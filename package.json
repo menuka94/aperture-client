@@ -1,0 +1,38 @@
+{
+  "name": "synopsisjs",
+  "version": "1.0.0",
+  "description": "Experimenting with D3 and Synopsis",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "serve": "npm run watch & live-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevin-bruhwiler/SynopsisJS.git"
+  },
+  "keywords": [],
+  "author": "Kevin Bruhwiler",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kevin-bruhwiler/SynopsisJS/issues"
+  },
+  "homepage": "https://github.com/kevin-bruhwiler/SynopsisJS#readme",
+  "dependencies": {
+    "d3": "^5.7.0",
+    "jquery": "^3.3.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-latest": "^6.24.1",
+    "css-loader": "^1.0.0",
+    "node-sass": "^4.9.3",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.0",
+    "webpack": "^4.19.0",
+    "webpack-cli": "^3.1.0"
+  }
+}
