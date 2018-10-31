@@ -10,7 +10,8 @@ module.exports = {
     ]
   },
   externals: {
-    "jquery": "jQuery"
+    "jquery": "jQuery",
+    "requirejs":"require"
   },
   mode: "development"
 }

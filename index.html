@@ -1,13 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+        integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+        crossorigin=""></script>
     <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+    <script src="src/simple-voronoi.js"></script>
+    <script src="src/leaflet-voronoi.js"></script>
+    <script src="src/d3-delaunay.js"></script>
     <title>SynopsisJS</title>
+    <style>
+	#mapid {height: 1180px;}
+    </style>
 </head>
 <body>
-	<text><h1>SynopsisJS Example</h1></text>
+    <text><h1>SynopsisJS Example</h1></text>
     <div id="viz"></div>
+    Geohash: <input type='text' id='geohash' value="9x" onchange="query()"/>
+    Minimum Temperature: <input type='text' id='mintemp' value="0" onchange="query()"/>
+    Maximum Temperature: <input type='text' id='maxtemp' value="300" onchange="query()"/>
+    <br/><br/>
+    Minimum Relative Humidity: <input type='text' id='minhum' value="0" onchange="query()"/>
+    Maximum Relative Humidity: <input type='text' id='maxhum' value="100" onchange="query()"/>
+    <div id="mapid"></div>
     <script type="text/javascript" src="src/display.js"></script>
 </body>
 </html>

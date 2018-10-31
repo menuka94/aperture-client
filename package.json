@@ -22,7 +22,8 @@
   "homepage": "https://github.com/kevin-bruhwiler/SynopsisJS#readme",
   "dependencies": {
     "d3": "^5.7.0",
-    "jquery": "^3.3.1"
+    "jquery": "^3.3.1",
+    "requirejs": "^2.3.6"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -33,6 +34,7 @@
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.0",
     "webpack": "^4.19.0",
+    "requirejs-text": "^2.3.6",
     "webpack-cli": "^3.1.0"
   }
 }
