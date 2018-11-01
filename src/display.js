@@ -1,9 +1,10 @@
 var Geohash = {};
 var points = [];
 var bounds = {};
+var mins = {}
+var maxes = {}
+var featureDict = {}
 var delaunay = null;
-var dataMax = Number.MIN_VALUE
-var dataMin = Number.MAX_VALUE
 var mymap = null
 var polygonLayer = null
 var polygonLayerGroup = null
@@ -89,8 +90,10 @@ var xhr = new XMLHttpRequest();
 xhr.onreadystatechange = function() {
     if (xhr.readyState == XMLHttpRequest.DONE) {
 	var data = JSON.parse(xhr.responseText);  
-	dataMax = Number.MIN_VALUE
-	dataMin = Number.MAX_VALUE
+	maxes["temperature"] = Number.MIN_VALUE
+	mins["temperature"] = Number.MAX_VALUE
+	maxes["humidity"] = Number.MIN_VALUE
+	mins["humidity"] = Number.MAX_VALUE
 	points = [] 
 	if (document.getElementById("geohash").value !== ""){
 	    bounds = geohash_bounds(document.getElementById("geohash").value);
@@ -100,33 +103,60 @@ xhr.onreadystatechange = function() {
 	    bounds["se"] = [-Number.MAX_VALUE, Number.MAX_VALUE]
 	    bounds["nw"] = [Number.MAX_VALUE, -Number.MAX_VALUE]
 	}
+	var tempCheck = document.getElementById("tempCheck").checked
+	var humCheck = document.getElementById("humCheck").checked
+	featureDict = {}
+
+	var ix = 2
+	if (tempCheck){
+	    featureDict["temp"] = ix
+	    ix += 1
+	}
+	if (humCheck){
+	    featureDict["hum"] = ix
+	    ix += 1
+	}
 	for (var key in data) {
     	    if (data.hasOwnProperty(key)) {
 		var features = data[key].split(",")
-		var temperature = parseFloat(features[0]);
-		var relativeHumidity = parseFloat(features[1]);
-                var geohash = key;
+	        var geohash = key;
 		var center = decode_geohash(geohash);
-		points.push([center["lat"], center["lon"], temperature])
-		if (dataMax < temperature){
-		    dataMax = temperature
+		var singlePoint = [center["lat"], center["lon"]]
+
+		var ix = 2
+		if (tempCheck){
+		    var temperature = parseFloat(features[0]);
+		    maxes["temperature"] = Math.max(temperature, maxes["temperature"])
+		    mins["temperature"] = Math.min(temperature, mins["temperature"])
+		    featureDict["temp"] = ix
+		    ix += 1
+		    singlePoint.push(temperature)
 		}
-		if (dataMin > temperature){
-		    dataMin = temperature
+		if (humCheck){
+		    var relativeHumidity = parseFloat(features[1]);
+                    featureDict["hum"] = humCheck
+		    maxes["humidity"] = Math.max(relativeHumidity, maxes["humidity"])
+		    mins["humidity"] = Math.min(relativeHumidity, mins["humidity"])
+		    featureDict["hum"] = ix
+		    ix += 1
+		    singlePoint.push(relativeHumidity)
 		}
+
+		points.push(singlePoint)
 	    }
 	}
 	if (polygonLayer == null){
 	    polygonLayer = new L.voronoiLayer(points,
-	        {dataMin: dataMin, dataMax: dataMax, bounds: bounds, minOpacity:0.4, map:mymap}).addTo(mymap);	
+	        {dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap}).addTo(mymap);	
 	} else {
 	    polygonLayer.setLatLngs(points,
-		{dataMin: dataMin, dataMax: dataMax, bounds: bounds, minOpacity:0.4, map:mymap})
+		{dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap})
 	}
     }
 }
 
 function query(e) {
+	console.log("here")
 	xhr.open("POST", "http://localhost:5711/synopsis", true);
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 	var geohash = document.getElementById("geohash").value;
@@ -134,7 +164,16 @@ function query(e) {
 	var maxtemp = document.getElementById("maxtemp").value;
 	var minhum = document.getElementById("minhum").value;
 	var maxhum = document.getElementById("maxhum").value;
-	xhr.send(geohash+","+mintemp+","+maxtemp+","+minhum+","+maxhum);
+	var tempCheck = document.getElementById("tempCheck").checked
+	var humCheck = document.getElementById("humCheck").checked
+	var queryString = geohash
+	if (tempCheck){
+		queryString += ",temperature_surface:"+mintemp+":"+maxtemp
+	}
+	if (humCheck){
+		queryString += ",relative_humidity_zerodegc_isotherm:"+minhum+":"+maxhum
+	}
+	xhr.send(queryString);
 }
 
 var geohash_element = document.getElementById("geohash");
@@ -142,10 +181,14 @@ var mintemp_element = document.getElementById("mintemp");
 var maxtemp_element = document.getElementById("maxtemp");
 var minhum_element = document.getElementById("minhum");
 var maxhum_element = document.getElementById("maxhum");
+var tempCheck_element = document.getElementById("tempCheck");
+var humCheck_element = document.getElementById("humCheck");
 geohash_element.oninput = query();
 mintemp_element.oninput = query();
 maxtemp_element.oninput = query();
 minhum_element.oninput = query();
 maxhum_element.oninput = query();
+tempCheck_element.addEventListener('change', query);
+humCheck_element.addEventListener('change', query);
 
 

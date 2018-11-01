@@ -10,6 +10,11 @@ function simplevoronoi(canvas) {
     this._ctx = canvas.getContext('2d');
     this._width = canvas.width;
     this._height = canvas.height;
+    
+    var newCanvas = this._createCanvas()
+    newCanvas.width = 10
+    newCanvas.height = 10
+    this._noise = this.perlinNoise(newCanvas)
 
     this._data = [];
 }
@@ -41,23 +46,72 @@ simplevoronoi.prototype = {
         this._height = this._canvas.height;
     },
 
+    setFeatures: function(features) {
+	this._features = features
+    },
+
     draw: function (minOpacity) {
         var ctx = this._ctx;
         ctx.clearRect(0, 0, this._width, this._height);
-	
         for (var i = 0, len = this._data.length, p; i < len; i++) {
             p = this._data[i];
-	    ctx.fillStyle = p[1]
 	    ctx.beginPath();
-            ctx.globalAlpha = 0.5//Math.min(Math.max(p[2] / this._max, minOpacity === undefined ? 0.05 : minOpacity), 1);
+            ctx.globalAlpha = 0.5
 	    ctx.moveTo(p[0][0][0], p[0][0][1])
 	    for (var j = 1; j < p[0].length; j++){
 		ctx.lineTo(p[0][j][0], p[0][j][1])
 	    } 
 	    ctx.closePath();
-	    ctx.fill();
+	    if (this._features["temp"] !== undefined){
+	        ctx.fillStyle = p[this._features["temp"]]
+	        ctx.fill();
+	    }
+	    if (this._features["hum"] !== undefined){
+	        ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
+	        ctx.globalAlpha = p[this._features["hum"]]
+	        ctx.fill();
+	    }
         }
         return this;
+    },
+
+    randomNoise: function (canvas, x, y, width, height, alpha) {
+        x = x || 0;
+        y = y || 0;
+        width = width || canvas.width;
+        height = height || canvas.height;
+        alpha = alpha || 255;
+        var g = canvas.getContext("2d"),
+            imageData = g.getImageData(x, y, width, height),
+            random = Math.random,
+            pixels = imageData.data,
+            n = pixels.length,
+            i = 0;
+        while (i < n) {
+            pixels[i++] = pixels[i++] = pixels[i++] = (random() * 256) | 0;
+            pixels[i++] = alpha;
+        }
+        g.putImageData(imageData, x, y);
+        return canvas;
+    },
+
+    perlinNoise: function (canvas) {
+	var newCanvas = this._createCanvas()
+        newCanvas.width = canvas.width
+        newCanvas.height = canvas.height
+        var noise = this.randomNoise(newCanvas);
+        var g = canvas.getContext("2d");
+        g.save();
+    
+        /* Scale random iterations onto the canvas to generate Perlin noise. */
+        for (var size = 4; size <= noise.width; size *= 2) {
+            var x = (Math.random() * (noise.width - size)) | 0,
+                y = (Math.random() * (noise.height - size)) | 0;
+            g.globalAlpha = 4 / size;
+            g.drawImage(noise, x, y, size, size, 0, 0, canvas.width, canvas.height);
+        }
+        g.restore();
+        return canvas;
     },
 
     _createCanvas: function () {

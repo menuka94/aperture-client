@@ -2,14 +2,6 @@
 
 L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 
-    // options: {
-    //     minOpacity: 0.05,
-    //     maxZoom: 18,
-    //     radius: 25,
-    //     blur: 15,
-    //     max: 1.0
-    // },
-
     percentColors: [
         { pct: 0.0, color: { r: 0x00, g: 0x00, b: 0xff } },
         { pct: 0.5, color: { r: 0x00, g: 0xff, b: 0x00 } },
@@ -160,7 +152,6 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
             b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
         };
         return 'rgb(' + [color.r, color.g, color.b].join(',') + ')';
-        // or output as hex if preferred
     },  
 
     _redraw: function () {
@@ -178,11 +169,22 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 	// console.time('process');
 	var voronoi = this._delaunay.voronoi([drawLimit._southWest.lat, drawLimit._southWest.lng, drawLimit._northEast.lat, drawLimit._northEast.lng]);
 
+	var voronoiFeatures = {}
+	var ix = 1
+	if (this.options.features["temp"] !== undefined){
+	    voronoiFeatures["temp"] = ix
+	    ix += 1
+	}
+	if (this.options.features["hum"] !== undefined){
+	    voronoiFeatures["hum"] = ix
+	    ix += 1
+	}
+	this._voronoi.setFeatures(voronoiFeatures)
+
 	var dataCount = 0
 	for (var i = 0; i < this._latlngs.length; i++) {
 	    var latlng = new L.LatLng(this._latlngs[i][0], this._latlngs[i][1]);
   	    if (drawLimit.contains(latlng)) {
-		var color = this._getColorForPercentage((points[i][2] - this.options.dataMin) / (this.options.dataMax - this.options.dataMin))
 		var newPolygon = []
 		var polygon = voronoi.cellPolygon(i)
 		if (this._polygonPerimeter(polygon) > 0.9){
@@ -200,8 +202,19 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 		    newPolygon.push([pPoint.x- topLeft.x, pPoint.y- topLeft.y])
 		}
 		if (valid){
-		    data.push([newPolygon,color])
+		    var singlePoint = [newPolygon]
+		    if (this.options.features["temp"] !== null){
+			var color = this._getColorForPercentage((points[i][this.options.features["temp"]] - this.options.dataMin["temperature"]) / 
+								(this.options.dataMax["temperature"] - this.options.dataMin["temperature"]))
+			singlePoint.push(color)
+		    }
+		    if (this.options.features["hum"] !== null){
+			var opacity = (points[i][this.options.features["hum"]] - this.options.dataMin["humidity"]) / 
+					(this.options.dataMax["humidity"] - this.options.dataMin["humidity"])
+			singlePoint.push(opacity)
+		    }
 		    dataCount += 1
+		    data.push(singlePoint)
 		}
 	    }
 	}

@@ -14,16 +14,19 @@
     <script src="src/d3-delaunay.js"></script>
     <title>SynopsisJS</title>
     <style>
-	#mapid {height: 1180px;}
+	#mapid {height: 980px;}
     </style>
 </head>
 <body>
     <text><h1>SynopsisJS Example</h1></text>
     <div id="viz"></div>
     Geohash: <input type='text' id='geohash' value="9x" onchange="query()"/>
+    <br/><br/>
+    <input type="checkbox" id="tempCheck" checked> Show Temperature <br/>
     Minimum Temperature: <input type='text' id='mintemp' value="0" onchange="query()"/>
     Maximum Temperature: <input type='text' id='maxtemp' value="300" onchange="query()"/>
     <br/><br/>
+    <input type="checkbox" id="humCheck"> Show Relative Humidity <br/>
     Minimum Relative Humidity: <input type='text' id='minhum' value="0" onchange="query()"/>
     Maximum Relative Humidity: <input type='text' id='maxhum' value="100" onchange="query()"/>
     <div id="mapid"></div>
