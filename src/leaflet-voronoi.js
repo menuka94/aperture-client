@@ -179,6 +179,14 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 	    voronoiFeatures["hum"] = ix
 	    ix += 1
 	}
+	if (this.options.features["vis"] !== undefined){
+	    voronoiFeatures["vis"] = ix
+	    ix += 1
+	}
+	if (this.options.features["pre"] !== undefined){
+	    voronoiFeatures["pre"] = ix
+	    ix += 1
+	}
 	this._voronoi.setFeatures(voronoiFeatures)
 
 	var dataCount = 0
@@ -211,6 +219,16 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 		    if (this.options.features["hum"] !== null){
 			var opacity = (points[i][this.options.features["hum"]] - this.options.dataMin["humidity"]) / 
 					(this.options.dataMax["humidity"] - this.options.dataMin["humidity"])
+			singlePoint.push(opacity)
+		    }
+		    if (this.options.features["vis"] !== null){
+			var opacity = (points[i][this.options.features["vis"]] - this.options.dataMin["visibility"]) / 
+					(this.options.dataMax["visibility"] - this.options.dataMin["visibility"])
+			singlePoint.push(opacity)
+		    }
+		    if (this.options.features["pre"] !== null){
+			var opacity = (points[i][this.options.features["pre"]] - this.options.dataMin["precipitation"]) / 
+					(this.options.dataMax["precipitation"] - this.options.dataMin["precipitation"])
 			singlePoint.push(opacity)
 		    }
 		    dataCount += 1

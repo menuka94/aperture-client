@@ -55,21 +55,49 @@ simplevoronoi.prototype = {
         ctx.clearRect(0, 0, this._width, this._height);
         for (var i = 0, len = this._data.length, p; i < len; i++) {
             p = this._data[i];
+	    //This is to remove visual of polygons not properly aligned
+	    if (this._features["hum"] !== undefined){
+		ctx.strokeStyle='#D3D3D3';
+		ctx.lineWidth=1.00;
+	    } 
+	    ctx.globalAlpha = 0.2
 	    ctx.beginPath();
-            ctx.globalAlpha = 0.5
 	    ctx.moveTo(p[0][0][0], p[0][0][1])
 	    for (var j = 1; j < p[0].length; j++){
 		ctx.lineTo(p[0][j][0], p[0][j][1])
-	    } 
+	    }
 	    ctx.closePath();
+	    ctx.globalAlpha = 0.5
 	    if (this._features["temp"] !== undefined){
 	        ctx.fillStyle = p[this._features["temp"]]
 	        ctx.fill();
 	    }
 	    if (this._features["hum"] !== undefined){
-	        ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
+	        //ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
+		ctx.fillStyle = '#D3D3D3' //silver gray
 	        ctx.globalAlpha = p[this._features["hum"]]
 	        ctx.fill();
+		if (p[this._features["hum"]] > 0.5){
+		    ctx.stroke();
+		}
+	    }
+	    if (this._features["vis"] !== undefined){
+	        //ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
+		ctx.fillStyle = '#000000' 
+	        ctx.globalAlpha = p[this._features["vis"]]
+	        ctx.fill();
+		if (p[this._features["vis"]] > 0.5){
+		    ctx.stroke();
+		}
+	    }
+	    if (this._features["pre"] !== undefined){
+	        //ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
+		ctx.fillStyle = '#000056' 
+	        ctx.globalAlpha = p[this._features["pre"]]
+	        ctx.fill();
+		if (p[this._features["pre"]] > 0.5){
+		    ctx.stroke();
+		}
 	    }
         }
         return this;
@@ -88,7 +116,7 @@ simplevoronoi.prototype = {
             n = pixels.length,
             i = 0;
         while (i < n) {
-            pixels[i++] = pixels[i++] = pixels[i++] = (random() * 256) | 0;
+            pixels[i++] = pixels[i++] = pixels[i++] = 200//Math.min((random() * 600),256) | 0;
             pixels[i++] = alpha;
         }
         g.putImageData(imageData, x, y);

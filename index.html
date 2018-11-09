@@ -22,13 +22,21 @@
     <div id="viz"></div>
     Geohash: <input type='text' id='geohash' value="9x" onchange="query()"/>
     <br/><br/>
-    <input type="checkbox" id="tempCheck" checked> Show Temperature <br/>
-    Minimum Temperature: <input type='text' id='mintemp' value="0" onchange="query()"/>
-    Maximum Temperature: <input type='text' id='maxtemp' value="300" onchange="query()"/>
+    <input type="checkbox" id="tempCheck" checked> Show Surface Temperature <br/>
+    Minimum Surface Temperature: <input type='text' id='mintemp' value="0" onchange="query()"/>
+    Maximum Surface Temperature: <input type='text' id='maxtemp' value="300" onchange="query()"/>
     <br/><br/>
     <input type="checkbox" id="humCheck"> Show Relative Humidity <br/>
     Minimum Relative Humidity: <input type='text' id='minhum' value="0" onchange="query()"/>
-    Maximum Relative Humidity: <input type='text' id='maxhum' value="100" onchange="query()"/>
+    Maximum Relative Humidity: <input type='text' id='maxhum' value="150" onchange="query()"/>
+    <br/><br/>
+    <input type="checkbox" id="visCheck"> Show Surface Visibility <br/>
+    Minimum Surface Visibility: <input type='text' id='minvis' value="0" onchange="query()"/>
+    Maximum Surface Visibility: <input type='text' id='maxvis' value="50000" onchange="query()"/>
+    <br/><br/>
+    <input type="checkbox" id="preCheck"> Show Precipitable Water <br/>
+    Minimum Precipitable Water: <input type='text' id='minpre' value="0" onchange="query()"/>
+    Maximum Precipitable Water: <input type='text' id='maxpre' value="100" onchange="query()"/>
     <div id="mapid"></div>
     <script type="text/javascript" src="src/display.js"></script>
 </body>
