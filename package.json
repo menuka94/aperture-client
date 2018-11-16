@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "serve": "npm run watch & live-server",
+    "serve": "npm run watch & live-server --host=129.82.45.226",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,8 +21,10 @@
   },
   "homepage": "https://github.com/kevin-bruhwiler/SynopsisJS#readme",
   "dependencies": {
+    "create-react-app": "^2.1.1",
     "d3": "^5.7.0",
     "jquery": "^3.3.1",
+    "live-server": "^1.2.0",
     "requirejs": "^2.3.6"
   },
   "devDependencies": {
@@ -34,7 +36,6 @@
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.0",
     "webpack": "^4.19.0",
-    "requirejs-text": "^2.3.6",
     "webpack-cli": "^3.1.0"
   }
 }
