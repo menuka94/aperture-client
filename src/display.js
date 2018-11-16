@@ -122,11 +122,11 @@ xhr.onreadystatechange = function() {
 	    featureDict["hum"] = ix
 	    ix += 1
 	}
-	if (humCheck){
+	if (visCheck){
 	    featureDict["vis"] = ix
 	    ix += 1
 	}
-	if (humCheck){
+	if (preCheck){
 	    featureDict["pre"] = ix
 	    ix += 1
 	}
@@ -147,7 +147,7 @@ xhr.onreadystatechange = function() {
 		}
 		if (humCheck){
 		    var relativeHumidity = parseFloat(features[ix]);
-                    featureDict["hum"] = humCheck
+                    //featureDict["hum"] = humCheck
 		    maxes["humidity"] = Math.max(relativeHumidity, maxes["humidity"])
 		    mins["humidity"] = Math.min(relativeHumidity, mins["humidity"])
 		    singlePoint.push(relativeHumidity)
@@ -155,7 +155,7 @@ xhr.onreadystatechange = function() {
 		}
 		if (visCheck){
 		    var visibility = parseFloat(features[ix]);
-                    featureDict["vis"] = visCheck
+                    //featureDict["vis"] = visCheck
 		    maxes["visibility"] = Math.max(visibility, maxes["visibility"])
 		    mins["visibility"] = Math.min(visibility, mins["visibility"])
 		    singlePoint.push(visibility)
@@ -163,7 +163,7 @@ xhr.onreadystatechange = function() {
 		}
 		if (preCheck){
 		    var precipitation = parseFloat(features[ix]);
-                    featureDict["pre"] = preCheck
+                    //featureDict["pre"] = preCheck
 		    maxes["precipitation"] = Math.max(precipitation, maxes["precipitation"])
 		    mins["precipitation"] = Math.min(precipitation, mins["precipitation"])
 		    singlePoint.push(precipitation)
@@ -184,7 +184,7 @@ xhr.onreadystatechange = function() {
 }
 
 function query(e) {
-	xhr.open("POST", "http://localhost:5711/synopsis", true);
+	xhr.open("POST", "http://lattice-213.cs.colostate.edu:5711/synopsis", true);
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 	var geohash = document.getElementById("geohash").value;
 	var mintemp = document.getElementById("mintemp").value;
@@ -216,6 +216,7 @@ function query(e) {
 	xhr.send(queryString);
 }
 
+/*
 var geohash_element = document.getElementById("geohash");
 var mintemp_element = document.getElementById("mintemp");
 var maxtemp_element = document.getElementById("maxtemp");
@@ -242,5 +243,8 @@ tempCheck_element.addEventListener('change', query);
 humCheck_element.addEventListener('change', query);
 visCheck_element.addEventListener('change', query);
 preCheck_element.addEventListener('change', query);
+*/
+var query_button = document.getElementById("update");
+query_button.onclick = query;
 query()
 

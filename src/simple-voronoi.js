@@ -56,10 +56,12 @@ simplevoronoi.prototype = {
         for (var i = 0, len = this._data.length, p; i < len; i++) {
             p = this._data[i];
 	    //This is to remove visual of polygons not properly aligned
+	    /*
 	    if (this._features["hum"] !== undefined){
 		ctx.strokeStyle='#D3D3D3';
 		ctx.lineWidth=1.00;
 	    } 
+            */
 	    ctx.globalAlpha = 0.2
 	    ctx.beginPath();
 	    ctx.moveTo(p[0][0][0], p[0][0][1])
@@ -75,28 +77,29 @@ simplevoronoi.prototype = {
 	    if (this._features["hum"] !== undefined){
 	        //ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
 		ctx.fillStyle = '#D3D3D3' //silver gray
-	        ctx.globalAlpha = p[this._features["hum"]]
+		//ctx.fillStyle = '#000000'
+	        ctx.globalAlpha = p[this._features["hum"]] * 0.9
 	        ctx.fill();
 		if (p[this._features["hum"]] > 0.5){
-		    ctx.stroke();
+		    //ctx.stroke();
 		}
 	    }
 	    if (this._features["vis"] !== undefined){
 	        //ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
 		ctx.fillStyle = '#000000' 
-	        ctx.globalAlpha = p[this._features["vis"]]
+	        ctx.globalAlpha = p[this._features["vis"]] * 0.5
 	        ctx.fill();
 		if (p[this._features["vis"]] > 0.5){
-		    ctx.stroke();
+		    //ctx.stroke();
 		}
 	    }
 	    if (this._features["pre"] !== undefined){
 	        //ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
 		ctx.fillStyle = '#000056' 
-	        ctx.globalAlpha = p[this._features["pre"]]
+	        ctx.globalAlpha = p[this._features["pre"]] * 0.9
 	        ctx.fill();
 		if (p[this._features["pre"]] > 0.5){
-		    ctx.stroke();
+		    //ctx.stroke();
 		}
 	    }
         }

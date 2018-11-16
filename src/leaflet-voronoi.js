@@ -211,22 +211,23 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 		}
 		if (valid){
 		    var singlePoint = [newPolygon]
-		    if (this.options.features["temp"] !== null){
+		    if (this.options.features["temp"] !== undefined){
 			var color = this._getColorForPercentage((points[i][this.options.features["temp"]] - this.options.dataMin["temperature"]) / 
 								(this.options.dataMax["temperature"] - this.options.dataMin["temperature"]))
 			singlePoint.push(color)
 		    }
-		    if (this.options.features["hum"] !== null){
+		    if (this.options.features["hum"] !== undefined){
 			var opacity = (points[i][this.options.features["hum"]] - this.options.dataMin["humidity"]) / 
 					(this.options.dataMax["humidity"] - this.options.dataMin["humidity"])
+			//console.log(opacity)
 			singlePoint.push(opacity)
 		    }
-		    if (this.options.features["vis"] !== null){
+		    if (this.options.features["vis"] !== undefined){
 			var opacity = (points[i][this.options.features["vis"]] - this.options.dataMin["visibility"]) / 
 					(this.options.dataMax["visibility"] - this.options.dataMin["visibility"])
 			singlePoint.push(opacity)
 		    }
-		    if (this.options.features["pre"] !== null){
+		    if (this.options.features["pre"] !== undefined){
 			var opacity = (points[i][this.options.features["pre"]] - this.options.dataMin["precipitation"]) / 
 					(this.options.dataMax["precipitation"] - this.options.dataMin["precipitation"])
 			singlePoint.push(opacity)
