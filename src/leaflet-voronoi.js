@@ -1,6 +1,7 @@
 'use strict';
 
-L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
+//L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
+L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 
     percentColors: [
         { pct: 0.0, color: { r: 0x00, g: 0x00, b: 0xff } },
@@ -10,6 +11,7 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 
     initialize: function (latlngs, options) {
         this._latlngs = latlngs;
+	console.log(this._latlngs)
 	this._delaunay = d3.Delaunay.from(latlngs)
         L.setOptions(this, options);
     },
@@ -152,7 +154,7 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
             b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
         };
         return 'rgb(' + [color.r, color.g, color.b].join(',') + ')';
-    },  
+    },
 
     _redraw: function () {
         if (!this._map) {
@@ -167,7 +169,8 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 		drawLimit = bounds.pad(0.4);
 
 	// console.time('process');
-	var voronoi = this._delaunay.voronoi([drawLimit._southWest.lat, drawLimit._southWest.lng, drawLimit._northEast.lat, drawLimit._northEast.lng]);
+	var voronoi = this._delaunay.voronoi([drawLimit._southWest.lat, drawLimit._southWest.lng, 
+						drawLimit._northEast.lat, drawLimit._northEast.lng]);
 
 	var voronoiFeatures = {}
 	var ix = 1
@@ -257,7 +260,57 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
         } else {
             this._canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ')';
         }
-    }
+    },
+
+    _onNewTimeLoading: function(ev) {
+        this._getDataForTime(ev.time);
+        return;
+    },
+
+    isReady: function(time) {
+        return (this._currentLoadedTime == time);
+    },
+
+    _update: function() {
+        this._baseLayer.setData(this._currentTimeData);
+        return true;
+    },
+
+    _getDataForTime: function(time) {
+       /*
+        if (!this._baseURL || !this._map) {
+            return;
+        }
+        var url = this._constructQuery(time);
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", (function(xhr) {
+            var response = xhr.currentTarget.response;
+            var data = JSON.parse(response);
+            delete this._currentTimeData.data;
+            this._currentTimeData.data = [];
+            for (var i = 0; i < data.length; i++) {
+                var marker = data[i];
+                if (marker.location) {
+                    this._currentTimeData.data.push({
+                        lat: marker.location.latitude,
+                        lng: marker.location.longitude,
+                        count: 1
+                    });
+                }
+            }
+            this._currentLoadedTime = time;
+            if (this._timeDimension && time == this._timeDimension.getCurrentTime() && !this._timeDimension.isLoading()) {
+                this._update();
+            }
+            this.fire('timeload', {
+                time: time
+            });
+        }).bind(this));
+
+        oReq.open("GET", url);
+        oReq.send();
+        */
+    },
 });
 
 L.voronoiLayer = function (latlngs, options) {

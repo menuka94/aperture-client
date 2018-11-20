@@ -1,5 +1,6 @@
 var Geohash = {};
 var points = [];
+var pointLocations = {}
 var bounds = {};
 var mins = {}
 var maxes = {}
@@ -29,6 +30,67 @@ function decode_geohash(geohash) {
     lon = lon.toFixed(Math.floor(2-Math.log(lonMax-lonMin)/Math.LN10));
 
     return { lat: Number(lat), lon: Number(lon) };
+};
+
+function encode_geohash(lat, lon, precision) {
+    // infer precision?
+    if (typeof precision == 'undefined') {
+        // refine geohash until it matches precision of supplied lat/lon
+        for (var p=1; p<=12; p++) {
+            var hash = Geohash.encode(lat, lon, p);
+            var posn = Geohash.decode(hash);
+            if (posn.lat==lat && posn.lon==lon) return hash;
+        }
+        precision = 12; // set to maximum
+    }
+
+    lat = Number(lat);
+    lon = Number(lon);
+    precision = Number(precision);
+
+    if (isNaN(lat) || isNaN(lon) || isNaN(precision)) throw new Error('Invalid geohash');
+
+    var idx = 0; // index into base32 map
+    var bit = 0; // each char holds 5 bits
+    var evenBit = true;
+    var geohash = '';
+
+    var latMin =  -90, latMax =  90;
+    var lonMin = -180, lonMax = 180;
+
+    while (geohash.length < precision) {
+        if (evenBit) {
+            // bisect E-W longitude
+            var lonMid = (lonMin + lonMax) / 2;
+            if (lon >= lonMid) {
+                idx = idx*2 + 1;
+                lonMin = lonMid;
+            } else {
+                idx = idx*2;
+                lonMax = lonMid;
+            }
+        } else {
+            // bisect N-S latitude
+            var latMid = (latMin + latMax) / 2;
+            if (lat >= latMid) {
+                idx = idx*2 + 1;
+                latMin = latMid;
+            } else {
+                idx = idx*2;
+                latMax = latMid;
+            }
+        }
+        evenBit = !evenBit;
+
+        if (++bit == 5) {
+            // 5 bits gives us a character: append it and start over
+            geohash += Geohash.base32.charAt(idx);
+            bit = 0;
+            idx = 0;
+        }
+    }
+
+    return geohash;
 };
 
 function geohash_bounds(geohash) {
@@ -76,7 +138,11 @@ function geohash_bounds(geohash) {
     return bounds;
 };
 
-mymap = L.map('mapid', {renderer: L.canvas(), minZoom: 4}).setView(view, zoomLevel);
+L.timeDimension.layer.VoronoiLayer = function(points, options) {
+    return new L.TimeDimension.Layer.VoronoiLayer(points, options);
+};
+
+mymap = L.map('mapid', {renderer: L.canvas(), minZoom: 4, timeDimension: true, timeDimensionControl: true}).setView(view, zoomLevel);
 
 var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -86,10 +152,51 @@ var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?ac
 	maxBounds: [[],[]]
 	}).addTo(mymap);
 
+polygonLayer = L.timeDimension.layer.VoronoiLayer(points,
+               	{dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap});
+polygonLayer.addTo(mymap);
+
+L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
+    _getDisplayDateFormat: function(date){
+        return date.format("mmmm yyyy");
+    }
+});
+var timeDimensionControl = new L.Control.TimeDimensionCustom({
+    playerOptions: {
+        buffer: 1,
+        minBufferReady: -1
+    }
+});
+mymap.addControl(this.timeDimensionControl);
+
+/*
+polygonLayer = new L.voronoiLayer(points,
+               	{dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap}).addTo(mymap)
+
+var td = L.timeDimension.layer(polygonLayer)
+td.addTo(mymap);
+var tdControl = L.control.timeDimension()
+tdControl.addTo(mymap);
+//var tdPlayer = new L.TimeDimension.Player({}, L.timeDimension)
+//tdPlayer.addTo(mymap);
+*/
+
+mymap.addEventListener('mousemove', function(ev) {
+   var mouseLat = ev.latlng.lat;
+   var mouseLng = ev.latlng.lng;
+   var mouseGeohash = encode_geohash(mouseLat,mouseLng,5)
+   var center = decode_geohash(mouseGeohash);
+   var centerLatLng = [center["lat"], center["lon"]]
+   if (pointLocations[centerLatLng] !== undefined){
+	var data = points[pointLocations[centerLatLng]]
+   }
+});
+
+
 var xhr = new XMLHttpRequest();
 xhr.onreadystatechange = function() {
     if (xhr.readyState == XMLHttpRequest.DONE) {
-	var data = JSON.parse(xhr.responseText);  
+	var data = JSON.parse(xhr.responseText);
 	maxes["temperature"] = Number.MIN_VALUE
 	mins["temperature"] = Number.MAX_VALUE
 	maxes["humidity"] = Number.MIN_VALUE
@@ -98,7 +205,8 @@ xhr.onreadystatechange = function() {
 	mins["visibility"] = Number.MAX_VALUE
 	maxes["precipitation"] = Number.MIN_VALUE
 	mins["precipitation"] = Number.MAX_VALUE
-	points = [] 
+	points = []
+        pointLocations = {}
 	if (document.getElementById("geohash").value !== ""){
 	    bounds = geohash_bounds(document.getElementById("geohash").value);
 	    bounds["se"] = [bounds["sw"]["lat"], bounds["ne"]["lon"]]
@@ -130,12 +238,15 @@ xhr.onreadystatechange = function() {
 	    featureDict["pre"] = ix
 	    ix += 1
 	}
+	count = 0
 	for (var key in data) {
     	    if (data.hasOwnProperty(key)) {
 		var features = data[key].split(",")
 	        var geohash = key;
 		var center = decode_geohash(geohash);
 		var singlePoint = [center["lat"], center["lon"]]
+		pointLocations[singlePoint] = count
+		count += 1
 
 		var ix = 0
 		if (tempCheck){
@@ -175,7 +286,7 @@ xhr.onreadystatechange = function() {
 	}
 	if (polygonLayer == null){
 	    polygonLayer = new L.voronoiLayer(points,
-	        {dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap}).addTo(mymap);	
+	        {dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap}).addTo(mymap)
 	} else {
 	    polygonLayer.setLatLngs(points,
 		{dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap})

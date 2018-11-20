@@ -87,7 +87,7 @@ simplevoronoi.prototype = {
 	    if (this._features["vis"] !== undefined){
 	        //ctx.fillStyle = ctx.createPattern(this._noise,"no-repeat")
 		ctx.fillStyle = '#000000' 
-	        ctx.globalAlpha = p[this._features["vis"]] * 0.5
+	        ctx.globalAlpha = (1 - p[this._features["vis"]]) * 0.5
 	        ctx.fill();
 		if (p[this._features["vis"]] > 0.5){
 		    //ctx.stroke();
