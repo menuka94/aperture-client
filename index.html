@@ -18,6 +18,15 @@
     <title>SynopsisJS</title>
     <style>
 	#mapid {height: 980px;}
+
+	.info {
+    	    padding: 6px 8px;
+    	    font: 14px/16px Arial, Helvetica, sans-serif;
+    	    background: white;
+    	    background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -25,20 +34,27 @@
     <div id="viz"></div>
     Geohash: <input type='text' id='geohash' value="9x"/>
      <button type="button" id="update">Update Map</button> 
+    <br />
+    Geohash Precision:
+        <select id="precision">
+            <option selected=5 value=5>5</option>
+            <option value=4>4</option>
+            <option value=3>3</option>
+        </select> 
     <br/><br/>
-    <input type="checkbox" id="tempCheck" checked> Show Surface Temperature <br/>
+    <input type="checkbox" id="tempCheck" checked> Show Surface Temperature (K)<br/>
     Minimum Surface Temperature: <input type='text' id='mintemp' value="0"/>
     Maximum Surface Temperature: <input type='text' id='maxtemp' value="300"/>
     <br/><br/>
-    <input type="checkbox" id="humCheck"> Show Relative Humidity <br/>
+    <input type="checkbox" id="humCheck"> Show Relative Humidity (%)<br/>
     Minimum Relative Humidity: <input type='text' id='minhum' value="0"/>
-    Maximum Relative Humidity: <input type='text' id='maxhum' value="150"/>
+    Maximum Relative Humidity: <input type='text' id='maxhum' value="101"/>
     <br/><br/>
-    <input type="checkbox" id="visCheck"> Show Surface Visibility <br/>
+    <input type="checkbox" id="visCheck"> Show Surface Visibility (m)<br/>
     Minimum Surface Visibility: <input type='text' id='minvis' value="0"/>
     Maximum Surface Visibility: <input type='text' id='maxvis' value="50000"/>
     <br/><br/>
-    <input type="checkbox" id="preCheck"> Show Precipitable Water <br/>
+    <input type="checkbox" id="preCheck"> Show Precipitable Water (mm)<br/>
     Minimum Precipitable Water: <input type='text' id='minpre' value="0"/>
     Maximum Precipitable Water: <input type='text' id='maxpre' value="100"/>
     <div id="mapid"></div>

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "serve": "npm run watch & live-server --host=129.82.45.226",
+    "serve": "npm run watch & live-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

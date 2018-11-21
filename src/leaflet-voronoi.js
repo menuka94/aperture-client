@@ -9,9 +9,14 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
         { pct: 1.0, color: { r: 0xff, g: 0x00, b: 0x00 } }
     ],
 
+    precisionToPerimeter: {
+	5: 0.9,
+	4: 1.9,
+	3: 7
+    },
+
     initialize: function (latlngs, options) {
         this._latlngs = latlngs;
-	console.log(this._latlngs)
 	this._delaunay = d3.Delaunay.from(latlngs)
         L.setOptions(this, options);
     },
@@ -174,19 +179,19 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 
 	var voronoiFeatures = {}
 	var ix = 1
-	if (this.options.features["temp"] !== undefined){
+	if (this.options.features["Surface Temperature,(K)"] !== undefined){
 	    voronoiFeatures["temp"] = ix
 	    ix += 1
 	}
-	if (this.options.features["hum"] !== undefined){
+	if (this.options.features["Relative Humidity,(%)"] !== undefined){
 	    voronoiFeatures["hum"] = ix
 	    ix += 1
 	}
-	if (this.options.features["vis"] !== undefined){
+	if (this.options.features["Surface Visibility,(m)"] !== undefined){
 	    voronoiFeatures["vis"] = ix
 	    ix += 1
 	}
-	if (this.options.features["pre"] !== undefined){
+	if (this.options.features["Precipitable Water,(mm)"] !== undefined){
 	    voronoiFeatures["pre"] = ix
 	    ix += 1
 	}
@@ -198,7 +203,8 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
   	    if (drawLimit.contains(latlng)) {
 		var newPolygon = []
 		var polygon = voronoi.cellPolygon(i)
-		if (this._polygonPerimeter(polygon) > 0.9){
+		var precision = document.getElementById("precision").value
+		if (this._polygonPerimeter(polygon) > this.precisionToPerimeter[precision]){
 		    continue
 		}
 		var valid = true
@@ -214,24 +220,25 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 		}
 		if (valid){
 		    var singlePoint = [newPolygon]
-		    if (this.options.features["temp"] !== undefined){
-			var color = this._getColorForPercentage((points[i][this.options.features["temp"]] - this.options.dataMin["temperature"]) / 
+		    if (this.options.features["Surface Temperature,(K)"] !== undefined){
+			var color = this._getColorForPercentage((points[i][this.options.features["Surface Temperature,(K)"]] - 
+								this.options.dataMin["temperature"]) / 
 								(this.options.dataMax["temperature"] - this.options.dataMin["temperature"]))
 			singlePoint.push(color)
 		    }
-		    if (this.options.features["hum"] !== undefined){
-			var opacity = (points[i][this.options.features["hum"]] - this.options.dataMin["humidity"]) / 
+		    if (this.options.features["Relative Humidity,(%)"] !== undefined){
+			var opacity = (points[i][this.options.features["Relative Humidity,(%)"]] - this.options.dataMin["humidity"]) / 
 					(this.options.dataMax["humidity"] - this.options.dataMin["humidity"])
 			//console.log(opacity)
 			singlePoint.push(opacity)
 		    }
-		    if (this.options.features["vis"] !== undefined){
-			var opacity = (points[i][this.options.features["vis"]] - this.options.dataMin["visibility"]) / 
+		    if (this.options.features["Surface Visibility,(m)"] !== undefined){
+			var opacity = (points[i][this.options.features["Surface Visibility,(m)"]] - this.options.dataMin["visibility"]) / 
 					(this.options.dataMax["visibility"] - this.options.dataMin["visibility"])
 			singlePoint.push(opacity)
 		    }
-		    if (this.options.features["pre"] !== undefined){
-			var opacity = (points[i][this.options.features["pre"]] - this.options.dataMin["precipitation"]) / 
+		    if (this.options.features["Precipitable Water,(mm)"] !== undefined){
+			var opacity = (points[i][this.options.features["Precipitable Water,(mm)"]] - this.options.dataMin["precipitation"]) / 
 					(this.options.dataMax["precipitation"] - this.options.dataMin["precipitation"])
 			singlePoint.push(opacity)
 		    }
@@ -314,5 +321,5 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 });
 
 L.voronoiLayer = function (latlngs, options) {
-    return new L.VoronoiLayer(latlngs, options);
+    return new L.TimeDimension.Layer.VoronoiLayer(latlngs, options);
 };
