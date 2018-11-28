@@ -1,7 +1,6 @@
 'use strict';
 
-//L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
-L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
+L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 
     percentColors: [
         { pct: 0.0, color: { r: 0x00, g: 0x00, b: 0xff } },
@@ -16,16 +15,18 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
     },
 
     initialize: function (latlngs, options) {
-        this._latlngs = latlngs;
-	this._delaunay = d3.Delaunay.from(latlngs)
+        //this._latlngs = latlngs;
+	//this._delaunay = d3.Delaunay.from(latlngs)
         L.setOptions(this, options);
     },
 
     setLatLngs: function (latlngs, options) {
-        this._latlngs = latlngs;
+	this._latlngs = latlngs;
 	L.setOptions(this, options);
-	this._delaunay = d3.Delaunay.from(latlngs)
-        return this.redraw();
+	if(latlngs.length > 1){
+	    this._delaunay = d3.Delaunay.from(latlngs)
+	}
+	return this.redraw();
     },
 
     addLatLng: function (latlng) {
@@ -34,8 +35,9 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
         return this.redraw();
     },
 
-    setOptions: function (options) {
-        L.setOptions(this, options);
+    setOptions: function (newOptions) {
+        L.setOptions(this, newOptions);
+	this.newOptions = newOptions
         return this.redraw();
     },
 
@@ -162,7 +164,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
     },
 
     _redraw: function () {
-        if (!this._map) {
+        if (!this._map || this._latlngs.length < 1) {
             return;
         }
 	var data = []
@@ -179,19 +181,19 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 
 	var voronoiFeatures = {}
 	var ix = 1
-	if (this.options.features["Surface Temperature,(K)"] !== undefined){
+	if (this.newOptions.features["Surface Temperature,(K)"] !== undefined){
 	    voronoiFeatures["temp"] = ix
 	    ix += 1
 	}
-	if (this.options.features["Relative Humidity,(%)"] !== undefined){
+	if (this.newOptions.features["Relative Humidity,(%)"] !== undefined){
 	    voronoiFeatures["hum"] = ix
 	    ix += 1
 	}
-	if (this.options.features["Surface Visibility,(m)"] !== undefined){
+	if (this.newOptions.features["Surface Visibility,(m)"] !== undefined){
 	    voronoiFeatures["vis"] = ix
 	    ix += 1
 	}
-	if (this.options.features["Precipitable Water,(mm)"] !== undefined){
+	if (this.newOptions.features["Precipitable Water,(mm)"] !== undefined){
 	    voronoiFeatures["pre"] = ix
 	    ix += 1
 	}
@@ -210,8 +212,8 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 		var valid = true
 		for (var j = 0; j < polygon.length; j++){
 		    var point = L.latLng(polygon[j])
-		    if (point.lat <= this.options.bounds['se'][0] || point.lat >= this.options.bounds['nw'][0] || 
-	      			point.lng  >= this.options.bounds['se'][1] || point.lng <= this.options.bounds['nw'][1]) {
+		    if (point.lat <= this.newOptions.bounds['se'][0] || point.lat >= this.newOptions.bounds['nw'][0] || 
+	      			point.lng  >= this.newOptions.bounds['se'][1] || point.lng <= this.newOptions.bounds['nw'][1]) {
 		        valid = false
 		        break 
 	  	    }
@@ -220,26 +222,26 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 		}
 		if (valid){
 		    var singlePoint = [newPolygon]
-		    if (this.options.features["Surface Temperature,(K)"] !== undefined){
-			var color = this._getColorForPercentage((points[i][this.options.features["Surface Temperature,(K)"]] - 
-								this.options.dataMin["temperature"]) / 
-								(this.options.dataMax["temperature"] - this.options.dataMin["temperature"]))
+		    if (this.newOptions.features["Surface Temperature,(K)"] !== undefined){
+			var color = this._getColorForPercentage((this._latlngs[i][this.newOptions.features["Surface Temperature,(K)"]] - 
+								this.newOptions.dataMin["temperature"]) / 
+								(this.newOptions.dataMax["temperature"] - this.newOptions.dataMin["temperature"]))
 			singlePoint.push(color)
 		    }
-		    if (this.options.features["Relative Humidity,(%)"] !== undefined){
-			var opacity = (points[i][this.options.features["Relative Humidity,(%)"]] - this.options.dataMin["humidity"]) / 
-					(this.options.dataMax["humidity"] - this.options.dataMin["humidity"])
+		    if (this.newOptions.features["Relative Humidity,(%)"] !== undefined){
+			var opacity = (this._latlngs[i][this.newOptions.features["Relative Humidity,(%)"]] - this.newOptions.dataMin["humidity"]) / 
+					(this.newOptions.dataMax["humidity"] - this.newOptions.dataMin["humidity"])
 			//console.log(opacity)
 			singlePoint.push(opacity)
 		    }
-		    if (this.options.features["Surface Visibility,(m)"] !== undefined){
-			var opacity = (points[i][this.options.features["Surface Visibility,(m)"]] - this.options.dataMin["visibility"]) / 
-					(this.options.dataMax["visibility"] - this.options.dataMin["visibility"])
+		    if (this.newOptions.features["Surface Visibility,(m)"] !== undefined){
+			var opacity = (this._latlngs[i][this.newOptions.features["Surface Visibility,(m)"]] - this.newOptions.dataMin["visibility"]) / 
+					(this.newOptions.dataMax["visibility"] - this.newOptions.dataMin["visibility"])
 			singlePoint.push(opacity)
 		    }
-		    if (this.options.features["Precipitable Water,(mm)"] !== undefined){
-			var opacity = (points[i][this.options.features["Precipitable Water,(mm)"]] - this.options.dataMin["precipitation"]) / 
-					(this.options.dataMax["precipitation"] - this.options.dataMin["precipitation"])
+		    if (this.newOptions.features["Precipitable Water,(mm)"] !== undefined){
+			var opacity = (this._latlngs[i][this.newOptions.features["Precipitable Water,(mm)"]] - this.newOptions.dataMin["precipitation"]) / 
+					(this.newOptions.dataMax["precipitation"] - this.newOptions.dataMin["precipitation"])
 			singlePoint.push(opacity)
 		    }
 		    dataCount += 1
@@ -251,7 +253,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
         // console.timeEnd('process');
 
         // console.time('draw ' + data.length);
-        this._voronoi.data(data).draw(this.options.minOpacity);
+        this._voronoi.data(data).draw(this.newOptions.minOpacity);
         // console.timeEnd('draw ' + data.length);
 
         this._frame = null;
@@ -267,59 +269,9 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
         } else {
             this._canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ')';
         }
-    },
-
-    _onNewTimeLoading: function(ev) {
-        this._getDataForTime(ev.time);
-        return;
-    },
-
-    isReady: function(time) {
-        return (this._currentLoadedTime == time);
-    },
-
-    _update: function() {
-        this._baseLayer.setData(this._currentTimeData);
-        return true;
-    },
-
-    _getDataForTime: function(time) {
-       /*
-        if (!this._baseURL || !this._map) {
-            return;
-        }
-        var url = this._constructQuery(time);
-        var oReq = new XMLHttpRequest();
-        oReq.addEventListener("load", (function(xhr) {
-            var response = xhr.currentTarget.response;
-            var data = JSON.parse(response);
-            delete this._currentTimeData.data;
-            this._currentTimeData.data = [];
-            for (var i = 0; i < data.length; i++) {
-                var marker = data[i];
-                if (marker.location) {
-                    this._currentTimeData.data.push({
-                        lat: marker.location.latitude,
-                        lng: marker.location.longitude,
-                        count: 1
-                    });
-                }
-            }
-            this._currentLoadedTime = time;
-            if (this._timeDimension && time == this._timeDimension.getCurrentTime() && !this._timeDimension.isLoading()) {
-                this._update();
-            }
-            this.fire('timeload', {
-                time: time
-            });
-        }).bind(this));
-
-        oReq.open("GET", url);
-        oReq.send();
-        */
-    },
+    }
 });
 
 L.voronoiLayer = function (latlngs, options) {
-    return new L.TimeDimension.Layer.VoronoiLayer(latlngs, options);
+    return new L.VoronoiLayer(latlngs, options);
 };

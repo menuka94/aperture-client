@@ -140,270 +140,6 @@ function geohash_bounds(geohash) {
     return bounds;
 };
 
-/*
-polygonLayer = new L.voronoiLayer(points,
-               	{dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap}).addTo(mymap)
-
-var td = L.timeDimension.layer(polygonLayer)
-td.addTo(mymap);
-var tdControl = L.control.timeDimension()
-tdControl.addTo(mymap);
-//var tdPlayer = new L.TimeDimension.Player({}, L.timeDimension)
-//tdPlayer.addTo(mymap);
-*/
-
-//This control is used to display information about hover location
-var info = L.control();
-
-info.onAdd = function (mymap) {
-    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-    this.update("<p><p/>");
-    return this._div;
-};
-// method that we will use to update the control based on feature properties passed
-info.update = function (content) {
-    this._div.innerHTML = content
-};
-info.addTo(mymap);
-
-var precisionToDistance = {
-                              5: 0.1,
-			      4: 0.2,  
-			      3: 0.7
-                          }
-//This listener updates info when the mouse is moved
-mymap.addEventListener('mousemove', function(ev) {
-   var mouseLat = ev.latlng.lat;
-   var mouseLng = ev.latlng.lng;
-   var precision = document.getElementById("precision").value
-   var mouseGeohash = encode_geohash(mouseLat,mouseLng,precision)
-   var center = decode_geohash(mouseGeohash);
-   var centerLatLng = [center["lat"], center["lon"]]
-   var location = null
-   var distance = Number.MAX_VALUE
-   var finalPoint = null
-   for (var key in pointLocations){
-       if(pointLocations.hasOwnProperty(key)){
-	   point = key.split(',').map(Number)
-	   var new_distance = Math.hypot(point[0]-ev.latlng.lat, point[1]-ev.latlng.lng);
-           if (new_distance < distance){
-               distance = new_distance
-	       location = pointLocations[key][0]
-	       finalPoint = point
-           }
-       }
-   }	
-
-   if (distance < precisionToDistance[precision]) {
-       var dataPoint = points[location]
-       var content = "<p>Geohash: "+encode_geohash(finalPoint[0],finalPoint[1],precision)+"<br/>"
-       content += "Lattitude: "+finalPoint[0].toFixed(2)+"<br/>"
-       content += "Longitude: "+finalPoint[1].toFixed(2)+"<br/>"
-       for (var key in polygonLayer.options.features) {
-           if (polygonLayer.options.features.hasOwnProperty(key)) {
-	       var keyData = key.split(',')
-               content += keyData[0]+": "+dataPoint[polygonLayer.options.features[key]].toFixed(2)+" "+keyData[1]+"<br/>"
-           }
-       }
-       content += "</p>"
-       info.update(content)
-   }
-});
-
-function updateMap(){
-    maxes["temperature"] = -Number.MAX_VALUE
-    mins["temperature"] = Number.MAX_VALUE
-    maxes["humidity"] = -Number.MAX_VALUE
-    mins["humidity"] = Number.MAX_VALUE
-    maxes["visibility"] = -Number.MAX_VALUE
-    mins["visibility"] = Number.MAX_VALUE
-    maxes["precipitation"] = -Number.MAX_VALUE
-    mins["precipitation"] = Number.MAX_VALUE
-    points = []
-    pointLocations = {}
-    if (document.getElementById("geohash").value !== ""){
-        bounds = geohash_bounds(document.getElementById("geohash").value);
-        bounds["se"] = [bounds["sw"]["lat"], bounds["ne"]["lon"]]
-        bounds["nw"] = [bounds["ne"]["lat"], bounds["sw"]["lon"]]
-    } else {
-        bounds["se"] = [-Number.MAX_VALUE, Number.MAX_VALUE]
-        bounds["nw"] = [Number.MAX_VALUE, -Number.MAX_VALUE]
-    }
-    var tempCheck = document.getElementById("tempCheck").checked
-    var humCheck = document.getElementById("humCheck").checked
-    var visCheck = document.getElementById("visCheck").checked
-    var preCheck = document.getElementById("preCheck").checked
-    featureDict = {}
-
-    var ix = 2
-    if (tempCheck){
-        featureDict["Surface Temperature,(K)"] = ix
-        ix += 1
-    }
-    if (humCheck){
-        featureDict["Relative Humidity,(%)"] = ix
-        ix += 1
-    }
-    if (visCheck){
-        featureDict["Surface Visibility,(m)"] = ix
-        ix += 1
-    }
-    if (preCheck){
-        featureDict["Precipitable Water,(mm)"] = ix
-        ix += 1
-    }
-
-    count = 0
-    for (var key in data) {
-        if (data.hasOwnProperty(key)) {
-            var features = data[key].split(",")
-            var geohash = key;
-            var center = decode_geohash(geohash);
-            var precision = document.getElementById("precision").value
-            if (precision !== geohash.length){
-                geohash = encode_geohash(center["lat"], center["lon"], precision)
-                center = decode_geohash(geohash)
-            }
-	    var latLng = [center["lat"], center["lon"]]
-	    var singlePoint = [center["lat"], center["lon"]]
-
-            var ix = 0
-            if (tempCheck){
-                var temperature = parseFloat(features[ix]);
-                maxes["temperature"] = Math.max(temperature, maxes["temperature"])
-                mins["temperature"] = Math.min(temperature, mins["temperature"])
-                singlePoint.push(temperature)
-                ix += 1
-            }
-            if (humCheck){
-                var relativeHumidity = parseFloat(features[ix]);
-                maxes["humidity"] = Math.max(relativeHumidity, maxes["humidity"])
-                mins["humidity"] = Math.min(relativeHumidity, mins["humidity"])
-                singlePoint.push(relativeHumidity)
-                ix += 1
-            }
-            if (visCheck){
-                var visibility = parseFloat(features[ix]);
-                maxes["visibility"] = Math.max(visibility, maxes["visibility"])
-                mins["visibility"] = Math.min(visibility, mins["visibility"])
-                singlePoint.push(visibility)
-                ix += 1
-            }
-            if (preCheck){
-                var precipitation = parseFloat(features[ix]);
-                maxes["precipitation"] = Math.max(precipitation, maxes["precipitation"])
-                mins["precipitation"] = Math.min(precipitation, mins["precipitation"])
-                singlePoint.push(precipitation)
-                ix += 1
-            }
-
-	    if (pointLocations[latLng] !== undefined){
-		if (pointLocations[latLng].length === 1){
-		    pointLocations[latLng].push(2)
-		} else {
-                    pointLocations[latLng][1] += 1
-		}
-		var p = points[pointLocations[latLng][0]]
-		var newP = [p[0],p[1]]
-		for(var i = 2; i < p.length; i++){
-		    //Cumulative moving average
-		    newP.push((p[i]+((pointLocations[latLng][1]-1)*singlePoint[i]))/pointLocations[latLng][1])
-		}
-		console.log(p, newP)
-		points[pointLocations[latLng][0]] = newP
-	    } else {
-                pointLocations[latLng] = [count]
-                count += 1
-		points.push(singlePoint)
-            }
-        }
-    }
-    console.log(points, pointLocations)
-    if (polygonLayer === null){
-	polygonLayer = L.timeDimension.layer.VoronoiLayer(points,
-               	{dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap});
-	polygonLayer.addTo(mymap)
-    } else {
-        polygonLayer.setLatLngs(points,
-            {dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap})
-    }
-}
-
-var xhr = new XMLHttpRequest();
-xhr.onreadystatechange = function() {
-    if (xhr.readyState == XMLHttpRequest.DONE) {
-	data = JSON.parse(xhr.responseText);
-	updateMap();
-    }
-}
-
-function query(e) {
-	xhr.open("POST", "http://127.0.0.1:5711/synopsis", true);
-	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-	var geohash = document.getElementById("geohash").value;
-	var mintemp = document.getElementById("mintemp").value;
-	var maxtemp = document.getElementById("maxtemp").value;
-	var minhum = document.getElementById("minhum").value;
-	var maxhum = document.getElementById("maxhum").value;
-	var minvis = document.getElementById("minvis").value;
-	var maxvis = document.getElementById("maxvis").value;
-	var minpre = document.getElementById("minpre").value;
-	var maxpre = document.getElementById("maxpre").value;
-	var tempCheck = document.getElementById("tempCheck").checked
-	var humCheck = document.getElementById("humCheck").checked
-	var visCheck = document.getElementById("visCheck").checked
-	var preCheck = document.getElementById("preCheck").checked
-	var queryString = geohash
-	if (tempCheck){
-	    queryString += ",temperature_surface:"+mintemp+":"+maxtemp
-	}
-	if (humCheck){
-	    queryString += ",relative_humidity_zerodegc_isotherm:"+minhum+":"+maxhum
-	}
-	if(visCheck){
-	    queryString += ",visibility_surface:"+minvis+":"+maxvis
-	}
-	if(preCheck){
-	    queryString += ",precipitable_water_entire_atmosphere:"+minpre+":"+maxpre
-	}
-	console.log("Query: " + queryString)
-	xhr.send(queryString);
-}
-
-/*
-var geohash_element = document.getElementById("geohash");
-var mintemp_element = document.getElementById("mintemp");
-var maxtemp_element = document.getElementById("maxtemp");
-var minhum_element = document.getElementById("minhum");
-var maxhum_element = document.getElementById("maxhum");
-var minvis_element = document.getElementById("minvis");
-var maxvis_element = document.getElementById("maxvis");
-var minpre_element = document.getElementById("minpre");
-var maxpre_element = document.getElementById("maxpre");
-var tempCheck_element = document.getElementById("tempCheck");
-var humCheck_element = document.getElementById("humCheck");
-var visCheck_element = document.getElementById("visCheck");
-var preCheck_element = document.getElementById("preCheck");
-geohash_element.oninput = query;
-mintemp_element.oninput = query;
-maxtemp_element.oninput = query;
-minhum_element.oninput = query;
-maxhum_element.oninput = query;
-minvis_element.oninput = query;
-maxvis_element.oninput = query;
-minpre_element.oninput = query;
-maxpre_element.oninput = query;
-tempCheck_element.addEventListener('change', query);
-humCheck_element.addEventListener('change', query);
-visCheck_element.addEventListener('change', query);
-preCheck_element.addEventListener('change', query);
-*/
-var query_button = document.getElementById("update");
-query_button.onclick = query;
-var precision = document.getElementById("precision");
-precision.oninput = updateMap;
-
-
 L.timeDimension.layer.VoronoiLayer = function(points, options) {
     return new L.TimeDimension.Layer.VoronoiLayer(points, options);
 };
@@ -416,14 +152,14 @@ var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?ac
 	maxBounds: [[],[]]
 	}).addTo(mymap);
 
-query()
 polygonLayer = L.timeDimension.layer.VoronoiLayer([],
                	{dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap});
 polygonLayer.addTo(mymap);
+//polygonLayer.query();
 
 L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
     _getDisplayDateFormat: function(date){
-        return date.format("mmmm yyyy");
+        return date.format("mm/dd/yyyy");
     }
 });
 var timeDimensionControl = new L.Control.TimeDimensionCustom({
@@ -433,4 +169,9 @@ var timeDimensionControl = new L.Control.TimeDimensionCustom({
     }
 });
 mymap.addControl(this.timeDimensionControl);
+
+var query_button = document.getElementById("update");
+query_button.onclick = function() {polygonLayer.query()};
+var precision = document.getElementById("precision");
+precision.oninput = function() {polygonLayer.updateMap()};
 
