@@ -5,16 +5,17 @@ if (typeof module !== 'undefined') module.exports = simplevoronoi;
 function simplevoronoi(canvas) {
     if (!(this instanceof simplevoronoi)) return new simplevoronoi(canvas);
 
-    this._canvas = canvas = typeof canvas === 'string' ? document.getElementById(canvas) : canvas;
+    //this._canvas = canvas = typeof canvas === 'string' ? document.getElementById(canvas) : canvas;
 
+    this._canvas = canvas
     this._ctx = canvas.getContext('2d');
     this._width = canvas.width;
     this._height = canvas.height;
     
-    var newCanvas = this._createCanvas()
-    newCanvas.width = 10
-    newCanvas.height = 10
-    this._noise = this.perlinNoise(newCanvas)
+    //var newCanvas = this._createCanvas()
+    //newCanvas.width = 10
+   // newCanvas.height = 10
+   // this._noise = this.perlinNoise(newCanvas)
 
     this._data = [];
 }
@@ -64,9 +65,9 @@ simplevoronoi.prototype = {
             */
 	    ctx.globalAlpha = 0.2
 	    ctx.beginPath();
-	    ctx.moveTo(p[0][0][0], p[0][0][1])
+	    ctx.moveTo(Math.floor(p[0][0][0]), Math.floor(p[0][0][1]))
 	    for (var j = 1; j < p[0].length; j++){
-		ctx.lineTo(p[0][j][0], p[0][j][1])
+		ctx.lineTo(Math.floor(p[0][j][0]), Math.floor(p[0][j][1]))
 	    }
 	    ctx.closePath();
 	    ctx.globalAlpha = 0.5

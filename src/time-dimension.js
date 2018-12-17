@@ -10,15 +10,21 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
         this._currentLoadedTime = 0;
         this._currentTimeLatLngs = latlngs
 	this._xhr = new XMLHttpRequest();
+	this._canvases = {}
+	this._queryTracker = []
 	this._xhr.onreadystatechange = function() {
             if (this.readyState == XMLHttpRequest.DONE) {
 	        me._data = JSON.parse(this.responseText);
 	        me.updateMap();
+		me.fire('timeload', {
+            	    time: me._time
+        	});
             }
         }
     },
 
     onAdd: function(map) {
+	this._map = map
         L.TimeDimension.Layer.prototype.onAdd.call(this, map);
         map.addLayer(this._baseLayer);
         if (this._timeDimension) {
@@ -51,26 +57,26 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
    	    var mouseGeohash = encode_geohash(mouseLat,mouseLng,precision)
    	    var center = decode_geohash(mouseGeohash);
    	    var centerLatLng = [center["lat"], center["lon"]]
-   	    var location = null
-   	    var distance = Number.MAX_VALUE
-   	    var finalPoint = null
+   	    me.location = null
+   	    me.distance = Number.MAX_VALUE
+   	    me.finalPoint = null
    	    for (var key in me._pointLocations){
 		if(me._pointLocations.hasOwnProperty(key)){
 		    var point = key.split(',').map(Number)
 		    var new_distance = Math.hypot(point[0]-ev.latlng.lat, point[1]-ev.latlng.lng);
-		    if (new_distance < distance){
-			distance = new_distance
-			location = me._pointLocations[key][0]
-			finalPoint = point
+		    if (new_distance < me.distance){
+			me.distance = new_distance
+			me.location = me._pointLocations[key][0]
+			me.finalPoint = point
 		    }
 		}
 	    }	
 
-	    if (distance < precisionToDistance[precision]) {
-		var dataPoint = me._currentTimeLatLngs[location]
-		var content = "<p>Geohash: "+encode_geohash(finalPoint[0],finalPoint[1],precision)+"<br/>"
-		content += "Lattitude: "+finalPoint[0].toFixed(2)+"<br/>"
-		content += "Longitude: "+finalPoint[1].toFixed(2)+"<br/>"
+	    if (me.distance < precisionToDistance[precision]) {
+		var dataPoint = me._currentTimeLatLngs[me.location]
+		var content = "<p>Geohash: "+encode_geohash(me.finalPoint[0],me.finalPoint[1],precision)+"<br/>"
+		content += "Lattitude: "+me.finalPoint[0].toFixed(2)+"<br/>"
+		content += "Longitude: "+me.finalPoint[1].toFixed(2)+"<br/>"
 		for (var key in me._baseLayer.newOptions.features) {
 		    if (me._baseLayer.newOptions.features.hasOwnProperty(key)) {
 		        var keyData = key.split(',')
@@ -81,8 +87,24 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 		info.update(content)
 	    }
 	});
-
 	
+	this.addEventListener('timeload', function(ev) {
+	    var precision = document.getElementById("precision").value
+	    if (me.distance < precisionToDistance[precision]) {
+		var dataPoint = me._currentTimeLatLngs[me.location]
+		var content = "<p>Geohash: "+encode_geohash(me.finalPoint[0],me.finalPoint[1],precision)+"<br/>"
+		content += "Lattitude: "+me.finalPoint[0].toFixed(2)+"<br/>"
+		content += "Longitude: "+me.finalPoint[1].toFixed(2)+"<br/>"
+		for (var key in me._baseLayer.newOptions.features) {
+		    if (me._baseLayer.newOptions.features.hasOwnProperty(key)) {
+		        var keyData = key.split(',')
+		        content += keyData[0]+": "+dataPoint[me._baseLayer.newOptions.features[key]].toFixed(2)+" "+keyData[1]+"<br/>"
+		    }
+		}
+       		content += "</p>"
+		info.update(content)
+	    }
+	});
     },
 
     updateMap: function(){
@@ -105,6 +127,8 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
             bounds["se"] = [bounds["sw"]["lat"], bounds["ne"]["lon"]]
             bounds["nw"] = [bounds["ne"]["lat"], bounds["sw"]["lon"]]
         } else {
+	    //bounds["sw"] = [-Number.MAX_VALUE, Number.MAX_VALUE]
+            //bounds["ne"] = [Number.MAX_VALUE, -Number.MAX_VALUE]
             bounds["se"] = [-Number.MAX_VALUE, Number.MAX_VALUE]
             bounds["nw"] = [Number.MAX_VALUE, -Number.MAX_VALUE]
         }
@@ -209,7 +233,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 	this._baseLayer.setOptions({dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap})
 	this._update()
 	/*
-	if (this._timeDimension && time == this._timeDimension.getCurrentTime() && !this._timeDimension.isLoading()) {
+	if (this._timeDimension && this._time == this._timeDimension.getCurrentTime() && !this._timeDimension.isLoading()) {
             this._update();
         }
 	*/
@@ -217,7 +241,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 
 
     _onNewTimeLoading: function(ev) {
-        this._getDataForTime(document.getElementById("time").value);
+        this.query(ev.time);
         return;
     },
 
@@ -226,9 +250,19 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
     },
 
     _update: function() {
-	console.log(this._currentTimeLatLngs)
-        this._baseLayer.setLatLngs(this._currentTimeLatLngs, this._options);
-        return true;
+	//this._baseLayer.setLatLngs(this._currentTimeLatLngs, this._options);
+	/*
+	if(this._baseLayer._map !== undefined){
+	    var currentQuery = this._queryTracker.shift()
+	    var currentCanvas = this._canvases[currentQuery].getContext('2d')
+	    delete this._canvases[currentQuery]
+     
+	    this._baseLayer.setOptions(this._options)
+	    this._baseLayer.newCanvas(currentCanvas, this._options)
+            return true;
+	}
+	*/
+	
     },
 
     setLatLngs: function(latlngs, options) {
@@ -236,48 +270,14 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
     },
 
     _getDataForTime: function(time) {
-	this.query("a")
-	/*
-        if (!this._baseURL || !this._map) {
-            return;
-        }
-        var url = this._constructQuery(time);
-        var oReq = new XMLHttpRequest();
-        oReq.addEventListener("load", (function(xhr) {
-            var response = xhr.currentTarget.response;
-            var data = JSON.parse(response);
-            delete this._currentTimeData.data;
-            this._currentTimeData.data = [];
-            for (var i = 0; i < data.length; i++) {
-                var marker = data[i];
-                if (marker.location) {
-                    this._currentTimeData.data.push({
-                        lat: marker.location.latitude,
-                        lng: marker.location.longitude,
-                        count: 1
-                    });
-                }
-            }
-            this._currentLoadedTime = time;
-            if (this._timeDimension && time == this._timeDimension.getCurrentTime() && !this._timeDimension.isLoading()) {
-                this._update();
-            }
-            this.fire('timeload', {
-                time: time
-            });
-        }).bind(this));
-
-        oReq.open("GET", url);
-        oReq.send();
-	*/
+	this.query(time)
     },
 
-    query: function(e, time) {
-	console.log(this)
+    query: function(time) {
         this._xhr.open("POST", "http://lattice-213.cs.colostate.edu:5711/synopsis", true);
 	this._xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 	var geohash = document.getElementById("geohash").value;
-	var time = document.getElementById("time").value;
+	//var time = document.getElementById("time").value;
 	var mintemp = document.getElementById("mintemp").value;
 	var maxtemp = document.getElementById("maxtemp").value;
 	var minhum = document.getElementById("minhum").value;
@@ -292,6 +292,8 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 	var preCheck = document.getElementById("preCheck").checked
 	var queryString = geohash
 	var date = new Date(time);
+	this._time = date.getTime()
+	console.log(date)
 	queryString += ","+date.getTime();
 
 	if (tempCheck){
@@ -308,6 +310,33 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 	}
 	console.log("Query: " + queryString)
 	this._xhr.send(queryString);
+	
+	if(this._canvases[queryString] === undefined) {
+	    var worker = new Worker("./src/voronoi-buffer.js")
+	    this._canvases[queryString] = L.DomUtil.create('canvas', 'leaflet-voronoi-layer leaflet-layer ' + queryString)
+	    var originProp = L.DomUtil.testProp(['transformOrigin', 'WebkitTransformOrigin', 'msTransformOrigin']);
+            this._canvases[queryString].style[originProp] = '50% 50%';
+
+            var size = this._map.getSize();
+            this._canvases[queryString].width  = size.x;
+            this._canvases[queryString].height = size.y;
+
+	    this._queryTracker.push(queryString)
+	    var offscreen = this._canvases[queryString].transferControlToOffscreen()
+	    worker.postMessage({queryString: queryString, x: this._map.getSize().x, y: this._map.getSize().y,
+			    geohash: document.getElementById("geohash").value, precision: document.getElementById("precision").value,
+			    tempCheck: document.getElementById("tempCheck").checked, humCheck: document.getElementById("humCheck").checked,
+			    visCheck: document.getElementById("visCheck").checked, preCheck: document.getElementById("preCheck").checked,
+			    bounds: this._map.getBounds(), canvas: offscreen,
+			    northWestBounds: this._map.getBounds().getNorthWest(), southEastBounds: this._map.getBounds().getSouthEast(),
+			    zoom: this._map.getZoom()}, [offscreen]);
+	    var me = this
+	    worker.onmessage = function(e) {
+		if (e.data.msg === 'render'){
+		    me._baseLayer.setNextBits(me._canvases[queryString]/*e.data.bits*/)
+		}
+	    }
+	}
     }
 
 });

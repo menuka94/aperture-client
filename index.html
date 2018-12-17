@@ -14,7 +14,7 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/socib/Leaflet.TimeDimension/master/dist/leaflet.timedimension.min.js"></script>
     <script src="src/simple-voronoi.js"></script>
     <script src="src/leaflet-voronoi.js"></script>
-    <script src="src/time-dimension.js"></script>
+    <script src="src/voronoi-buffer.js"></script>
     <script src="src/d3-delaunay.js"></script>
     <title>SynopsisJS</title>
     <style>
@@ -33,22 +33,24 @@
 <body>
     <text><h1>SynopsisJS Example</h1></text>
     <div id="viz"></div>
-    Geohash: <input type='text' id='geohash' value="9x"/>
-    Time: <input type="datetime-local" id="time" name="time" value="2014-03-16T06:00" />
+    Geohash: <input type='text' id='geohash' value=""/>
      <button type="button" id="update">Update Map</button> 
     <br />
     Geohash Precision:
         <select id="precision">
-            <option selected=5 value=5>5</option>
-            <option value=4>4</option>
+            <option value=5>5</option>
+            <option selected=4 value=4>4</option>
             <option value=3>3</option>
         </select> 
+    <br/><br/> 
+    Start Time: <input type="datetime-local" id="starttime" name="starttime" value="2014-03-14T18:00" />
+    End Time: <input type="datetime-local" id="endtime" name="endtime" value="2014-03-16T12:00" />
     <br/><br/>
     <input type="checkbox" id="tempCheck" checked> Show Surface Temperature (K)<br/>
     Minimum Surface Temperature: <input type='text' id='mintemp' value="0"/>
     Maximum Surface Temperature: <input type='text' id='maxtemp' value="300"/>
     <br/><br/>
-    <input type="checkbox" id="humCheck"> Show Relative Humidity (%)<br/>
+    <input type="checkbox" id="humCheck" checked> Show Relative Humidity (%)<br/>
     Minimum Relative Humidity: <input type='text' id='minhum' value="0"/>
     Maximum Relative Humidity: <input type='text' id='maxhum' value="101"/>
     <br/><br/>
@@ -60,6 +62,7 @@
     Minimum Precipitable Water: <input type='text' id='minpre' value="0"/>
     Maximum Precipitable Water: <input type='text' id='maxpre' value="100"/>
     <div id="mapid"></div>
+    <script src="src/time-dimension.js"></script>
     <script type="text/javascript" src="src/display.js"></script>
 </body>
 </html>

@@ -9,11 +9,11 @@ var delaunay = null;
 var mymap = null
 var polygonLayer = null
 var polygonLayerGroup = null
-var view = {lat: 39.839, lng: -104.990}
-var zoomLevel = 10
+var view = {lat: 39.839, lng: -85.990}
+var zoomLevel = 4
 var data = []
+var Geohash = {};
 Geohash.base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
-mymap = L.map('mapid', {renderer: L.canvas(), minZoom: 4, timeDimension: true, timeDimensionControl: true}).setView(view, zoomLevel);
 
 function decode_geohash(geohash) {
 
@@ -140,6 +140,15 @@ function geohash_bounds(geohash) {
     return bounds;
 };
 
+mymap = L.map('mapid', {renderer: L.canvas(), minZoom: 4, 
+			timeDimension: true, //timeDimensionControl: true,
+			timeDimensionOptions: {
+        		    timeInterval: document.getElementById("starttime").value + "/" + document.getElementById("endtime").value,
+        		    period: "PT6H",
+                            currentTime: new Date(document.getElementById("starttime").value)},
+                       }
+    ).setView(view, zoomLevel);
+
 L.timeDimension.layer.VoronoiLayer = function(points, options) {
     return new L.TimeDimension.Layer.VoronoiLayer(points, options);
 };
@@ -157,21 +166,27 @@ polygonLayer = L.timeDimension.layer.VoronoiLayer([],
 polygonLayer.addTo(mymap);
 //polygonLayer.query();
 
+
 L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
     _getDisplayDateFormat: function(date){
-        return date.format("mm/dd/yyyy");
+	//console.log(date)
+        //return date.format("mm/dd/yyyy");
+	return date
     }
 });
+
 var timeDimensionControl = new L.Control.TimeDimensionCustom({
+    autoPlay: true,
     playerOptions: {
-        buffer: 1,
+        buffer: 5,
         minBufferReady: -1
-    }
+    },
 });
 mymap.addControl(this.timeDimensionControl);
 
+
 var query_button = document.getElementById("update");
-query_button.onclick = function() {polygonLayer.query()};
+query_button.onclick = function() {polygonLayer.query(mymap.timeDimension.getCurrentTime())};
 var precision = document.getElementById("precision");
 precision.oninput = function() {polygonLayer.updateMap()};
 

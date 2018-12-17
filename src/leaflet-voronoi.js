@@ -15,7 +15,7 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
     },
 
     initialize: function (latlngs, options) {
-        //this._latlngs = latlngs;
+        this._latlngs = latlngs;
 	//this._delaunay = d3.Delaunay.from(latlngs)
         L.setOptions(this, options);
     },
@@ -36,14 +36,15 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
     },
 
     setOptions: function (newOptions) {
-        L.setOptions(this, newOptions);
+        //L.setOptions(this, newOptions);
 	this.newOptions = newOptions
-        return this.redraw();
+        //return this.redraw();
+	return
     },
 
     redraw: function () {
-        if (this._voronoi && !this._frame && this._map && !this._map._animating) {
-            this._frame = L.Util.requestAnimFrame(this._redraw, this);
+        if (/*this._voronoi && */!this._frame && this._map && !this._map._animating) {
+            this._frame = L.Util.requestAnimFrame(this.newCanvas, this);
         }
         return this;
     },
@@ -111,8 +112,41 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
         return this;
     },
 
+    setNextBits: function (bits) {
+	this._bits = bits
+	//L.Util.requestAnimFrame(this.newCanvas, this);
+	return this.redraw()
+    },
+
+    newCanvas: function () {
+	/*
+	var newCanvas = L.DomUtil.create('canvas', 'leaflet-voronoi-layer leaflet-layer')
+	var originProp = L.DomUtil.testProp(['transformOrigin', 'WebkitTransformOrigin', 'msTransformOrigin']);
+        canvas.style[originProp] = '50% 50%';
+
+        var size = this._map.getSize();
+        canvas.width  = size.x;
+        canvas.height = size.y;
+	newCanvas.getContext('bitmaprenderer').transferFromImageBitmap(bits)
+	
+	//L.setOptions(this, options)
+	var canvas = this._canvas = newCanvas
+	var animated = this._map.options.zoomAnimation && L.Browser.any3d;
+        L.DomUtil.setClass(canvas, 'leaflet-zoom-' + (animated ? 'animated' : 'hide'));
+	*/
+	console.log(this._bits, this._canvas)
+	if(this._bits !== undefined) {
+	    console.log(this._bits.toDataURL() == this._canvas.toDataURL())
+	    var ctx = this._canvas.getContext("2d")
+	    this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
+	    this._ctx.drawImage(this._bits,0,0)
+	}
+	this._frame = null
+    },
+
     _initCanvas: function () {
         var canvas = this._canvas = L.DomUtil.create('canvas', 'leaflet-voronoi-layer leaflet-layer');
+	this._ctx = canvas.getContext("2d")
 
         var originProp = L.DomUtil.testProp(['transformOrigin', 'WebkitTransformOrigin', 'msTransformOrigin']);
         canvas.style[originProp] = '50% 50%';
@@ -124,7 +158,7 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
         var animated = this._map.options.zoomAnimation && L.Browser.any3d;
         L.DomUtil.addClass(canvas, 'leaflet-zoom-' + (animated ? 'animated' : 'hide'));
 
-        this._voronoi = simplevoronoi(canvas);
+        //this._voronoi = simplevoronoi(canvas);
     },
 
     _reset: function () {
@@ -133,14 +167,16 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 
         var size = this._map.getSize();
 
+	/*
         if (this._voronoi._width !== size.x) {
             this._canvas.width = this._voronoi._width  = size.x;
         }
         if (this._voronoi._height !== size.y) {
             this._canvas.height = this._voronoi._height = size.y;
         }
-
-        this._redraw();
+	*/
+        //this._redraw();
+	this.redraw()
     },
 
     _getColorForPercentage: function(pct) {
@@ -165,6 +201,7 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 
     _redraw: function () {
         if (!this._map || this._latlngs.length < 1) {
+	    this._frame = null
             return;
         }
 	var data = []
