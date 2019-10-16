@@ -10,7 +10,7 @@ var mymap = null
 var polygonLayer = null
 var polygonLayerGroup = null
 var view = {lat: 39.839, lng: -85.990}
-var zoomLevel = 4
+var zoomLevel = 3
 var data = []
 var Geohash = {};
 Geohash.base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
@@ -140,12 +140,50 @@ function geohash_bounds(geohash) {
     return bounds;
 };
 
-mymap = L.map('mapid', {renderer: L.canvas(), minZoom: 4, 
+function geohash_adjacent(geohash, direction) {
+    // based on github.com/davetroy/geohash-js
+
+    geohash = geohash.toLowerCase();
+    direction = direction.toLowerCase();
+
+    if (geohash.length === 0) throw new Error('Invalid geohash');
+    if ('nsew'.indexOf(direction) == -1) throw new Error('Invalid direction');
+
+    var neighbour = {
+        n: [ 'p0r21436x8zb9dcf5h7kjnmqesgutwvy', 'bc01fg45238967deuvhjyznpkmstqrwx' ],
+        s: [ '14365h7k9dcfesgujnmqp0r2twvyx8zb', '238967debc01fg45kmstqrwxuvhjyznp' ],
+        e: [ 'bc01fg45238967deuvhjyznpkmstqrwx', 'p0r21436x8zb9dcf5h7kjnmqesgutwvy' ],
+        w: [ '238967debc01fg45kmstqrwxuvhjyznp', '14365h7k9dcfesgujnmqp0r2twvyx8zb' ],
+    };
+    var border = {
+        n: [ 'prxz',     'bcfguvyz' ],
+        s: [ '028b',     '0145hjnp' ],
+        e: [ 'bcfguvyz', 'prxz'     ],
+        w: [ '0145hjnp', '028b'     ],
+    };
+
+    var lastCh = geohash.slice(-1);    // last character of hash
+    var parent = geohash.slice(0, -1); // hash without last character
+
+    var type = geohash.length % 2;
+
+    // check for edge-cases which don't share common prefix
+    if (border[direction][type].indexOf(lastCh) != -1 && parent !== '') {
+        parent = geohash_adjacent(parent, direction);
+    }
+
+    // append letter for direction to parent
+    return parent + Geohash.base32.charAt(neighbour[direction][type].indexOf(lastCh));
+};
+
+mymap = L.map('mapid', {renderer: L.canvas(), minZoom: 3, 
+			fullscreenControl: true,
 			timeDimension: true, //timeDimensionControl: true,
 			timeDimensionOptions: {
         		    timeInterval: document.getElementById("starttime").value + "/" + document.getElementById("endtime").value,
+        		    transitionTime: 0.1,
         		    period: "PT6H",
-                            currentTime: new Date(document.getElementById("starttime").value)},
+                    currentTime: new Date(document.getElementById("starttime").value)},
                        }
     ).setView(view, zoomLevel);
 
@@ -161,32 +199,73 @@ var tiles = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?ac
 	maxBounds: [[],[]]
 	}).addTo(mymap);
 
-polygonLayer = L.timeDimension.layer.VoronoiLayer([],
-               	{dataMin: mins, dataMax: maxes, features: featureDict, bounds: bounds, minOpacity:0.4, map:mymap});
+polygonLayer = L.timeDimension.layer.VoronoiLayer({loadingTimeout: 1000000});
 polygonLayer.addTo(mymap);
-//polygonLayer.query();
 
 
 L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
     _getDisplayDateFormat: function(date){
-	//console.log(date)
-        //return date.format("mm/dd/yyyy");
 	return date
     }
 });
 
 var timeDimensionControl = new L.Control.TimeDimensionCustom({
-    autoPlay: true,
+    autoPlay: false,
+    maxSpeed: 10,
     playerOptions: {
-        buffer: 5,
-        minBufferReady: -1
+        buffer: 1,
+        minBufferReady: -1,
+        transitionTime: 100,	
     },
 });
 mymap.addControl(this.timeDimensionControl);
+polygonLayer.addControlReference(timeDimensionControl)
 
+var opts = {
+  lines: 13, // The number of lines to draw
+  length: 38, // The length of each line
+  width: 17, // The line thickness
+  radius: 45, // The radius of the inner circle
+  scale: 0.4, // Scales overall size of the spinner
+  corners: 1, // Corner roundness (0..1)
+  color: '#ffffff', // CSS color or array of colors
+  fadeColor: 'transparent', // CSS color or array of colors
+  speed: 1, // Rounds per second
+  rotate: 1, // The rotation offset
+  animation: 'spinner-line-fade-default', // The CSS animation name for the lines
+  direction: 1, // 1: clockwise, -1: counterclockwise
+  zIndex: 2e9, // The z-index (defaults to 2000000000)
+  className: 'spinner', // The CSS class to assign to the spinner
+  top: '50%', // Top position relative to parent
+  left: '50%', // Left position relative to parent
+  shadow: '0 0 1px transparent', // Box-shadow for the lines
+  position: 'absolute' // Element positioning
+};
+
+var target = document.getElementById('mapid');
+var spinner = new Spinner(opts);
+
+mymap.timeDimension.on('timeloading', function(data) { 
+	if (data.time == mymap.timeDimension.getCurrentTime()
+		&& data.time != polygonLayer._currentLoadedTime) { 
+		spinner.spin(target); 
+	}
+});
+
+polygonLayer.on('timeload', function(data) { 
+	if (data.time == polygonLayer._currentLoadedTime) { 
+		spinner.stop(); 
+	}
+});
 
 var query_button = document.getElementById("update");
-query_button.onclick = function() {polygonLayer.query(mymap.timeDimension.getCurrentTime())};
-var precision = document.getElementById("precision");
-precision.oninput = function() {polygonLayer.updateMap()};
-
+query_button.onclick = function() {
+	var tiArray = L.TimeDimension.Util.parseTimeInterval(document.getElementById("starttime").value + "/" + document.getElementById("endtime").value);
+    var period = mymap.timeDimension.options.period || 'P1D';
+    var validTimeRange = mymap.timeDimension.options.validTimeRange || undefined;
+    var validTimes = L.TimeDimension.Util.explodeTimeRange(tiArray[0], tiArray[1], period, validTimeRange);
+	mymap.timeDimension.setAvailableTimes(validTimes, "replace")
+	mymap.timeDimension.setCurrentTime(new Date(document.getElementById("starttime").value))
+	spinner.spin(target);	
+	polygonLayer._getDataForTime(new Date(document.getElementById("starttime").value).getTime())
+	}

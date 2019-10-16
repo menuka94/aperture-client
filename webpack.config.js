@@ -9,6 +9,9 @@ module.exports = {
       { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
     ]
   },
+  watchOptions: {
+    ignored: "**/.*"
+  },
   externals: {
     "jquery": "jQuery",
     "requirejs":"require"

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "watch": "webpack --watch",
+    "watch": "webpack --watch --config webpack.config.js",
     "serve": "npm run watch & live-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -25,7 +25,8 @@
     "d3": "^5.7.0",
     "jquery": "^3.3.1",
     "live-server": "^1.2.0",
-    "requirejs": "^2.3.6"
+    "requirejs": "^2.3.6",
+    "set-default-browser": "^1.0.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

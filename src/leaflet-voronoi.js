@@ -2,59 +2,24 @@
 
 L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
 
-    percentColors: [
-        { pct: 0.0, color: { r: 0x00, g: 0x00, b: 0xff } },
-        { pct: 0.5, color: { r: 0x00, g: 0xff, b: 0x00 } },
-        { pct: 1.0, color: { r: 0xff, g: 0x00, b: 0x00 } }
-    ],
-
-    precisionToPerimeter: {
-	5: 0.9,
-	4: 1.9,
-	3: 7
+    initialize: function (canvas) {
+		this._canvas = canvas
     },
 
-    initialize: function (latlngs, options) {
-        this._latlngs = latlngs;
-	//this._delaunay = d3.Delaunay.from(latlngs)
-        L.setOptions(this, options);
-    },
-
-    setLatLngs: function (latlngs, options) {
-	this._latlngs = latlngs;
-	L.setOptions(this, options);
-	if(latlngs.length > 1){
-	    this._delaunay = d3.Delaunay.from(latlngs)
-	}
-	return this.redraw();
-    },
-
-    addLatLng: function (latlng) {
-        this._latlngs.push(latlng);
-	this._delaunay = d3.Delaunay.from(latlngs)
-        return this.redraw();
-    },
-
-    setOptions: function (newOptions) {
-        //L.setOptions(this, newOptions);
-	this.newOptions = newOptions
-        //return this.redraw();
-	return
+    setCanvas: function (canvas) {
+		this._canvas = canvas;
+		return this.redraw();
     },
 
     redraw: function () {
-        if (/*this._voronoi && */!this._frame && this._map && !this._map._animating) {
-            this._frame = L.Util.requestAnimFrame(this.newCanvas, this);
+        if (this._voronoi && !this._frame && this._map && !this._map._animating) {
+            this._frame = L.Util.requestAnimFrame(this._redraw, this);
         }
         return this;
     },
 
     onAdd: function (map) {
         this._map = map;
-
-        if (!this._canvas) {
-            this._initCanvas();
-        }
 
         if (this.options.pane) {
             this.getPane().appendChild(this._canvas);
@@ -72,11 +37,11 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
     },
 
     onRemove: function (map) {
-     //   if (this.options.pane) {
-     //       this.getPane().removeChild(this._canvas);
-     //  }else{
-     //       map.getPanes().overlayPane.removeChild(this._canvas);
-     //   }
+        if (this.options.pane) {
+            this.getPane().removeChild(this._canvas);
+       }else{
+            map.getPanes().overlayPane.removeChild(this._canvas);
+        }
 
         map.off('moveend', this._reset, this);
 
@@ -85,223 +50,43 @@ L.VoronoiLayer = (L.Layer ? L.Layer : L.Class).extend({
         }
     },
 
-    _polygonArea: function (corners) {
-        var n = corners.length
-        var area = 0.0
-        for (var i = 0; i < n; i++){
-            var j = (i + 1) % n
-            area += corners[i][0] * corners[j][1]
-            area -= corners[j][0] * corners[i][1]
-	}
-        area = Math.abs(area) / 2.0
-        return area
-    },
-
-    _polygonPerimeter: function (corners) {
-        var n = corners.length
-        var length = 0.0
-        for (var i = 0; i < n; i++){
-            var j = (i + 1) % n
-            length += Math.hypot(corners[j][0]-corners[i][0], corners[j][1]-corners[i][1])
-	}
-        return length
-    },
-
     addTo: function (map) {
+		this._map = map
         map.addLayer(this);
         return this;
     },
 
-    setNextBits: function (bits) {
-	this._bits = bits
-	//L.Util.requestAnimFrame(this.newCanvas, this);
-	return this.redraw()
-    },
-
-    newCanvas: function () {
-	/*
-	var newCanvas = L.DomUtil.create('canvas', 'leaflet-voronoi-layer leaflet-layer')
-	var originProp = L.DomUtil.testProp(['transformOrigin', 'WebkitTransformOrigin', 'msTransformOrigin']);
-        canvas.style[originProp] = '50% 50%';
-
-        var size = this._map.getSize();
-        canvas.width  = size.x;
-        canvas.height = size.y;
-	newCanvas.getContext('bitmaprenderer').transferFromImageBitmap(bits)
-	
-	//L.setOptions(this, options)
-	var canvas = this._canvas = newCanvas
-	var animated = this._map.options.zoomAnimation && L.Browser.any3d;
-        L.DomUtil.setClass(canvas, 'leaflet-zoom-' + (animated ? 'animated' : 'hide'));
-	*/
-	console.log(this._bits, this._canvas)
-	if(this._bits !== undefined) {
-	    console.log(this._bits.toDataURL() == this._canvas.toDataURL())
-	    var ctx = this._canvas.getContext("2d")
-	    this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
-	    this._ctx.drawImage(this._bits,0,0)
-	}
-	this._frame = null
-    },
-
-    _initCanvas: function () {
-        var canvas = this._canvas = L.DomUtil.create('canvas', 'leaflet-voronoi-layer leaflet-layer');
-	this._ctx = canvas.getContext("2d")
-
-        var originProp = L.DomUtil.testProp(['transformOrigin', 'WebkitTransformOrigin', 'msTransformOrigin']);
-        canvas.style[originProp] = '50% 50%';
-
-        var size = this._map.getSize();
-        canvas.width  = size.x;
-        canvas.height = size.y;
-
-        var animated = this._map.options.zoomAnimation && L.Browser.any3d;
-        L.DomUtil.addClass(canvas, 'leaflet-zoom-' + (animated ? 'animated' : 'hide'));
-
-        //this._voronoi = simplevoronoi(canvas);
-    },
-
     _reset: function () {
-        var topLeft = this._map.containerPointToLayerPoint([0, 0]);
+        var topLeft = this._map.latLngToLayerPoint([65.0, -165.0]);
+        var bottomRight = this._map.latLngToLayerPoint([3.0, -40.0]);
+
+		this._canvas.style.width = ""+bottomRight.x - topLeft.x+"px"
+        this._canvas.style.height = ""+bottomRight.y - topLeft.y+"px"
         L.DomUtil.setPosition(this._canvas, topLeft);
-
-        var size = this._map.getSize();
-
-	/*
-        if (this._voronoi._width !== size.x) {
-            this._canvas.width = this._voronoi._width  = size.x;
-        }
-        if (this._voronoi._height !== size.y) {
-            this._canvas.height = this._voronoi._height = size.y;
-        }
-	*/
-        //this._redraw();
-	this.redraw()
-    },
-
-    _getColorForPercentage: function(pct) {
-        for (var i = 1; i < this.percentColors.length - 1; i++) {
-            if (pct < this.percentColors[i].pct) {
-                break;
-            }
-        }
-        var lower = this.percentColors[i - 1];
-        var upper = this.percentColors[i];
-        var range = upper.pct - lower.pct;
-        var rangePct = (pct - lower.pct) / range;
-        var pctLower = 1 - rangePct;
-        var pctUpper = rangePct;
-        var color = {
-            r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
-            g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
-            b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
-        };
-        return 'rgb(' + [color.r, color.g, color.b].join(',') + ')';
+        this._redraw();
     },
 
     _redraw: function () {
-        if (!this._map || this._latlngs.length < 1) {
-	    this._frame = null
+        if (!this._map) {
+			this._frame = null
             return;
         }
-	var data = []
-        var bounds = mymap.getBounds(),
-		topLeftLL = bounds.getNorthWest(),
-		bottomRightLL = bounds.getSouthEast(),
-        	topLeft = mymap.latLngToLayerPoint(topLeftLL),
-        	bottomRight = mymap.latLngToLayerPoint(bottomRightLL),
-		drawLimit = bounds.pad(0.4);
-
-	// console.time('process');
-	var voronoi = this._delaunay.voronoi([drawLimit._southWest.lat, drawLimit._southWest.lng, 
-						drawLimit._northEast.lat, drawLimit._northEast.lng]);
-
-	var voronoiFeatures = {}
-	var ix = 1
-	if (this.newOptions.features["Surface Temperature,(K)"] !== undefined){
-	    voronoiFeatures["temp"] = ix
-	    ix += 1
-	}
-	if (this.newOptions.features["Relative Humidity,(%)"] !== undefined){
-	    voronoiFeatures["hum"] = ix
-	    ix += 1
-	}
-	if (this.newOptions.features["Surface Visibility,(m)"] !== undefined){
-	    voronoiFeatures["vis"] = ix
-	    ix += 1
-	}
-	if (this.newOptions.features["Precipitable Water,(mm)"] !== undefined){
-	    voronoiFeatures["pre"] = ix
-	    ix += 1
-	}
-	this._voronoi.setFeatures(voronoiFeatures)
-
-	var dataCount = 0
-	for (var i = 0; i < this._latlngs.length; i++) {
-	    var latlng = new L.LatLng(this._latlngs[i][0], this._latlngs[i][1]);
-  	    if (drawLimit.contains(latlng)) {
-		var newPolygon = []
-		var polygon = voronoi.cellPolygon(i)
-		var precision = document.getElementById("precision").value
-		if (this._polygonPerimeter(polygon) > this.precisionToPerimeter[precision]){
-		    continue
-		}
-		var valid = true
-		for (var j = 0; j < polygon.length; j++){
-		    var point = L.latLng(polygon[j])
-		    if (point.lat <= this.newOptions.bounds['se'][0] || point.lat >= this.newOptions.bounds['nw'][0] || 
-	      			point.lng  >= this.newOptions.bounds['se'][1] || point.lng <= this.newOptions.bounds['nw'][1]) {
-		        valid = false
-		        break 
-	  	    }
-	  	    var pPoint = mymap.latLngToLayerPoint(point)
-		    newPolygon.push([pPoint.x- topLeft.x, pPoint.y- topLeft.y])
-		}
-		if (valid){
-		    var singlePoint = [newPolygon]
-		    if (this.newOptions.features["Surface Temperature,(K)"] !== undefined){
-			var color = this._getColorForPercentage((this._latlngs[i][this.newOptions.features["Surface Temperature,(K)"]] - 
-								this.newOptions.dataMin["temperature"]) / 
-								(this.newOptions.dataMax["temperature"] - this.newOptions.dataMin["temperature"]))
-			singlePoint.push(color)
-		    }
-		    if (this.newOptions.features["Relative Humidity,(%)"] !== undefined){
-			var opacity = (this._latlngs[i][this.newOptions.features["Relative Humidity,(%)"]] - this.newOptions.dataMin["humidity"]) / 
-					(this.newOptions.dataMax["humidity"] - this.newOptions.dataMin["humidity"])
-			//console.log(opacity)
-			singlePoint.push(opacity)
-		    }
-		    if (this.newOptions.features["Surface Visibility,(m)"] !== undefined){
-			var opacity = (this._latlngs[i][this.newOptions.features["Surface Visibility,(m)"]] - this.newOptions.dataMin["visibility"]) / 
-					(this.newOptions.dataMax["visibility"] - this.newOptions.dataMin["visibility"])
-			singlePoint.push(opacity)
-		    }
-		    if (this.newOptions.features["Precipitable Water,(mm)"] !== undefined){
-			var opacity = (this._latlngs[i][this.newOptions.features["Precipitable Water,(mm)"]] - this.newOptions.dataMin["precipitation"]) / 
-					(this.newOptions.dataMax["precipitation"] - this.newOptions.dataMin["precipitation"])
-			singlePoint.push(opacity)
-		    }
-		    dataCount += 1
-		    data.push(singlePoint)
-		}
-	    }
-	}
-	console.log("Number of data points displayed: "+ dataCount)
-        // console.timeEnd('process');
-
-        // console.time('draw ' + data.length);
-        this._voronoi.data(data).draw(this.newOptions.minOpacity);
-        // console.timeEnd('draw ' + data.length);
-
         this._frame = null;
     },
+    
+    _extractNumber: function (txt) {
+		var numb = txt.match(/\d/g)
+		numb = numb.join("")
+		return parseInt(numb)
+	},
 
     _animateZoom: function (e) {
-        var scale = this._map.getZoomScale(e.zoom),
-            offset = this._map._getCenterOffset(e.center)._multiplyBy(-scale).subtract(this._map._getMapPanePos());
+        var scale = this._map.getZoomScale(e.zoom)
+        var offset = this._map._getCenterOffset(e.center)._multiplyBy(-scale).subtract(this._map._getMapPanePos());
 
         if (L.DomUtil.setTransform) {
             L.DomUtil.setTransform(this._canvas, offset, scale);
+            
 
         } else {
             this._canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ')';
