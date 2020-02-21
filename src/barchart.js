@@ -35,13 +35,9 @@ class BarChart {
 		// Scales
 		//-----------
 
-		var xScale = d3.scale.ordinal()
-			.domain(d3.range(dataset.length))
-			.rangeRoundBands([0, w], 0.05);
+		var xScale = d3.scaleOrdinal(d3.range(dataset.length), [0, w]);
 
-		var yScale = d3.scale.linear()
-			.domain([0, d3.max(dataset)])
-			.range([0, h]);
+		var yScale = d3.scaleLinear([0, d3.max(dataset)], [0, h]);
 
 		// SVG
 		//-----------
@@ -76,7 +72,7 @@ class BarChart {
 		  .attr('y', function(d) {
 			return h - yScale(d) + 20;
 		  })
-		  .attr('width', xScale.rangeBand())
+		  .attr('width', xScale.bandwidth())
 			.attr('height', function(d) {
 			return yScale(d);
 		  })
@@ -117,7 +113,7 @@ class BarChart {
 		  })
 		  .attr("text-anchor", "middle")
 			.attr("x", function(d, i) {
-			return xScale(i) + xScale.rangeBand() / 2;
+			return xScale(i) + xScale.bandwidth() / 2;
 			})
 			.attr("y", function(d) {
 			return h - yScale(d) + 34;
@@ -136,7 +132,7 @@ class BarChart {
 		  })
 		  .attr("text-anchor", "middle")
 			.attr("x", function(d, i) {
-			return xScale(i) + xScale.rangeBand() / 2;
+			return xScale(i) + xScale.bandwidth() / 2;
 			})
 			.attr("y", function(d) {
 			return h + 35;

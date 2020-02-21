@@ -14,11 +14,15 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
         this._masks = {}
         this._cachedResults = {}
         this._features = []
+        this._locationPrecision = 0.5
+        this._percentageToColor = {0.0:[0,0,255], 0.5:[0,255,0], 1.0:[255,0,0]};
         this._serverCache = true
         this._clientBuffer = true
         this._panningTrajectory = []
         this._trajectoryPlanning = false
         this._animationPreloading = false
+        this._NE = {x:65.0000, y:-165.0000};
+		this._SW = {x:3.0000, y:-40.0000};
         this._featureColors = {"Temperature": ["#0A32FD","K"], "Humidity": ["#8B8B8B","%"], 
 								"Visibility": ["#0D0A0A","m"], "Precipitation": ["#8033C3","mm"]}
 		this._featureIndexes = {"Temperature": 2, "Humidity": 3, 
@@ -157,6 +161,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
     _initCanvas: function () {
         var canvas = this._canvas = L.DomUtil.create('canvas', 'leaflet-voronoi-layer leaflet-layer');
 		this._ctx = canvas.getContext("2d")
+		this._ctx.globalCompositeOperation = "lighter"
 
         var originProp = L.DomUtil.testProp(['transformOrigin', 'WebkitTransformOrigin', 'msTransformOrigin']);
         canvas.style[originProp] = '50% 50%';
@@ -196,6 +201,138 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 		this._baseLayer.setCanvas(this._canvas)
     },
     
+    _getColorForPercentage: function(pct, alpha){
+		if(pct == 0) {
+			pct += 0.00001;
+		} else if (pct % 0.5 == 0) {
+			pct -= 0.00001;
+		}
+        var lower = 0.5*(Math.floor(Math.abs(pct/0.5)));
+        var upper = 0.5*(Math.ceil(Math.abs(pct/0.5)));
+        var range = upper - lower;
+        var rangePct = (pct - lower) / range;
+        var pctLower = 1 - rangePct;
+        var pctUpper = rangePct;
+        var r = Math.floor(this._percentageToColor[lower][0]*pctLower +
+        		this._percentageToColor[upper][0]*pctUpper);
+        var g = Math.floor(this._percentageToColor[lower][1]*pctLower +
+        		this._percentageToColor[upper][1]*pctUpper);
+        var b = Math.floor(this._percentageToColor[lower][2]*pctLower +
+        		this._percentageToColor[upper][2]*pctUpper);
+        return [r, g, b, alpha];
+	},
+    
+    _combineColors: function(base, added){
+		var mix = [];
+		mix[3] = 1 - (1 - added[3]) * (1 - base[3]); // alpha
+		mix[0] = Math.round((added[0] * added[3] / mix[3]) + (base[0] * base[3] * (1 - added[3]) / mix[3])); // red
+		mix[1] = Math.round((added[1] * added[3] / mix[3]) + (base[1] * base[3] * (1 - added[3]) / mix[3])); // green
+		mix[2] = Math.round((added[2] * added[3] / mix[3]) + (base[2] * base[3] * (1 - added[3]) / mix[3])); // blue
+		return mix
+	},
+    
+    _mercatorProjection: function(p) {
+		var x = (p.lon + 180) * (this._ctx.canvas.width / 360);
+		var latRad = p.lat * Math.PI / 180;
+		var mercN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
+		var y = (this._ctx.canvas.height / 2) - (this._ctx.canvas.height * mercN / (2 * Math.PI));
+		return {lat:x, lon:y};
+	},
+	
+    _drawCanvas: function(data, mins, maxes, min_lat, min_lon, max_lat, max_lon){
+		this._ctx.clearRect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);
+        const mapWidth = max_lat - min_lat
+        const mapHeight = max_lon - min_lon
+        const mapCenterX = (max_lat + min_lat)/2;
+		const mapCenterY = (max_lon + min_lon)/2;
+        const scale = Math.min(this._ctx.canvas.width / mapWidth, this._ctx.canvas.height / mapHeight);
+		for (var key in data) {
+			if (data.hasOwnProperty(key)) {
+				var l = key.split(",").map(Number)
+				l[0] = (l[0] - mapCenterX) * this._ctx.canvas.width / mapWidth + this._ctx.canvas.width / 2 
+				l[1] = (l[1] - mapCenterY) * this._ctx.canvas.height / mapHeight + this._ctx.canvas.height / 2 
+				var ix = 0
+				var f = data[key][0]
+				var c = data[key][1]
+				var base = undefined
+				//Draw temperature
+				if(document.getElementById("tempCheck").checked) {
+					var colorPct = this._getColorForPercentage((f[ix]/c - mins[ix]) / (maxes[ix] - mins[ix]), 0.3);
+					base = (typeof base === "undefined") ? colorPct : this._combineColors(base, colorPct)
+					ix++
+				}
+
+				//Draw humidity
+				if(document.getElementById("humCheck").checked) {
+					var colorPct = [211, 211, 211, 0.9*((f[ix]/c - mins[ix]) / (maxes[ix] - mins[ix]))];
+					base = (typeof base === "undefined") ? colorPct : this._combineColors(base, colorPct)
+					ix++
+				}
+
+				//Draw visibility
+				if(document.getElementById("visCheck").checked) {
+					var colorPct = [0,0,0, 0.5*((f[ix]/c - mins[ix]) / (maxes[ix] - mins[ix]))];
+					base = (typeof base === "undefined") ? colorPct : this._combineColors(base, colorPct)
+					ix++
+				}
+				
+				//Draw precip
+				if(document.getElementById("preCheck").checked) {
+					var colorPct = [0,0,86, 0.9*((f[ix]/c - mins[ix]) / (maxes[ix] - mins[ix]))];
+					base = (typeof base === "undefined") ? colorPct : this._combineColors(base, colorPct)
+					ix++
+				}
+				this._ctx.beginPath()
+				this._ctx.fillStyle = "rgba("+base[0]+","+base[1]+","+base[2]+","+base[3]+")"; 
+				this._ctx.fillRect(l[0], l[1], this._locationPrecision*5, this._locationPrecision* 5); 
+			}
+		}
+	},
+    
+    _processImageData: function(data){
+		var len = 0;
+		for (var key in data) {
+			if (data.hasOwnProperty(key)) {
+				len = data[key].split(",").filter(String).length
+				break
+			}
+		}
+		var maxes = new Array(len).fill(Number.MIN_VALUE)
+		var mins = new Array(len).fill(Number.MAX_VALUE)
+		var min_lat = Number.MAX_VALUE
+		var min_lon = Number.MAX_VALUE
+		var max_lat = Number.MIN_VALUE
+		var max_lon = Number.MIN_VALUE
+		var parsedData = {}
+		for (var key in data) {
+			if (data.hasOwnProperty(key)) {
+				var featureData = data[key].split(",").filter(String).map(Number)
+				var dg = decode_geohash(key)
+				dg = this._mercatorProjection(dg)
+				//var lat_lon = [dg.lat,dg.lon]
+				var lat_lon = [Number((Math.round(dg.lat / this._locationPrecision) * this._locationPrecision).toFixed(4)), 
+					Number((Math.round(dg.lon / this._locationPrecision) * this._locationPrecision).toFixed(4))]
+				if (lat_lon in parsedData){
+					parsedData[lat_lon][0] = parsedData[lat_lon][0].map((a, i) => a + featureData[i])
+					parsedData[lat_lon][1] += 1
+				} else {
+					parsedData[lat_lon] = [featureData, 1]
+				}
+				min_lat = min_lat > lat_lon[0] ? lat_lon[0] : min_lat;
+				min_lon = min_lon > lat_lon[1] ? lat_lon[1] : min_lon;
+				max_lat = max_lat < lat_lon[0] ? lat_lon[0] : max_lat;
+				max_lon = max_lon < lat_lon[1] ? lat_lon[1] : max_lon;
+				for(var i = 0; i < len; i++){
+					if(maxes[i] < featureData[i])
+						maxes[i] = featureData[i]
+					if(mins[i] > featureData[i])
+						mins[i] = featureData[i]
+				}
+			}
+		}
+		this._drawCanvas(parsedData, mins, maxes, min_lat, min_lon, max_lat, max_lon)
+	},
+    
     _updateTime: function(queryData) {
 		var currTime = parseFloat(this._timeDimension.getCurrentTime())
 		currTime = new Date(currTime)
@@ -210,9 +347,10 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 			}
 			this._update();
 			this._pointData = queryData["data"]
+			this._processImageData(queryData["data"])
 			this._currentLoadedTime = currTime;
 			this.loadedTime = currTime
-			this.statQuery(this)
+			//this.statQuery(this)
 			currTime = new Date(currTime)
 			currTime.setHours(currTime.getHours()-23)
 			currTime = currTime.getTime()
@@ -246,6 +384,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 			d.setHours(d.getHours()+6);
 			qTime = d.getTime()
 			if (this._animationPreloading === false){
+				i = 20
 				break
 			}
 		}
@@ -490,6 +629,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 					matrix.make(queryData["corr"], me._features)
 				this._dataMeans = queryData["means"]
 				this._dataStds = queryData["stds"]
+				/*
 				if (drawBar){
 					var bc = new BarChart(me)
 					bc.clear()
@@ -500,6 +640,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 									me._featureColors[me._features[i]][0], me._featureColors[me._features[i]][1])
 					}
 				}
+				*/
 			} else { matrix.remove() }
 		}).bind(me));
 		_xhr.open("POST", "http://"+this.getMachine(this._currentLoadedTime)+".cs.colostate.edu:5711/synopsis", asynchronous);
@@ -642,6 +783,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
         
         _xhr.open("POST", "http://"+this.getMachine(time)+".cs.colostate.edu:5711/synopsis", asynchronous);
 		_xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        console.log(queryString)
         _xhr.send(queryString);	
 	},
 	
