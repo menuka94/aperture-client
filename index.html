@@ -85,22 +85,14 @@
     <input type="checkbox" id="preCheck" checked> Show Precipitable Water (mm)<br/>
     Minimum Precipitable Water: <input type='text' id='minpre' value="0"/>
     Maximum Precipitable Water: <input type='text' id='maxpre' value="100"/>
-    <div style="width: 100vw; height: 100vh; overflow: hidden;">
-		<div id="mapid" style="height: 50%; width:50%; float:left"></div>
+
+    <div class="mapContainer">
+		<div id="osmMap1" style="height: 50%; width:50%; float:left"></div>
 		<div id="buildingmap" style="height: 50%; width:50%; float:right; overflow: hidden;position:relative;">
 			<div id="widget-container" class="wrld-widget-container" style="float:left; height:100%"></div>
 		</div>
 		<div id="metamap" style="height: 50%; width:50%; float:left"></div>
-		<div id="earthengine" class ="gmap" style="height: 50%; width:50%; float:right">
-			<p class="output">Loading Earth Engine...</p>
-			<div class="g-sign-in hidden">
-				<span class="label">Sign in with:</span>
-				<div class="button">
-					<span class="icon"></span>
-					<span class="button-text">Google</span>
-				</div>
-			</div>
-		</div>
+		<div id="osmMap2" style="height: 50%; width:50%; float:right"></div>
 	</div>
 	<div class="tiles-loading"></div>
 	

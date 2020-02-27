@@ -180,7 +180,7 @@ function geohash_adjacent(geohash, direction) {
     return parent + Geohash.base32.charAt(neighbour[direction][type].indexOf(lastCh));
 };
 
-mymap = L.map('mapid', {renderer: L.canvas(), minZoom: 3, 
+mymap = L.map('osmMap1', {renderer: L.canvas(), minZoom: 3, 
 			fullscreenControl: true,
 			timeDimension: true, //timeDimensionControl: true,
 			timeDimensionOptions: {
@@ -243,6 +243,9 @@ metamap.animate()
 metamap.target.x = (view.lng-90) * Math.PI / 180
 metamap.target.y = mymap.getCenter().lat * Math.PI / 180
 
+
+
+/* Commented because switching to OSM
 var CLIENT_ID = "193027830416-kg91073o6jooijk6duu9s47b1vt836aq.apps.googleusercontent.com"
 var earthEngine = ee
 var gmap
@@ -290,7 +293,7 @@ $(document).ready(function() {
     console.log(runAnalysis, onImmediateFailed)
     onImmediateFailed()
 	earthEngine.data.authenticate(CLIENT_ID, runAnalysis, null, null, onImmediateFailed);
-});
+});*/
 
 mymap.on("move", function () {
 	if(!freeze){
