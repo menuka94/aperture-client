@@ -250,6 +250,7 @@ metamap.target.y = mymap.getCenter().lat * Math.PI / 180
 osmMap2 = L.map('osmMap2', {renderer: L.canvas(), minZoom: 3, 
     fullscreenControl: true,
     timeDimension: false,
+    inertia: false
                }
 ).setView(view, zoomLevel);
 
@@ -348,7 +349,7 @@ osmMap2.on("move", function () {
         osmMap2Flag = true;
         mapABScenter = osmMap2.getCenter();
         mapABSzoom = osmMap2.getZoom();
-        mymap.setView(mapABScenter, mapABSzoom);
+    //mymap.setView(mapABScenter, mapABSzoom);
 		buildingmap.setView(mapABScenter, mapABSzoom, {
             animate: false
         });
