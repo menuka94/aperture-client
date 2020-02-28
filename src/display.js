@@ -246,7 +246,7 @@ metamap.animate()
 metamap.target.x = (view.lng-90) * Math.PI / 180
 metamap.target.y = mymap.getCenter().lat * Math.PI / 180
 
-
+/*
 osmMap2 = L.map('osmMap2', {renderer: L.canvas(), minZoom: 3, 
     fullscreenControl: true,
     timeDimension: false,
@@ -260,7 +260,7 @@ var tiles2 = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?a
     	id: 'mapbox.streets',
     	accessToken: 'pk.eyJ1Ijoia2V2aW5icnVod2lsZXIiLCJhIjoiY2ptdjBuMzRiMGNzeTNwbm9sYml5aWhvcyJ9.i6hZMqiVZgDiyDj5zcFcIA',
 	maxBounds: [[],[]]
-}).addTo(osmMap2);
+}).addTo(osmMap2);*/
 
 
 
@@ -323,7 +323,7 @@ mymap.on("move", function () {
         buildingmap.setView(mapABScenter, mapABSzoom, {
             animate: false
         });
-        osmMap2.setView(mapABScenter, mapABSzoom); //here
+        //osmMap2.setView(mapABScenter, mapABSzoom); //here
 		metamap.target.x = (mapABScenter.lng-90) * Math.PI / 180;
 		metamap.target.y = mapABScenter.lat * Math.PI / 180;
 	}
@@ -336,13 +336,13 @@ buildingmap.on("move", function () {
         mapABScenter = buildingmap.getCenter();
         mapABSzoom = buildingmap.getZoom();
         mymap.setView(buildingmap.getCenter(), mapABSzoom);
-        osmMap2.setView(mapABScenter, mapABSzoom); //here
+        //osmMap2.setView(mapABScenter, mapABSzoom); //here
 		metamap.target.x = (mapABScenter.lng-90) * Math.PI / 180;
 		metamap.target.y = mapABScenter.lat * Math.PI / 180;
 	}
 });
 
-
+/*
 osmMap2.on("move", function () {
 	if(!freeze){
 		freeze = true;
@@ -356,7 +356,7 @@ osmMap2.on("move", function () {
 		metamap.target.x = (mapABScenter.lng-90) * Math.PI / 180;
 		metamap.target.y = mapABScenter.lat * Math.PI / 180;
 	}
-});
+});*/
 
 
 document.addEventListener("rotate", function (e) {
@@ -369,7 +369,7 @@ document.addEventListener("rotate", function (e) {
         buildingmap.setView(mapABScenter, buildingmap.getZoom(), {
             animate: false
         });
-        osmMap2.setView(mapABScenter, osmMap2.getZoom());
+        //osmMap2.setView(mapABScenter, osmMap2.getZoom());
 	}
 });
 
@@ -386,11 +386,12 @@ mymap.on("moveend", function() {
 
 });
 
+/*
 osmMap2.on("moveend", function() {
     if(osmMap2Flag){
         freeze = false; osmMap2Flag=false;
     }
-});
+});*/
 
 document.addEventListener("rotate-end", function (e) {
     if(metamapFlag){
