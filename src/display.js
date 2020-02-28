@@ -1,23 +1,25 @@
 var Geohash = {};
 var points = [];
-var pointLocations = {}
+var pointLocations = {};
 var bounds = {};
-var mins = {}
-var maxes = {}
-var featureDict = {}
+var mins = {};
+var maxes = {};
+var featureDict = {};
 var delaunay = null;
-var mymap = null
-var polygonLayer = null
-var polygonLayerGroup = null
-var view = {lat: 40.7580, lng: 286.0145}
-var zoomLevel = 3
-var data = []
+var mymap = null;
+var polygonLayer = null;
+var polygonLayerGroup = null;
+var view = {lat: 40.7580, lng: 286.0145};
+var zoomLevel = 3;
+var data = [];
 var Geohash = {};
-var freeze = false
-var mymapFlag = true
-var buildingmapFlag = true
-var metamapFlag = true
-var osmMap2Flag = true
+var freeze = false;
+var mymapFlag = true;
+var buildingmapFlag = true;
+var metamapFlag = true;
+var osmMap2Flag = true;
+var mapABSzoom;
+var mapABScenter;
 Geohash.base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 
 function decode_geohash(geohash) {
@@ -182,8 +184,8 @@ function geohash_adjacent(geohash, direction) {
 };
 
 mymap = L.map('osmMap1', {renderer: L.canvas(), minZoom: 3, 
-			fullscreenControl: true,
-			timeDimension: true, //timeDimensionControl: true,
+            fullscreenControl: true,
+            timeDimension: true, //timeDimensionControl: true,
 			timeDimensionOptions: {
         		    timeInterval: document.getElementById("starttime").value + "/" + document.getElementById("endtime").value,
         		    transitionTime: 0.1,
@@ -227,8 +229,8 @@ mymap.addControl(this.timeDimensionControl);
 polygonLayer.addControlReference(timeDimensionControl)
 
 var buildingmap = L.Wrld.map('buildingmap', '3d53418653e9c0cb75da99e8ea121c64', {
-	center: view,
-	zoom: 15,
+    center: view,
+    zoom: 15,
 	indoorsEnabled: true
 });
 var indoorControl = new WrldIndoorControl("widget-container", buildingmap);
@@ -247,9 +249,17 @@ metamap.target.y = mymap.getCenter().lat * Math.PI / 180
 
 osmMap2 = L.map('osmMap2', {renderer: L.canvas(), minZoom: 3, 
     fullscreenControl: true,
-    timeDimension: true
+    timeDimension: false,
                }
 ).setView(view, zoomLevel);
+
+var tiles2 = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    	maxZoom: 18,
+    	id: 'mapbox.streets',
+    	accessToken: 'pk.eyJ1Ijoia2V2aW5icnVod2lsZXIiLCJhIjoiY2ptdjBuMzRiMGNzeTNwbm9sYml5aWhvcyJ9.i6hZMqiVZgDiyDj5zcFcIA',
+	maxBounds: [[],[]]
+}).addTo(osmMap2);
 
 
 
@@ -306,35 +316,45 @@ $(document).ready(function() {
 mymap.on("move", function () {
 	if(!freeze){
 		freeze = true;
-		mymapFlag = true;
-        buildingmap.setView(mymap.getCenter(), buildingmap.getZoom());
-        osmMap2.setView(mymap.getCenter(), osmMap2.getZoom()); //here
-		metamap.target.x = (mymap.getCenter().lng-90) * Math.PI / 180;
-		metamap.target.y = mymap.getCenter().lat * Math.PI / 180;
+        mymapFlag = true;
+        mapABScenter = mymap.getCenter();
+        mapABSzoom = mymap.getZoom();
+        buildingmap.setView(mapABScenter, mapABSzoom, {
+            animate: false
+        });
+        osmMap2.setView(mapABScenter, mapABSzoom); //here
+		metamap.target.x = (mapABScenter.lng-90) * Math.PI / 180;
+		metamap.target.y = mapABScenter.lat * Math.PI / 180;
 	}
 });
 
 buildingmap.on("move", function () {
 	if(!freeze){
 		freeze = true;
-		buildingmapFlag = true;
-        mymap.setView(buildingmap.getCenter(), mymap.getZoom());
-        osmMap2.setView(buildingmap.getCenter(), osmMap2.getZoom()); //here
-		metamap.target.x = (mymap.getCenter().lng-90) * Math.PI / 180;
-		metamap.target.y = mymap.getCenter().lat * Math.PI / 180;
+        buildingmapFlag = true;
+        mapABScenter = buildingmap.getCenter();
+        mapABSzoom = buildingmap.getZoom();
+        mymap.setView(buildingmap.getCenter(), mapABSzoom);
+        osmMap2.setView(mapABScenter, mapABSzoom); //here
+		metamap.target.x = (mapABScenter.lng-90) * Math.PI / 180;
+		metamap.target.y = mapABScenter.lat * Math.PI / 180;
 	}
 });
 
 
 osmMap2.on("move", function () {
-	/*if(!freeze){
+	if(!freeze){
 		freeze = true;
         osmMap2Flag = true;
-        mymap.setView(osmMap2.getCenter(), mymap.getZoom());
-		buildingmap.setView(osmMap2.getCenter(), buildingmap.getZoom());
-		metamap.target.x = (osmMap2.getCenter().lng-90) * Math.PI / 180;
-		metamap.target.y = osmMap2.getCenter().lat * Math.PI / 180;
-	}*/
+        mapABScenter = osmMap2.getCenter();
+        mapABSzoom = osmMap2.getZoom();
+        mymap.setView(mapABScenter, mapABSzoom);
+		buildingmap.setView(mapABScenter, mapABSzoom, {
+            animate: false
+        });
+		metamap.target.x = (mapABScenter.lng-90) * Math.PI / 180;
+		metamap.target.y = mapABScenter.lat * Math.PI / 180;
+	}
 });
 
 
@@ -342,10 +362,13 @@ document.addEventListener("rotate", function (e) {
 	if(!freeze){
 		freeze = true;
 		metamapFlag = true;
-		new_lat_lng = {lat: e.detail.y * 180 / Math.PI, lng:e.detail.x * 180 / Math.PI - 270};
-		mymap.setView(new_lat_lng, mymap.getZoom());
-        buildingmap.setView(new_lat_lng, buildingmap.getZoom());
-        osmMap2.setView(new_lat_lng, osmMap2.getZoom());
+        new_lat_lng = {lat: e.detail.y * 180 / Math.PI, lng:e.detail.x * 180 / Math.PI - 270};
+        mapABScenter = new_lat_lng;
+		mymap.setView(mapABScenter, mymap.getZoom());
+        buildingmap.setView(mapABScenter, buildingmap.getZoom(), {
+            animate: false
+        });
+        osmMap2.setView(mapABScenter, osmMap2.getZoom());
 	}
 });
 
