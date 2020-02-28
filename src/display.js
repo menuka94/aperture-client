@@ -17,6 +17,7 @@ var freeze = false
 var mymapFlag = true
 var buildingmapFlag = true
 var metamapFlag = true
+var osmMap2Flag = true
 Geohash.base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 
 function decode_geohash(geohash) {
@@ -244,6 +245,13 @@ metamap.target.x = (view.lng-90) * Math.PI / 180
 metamap.target.y = mymap.getCenter().lat * Math.PI / 180
 
 
+osmMap2 = L.map('osmMap2', {renderer: L.canvas(), minZoom: 3, 
+    fullscreenControl: true,
+    timeDimension: true
+               }
+).setView(view, zoomLevel);
+
+
 
 /* Commented because switching to OSM
 var CLIENT_ID = "193027830416-kg91073o6jooijk6duu9s47b1vt836aq.apps.googleusercontent.com"
@@ -297,38 +305,74 @@ $(document).ready(function() {
 
 mymap.on("move", function () {
 	if(!freeze){
-		freeze = true
-		mymapFlag = true
-		buildingmap.setView(mymap.getCenter(), buildingmap.getZoom());
-		metamap.target.x = (mymap.getCenter().lng-90) * Math.PI / 180
-		metamap.target.y = mymap.getCenter().lat * Math.PI / 180
+		freeze = true;
+		mymapFlag = true;
+        buildingmap.setView(mymap.getCenter(), buildingmap.getZoom());
+        osmMap2.setView(mymap.getCenter(), osmMap2.getZoom()); //here
+		metamap.target.x = (mymap.getCenter().lng-90) * Math.PI / 180;
+		metamap.target.y = mymap.getCenter().lat * Math.PI / 180;
 	}
 });
 
 buildingmap.on("move", function () {
 	if(!freeze){
-		freeze = true
-		buildingmapFlag = true
-		mymap.setView(buildingmap.getCenter(), mymap.getZoom());
-		metamap.target.x = (mymap.getCenter().lng-90) * Math.PI / 180
-		metamap.target.y = mymap.getCenter().lat * Math.PI / 180
+		freeze = true;
+		buildingmapFlag = true;
+        mymap.setView(buildingmap.getCenter(), mymap.getZoom());
+        osmMap2.setView(buildingmap.getCenter(), osmMap2.getZoom()); //here
+		metamap.target.x = (mymap.getCenter().lng-90) * Math.PI / 180;
+		metamap.target.y = mymap.getCenter().lat * Math.PI / 180;
 	}
+});
+
+
+osmMap2.on("move", function () {
+	/*if(!freeze){
+		freeze = true;
+        osmMap2Flag = true;
+        mymap.setView(osmMap2.getCenter(), mymap.getZoom());
+		buildingmap.setView(osmMap2.getCenter(), buildingmap.getZoom());
+		metamap.target.x = (osmMap2.getCenter().lng-90) * Math.PI / 180;
+		metamap.target.y = osmMap2.getCenter().lat * Math.PI / 180;
+	}*/
 });
 
 
 document.addEventListener("rotate", function (e) {
 	if(!freeze){
-		freeze = true
-		metamapFlag = true
-		new_lat_lng = {lat: e.detail.y * 180 / Math.PI, lng:e.detail.x * 180 / Math.PI - 270}
+		freeze = true;
+		metamapFlag = true;
+		new_lat_lng = {lat: e.detail.y * 180 / Math.PI, lng:e.detail.x * 180 / Math.PI - 270};
 		mymap.setView(new_lat_lng, mymap.getZoom());
-		buildingmap.setView(new_lat_lng, buildingmap.getZoom());
+        buildingmap.setView(new_lat_lng, buildingmap.getZoom());
+        osmMap2.setView(new_lat_lng, osmMap2.getZoom());
 	}
 });
 
-buildingmap.on("moveend", function() {if(mymapFlag){freeze = false; mymapFlag=false}})
-mymap.on("moveend", function() {if(buildingmapFlag){freeze = false; buildingmapFlag=false}})
-document.addEventListener("rotate-end", function (e) {if(metamapFlag){freeze = false; metamapFlag=false}})
+buildingmap.on("moveend", function() {
+    if(buildingmapFlag){
+        freeze = false; buildingmapFlag=false;
+    }
+});
+
+mymap.on("moveend", function() {
+    if(mymapFlag){
+        freeze = false; mymapFlag=false;
+    }
+
+});
+
+osmMap2.on("moveend", function() {
+    if(osmMap2Flag){
+        freeze = false; osmMap2Flag=false;
+    }
+});
+
+document.addEventListener("rotate-end", function (e) {
+    if(metamapFlag){
+        freeze = false; metamapFlag=false;
+    }
+});
 
 
 var opts = {
