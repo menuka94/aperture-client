@@ -72,7 +72,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 			var directions = ["n","s","e","w"]
 			var mouseLat = ev.latlng.lat;
 			var mouseLng = ev.latlng.lng;
-			var precision = document.getElementById("precision").value
+			var precision = window.parent.window.parent.document.getElementById("precision").value
 			var mouseGeohash = encode_geohash(mouseLat,mouseLng,precision)
 			var center = decode_geohash(mouseGeohash);
 			
@@ -256,28 +256,28 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 				var c = data[key][1]
 				var base = undefined
 				//Draw temperature
-				if(document.getElementById("tempCheck").checked) {
+				if(window.parent.window.parent.document.getElementById("tempCheck").checked) {
 					var colorPct = this._getColorForPercentage((f[ix]/c - mins[ix]) / (maxes[ix] - mins[ix]), 0.3);
 					base = (typeof base === "undefined") ? colorPct : this._combineColors(base, colorPct)
 					ix++
 				}
 
 				//Draw humidity
-				if(document.getElementById("humCheck").checked) {
+				if(window.parent.window.parent.document.getElementById("humCheck").checked) {
 					var colorPct = [211, 211, 211, 0.9*((f[ix]/c - mins[ix]) / (maxes[ix] - mins[ix]))];
 					base = (typeof base === "undefined") ? colorPct : this._combineColors(base, colorPct)
 					ix++
 				}
 
 				//Draw visibility
-				if(document.getElementById("visCheck").checked) {
+				if(window.parent.window.parent.document.getElementById("visCheck").checked) {
 					var colorPct = [0,0,0, 0.5*((f[ix]/c - mins[ix]) / (maxes[ix] - mins[ix]))];
 					base = (typeof base === "undefined") ? colorPct : this._combineColors(base, colorPct)
 					ix++
 				}
 				
 				//Draw precip
-				if(document.getElementById("preCheck").checked) {
+				if(window.parent.window.parent.document.getElementById("preCheck").checked) {
 					var colorPct = [0,0,86, 0.9*((f[ix]/c - mins[ix]) / (maxes[ix] - mins[ix]))];
 					base = (typeof base === "undefined") ? colorPct : this._combineColors(base, colorPct)
 					ix++
@@ -390,7 +390,7 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 		}
 		
 		if (geohash === null)
-			geohash = document.getElementById("geohash").value;
+			geohash = window.parent.window.parent.document.getElementById("geohash").value;
 			
 		if(geohash !== "" && this._trajectoryPlanning){
 			if(this._panningTrajectory.length === 2)
@@ -496,16 +496,16 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 					}
 					if(parseFloat(queryData["time"]) === time){
 						this._features = []
-						if (document.getElementById("tempCheck").checked){
+						if (window.parent.window.parent.document.getElementById("tempCheck").checked){
 							this._features.push("Temperature")
 						}
-						if (document.getElementById("humCheck").checked){
+						if (window.parent.window.parent.document.getElementById("humCheck").checked){
 							this._features.push("Humidity")
 						}
-						if (document.getElementById("visCheck").checked){
+						if (window.parent.window.parent.document.getElementById("visCheck").checked){
 							this._features.push("Visibility")
 						}
-						if (document.getElementById("preCheck").checked){
+						if (window.parent.window.parent.document.getElementById("preCheck").checked){
 							this._features.push("Precipitation")
 						}
 						this._updateTime(queryData)
@@ -526,57 +526,57 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 
     query: function(time, geohash=null, params={}) {
 		if (geohash === null)
-			geohash = document.getElementById("geohash").value;
+			geohash = window.parent.window.parent.document.getElementById("geohash").value;
 		if(!("precision" in params))
-			var precision = document.getElementById("precision").value;
+			var precision = window.parent.window.parent.document.getElementById("precision").value;
 		else
 			var precision = params["precision"]
 		if(!("minTemperature" in params))
-			var mintemp = document.getElementById("mintemp").value;
+			var mintemp = window.parent.window.parent.document.getElementById("mintemp").value;
 		else
 			var mintemp = params["minTemperature"]
 		if(!("maxTemperature" in params))
-			var maxtemp = document.getElementById("maxtemp").value;
+			var maxtemp = window.parent.window.parent.document.getElementById("maxtemp").value;
 		else
 			var maxtemp = params["maxTemperature"]
 		if(!("minHumidity" in params))
-			var minhum = document.getElementById("minhum").value;
+			var minhum = window.parent.window.parent.document.getElementById("minhum").value;
 		else
 			var minhum = params["minHumidity"]
 		if(!("maxHumidity" in params))
-			var maxhum = document.getElementById("maxhum").value;
+			var maxhum = window.parent.window.parent.document.getElementById("maxhum").value;
 		else
 			var maxhum = params["maxHumidity"]
 		if(!("minVisibility" in params))
-			var minvis = document.getElementById("minvis").value;
+			var minvis = window.parent.window.parent.document.getElementById("minvis").value;
 		else
 			var minvis = params["minVisibility"]
 		if(!("maxVisibility" in params))
-			var maxvis = document.getElementById("maxvis").value;
+			var maxvis = window.parent.window.parent.document.getElementById("maxvis").value;
 		else
 			var maxvis = params["maxVisibility"]
 		if(!("minPrecipitation" in params))
-			var minpre = document.getElementById("minpre").value;
+			var minpre = window.parent.window.parent.document.getElementById("minpre").value;
 		else
 			var minpre = params["minPrecipitation"]
 		if(!("maxPrecipitation" in params))
-			var maxpre = document.getElementById("maxpre").value;
+			var maxpre = window.parent.window.parent.document.getElementById("maxpre").value;
 		else
 			var maxpre = params["maxPrecipitation"]
 		if (!("tempCheck" in params))
-			var tempCheck = document.getElementById("tempCheck").checked
+			var tempCheck = window.parent.window.parent.document.getElementById("tempCheck").checked
 		else
 			var tempCheck = params["tempCheck"]
 		if (!("humCheck" in params))
-			var humCheck = document.getElementById("humCheck").checked
+			var humCheck = window.parent.window.parent.document.getElementById("humCheck").checked
 		else
 			var humCheck = params["humCheck"]
 		if (!("visCheck" in params))
-			var visCheck = document.getElementById("visCheck").checked
+			var visCheck = window.parent.window.parent.document.getElementById("visCheck").checked
 		else
 			var visCheck = params["visCheck"]
 		if (!("preCheck" in params))
-			var preCheck = document.getElementById("preCheck").checked
+			var preCheck = window.parent.window.parent.document.getElementById("preCheck").checked
 		else
 			var preCheck = params["preCheck"]
 		if (!("time" in params)){
@@ -610,10 +610,10 @@ L.TimeDimension.Layer.VoronoiLayer = L.TimeDimension.Layer.extend({
 		var queryString = ["stat"]
 		if (geos !== null){
 			queryString.push(me.query(me.loadedTime, geos.join("+"), params))
-		} else if (boundingGeo.length > document.getElementById("geohash").value.length){
+		} else if (boundingGeo.length > window.parent.document.getElementById("geohash").value.length){
 			queryString.push(me.query(me.loadedTime, boundingGeo, params))
 		} else {
-			queryString.push(me.query(me.loadedTime, document.getElementById("geohash").value, params))
+			queryString.push(me.query(me.loadedTime, window.parent.document.getElementById("geohash").value, params))
 		}
 		queryString = queryString.join("-")
 		var _xhr = new XMLHttpRequest();
