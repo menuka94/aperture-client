@@ -12,13 +12,9 @@
 <body>
     <div id='map2' class='map'></div>
     <script>
-        var view = {lat: 40.7580, lng: 286.0145};
-        var zoomLevel = 3;
-    </script>
-    <script>
         L.mapbox.accessToken = 'pk.eyJ1IjoiZHIxMDEiLCJhIjoiY2s3NmgyOW90MDAxMjNsdDYzcDN2aTBtayJ9.kqqEBhzQp-uBB9_wtXizUA';
         var map = L.mapbox.map('map2', 'mapbox.streets')
-        .setView(view, zoomLevel);
+        .setView(parent.view, parent.zoomLevel);
         var url = 'https://api.airmap.com/maps/v4/tiles';
 
         var layers = ['airports_recreational', 'class_b', 'class_c', 'class_d', 'class_e0'];
@@ -104,8 +100,20 @@
             }
             break;
         }
-
         return style;
         }
+
+        map.on("move", function () {
+            parent.setGlobalPosition(map.getCenter(),2);
+            parent.setGlobalZoom(map.getZoom(),2);
+        });
     </script>
+
+    <!--You must add this map's setter function-->
+    <script> 
+        var thisMapsSetter = function(view,zoom){
+            map.setView(view, map.getZoom());
+        }
+        parent.setterFunctions.push(thisMapsSetter);
+    </script> 
 </body>

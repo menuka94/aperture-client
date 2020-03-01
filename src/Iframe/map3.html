@@ -12,15 +12,25 @@
 <body>
     <div id='map3' class='map'></div>
     <script>
-        var view = {lat: 40.7580, lng: 286.0145};
-        var zoomLevel = 3;
-    </script>
-    <script>
         var buildingmap = L.Wrld.map('map3', '3d53418653e9c0cb75da99e8ea121c64', {
-            center: view,
+            center: parent.view,
             zoom: 15,
             indoorsEnabled: true
         });
         var indoorControl = new WrldIndoorControl("widget-container", buildingmap);
+        buildingmap.on("move", function () {
+            parent.setGlobalPosition(buildingmap.getCenter(),3);
+            parent.setGlobalZoom(buildingmap.getZoom(),3);
+        });
     </script>
+
+    <!--You must add this map's setter function-->
+    <script> 
+        var thisMapsSetter = function(view,zoom){
+            buildingmap.setView(view, buildingmap.getZoom(), {
+                animate: false
+            });
+        }
+        parent.setterFunctions.push(thisMapsSetter);
+    </script> 
 </body>

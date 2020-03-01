@@ -21,10 +21,6 @@
 	<div id="barchart"></div>
     <div id='map4' class='map'></div>
     <script>
-        var view = {lat: 40.7580, lng: 286.0145};
-        var zoomLevel = 3;
-    </script>
-    <script>
         // Make the globe
         var metamap = new DAT.Globe( document.getElementById('map4'), {imgDir:"Dependencies/globe/"} );
         //metamap.addData([40.7580, 286.0145, 0.9, 34.0522, 241.7563, 0.5, 41.8781, 360-87.6298, 0.7, 47.6062, 360-122.3321, 0.3,
@@ -33,7 +29,22 @@
         {format:"magnitude", name:"population"});
         metamap.createPoints();
         metamap.animate();
-        metamap.target.x = (view.lng-90) * Math.PI / 180;
-        metamap.target.y = view.lat * Math.PI / 180;
+        metamap.target.x = (parent.view.lng-90) * Math.PI / 180;
+        metamap.target.y = parent.view.lat * Math.PI / 180;
+        document.addEventListener("rotate", function (e) {
+            new_lat_lng = {lat: e.detail.y * 180 / Math.PI, lng:e.detail.x * 180 / Math.PI - 270};
+            parent.setGlobalPosition(new_lat_long,4);
+        });
     </script>
+
+
+    <!--You must add this map's setter function-->
+    <script> 
+        var thisMapsSetter = function(view,zoom){
+            metamap.target.x = (view.lng-90) * Math.PI / 180;
+		    metamap.target.y = view.lat * Math.PI / 180;
+        }
+        parent.setterFunctions.push(thisMapsSetter);
+        console.log(parent.setterFunctions.length);
+    </script> 
 </body>

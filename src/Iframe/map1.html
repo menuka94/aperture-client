@@ -16,10 +16,7 @@
 <body>
     <script src="Dependencies/time-dimension.js"></script>
     <div id='map1' class='map'></div>
-    <script>
-        var view = {lat: 40.7580, lng: 286.0145};
-        var zoomLevel = 3;
-    </script>
+    
     <script>
         var Geohash = {};
         var points = [];
@@ -197,6 +194,8 @@
             // append letter for direction to parent
             return parent + Geohash.base32.charAt(neighbour[direction][type].indexOf(lastCh));
         };
+
+
         mymap = L.map('map1', {renderer: L.canvas(), minZoom: 3, 
             fullscreenControl: true,
             timeDimension: true, //timeDimensionControl: true,
@@ -206,7 +205,7 @@
         		    period: "PT6H",
                     currentTime: new Date(window.parent.document.getElementById("starttime").value)},
                        }
-        ).setView(view, zoomLevel);
+        ).setView(window.parent.view, window.parent.zoomLevel);
 
         L.timeDimension.layer.VoronoiLayer = function(points, options) {
             return new L.TimeDimension.Layer.VoronoiLayer(points, options);
@@ -226,7 +225,7 @@
 
         L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
             _getDisplayDateFormat: function(date){
-            return date
+                return date;
             }
         });
 
@@ -241,5 +240,18 @@
         });
         mymap.addControl(this.timeDimensionControl);
         polygonLayer.addControlReference(timeDimensionControl);
+
+        mymap.on("move", function () {
+            parent.setGlobalPosition(mymap.getCenter(),1);
+            parent.setGlobalZoom(mymap.getZoom(),1);
+        });
     </script>
+
+    <!--You must add this map's setter function-->
+    <script> 
+        var thisMapsSetter = function(view,zoom){
+            mymap.setView(view, mymap.getZoom());
+        }
+        parent.setterFunctions.push(thisMapsSetter);
+    </script> 
 </body>
