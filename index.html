@@ -6,7 +6,20 @@
     <link rel="stylesheet" type="text/css" href="css/spin.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
+
     <script src='src/controller.js'></script>
+    <script>
+        mouse1 = false;
+        document.addEventListener('mousedown', function(event) {
+            mouse1 = true;
+            clearAll();
+        });
+        document.addEventListener('mouseup', function(event) {
+            mouse1 = false;
+        });
+    </script>
+
+
     <title>Aperture</title>
     <style>
 	#mapid {height:680px;}
@@ -57,6 +70,8 @@
     <input type="checkbox" id="preCheck" checked> Show Precipitable Water (mm)<br/>
     Minimum Precipitable Water: <input type='text' id='minpre' value="0"/>
     Maximum Precipitable Water: <input type='text' id='maxpre' value="100"/>
+
+
 
     <div class="mapContainer">
         <div id="mMap1" style="height: 50%; width:50%; float:left">

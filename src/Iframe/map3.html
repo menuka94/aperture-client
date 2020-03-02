@@ -11,6 +11,7 @@
 </head>
 <body>
     <div id='map3' class='map'></div>
+    <script src="Dependencies/mouseDown.js"></script>
     <script>
         var buildingmap = L.Wrld.map('map3', '3d53418653e9c0cb75da99e8ea121c64', {
             center: parent.view,
@@ -28,7 +29,6 @@
     <script> 
         var thisMapsSetter = function(view,zoom){
             buildingmap.setView(view, buildingmap.getZoom(), {
-                animate: false
             });
         }
         parent.setterFunctions.push(thisMapsSetter);

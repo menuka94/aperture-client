@@ -73,6 +73,13 @@ function initializeMap(mapNumber,TorF){ //sets mapNumber to True or False
     }
 }
 
+function clearAll(){
+    map1IsBeingMoved = false;
+    map2IsBeingMoved = false;
+    map3IsBeingMoved = false;
+    map4IsBeingMoved = false;
+}
+
 function verifyCorrectMap(mapNumber){
     if(map1IsBeingMoved || map2IsBeingMoved || map3IsBeingMoved || map4IsBeingMoved){ //check if any map is being moved currently
         switch(mapNumber){ //checks if the map that is calling the function is the one being moved, returns true if it is, false if it isnt
@@ -92,3 +99,4 @@ function verifyCorrectMap(mapNumber){
         return false;
     }
 }
+

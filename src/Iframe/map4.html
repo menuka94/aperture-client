@@ -20,6 +20,7 @@
     <div id="grid"></div>
 	<div id="barchart"></div>
     <div id='map4' class='map'></div>
+    <script src="Dependencies/mouseDown.js"></script>
     <script>
         // Make the globe
         var metamap = new DAT.Globe( document.getElementById('map4'), {imgDir:"Dependencies/globe/"} );
@@ -33,7 +34,7 @@
         metamap.target.y = parent.view.lat * Math.PI / 180;
         document.addEventListener("rotate", function (e) {
             new_lat_lng = {lat: e.detail.y * 180 / Math.PI, lng:e.detail.x * 180 / Math.PI - 270};
-            parent.setGlobalPosition(new_lat_long,4);
+            parent.setGlobalPosition(new_lat_lng,4);
         });
     </script>
 
