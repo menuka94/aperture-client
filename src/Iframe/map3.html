@@ -21,6 +21,8 @@
         var buildingmap = L.Wrld.map('map3', '3d53418653e9c0cb75da99e8ea121c64', {
             center: parent.view,
             zoom: 15,
+            frameRateThrottleWhenIdleEnabled: true,  
+            idleSecondsBeforeFrameRateThrottle: 20.0,
             indoorsEnabled: true
         });
         var indoorControl = new WrldIndoorControl("widget-container", buildingmap);
