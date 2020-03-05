@@ -16,11 +16,16 @@
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
 </head>
 <body>
+    <!--Required for this map to be controlled-->
+    <script>const MAPNUMBER = 4; //refers to whatever map in the grid this refers to</script>
+    <script src="Dependencies/mouseDown.js"></script>
+    <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
+    <!------------------------------------------>
+
     <div id="legend"></div>
     <div id="grid"></div>
 	<div id="barchart"></div>
     <div id='map4' class='map'></div>
-    <script src="Dependencies/mouseDown.js"></script>
     <script>
         // Make the globe
         var metamap = new DAT.Globe( document.getElementById('map4'), {imgDir:"Dependencies/globe/"} );

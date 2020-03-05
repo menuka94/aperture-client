@@ -3,12 +3,20 @@ var zoomLevel = 3;
 
 var setterFunctions = []; //these are added at the end of each map's html
 
-var map1IsBeingMoved = false;
+//flags which prevent other maps from moving the moused map
+var map1IsBeingMoved = false; 
 var map2IsBeingMoved = false;
 var map3IsBeingMoved = false;
 var map4IsBeingMoved = false;
 
-function setGlobalZoom(_zoomLevel,mapNumber){
+var map1IsMoused = false;
+var map2IsMoused = false;
+var map3IsMoused = false;
+var map4IsMoused = false;
+
+
+
+function setGlobalZoom(_zoomLevel,mapNumber){ //this isnt used but its here anyways
     if(checkIfAnyCanMove()){
         initializeMap(mapNumber,true);
     }
@@ -53,32 +61,26 @@ function checkIfAnyCanMove(){ //checks if any map can start moving at the curren
     }
 }
 
-function initializeMap(mapNumber,TorF){ //sets mapNumber to True or False
+function initializeMap(mapNumber,TorF){ //sets mapNumber to True or False, this also checks if the map is being moused as verification
     //console.log("setting map " + mapNumber + " to true");
     switch(mapNumber){
         case 1:
-            map1IsBeingMoved = TorF;
+            map1IsBeingMoved = TorF && map1IsMoused;
             break;
         case 2:
-            map2IsBeingMoved = TorF;
+            map2IsBeingMoved = TorF && map2IsMoused;
             break;
         case 3:
-            map3IsBeingMoved = TorF;
+            map3IsBeingMoved = TorF && map3IsMoused;
             break;
         case 4:
-            map4IsBeingMoved = TorF;
+            map4IsBeingMoved = TorF && map4IsMoused;
             break;
         default:
             return;
     }
 }
 
-function clearAll(){
-    map1IsBeingMoved = false;
-    map2IsBeingMoved = false;
-    map3IsBeingMoved = false;
-    map4IsBeingMoved = false;
-}
 
 function verifyCorrectMap(mapNumber){
     if(map1IsBeingMoved || map2IsBeingMoved || map3IsBeingMoved || map4IsBeingMoved){ //check if any map is being moved currently
@@ -100,3 +102,40 @@ function verifyCorrectMap(mapNumber){
     }
 }
 
+//mouse control functions
+document.addEventListener('mousedown', function(event) { //since these two being called means the mouse is not on any map, set all to false
+    mouseUp();
+});
+document.addEventListener('mouseup', function(event) {
+    mouseUp();
+});
+
+function mouseUp(){ //called whenever a mouse comes up or isnt over a map when clicked
+    map1IsMoused = false;
+    map2IsMoused = false;
+    map3IsMoused = false;
+    map4IsMoused = false;
+    map1IsBeingMoved = false;
+    map2IsBeingMoved = false;
+    map3IsBeingMoved = false;
+    map4IsBeingMoved = false;
+}
+
+function mouseDown(mapNumber){ //called from iframe of map, allows map to be moved
+    switch(mapNumber){
+        case 1:
+            map1IsMoused = true;
+            break;
+        case 2:
+            map2IsMoused = true;
+            break;
+        case 3:
+            map3IsMoused = true;
+            break;
+        case 4:
+            map4IsMoused = true;
+            break;
+        default:
+            return;
+    }
+}

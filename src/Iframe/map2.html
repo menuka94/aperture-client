@@ -10,11 +10,17 @@
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
 </head>
 <body>
-    <div id='map2' class='map'></div>
+    <!--Required for this map to be controlled-->
+    <script>const MAPNUMBER = 2; //refers to whatever map in the grid this refers to</script>
     <script src="Dependencies/mouseDown.js"></script>
+    <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
+    <!------------------------------------------>
+
+    <div id='map2' class='map'></div>
     <script>
         osmMap2 = L.map('map2', {renderer: L.canvas(), minZoom: 3, 
             fullscreenControl: true,
+            inertia: false,
             timeDimension: false
         }).setView(parent.view, parent.zoomLevel);
 

@@ -10,8 +10,13 @@
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
 </head>
 <body>
-    <div id='map3' class='map'></div>
+    <!--Required for this map to be controlled-->
+    <script>const MAPNUMBER = 3; //refers to whatever map in the grid this refers to</script>
     <script src="Dependencies/mouseDown.js"></script>
+    <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
+    <!------------------------------------------>
+
+    <div id='map3' class='map'></div>
     <script>
         var buildingmap = L.Wrld.map('map3', '3d53418653e9c0cb75da99e8ea121c64', {
             center: parent.view,

@@ -9,13 +9,18 @@
 
     <script src='src/controller.js'></script>
     <script>
-        mouse1 = false;
-        document.addEventListener('mousedown', function(event) {
-            mouse1 = true;
-            clearAll();
+        
+        document.addEventListener('mousedown', function(event) { //since these two being called means the mouse is not on any map, set all to false
+            map1IsMoused = false;
+            map2IsMoused = false;
+            map3IsMoused = false;
+            map4IsMoused = false;
         });
         document.addEventListener('mouseup', function(event) {
-            mouse1 = false;
+            map1IsMoused = false;
+            map2IsMoused = false;
+            map3IsMoused = false;
+            map4IsMoused = false;
         });
     </script>
 

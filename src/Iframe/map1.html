@@ -18,7 +18,12 @@
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
 </head>
 <body>
+    <!--Required for this map to be controlled-->
+    <script>const MAPNUMBER = 1; //refers to whatever map in the grid this refers to</script>
     <script src="Dependencies/mouseDown.js"></script>
+    <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
+    <!------------------------------------------>
+
     <script src="Dependencies/time-dimension.js"></script>
     <div id='map1' class='map'></div>
     
@@ -204,6 +209,7 @@
         mymap = L.map('map1', {renderer: L.canvas(), minZoom: 3, 
             fullscreenControl: true,
             timeDimension: true, //timeDimensionControl: true,
+            inertia: false,
 			timeDimensionOptions: {
         		    timeInterval: window.parent.document.getElementById("starttime").value + "/" + window.parent.document.getElementById("endtime").value,
         		    transitionTime: 0.1,
