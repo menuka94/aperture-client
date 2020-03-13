@@ -59,20 +59,20 @@
         
         // Only one query per layer - we must remove and re-add layer to get output for new location
         function updateOverPassLayer(opl, e){
-			if(e.target.getZoom() < opl.options.minZoom) { return opl } //ignore when results not visible to reduce requests
-			osmMap2.removeLayer(opl)
+	    if(e.target.getZoom() < opl.options.minZoom) { return opl } //ignore when results not visible to reduce requests
+	    osmMap2.removeLayer(opl)
             opl = getNewOverPassLayer('node [amenity=drinking_water] ({{bbox}}); out;')
-			osmMap2.addLayer(opl);
-			return opl
-		}
+		osmMap2.addLayer(opl);
+		return opl
+	    }
 		
 		// To stop the map from crashing when zooming out from places with many icons
         function removeOverPassLayer(opl, e){
             osmMap2.removeLayer(opl)
-		}
+	}
         
         osmMap2.on("moveend", function (e) {
-			opl = updateOverPassLayer(opl, e)
+	    opl = updateOverPassLayer(opl, e)
         });
         
     </script>
