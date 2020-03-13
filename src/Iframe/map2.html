@@ -25,6 +25,7 @@
             inertia: false,
             timeDimension: false
         }).setView(parent.view, parent.zoomLevel);
+        
 
         var tiles2 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -35,8 +36,8 @@
         
         L.icon = function (options) {
 			return new L.Icon({
-				iconUrl: "../../images/drinking_fountain_small.png",
-				iconSize: [25, 25]
+				iconUrl: "../../images/drinking_fountain.png",
+				iconSize: [20, 20]
 			});
 		};
 
@@ -45,30 +46,32 @@
 			return new L.OverPassLayer({
 						minZoom: 15,
 						query: query,
-						markerIcon: L.icon()
+						markerIcon: L.icon(),
+						id: "OverPassLayer"
 					});
 		}
 
         var opl = getNewOverPassLayer('node [amenity=drinking_water] ({{bbox}}); out;')
 		osmMap2.addLayer(opl);
 
-        osmMap2.on("move", function () {
+        osmMap2.on("move", function (e) {
             parent.setGlobalPosition(osmMap2.getCenter(),2);
             parent.setGlobalZoom(osmMap2.getZoom(),2);
         });
         
-        // Only one query per layer - we must remove and re-add layer to get output for new location
-        function updateOverPassLayer(opl, e){
-			//if(e.target.hasLayer(opl)) { osmMap2.removeLayer(opl) }
-			if(e.target.getZoom() < opl.options.minZoom) { return opl } //ignore when results not visible to reduce requests
-			osmMap2.removeLayer(opl)
-            opl = getNewOverPassLayer('node [amenity=drinking_water] ({{bbox}}); out;')
-			osmMap2.addLayer(opl);
-			return opl
+        function updateOverPassLayer(e){
+			if(e.target.getZoom() < opl.options.minZoom) {
+				e.target.eachLayer(function(layer){
+					if(layer.options.id === "OverPassLayer")
+						e.target.removeLayer(opl)
+				});
+			} else {
+				e.target.addLayer(opl) 
+            }
 	}
         
-        osmMap2.on("moveend", function (e) {
-	    opl = updateOverPassLayer(opl, e)
+        osmMap2.on("zoomend moveend", function (e) {
+			updateOverPassLayer(e)
         });
         
     </script>
