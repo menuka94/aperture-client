@@ -35,7 +35,7 @@
         
         L.icon = function (options) {
 			return new L.Icon({
-				iconUrl: "../../images/drinking_fountain.png",
+				iconUrl: "../../images/drinking_fountain_small.png",
 				iconSize: [25, 25]
 			});
 		};
@@ -43,7 +43,7 @@
 		
 		function getNewOverPassLayer(query){
 			return new L.OverPassLayer({
-						minZoom: 14,
+						minZoom: 15,
 						query: query,
 						markerIcon: L.icon()
 					});
@@ -59,15 +59,16 @@
         
         // Only one query per layer - we must remove and re-add layer to get output for new location
         function updateOverPassLayer(opl, e){
-			if(e.target.hasLayer(opl)) { osmMap2.removeLayer(opl) }
+			//if(e.target.hasLayer(opl)) { osmMap2.removeLayer(opl) }
 			if(e.target.getZoom() < opl.options.minZoom) { return opl } //ignore when results not visible to reduce requests
+			osmMap2.removeLayer(opl)
             opl = getNewOverPassLayer('node [amenity=drinking_water] ({{bbox}}); out;')
 			osmMap2.addLayer(opl);
 			return opl
-		}
+	}
         
         osmMap2.on("moveend", function (e) {
-			opl = updateOverPassLayer(opl, e)
+	    opl = updateOverPassLayer(opl, e)
         });
         
     </script>
