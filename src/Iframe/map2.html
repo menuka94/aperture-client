@@ -8,6 +8,8 @@
         integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
         crossorigin=""></script>
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
+    <link rel="stylesheet" type="text/css" href="Dependencies/OverPassLayer.css">
+    <script src="Dependencies/OverPassLayer.bundle.js"></script>
 </head>
 <body>
     <!--Required for this map to be controlled-->
@@ -23,6 +25,7 @@
             inertia: false,
             timeDimension: false
         }).setView(parent.view, parent.zoomLevel);
+        
 
         var tiles2 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -30,10 +33,47 @@
             maxBounds: [[],[]]
         }).addTo(osmMap2);
 
-        osmMap2.on("move", function () {
+        
+        L.icon = function (options) {
+			return new L.Icon({
+				iconUrl: "../../images/drinking_fountain.png",
+				iconSize: [20, 20]
+			});
+		};
+
+		
+		function getNewOverPassLayer(query){
+			return new L.OverPassLayer({
+						minZoom: 15,
+						query: query,
+						markerIcon: L.icon(),
+						id: "OverPassLayer"
+					});
+		}
+
+        var opl = getNewOverPassLayer('node [amenity=drinking_water] ({{bbox}}); out;')
+		osmMap2.addLayer(opl);
+
+        osmMap2.on("move", function (e) {
             parent.setGlobalPosition(osmMap2.getCenter(),2);
             parent.setGlobalZoom(osmMap2.getZoom(),2);
         });
+        
+        function updateOverPassLayer(e){
+			if(e.target.getZoom() < opl.options.minZoom) {
+				e.target.eachLayer(function(layer){
+					if(layer.options.id === "OverPassLayer")
+						e.target.removeLayer(opl)
+				});
+			} else {
+				e.target.addLayer(opl) 
+            }
+	}
+        
+        osmMap2.on("zoomend moveend", function (e) {
+			updateOverPassLayer(e)
+        });
+        
     </script>
 
     <!--You must add this map's setter function-->
