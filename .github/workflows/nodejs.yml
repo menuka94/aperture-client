@@ -32,6 +32,6 @@ jobs:
     - run: npm run build --if-present
     - run: npm run test
     - run: npm run coverage
-    - run: ./cc-test-reporter after-build
+    - run: ./cc-test-reporter after-build -r 67360605f902d9f1867b61e17e85107f03a659b5922fab26ee13fac6df3f4bff
       env:
         CI: true
