@@ -7,7 +7,8 @@
     "build": "webpack",
     "watch": "webpack --watch --config webpack.config.js",
     "serve": "npm run watch & live-server",
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "nyc --reporter=lcov mocha"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "live-server": "^1.2.1",
     "mocha": "^7.1.0",
     "mocha-jsdom": "^2.0.0",
+    "nyc": "^15.0.0",
     "requirejs": "^2.3.6",
     "set-default-browser": "^1.0.1"
   },
