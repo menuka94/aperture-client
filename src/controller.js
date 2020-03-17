@@ -48,6 +48,7 @@ function setGlobalPosition(_view, mapNumber) {
 function setGlobalPositionFORCE(_view, mapNumber) {
     view = _view;
     updateMaps(mapNumber);
+    updateAll();
 }
 
 function updateMaps(mapNumber) {
