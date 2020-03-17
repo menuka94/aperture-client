@@ -20,12 +20,19 @@
 
     <div id='map2' class='map'></div>
     <script>
+
+        
         osmMap2 = L.map('map2', {renderer: L.canvas(), minZoom: 3, 
             fullscreenControl: true,
             inertia: false,
             timeDimension: false
-        }).setView(parent.view, parent.zoomLevel);
+        });
         
+        osmMap2.on("load", function () {
+            parent.loaded();
+        });
+
+        osmMap2.setView(parent.view, parent.zoomLevel);
 
         var tiles2 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -37,7 +44,7 @@
         L.icon = function (options) {
 			return new L.Icon({
 				iconUrl: "../../images/drinking_fountain.png",
-				iconSize: [20, 20]
+				iconSize: [10, 10]
 			});
 		};
 
@@ -53,25 +60,28 @@
 
         var opl = getNewOverPassLayer('node [amenity=drinking_water] ({{bbox}}); out;')
 		osmMap2.addLayer(opl);
-
-        osmMap2.on("move", function (e) {
-            parent.setGlobalPosition(osmMap2.getCenter(),2);
-            parent.setGlobalZoom(osmMap2.getZoom(),2);
-        });
         
-        function updateOverPassLayer(e){
-			if(e.target.getZoom() < opl.options.minZoom) {
-				e.target.eachLayer(function(layer){
-					if(layer.options.id === "OverPassLayer")
-						e.target.removeLayer(opl)
+        function updateOverPassLayer(map){
+			if(map.getZoom() < opl.options.minZoom) {
+				map.eachLayer(function(layer){
+                    if(layer.options.id === "OverPassLayer"){
+                        map.removeLayer(opl);
+                    }
 				});
 			} else {
-				e.target.addLayer(opl) 
+				map.addLayer(opl);
             }
 	}
         
-        osmMap2.on("zoomend moveend", function (e) {
-			updateOverPassLayer(e)
+        parent.addEventListener('updateMaps', function () {
+            updateOverPassLayer(osmMap2);
+        });
+
+        osmMap2.on("move", function (e) {
+            parent.setGlobalPosition(osmMap2.getCenter(),MAPNUMBER);
+        });
+        osmMap2.on("zoom", function () {
+            parent.setGlobalPosition(osmMap2.getCenter(),MAPNUMBER);
         });
         
     </script>

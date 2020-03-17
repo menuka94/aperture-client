@@ -205,7 +205,6 @@
             return parent + Geohash.base32.charAt(neighbour[direction][type].indexOf(lastCh));
         };
 
-
         mymap = L.map('map1', {renderer: L.canvas(), minZoom: 3, 
             fullscreenControl: true,
             timeDimension: true, //timeDimensionControl: true,
@@ -216,7 +215,13 @@
         		    period: "PT6H",
                     currentTime: new Date(window.parent.document.getElementById("starttime").value)},
                        }
-        ).setView(window.parent.view, window.parent.zoomLevel);
+        );
+        
+        mymap.on("load", function () {
+            parent.loaded();
+        });
+
+        mymap.setView(window.parent.view, window.parent.zoomLevel);
 
         L.timeDimension.layer.VoronoiLayer = function(points, options) {
             return new L.TimeDimension.Layer.VoronoiLayer(points, options);
@@ -302,8 +307,10 @@
         }
 
         mymap.on("move", function () {
-            parent.setGlobalPosition(mymap.getCenter(),1);
-            parent.setGlobalZoom(mymap.getZoom(),1);
+            parent.setGlobalPosition(mymap.getCenter(),MAPNUMBER);
+        });
+        mymap.on("zoomend", function () {
+            parent.setGlobalPositionFORCE(mymap.getCenter(),MAPNUMBER);
         });
     </script>
 
