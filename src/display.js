@@ -315,7 +315,7 @@ $(document).ready(function() {
     onImmediateFailed()
 	earthEngine.data.authenticate(CLIENT_ID, runAnalysis, null, null, onImmediateFailed);
 });*/
-
+/*
 mymap.on("move", function () {
 	if(!freeze){
 		freeze = true;
@@ -343,7 +343,7 @@ buildingmap.on("move", function () {
 		metamap.target.y = mapABScenter.lat * Math.PI / 180;
 	}
 });
-
+*/
 /*
 osmMap2.on("move", function () {
 	if(!freeze){
@@ -374,7 +374,7 @@ document.addEventListener("rotate", function (e) {
         //osmMap2.setView(mapABScenter, osmMap2.getZoom());
 	}
 });
-
+/*
 buildingmap.on("moveend", function() {
     if(buildingmapFlag){
         freeze = false; buildingmapFlag=false;
@@ -387,7 +387,7 @@ mymap.on("moveend", function() {
     }
 
 });
-
+*/
 /*
 osmMap2.on("moveend", function() {
     if(osmMap2Flag){
@@ -401,7 +401,7 @@ document.addEventListener("rotate-end", function (e) {
     }
 });
 
-
+/*
 var opts = {
   lines: 13, // The number of lines to draw
   length: 38, // The length of each line
@@ -449,4 +449,12 @@ query_button.onclick = function() {
 	mymap.timeDimension.setCurrentTime(new Date(document.getElementById("starttime").value))
 	spinner.spin(target);	
 	polygonLayer._getDataForTime(new Date(document.getElementById("starttime").value).getTime())
+}
+*/
+
+module.exports = {
+  decode_geohash: decode_geohash,
+  encode_geohash: encode_geohash,
+  geohash_bounds: geohash_bounds,
+  geohash_adjacent: geohash_adjacent
 }
