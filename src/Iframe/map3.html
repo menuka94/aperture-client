@@ -15,21 +15,27 @@
     <script src="Dependencies/mouseDown.js"></script>
     <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
     <!------------------------------------------>
-
-    <div id='map3' class='map'></div>
+    <div id="widget-container" class="wrld-widget-container" style="float:left; height:90%"></div>
+    <div id='map3' class='map'>
+    </div>
     <script>
         var buildingmap = L.Wrld.map('map3', '3d53418653e9c0cb75da99e8ea121c64', {
             center: parent.view,
             zoom: 15,
-            frameRateThrottleWhenIdleEnabled: true,  
-            idleSecondsBeforeFrameRateThrottle: 20.0,
             indoorsEnabled: true
         });
-        var indoorControl = new WrldIndoorControl("widget-container", buildingmap);
-        buildingmap.on("move", function () {
-            parent.setGlobalPosition(buildingmap.getCenter(),3);
-            parent.setGlobalZoom(buildingmap.getZoom(),3);
+        buildingmap.on("initialstreamingcomplete", function () {
+            parent.loaded();
+            parent.setGlobalPositionFORCE(buildingmap.getCenter(),MAPNUMBER);
         });
+        var indoorControl = new WrldIndoorControl("widget-container", buildingmap);
+
+
+        //updates controller----------------------------------------------
+        buildingmap.on("move", function () {
+            parent.setGlobalPosition(buildingmap.getCenter(),MAPNUMBER);
+        });
+        //----------------------------------------------------------------
     </script>
 
     <!--You must add this map's setter function-->

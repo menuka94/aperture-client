@@ -48,7 +48,7 @@
         metamap.target.y = parent.view.lat * Math.PI / 180;
         document.addEventListener("rotate", function (e) {
             new_lat_lng = {lat: e.detail.y * 180 / Math.PI, lng:e.detail.x * 180 / Math.PI - 270};
-            parent.setGlobalPosition(new_lat_lng,4);
+            parent.setGlobalPosition(new_lat_lng,MAPNUMBER);
         });
     </script>
 
