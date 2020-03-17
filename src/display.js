@@ -1,3 +1,4 @@
+var Geohash = {};
 Geohash.base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 
 function decode_geohash(geohash) {
