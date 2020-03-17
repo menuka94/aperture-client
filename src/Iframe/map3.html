@@ -26,9 +26,9 @@
         });
         buildingmap.on("initialstreamingcomplete", function () {
             parent.loaded();
+            parent.setGlobalPositionFORCE(buildingmap.getCenter(),MAPNUMBER);
         });
         var indoorControl = new WrldIndoorControl("widget-container", buildingmap);
-
 
 
         //updates controller----------------------------------------------

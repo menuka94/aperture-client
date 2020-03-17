@@ -27,7 +27,7 @@
             inertia: false,
             timeDimension: false
         });
-        
+
         osmMap2.on("load", function () {
             parent.loaded();
         });
@@ -44,7 +44,7 @@
         L.icon = function (options) {
 			return new L.Icon({
 				iconUrl: "../../images/drinking_fountain.png",
-				iconSize: [10, 10]
+				iconSize: [15, 15]
 			});
 		};
 
@@ -80,8 +80,8 @@
         osmMap2.on("move", function (e) {
             parent.setGlobalPosition(osmMap2.getCenter(),MAPNUMBER);
         });
-        osmMap2.on("zoom", function () {
-            parent.setGlobalPosition(osmMap2.getCenter(),MAPNUMBER);
+        osmMap2.on("zoomend", function () {
+            parent.setGlobalPositionFORCE(osmMap2.getCenter(),MAPNUMBER);
         });
         
     </script>
