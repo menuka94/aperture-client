@@ -7,7 +7,8 @@
     "build": "webpack",
     "watch": "webpack --watch --config webpack.config.js",
     "serve": "npm run watch & live-server",
-    "test": "nyc mocha"
+    "test": "mocha",
+    "coverage": "nyc --reporter=lcov mocha"
   },
   "repository": {
     "type": "git",
