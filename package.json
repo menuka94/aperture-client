@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch --config webpack.config.js",
-    "serve": "npm run watch & live-server",
+    "serve": "npm run watch & live-server --ignore='**/node_modules/**'",
     "test": "mocha --recursive -r jsdom-global/register",
     "coverage": "nyc --reporter=lcov mocha"
   },
