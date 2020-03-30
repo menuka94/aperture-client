@@ -727,10 +727,10 @@ proto.MatchingStrand.prototype.setTots = function(value) {
 
 /**
  * optional bytes strand = 4;
- * @return {string}
+ * @return {!(string|Uint8Array)}
  */
 proto.MatchingStrand.prototype.getStrand = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
 
 

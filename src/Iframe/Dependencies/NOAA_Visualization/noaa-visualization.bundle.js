@@ -2628,7 +2628,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 },{}],6:[function(require,module,exports){
-const {TargetQueryRequest, TargetQueryResponse, Expression, Predicate} = require("./targeted_query_service_pb.js")
+const {TargetQueryRequest, TargetQueryResponse, Expression, Predicate, MatchingStrand} = require("./targeted_query_service_pb.js")
 const {TargetedQueryServiceClient} = require('./targeted_query_service_grpc_web_pb.js');
 
 NOAAVisualization = {
@@ -2636,7 +2636,6 @@ NOAAVisualization = {
         var service = new TargetedQueryServiceClient("http://"+window.location.hostname+":9092")
         var request = new TargetQueryRequest()
         var temporalLower = new Predicate()
-        temporalLower.setAttribute("time")
         temporalLower.setComparisonop(Predicate.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO)
         temporalLower.setIntegervalue(new Date("2015-01-01T00:00:00Z").getTime())
         var temporalUpper = new Predicate()
@@ -2655,9 +2654,17 @@ NOAAVisualization = {
         request.setTemporalscope(temporal)
         
         console.log("hi")
-        service.query(request, {}, function(err, response) {
-            console.log("hello")
-            console.log("Result of Add : ",response.getResult())
+        var stream = service.query(request, {})
+        stream.on('data', function(response) {
+            console.log(response.getStrandsList());
+        });
+        stream.on('status', function(status) {
+            console.log(status.code);
+            console.log(status.details);
+            console.log(status.metadata);
+        });
+        stream.on('end', function(end) {
+            // stream end signal
         });
     },
     
@@ -3544,10 +3551,10 @@ proto.MatchingStrand.prototype.setTots = function(value) {
 
 /**
  * optional bytes strand = 4;
- * @return {string}
+ * @return {!(string|Uint8Array)}
  */
 proto.MatchingStrand.prototype.getStrand = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
 
 
