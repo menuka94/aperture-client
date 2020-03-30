@@ -2633,7 +2633,7 @@ const {TargetedQueryServiceClient} = require('./targeted_query_service_grpc_web_
 
 NOAAVisualization = {
     initialize: function(options) {
-        var service = new TargetedQueryServiceClient("http://funkwerks.cs.colostate.edu:9092")
+        var service = new TargetedQueryServiceClient("http://"+window.location.hostname+":9092")
         var request = new TargetQueryRequest()
         var temporalLower = new Predicate()
         temporalLower.setAttribute("time")
