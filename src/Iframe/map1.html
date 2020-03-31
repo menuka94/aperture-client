@@ -13,6 +13,7 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/nezasa/iso8601-js-period/master/iso8601.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/socib/Leaflet.TimeDimension/master/dist/leaflet.timedimension.min.js"></script>
     <script type="text/javascript" src="Dependencies/moment.js"></script>
+    <script type="text/javascript" src="Dependencies/NOAA_Visualization/noaa-visualization.bundle.js"></script>
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
 </head>
 <body>
@@ -37,6 +38,8 @@
                     currentTime: new Date("2015-01-02T06:00")},
 			}
         );
+        
+        vizLayer = new noaa_visualization({})
         
         mymap.on("load", function () {
             parent.loaded();
