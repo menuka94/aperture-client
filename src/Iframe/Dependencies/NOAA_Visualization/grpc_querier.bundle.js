@@ -166,10 +166,6 @@ function fromByteArray (uint8) {
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
-var customInspectSymbol =
-  (typeof Symbol === 'function' && typeof Symbol.for === 'function')
-    ? Symbol.for('nodejs.util.inspect.custom')
-    : null
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -206,9 +202,7 @@ function typedArraySupport () {
   // Can typed array instances can be augmented?
   try {
     var arr = new Uint8Array(1)
-    var proto = { foo: function () { return 42 } }
-    Object.setPrototypeOf(proto, Uint8Array.prototype)
-    Object.setPrototypeOf(arr, proto)
+    arr.__proto__ = { __proto__: Uint8Array.prototype, foo: function () { return 42 } }
     return arr.foo() === 42
   } catch (e) {
     return false
@@ -237,7 +231,7 @@ function createBuffer (length) {
   }
   // Return an augmented `Uint8Array` instance
   var buf = new Uint8Array(length)
-  Object.setPrototypeOf(buf, Buffer.prototype)
+  buf.__proto__ = Buffer.prototype
   return buf
 }
 
@@ -287,7 +281,7 @@ function from (value, encodingOrOffset, length) {
   }
 
   if (value == null) {
-    throw new TypeError(
+    throw TypeError(
       'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
       'or Array-like Object. Received type ' + (typeof value)
     )
@@ -295,12 +289,6 @@ function from (value, encodingOrOffset, length) {
 
   if (isInstance(value, ArrayBuffer) ||
       (value && isInstance(value.buffer, ArrayBuffer))) {
-    return fromArrayBuffer(value, encodingOrOffset, length)
-  }
-
-  if (typeof SharedArrayBuffer !== 'undefined' &&
-      (isInstance(value, SharedArrayBuffer) ||
-      (value && isInstance(value.buffer, SharedArrayBuffer)))) {
     return fromArrayBuffer(value, encodingOrOffset, length)
   }
 
@@ -345,8 +333,8 @@ Buffer.from = function (value, encodingOrOffset, length) {
 
 // Note: Change prototype *after* Buffer.from is defined to workaround Chrome bug:
 // https://github.com/feross/buffer/pull/148
-Object.setPrototypeOf(Buffer.prototype, Uint8Array.prototype)
-Object.setPrototypeOf(Buffer, Uint8Array)
+Buffer.prototype.__proto__ = Uint8Array.prototype
+Buffer.__proto__ = Uint8Array
 
 function assertSize (size) {
   if (typeof size !== 'number') {
@@ -450,8 +438,7 @@ function fromArrayBuffer (array, byteOffset, length) {
   }
 
   // Return an augmented `Uint8Array` instance
-  Object.setPrototypeOf(buf, Buffer.prototype)
-
+  buf.__proto__ = Buffer.prototype
   return buf
 }
 
@@ -773,9 +760,6 @@ Buffer.prototype.inspect = function inspect () {
   if (this.length > max) str += ' ... '
   return '<Buffer ' + str + '>'
 }
-if (customInspectSymbol) {
-  Buffer.prototype[customInspectSymbol] = Buffer.prototype.inspect
-}
 
 Buffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {
   if (isInstance(target, Uint8Array)) {
@@ -901,7 +885,7 @@ function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
         return Uint8Array.prototype.lastIndexOf.call(buffer, val, byteOffset)
       }
     }
-    return arrayIndexOf(buffer, [val], byteOffset, encoding, dir)
+    return arrayIndexOf(buffer, [ val ], byteOffset, encoding, dir)
   }
 
   throw new TypeError('val must be string, number or Buffer')
@@ -1230,7 +1214,7 @@ function hexSlice (buf, start, end) {
 
   var out = ''
   for (var i = start; i < end; ++i) {
-    out += hexSliceLookupTable[buf[i]]
+    out += toHex(buf[i])
   }
   return out
 }
@@ -1267,8 +1251,7 @@ Buffer.prototype.slice = function slice (start, end) {
 
   var newBuf = this.subarray(start, end)
   // Return an augmented `Uint8Array` instance
-  Object.setPrototypeOf(newBuf, Buffer.prototype)
-
+  newBuf.__proto__ = Buffer.prototype
   return newBuf
 }
 
@@ -1757,8 +1740,6 @@ Buffer.prototype.fill = function fill (val, start, end, encoding) {
     }
   } else if (typeof val === 'number') {
     val = val & 255
-  } else if (typeof val === 'boolean') {
-    val = Number(val)
   }
 
   // Invalid ranges are not set to a default, so can range check early.
@@ -1814,6 +1795,11 @@ function base64clean (str) {
     str = str + '='
   }
   return str
+}
+
+function toHex (n) {
+  if (n < 16) return '0' + n.toString(16)
+  return n.toString(16)
 }
 
 function utf8ToBytes (string, units) {
@@ -1945,20 +1931,6 @@ function numberIsNaN (obj) {
   // For IE11 support
   return obj !== obj // eslint-disable-line no-self-compare
 }
-
-// Create lookup table for `toString('hex')`
-// See: https://github.com/feross/buffer/issues/219
-var hexSliceLookupTable = (function () {
-  var alphabet = '0123456789abcdef'
-  var table = new Array(256)
-  for (var i = 0; i < 16; ++i) {
-    var i16 = i * 16
-    for (var j = 0; j < 16; ++j) {
-      table[i16 + j] = alphabet[i] + alphabet[j]
-    }
-  }
-  return table
-})()
 
 }).call(this,require("buffer").Buffer)
 },{"base64-js":1,"buffer":2,"ieee754":5}],3:[function(require,module,exports){
@@ -2628,51 +2600,66 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 },{}],6:[function(require,module,exports){
-const {TargetQueryRequest, TargetQueryResponse, Expression, Predicate, MatchingStrand} = require("./targeted_query_service_pb.js")
+const {TargetQueryRequest, Expression, Predicate} = require("./targeted_query_service_pb.js")
 const {TargetedQueryServiceClient} = require('./targeted_query_service_grpc_web_pb.js');
 
-NOAAVisualization = {
-    initialize: function(options) {
-        var service = new TargetedQueryServiceClient("http://"+window.location.hostname+":9092")
-        var request = new TargetQueryRequest()
-        var temporalLower = new Predicate()
-        temporalLower.setComparisonop(Predicate.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO)
-        temporalLower.setIntegervalue(new Date("2015-01-01T00:00:00Z").getTime())
-        var temporalUpper = new Predicate()
-        temporalUpper.setComparisonop(Predicate.ComparisonOperator.LESS_THAN)
-        temporalUpper.setIntegervalue(new Date("2015-01-03T12:00:00Z").getTime())
-        var temporal = new Expression()
-        temporal.setPredicate1(temporalLower)
-        temporal.setPredicate2(temporalUpper)
-        temporal.setCombineop(Expression.CombineOperator.AND)
-        
-        var geohash = new Predicate()
-        geohash.setStringvalue("9y8")
-        
-        request.setDataset("noaa_2015_jan")
-        request.setSpatialscopeList([geohash])
-        request.setTemporalscope(temporal)
-        
-        console.log("hi")
-        var stream = service.query(request, {})
-        stream.on('data', function(response) {
-            console.log(response.getStrandsList());
+GRPCQuerier = {
+    initialize: function () {
+        const service = new TargetedQueryServiceClient("http://" + window.location.hostname + ":9092")
+
+        stream.on('data', function (response) {
+            for (const strand of response.getStrandsList()) {
+                console.log(strand.getObservationcount());
+                console.log(strand.getFeaturesList())
+            }
         });
-        stream.on('status', function(status) {
+        stream.on('status', function (status) {
             console.log(status.code);
             console.log(status.details);
             console.log(status.metadata);
         });
-        stream.on('end', function(end) {
+        stream.on('end', function (end) {
             // stream end signal
         });
     },
-    
-    
-}
 
-noaa_visualization = function(options) {
-    return NOAAVisualization.initialize(options);
+    _getTemporalExpresion: function (startEpochMilli, endEpochMilli) {
+        const temporalLower = new Predicate();
+        temporalLower.setComparisonop(Predicate.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO);
+        temporalLower.setIntegervalue(startEpochMilli);
+        const temporalUpper = new Predicate();
+        temporalUpper.setComparisonop(Predicate.ComparisonOperator.LESS_THAN);
+        temporalUpper.setIntegervalue(endEpochMilli);
+        const temporal = new Expression();
+        temporal.setPredicate1(temporalLower);
+        temporal.setPredicate2(temporalUpper);
+        temporal.setCombineop(Expression.CombineOperator.AND);
+        return temporal
+    },
+
+    _getSpatialScopePredicate: function (geohashList) {
+        const geohashes = []
+        for (const geo of geohashList) {
+            const geohash = new Predicate();
+            geohash.setStringvalue(geo);
+            geohashes.push(geohash)
+        }
+        return geohashes
+    },
+
+    getStreamForQuery: function (datasetName, geohashList, startEpochMilli, endEpochMilli) {
+        const request = new TargetQueryRequest();
+        const temporal = this._getTemporalExpresion(startEpochMilli, endEpochMilli);
+        const geohashes = this._getSpatialScopePredicate(geohashList);
+        request.setDataset(datasetName);
+        request.setSpatialscopeList(geohashes);
+        request.setTemporalscope(temporal);
+        return service.query(request, {});
+    },
+};
+
+grpc_querier = function(options) {
+    return GRPCQuerier.initialize(options);
 };
 
 },{"./targeted_query_service_grpc_web_pb.js":7,"./targeted_query_service_pb.js":8}],7:[function(require,module,exports){
@@ -2822,6 +2809,7 @@ module.exports = proto;
 
 
 },{"./targeted_query_service_pb.js":8,"grpc-web":4}],8:[function(require,module,exports){
+// source: targeted_query_service.proto
 /**
  * @fileoverview
  * @enhanceable
@@ -2837,12 +2825,14 @@ var global = Function('return this')();
 
 goog.exportSymbol('proto.Expression', null, global);
 goog.exportSymbol('proto.Expression.CombineOperator', null, global);
-goog.exportSymbol('proto.MatchingStrand', null, global);
+goog.exportSymbol('proto.Expression.FirstCase', null, global);
+goog.exportSymbol('proto.Expression.SecondCase', null, global);
 goog.exportSymbol('proto.Predicate', null, global);
 goog.exportSymbol('proto.Predicate.ComparisonOperator', null, global);
+goog.exportSymbol('proto.Predicate.ValueCase', null, global);
+goog.exportSymbol('proto.ProtoBuffSerializedStrand', null, global);
 goog.exportSymbol('proto.TargetQueryRequest', null, global);
 goog.exportSymbol('proto.TargetQueryResponse', null, global);
-
 /**
  * Generated by JsPbCodeGenerator.
  * @param {Array=} opt_data Optional initial data array, typically from a
@@ -2858,8 +2848,97 @@ proto.TargetQueryRequest = function(opt_data) {
 };
 goog.inherits(proto.TargetQueryRequest, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
   proto.TargetQueryRequest.displayName = 'proto.TargetQueryRequest';
 }
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.TargetQueryResponse = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.TargetQueryResponse.repeatedFields_, null);
+};
+goog.inherits(proto.TargetQueryResponse, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.TargetQueryResponse.displayName = 'proto.TargetQueryResponse';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.ProtoBuffSerializedStrand = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.ProtoBuffSerializedStrand.repeatedFields_, null);
+};
+goog.inherits(proto.ProtoBuffSerializedStrand, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.ProtoBuffSerializedStrand.displayName = 'proto.ProtoBuffSerializedStrand';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.Expression = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.Expression.oneofGroups_);
+};
+goog.inherits(proto.Expression, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.Expression.displayName = 'proto.Expression';
+}
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.Predicate = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.Predicate.oneofGroups_);
+};
+goog.inherits(proto.Predicate, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  /**
+   * @public
+   * @override
+   */
+  proto.Predicate.displayName = 'proto.Predicate';
+}
+
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
@@ -2871,13 +2950,15 @@ proto.TargetQueryRequest.repeatedFields_ = [2,4,5];
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.TargetQueryRequest.prototype.toObject = function(opt_includeInstance) {
@@ -2887,8 +2968,8 @@ proto.TargetQueryRequest.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.TargetQueryRequest} msg The msg instance to transform.
  * @return {!Object}
@@ -3044,9 +3125,12 @@ proto.TargetQueryRequest.prototype.getDataset = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.TargetQueryRequest} returns this
+ */
 proto.TargetQueryRequest.prototype.setDataset = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -3060,9 +3144,12 @@ proto.TargetQueryRequest.prototype.getSpatialscopeList = function() {
 };
 
 
-/** @param {!Array<!proto.Predicate>} value */
+/**
+ * @param {!Array<!proto.Predicate>} value
+ * @return {!proto.TargetQueryRequest} returns this
+*/
 proto.TargetQueryRequest.prototype.setSpatialscopeList = function(value) {
-  jspb.Message.setRepeatedWrapperField(this, 2, value);
+  return jspb.Message.setRepeatedWrapperField(this, 2, value);
 };
 
 
@@ -3076,8 +3163,12 @@ proto.TargetQueryRequest.prototype.addSpatialscope = function(opt_value, opt_ind
 };
 
 
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.TargetQueryRequest} returns this
+ */
 proto.TargetQueryRequest.prototype.clearSpatialscopeList = function() {
-  this.setSpatialscopeList([]);
+  return this.setSpatialscopeList([]);
 };
 
 
@@ -3091,20 +3182,27 @@ proto.TargetQueryRequest.prototype.getTemporalscope = function() {
 };
 
 
-/** @param {?proto.Expression|undefined} value */
+/**
+ * @param {?proto.Expression|undefined} value
+ * @return {!proto.TargetQueryRequest} returns this
+*/
 proto.TargetQueryRequest.prototype.setTemporalscope = function(value) {
-  jspb.Message.setWrapperField(this, 3, value);
+  return jspb.Message.setWrapperField(this, 3, value);
 };
 
 
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.TargetQueryRequest} returns this
+ */
 proto.TargetQueryRequest.prototype.clearTemporalscope = function() {
-  this.setTemporalscope(undefined);
+  return this.setTemporalscope(undefined);
 };
 
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.TargetQueryRequest.prototype.hasTemporalscope = function() {
   return jspb.Message.getField(this, 3) != null;
@@ -3121,9 +3219,12 @@ proto.TargetQueryRequest.prototype.getFeaturepredicatesList = function() {
 };
 
 
-/** @param {!Array<!proto.Expression>} value */
+/**
+ * @param {!Array<!proto.Expression>} value
+ * @return {!proto.TargetQueryRequest} returns this
+*/
 proto.TargetQueryRequest.prototype.setFeaturepredicatesList = function(value) {
-  jspb.Message.setRepeatedWrapperField(this, 4, value);
+  return jspb.Message.setRepeatedWrapperField(this, 4, value);
 };
 
 
@@ -3137,8 +3238,12 @@ proto.TargetQueryRequest.prototype.addFeaturepredicates = function(opt_value, op
 };
 
 
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.TargetQueryRequest} returns this
+ */
 proto.TargetQueryRequest.prototype.clearFeaturepredicatesList = function() {
-  this.setFeaturepredicatesList([]);
+  return this.setFeaturepredicatesList([]);
 };
 
 
@@ -3152,9 +3257,12 @@ proto.TargetQueryRequest.prototype.getMetadatapredicatesList = function() {
 };
 
 
-/** @param {!Array<!proto.Expression>} value */
+/**
+ * @param {!Array<!proto.Expression>} value
+ * @return {!proto.TargetQueryRequest} returns this
+*/
 proto.TargetQueryRequest.prototype.setMetadatapredicatesList = function(value) {
-  jspb.Message.setRepeatedWrapperField(this, 5, value);
+  return jspb.Message.setRepeatedWrapperField(this, 5, value);
 };
 
 
@@ -3168,29 +3276,16 @@ proto.TargetQueryRequest.prototype.addMetadatapredicates = function(opt_value, o
 };
 
 
-proto.TargetQueryRequest.prototype.clearMetadatapredicatesList = function() {
-  this.setMetadatapredicatesList([]);
-};
-
-
-
 /**
- * Generated by JsPbCodeGenerator.
- * @param {Array=} opt_data Optional initial data array, typically from a
- * server response, or constructed directly in Javascript. The array is used
- * in place and becomes part of the constructed object. It is not cloned.
- * If no data is provided, the constructed object will be empty, but still
- * valid.
- * @extends {jspb.Message}
- * @constructor
+ * Clears the list making it empty but non-null.
+ * @return {!proto.TargetQueryRequest} returns this
  */
-proto.TargetQueryResponse = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.TargetQueryResponse.repeatedFields_, null);
+proto.TargetQueryRequest.prototype.clearMetadatapredicatesList = function() {
+  return this.setMetadatapredicatesList([]);
 };
-goog.inherits(proto.TargetQueryResponse, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
-  proto.TargetQueryResponse.displayName = 'proto.TargetQueryResponse';
-}
+
+
+
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
@@ -3202,13 +3297,15 @@ proto.TargetQueryResponse.repeatedFields_ = [1];
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.TargetQueryResponse.prototype.toObject = function(opt_includeInstance) {
@@ -3218,8 +3315,8 @@ proto.TargetQueryResponse.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.TargetQueryResponse} msg The msg instance to transform.
  * @return {!Object}
@@ -3228,7 +3325,7 @@ proto.TargetQueryResponse.prototype.toObject = function(opt_includeInstance) {
 proto.TargetQueryResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     strandsList: jspb.Message.toObjectList(msg.getStrandsList(),
-    proto.MatchingStrand.toObject, includeInstance)
+    proto.ProtoBuffSerializedStrand.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -3266,8 +3363,8 @@ proto.TargetQueryResponse.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new proto.MatchingStrand;
-      reader.readMessage(value,proto.MatchingStrand.deserializeBinaryFromReader);
+      var value = new proto.ProtoBuffSerializedStrand;
+      reader.readMessage(value,proto.ProtoBuffSerializedStrand.deserializeBinaryFromReader);
       msg.addStrands(value);
       break;
     default:
@@ -3304,94 +3401,98 @@ proto.TargetQueryResponse.serializeBinaryToWriter = function(message, writer) {
     writer.writeRepeatedMessage(
       1,
       f,
-      proto.MatchingStrand.serializeBinaryToWriter
+      proto.ProtoBuffSerializedStrand.serializeBinaryToWriter
     );
   }
 };
 
 
 /**
- * repeated MatchingStrand strands = 1;
- * @return {!Array<!proto.MatchingStrand>}
+ * repeated ProtoBuffSerializedStrand strands = 1;
+ * @return {!Array<!proto.ProtoBuffSerializedStrand>}
  */
 proto.TargetQueryResponse.prototype.getStrandsList = function() {
-  return /** @type{!Array<!proto.MatchingStrand>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.MatchingStrand, 1));
-};
-
-
-/** @param {!Array<!proto.MatchingStrand>} value */
-proto.TargetQueryResponse.prototype.setStrandsList = function(value) {
-  jspb.Message.setRepeatedWrapperField(this, 1, value);
+  return /** @type{!Array<!proto.ProtoBuffSerializedStrand>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.ProtoBuffSerializedStrand, 1));
 };
 
 
 /**
- * @param {!proto.MatchingStrand=} opt_value
+ * @param {!Array<!proto.ProtoBuffSerializedStrand>} value
+ * @return {!proto.TargetQueryResponse} returns this
+*/
+proto.TargetQueryResponse.prototype.setStrandsList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 1, value);
+};
+
+
+/**
+ * @param {!proto.ProtoBuffSerializedStrand=} opt_value
  * @param {number=} opt_index
- * @return {!proto.MatchingStrand}
+ * @return {!proto.ProtoBuffSerializedStrand}
  */
 proto.TargetQueryResponse.prototype.addStrands = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.MatchingStrand, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.ProtoBuffSerializedStrand, opt_index);
 };
 
 
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.TargetQueryResponse} returns this
+ */
 proto.TargetQueryResponse.prototype.clearStrandsList = function() {
-  this.setStrandsList([]);
+  return this.setStrandsList([]);
 };
 
 
 
 /**
- * Generated by JsPbCodeGenerator.
- * @param {Array=} opt_data Optional initial data array, typically from a
- * server response, or constructed directly in Javascript. The array is used
- * in place and becomes part of the constructed object. It is not cloned.
- * If no data is provided, the constructed object will be empty, but still
- * valid.
- * @extends {jspb.Message}
- * @constructor
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
  */
-proto.MatchingStrand = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
-};
-goog.inherits(proto.MatchingStrand, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
-  proto.MatchingStrand.displayName = 'proto.MatchingStrand';
-}
+proto.ProtoBuffSerializedStrand.repeatedFields_ = [3,5,6,7,8,9];
+
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.MatchingStrand.prototype.toObject = function(opt_includeInstance) {
-  return proto.MatchingStrand.toObject(opt_includeInstance, this);
+proto.ProtoBuffSerializedStrand.prototype.toObject = function(opt_includeInstance) {
+  return proto.ProtoBuffSerializedStrand.toObject(opt_includeInstance, this);
 };
 
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.MatchingStrand} msg The msg instance to transform.
+ * @param {!proto.ProtoBuffSerializedStrand} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.MatchingStrand.toObject = function(includeInstance, msg) {
+proto.ProtoBuffSerializedStrand.toObject = function(includeInstance, msg) {
   var f, obj = {
-    spatialscope: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    fromts: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    tots: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    strand: msg.getStrand_asB64()
+    geohash: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    startts: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    featuresList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 3)) == null ? undefined : f,
+    observationcount: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    meanList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 5)) == null ? undefined : f,
+    m2List: (f = jspb.Message.getRepeatedFloatingPointField(msg, 6)) == null ? undefined : f,
+    minList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 7)) == null ? undefined : f,
+    maxList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 8)) == null ? undefined : f,
+    s2List: (f = jspb.Message.getRepeatedFloatingPointField(msg, 9)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -3405,23 +3506,23 @@ proto.MatchingStrand.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.MatchingStrand}
+ * @return {!proto.ProtoBuffSerializedStrand}
  */
-proto.MatchingStrand.deserializeBinary = function(bytes) {
+proto.ProtoBuffSerializedStrand.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.MatchingStrand;
-  return proto.MatchingStrand.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.ProtoBuffSerializedStrand;
+  return proto.ProtoBuffSerializedStrand.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.MatchingStrand} msg The message object to deserialize into.
+ * @param {!proto.ProtoBuffSerializedStrand} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.MatchingStrand}
+ * @return {!proto.ProtoBuffSerializedStrand}
  */
-proto.MatchingStrand.deserializeBinaryFromReader = function(msg, reader) {
+proto.ProtoBuffSerializedStrand.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -3430,19 +3531,39 @@ proto.MatchingStrand.deserializeBinaryFromReader = function(msg, reader) {
     switch (field) {
     case 1:
       var value = /** @type {string} */ (reader.readString());
-      msg.setSpatialscope(value);
+      msg.setGeohash(value);
       break;
     case 2:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setFromts(value);
+      msg.setStartts(value);
       break;
     case 3:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setTots(value);
+      var value = /** @type {!Array<number>} */ (reader.readPackedDouble());
+      msg.setFeaturesList(value);
       break;
     case 4:
-      var value = /** @type {!Uint8Array} */ (reader.readBytes());
-      msg.setStrand(value);
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setObservationcount(value);
+      break;
+    case 5:
+      var value = /** @type {!Array<number>} */ (reader.readPackedDouble());
+      msg.setMeanList(value);
+      break;
+    case 6:
+      var value = /** @type {!Array<number>} */ (reader.readPackedDouble());
+      msg.setM2List(value);
+      break;
+    case 7:
+      var value = /** @type {!Array<number>} */ (reader.readPackedDouble());
+      msg.setMinList(value);
+      break;
+    case 8:
+      var value = /** @type {!Array<number>} */ (reader.readPackedDouble());
+      msg.setMaxList(value);
+      break;
+    case 9:
+      var value = /** @type {!Array<number>} */ (reader.readPackedDouble());
+      msg.setS2List(value);
       break;
     default:
       reader.skipField();
@@ -3457,9 +3578,9 @@ proto.MatchingStrand.deserializeBinaryFromReader = function(msg, reader) {
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.MatchingStrand.prototype.serializeBinary = function() {
+proto.ProtoBuffSerializedStrand.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.MatchingStrand.serializeBinaryToWriter(this, writer);
+  proto.ProtoBuffSerializedStrand.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -3467,37 +3588,72 @@ proto.MatchingStrand.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.MatchingStrand} message
+ * @param {!proto.ProtoBuffSerializedStrand} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.MatchingStrand.serializeBinaryToWriter = function(message, writer) {
+proto.ProtoBuffSerializedStrand.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getSpatialscope();
+  f = message.getGeohash();
   if (f.length > 0) {
     writer.writeString(
       1,
       f
     );
   }
-  f = message.getFromts();
+  f = message.getStartts();
   if (f !== 0) {
     writer.writeInt64(
       2,
       f
     );
   }
-  f = message.getTots();
-  if (f !== 0) {
-    writer.writeInt64(
+  f = message.getFeaturesList();
+  if (f.length > 0) {
+    writer.writePackedDouble(
       3,
       f
     );
   }
-  f = message.getStrand_asU8();
-  if (f.length > 0) {
-    writer.writeBytes(
+  f = message.getObservationcount();
+  if (f !== 0) {
+    writer.writeInt64(
       4,
+      f
+    );
+  }
+  f = message.getMeanList();
+  if (f.length > 0) {
+    writer.writePackedDouble(
+      5,
+      f
+    );
+  }
+  f = message.getM2List();
+  if (f.length > 0) {
+    writer.writePackedDouble(
+      6,
+      f
+    );
+  }
+  f = message.getMinList();
+  if (f.length > 0) {
+    writer.writePackedDouble(
+      7,
+      f
+    );
+  }
+  f = message.getMaxList();
+  if (f.length > 0) {
+    writer.writePackedDouble(
+      8,
+      f
+    );
+  }
+  f = message.getS2List();
+  if (f.length > 0) {
+    writer.writePackedDouble(
+      9,
       f
     );
   }
@@ -3505,107 +3661,282 @@ proto.MatchingStrand.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional string spatialScope = 1;
+ * optional string geohash = 1;
  * @return {string}
  */
-proto.MatchingStrand.prototype.getSpatialscope = function() {
+proto.ProtoBuffSerializedStrand.prototype.getGeohash = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
-/** @param {string} value */
-proto.MatchingStrand.prototype.setSpatialscope = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+/**
+ * @param {string} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.setGeohash = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
 /**
- * optional int64 fromTS = 2;
+ * optional int64 startTS = 2;
  * @return {number}
  */
-proto.MatchingStrand.prototype.getFromts = function() {
+proto.ProtoBuffSerializedStrand.prototype.getStartts = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
 };
 
 
-/** @param {number} value */
-proto.MatchingStrand.prototype.setFromts = function(value) {
-  jspb.Message.setProto3IntField(this, 2, value);
+/**
+ * @param {number} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.setStartts = function(value) {
+  return jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
 /**
- * optional int64 toTS = 3;
+ * repeated double features = 3;
+ * @return {!Array<number>}
+ */
+proto.ProtoBuffSerializedStrand.prototype.getFeaturesList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 3));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.setFeaturesList = function(value) {
+  return jspb.Message.setField(this, 3, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.addFeatures = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 3, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.clearFeaturesList = function() {
+  return this.setFeaturesList([]);
+};
+
+
+/**
+ * optional int64 observationCount = 4;
  * @return {number}
  */
-proto.MatchingStrand.prototype.getTots = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/** @param {number} value */
-proto.MatchingStrand.prototype.setTots = function(value) {
-  jspb.Message.setProto3IntField(this, 3, value);
+proto.ProtoBuffSerializedStrand.prototype.getObservationcount = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
 /**
- * optional bytes strand = 4;
- * @return {!(string|Uint8Array)}
+ * @param {number} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
  */
-proto.MatchingStrand.prototype.getStrand = function() {
-  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+proto.ProtoBuffSerializedStrand.prototype.setObservationcount = function(value) {
+  return jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
 /**
- * optional bytes strand = 4;
- * This is a type-conversion wrapper around `getStrand()`
- * @return {string}
+ * repeated double mean = 5;
+ * @return {!Array<number>}
  */
-proto.MatchingStrand.prototype.getStrand_asB64 = function() {
-  return /** @type {string} */ (jspb.Message.bytesAsB64(
-      this.getStrand()));
+proto.ProtoBuffSerializedStrand.prototype.getMeanList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 5));
 };
 
 
 /**
- * optional bytes strand = 4;
- * Note that Uint8Array is not supported on all browsers.
- * @see http://caniuse.com/Uint8Array
- * This is a type-conversion wrapper around `getStrand()`
- * @return {!Uint8Array}
+ * @param {!Array<number>} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
  */
-proto.MatchingStrand.prototype.getStrand_asU8 = function() {
-  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
-      this.getStrand()));
+proto.ProtoBuffSerializedStrand.prototype.setMeanList = function(value) {
+  return jspb.Message.setField(this, 5, value || []);
 };
-
-
-/** @param {!(string|Uint8Array)} value */
-proto.MatchingStrand.prototype.setStrand = function(value) {
-  jspb.Message.setProto3BytesField(this, 4, value);
-};
-
 
 
 /**
- * Generated by JsPbCodeGenerator.
- * @param {Array=} opt_data Optional initial data array, typically from a
- * server response, or constructed directly in Javascript. The array is used
- * in place and becomes part of the constructed object. It is not cloned.
- * If no data is provided, the constructed object will be empty, but still
- * valid.
- * @extends {jspb.Message}
- * @constructor
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
  */
-proto.Expression = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.Expression.oneofGroups_);
+proto.ProtoBuffSerializedStrand.prototype.addMean = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 5, value, opt_index);
 };
-goog.inherits(proto.Expression, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
-  proto.Expression.displayName = 'proto.Expression';
-}
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.clearMeanList = function() {
+  return this.setMeanList([]);
+};
+
+
+/**
+ * repeated double m2 = 6;
+ * @return {!Array<number>}
+ */
+proto.ProtoBuffSerializedStrand.prototype.getM2List = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 6));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.setM2List = function(value) {
+  return jspb.Message.setField(this, 6, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.addM2 = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 6, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.clearM2List = function() {
+  return this.setM2List([]);
+};
+
+
+/**
+ * repeated double min = 7;
+ * @return {!Array<number>}
+ */
+proto.ProtoBuffSerializedStrand.prototype.getMinList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 7));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.setMinList = function(value) {
+  return jspb.Message.setField(this, 7, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.addMin = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 7, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.clearMinList = function() {
+  return this.setMinList([]);
+};
+
+
+/**
+ * repeated double max = 8;
+ * @return {!Array<number>}
+ */
+proto.ProtoBuffSerializedStrand.prototype.getMaxList = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 8));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.setMaxList = function(value) {
+  return jspb.Message.setField(this, 8, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.addMax = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 8, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.clearMaxList = function() {
+  return this.setMaxList([]);
+};
+
+
+/**
+ * repeated double s2 = 9;
+ * @return {!Array<number>}
+ */
+proto.ProtoBuffSerializedStrand.prototype.getS2List = function() {
+  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedFloatingPointField(this, 9));
+};
+
+
+/**
+ * @param {!Array<number>} value
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.setS2List = function(value) {
+  return jspb.Message.setField(this, 9, value || []);
+};
+
+
+/**
+ * @param {number} value
+ * @param {number=} opt_index
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.addS2 = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 9, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ProtoBuffSerializedStrand} returns this
+ */
+proto.ProtoBuffSerializedStrand.prototype.clearS2List = function() {
+  return this.setS2List([]);
+};
+
+
+
 /**
  * Oneof group definitions for this message. Each group defines the field
  * numbers belonging to that group. When of these fields' value is set, all
@@ -3652,13 +3983,15 @@ proto.Expression.prototype.getSecondCase = function() {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.Expression.prototype.toObject = function(opt_includeInstance) {
@@ -3668,8 +4001,8 @@ proto.Expression.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.Expression} msg The msg instance to transform.
  * @return {!Object}
@@ -3832,20 +4165,27 @@ proto.Expression.prototype.getExpression1 = function() {
 };
 
 
-/** @param {?proto.Expression|undefined} value */
+/**
+ * @param {?proto.Expression|undefined} value
+ * @return {!proto.Expression} returns this
+*/
 proto.Expression.prototype.setExpression1 = function(value) {
-  jspb.Message.setOneofWrapperField(this, 1, proto.Expression.oneofGroups_[0], value);
+  return jspb.Message.setOneofWrapperField(this, 1, proto.Expression.oneofGroups_[0], value);
 };
 
 
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.Expression} returns this
+ */
 proto.Expression.prototype.clearExpression1 = function() {
-  this.setExpression1(undefined);
+  return this.setExpression1(undefined);
 };
 
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.Expression.prototype.hasExpression1 = function() {
   return jspb.Message.getField(this, 1) != null;
@@ -3862,20 +4202,27 @@ proto.Expression.prototype.getPredicate1 = function() {
 };
 
 
-/** @param {?proto.Predicate|undefined} value */
+/**
+ * @param {?proto.Predicate|undefined} value
+ * @return {!proto.Expression} returns this
+*/
 proto.Expression.prototype.setPredicate1 = function(value) {
-  jspb.Message.setOneofWrapperField(this, 2, proto.Expression.oneofGroups_[0], value);
+  return jspb.Message.setOneofWrapperField(this, 2, proto.Expression.oneofGroups_[0], value);
 };
 
 
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.Expression} returns this
+ */
 proto.Expression.prototype.clearPredicate1 = function() {
-  this.setPredicate1(undefined);
+  return this.setPredicate1(undefined);
 };
 
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.Expression.prototype.hasPredicate1 = function() {
   return jspb.Message.getField(this, 2) != null;
@@ -3891,9 +4238,12 @@ proto.Expression.prototype.getCombineop = function() {
 };
 
 
-/** @param {!proto.Expression.CombineOperator} value */
+/**
+ * @param {!proto.Expression.CombineOperator} value
+ * @return {!proto.Expression} returns this
+ */
 proto.Expression.prototype.setCombineop = function(value) {
-  jspb.Message.setProto3EnumField(this, 3, value);
+  return jspb.Message.setProto3EnumField(this, 3, value);
 };
 
 
@@ -3907,20 +4257,27 @@ proto.Expression.prototype.getExpression2 = function() {
 };
 
 
-/** @param {?proto.Expression|undefined} value */
+/**
+ * @param {?proto.Expression|undefined} value
+ * @return {!proto.Expression} returns this
+*/
 proto.Expression.prototype.setExpression2 = function(value) {
-  jspb.Message.setOneofWrapperField(this, 4, proto.Expression.oneofGroups_[1], value);
+  return jspb.Message.setOneofWrapperField(this, 4, proto.Expression.oneofGroups_[1], value);
 };
 
 
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.Expression} returns this
+ */
 proto.Expression.prototype.clearExpression2 = function() {
-  this.setExpression2(undefined);
+  return this.setExpression2(undefined);
 };
 
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.Expression.prototype.hasExpression2 = function() {
   return jspb.Message.getField(this, 4) != null;
@@ -3937,20 +4294,27 @@ proto.Expression.prototype.getPredicate2 = function() {
 };
 
 
-/** @param {?proto.Predicate|undefined} value */
+/**
+ * @param {?proto.Predicate|undefined} value
+ * @return {!proto.Expression} returns this
+*/
 proto.Expression.prototype.setPredicate2 = function(value) {
-  jspb.Message.setOneofWrapperField(this, 5, proto.Expression.oneofGroups_[1], value);
+  return jspb.Message.setOneofWrapperField(this, 5, proto.Expression.oneofGroups_[1], value);
 };
 
 
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.Expression} returns this
+ */
 proto.Expression.prototype.clearPredicate2 = function() {
-  this.setPredicate2(undefined);
+  return this.setPredicate2(undefined);
 };
 
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.Expression.prototype.hasPredicate2 = function() {
   return jspb.Message.getField(this, 5) != null;
@@ -3958,23 +4322,6 @@ proto.Expression.prototype.hasPredicate2 = function() {
 
 
 
-/**
- * Generated by JsPbCodeGenerator.
- * @param {Array=} opt_data Optional initial data array, typically from a
- * server response, or constructed directly in Javascript. The array is used
- * in place and becomes part of the constructed object. It is not cloned.
- * If no data is provided, the constructed object will be empty, but still
- * valid.
- * @extends {jspb.Message}
- * @constructor
- */
-proto.Predicate = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.Predicate.oneofGroups_);
-};
-goog.inherits(proto.Predicate, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
-  proto.Predicate.displayName = 'proto.Predicate';
-}
 /**
  * Oneof group definitions for this message. Each group defines the field
  * numbers belonging to that group. When of these fields' value is set, all
@@ -4006,13 +4353,15 @@ proto.Predicate.prototype.getValueCase = function() {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.Predicate.prototype.toObject = function(opt_includeInstance) {
@@ -4022,8 +4371,8 @@ proto.Predicate.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.Predicate} msg The msg instance to transform.
  * @return {!Object}
@@ -4035,7 +4384,7 @@ proto.Predicate.toObject = function(includeInstance, msg) {
     comparisonop: jspb.Message.getFieldWithDefault(msg, 2, 0),
     stringvalue: jspb.Message.getFieldWithDefault(msg, 3, ""),
     integervalue: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    doublevalue: +jspb.Message.getFieldWithDefault(msg, 5, 0.0)
+    doublevalue: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0)
   };
 
   if (includeInstance) {
@@ -4179,9 +4528,12 @@ proto.Predicate.prototype.getAttribute = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.Predicate} returns this
+ */
 proto.Predicate.prototype.setAttribute = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -4194,9 +4546,12 @@ proto.Predicate.prototype.getComparisonop = function() {
 };
 
 
-/** @param {!proto.Predicate.ComparisonOperator} value */
+/**
+ * @param {!proto.Predicate.ComparisonOperator} value
+ * @return {!proto.Predicate} returns this
+ */
 proto.Predicate.prototype.setComparisonop = function(value) {
-  jspb.Message.setProto3EnumField(this, 2, value);
+  return jspb.Message.setProto3EnumField(this, 2, value);
 };
 
 
@@ -4209,20 +4564,27 @@ proto.Predicate.prototype.getStringvalue = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.Predicate} returns this
+ */
 proto.Predicate.prototype.setStringvalue = function(value) {
-  jspb.Message.setOneofField(this, 3, proto.Predicate.oneofGroups_[0], value);
+  return jspb.Message.setOneofField(this, 3, proto.Predicate.oneofGroups_[0], value);
 };
 
 
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.Predicate} returns this
+ */
 proto.Predicate.prototype.clearStringvalue = function() {
-  jspb.Message.setOneofField(this, 3, proto.Predicate.oneofGroups_[0], undefined);
+  return jspb.Message.setOneofField(this, 3, proto.Predicate.oneofGroups_[0], undefined);
 };
 
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.Predicate.prototype.hasStringvalue = function() {
   return jspb.Message.getField(this, 3) != null;
@@ -4238,20 +4600,27 @@ proto.Predicate.prototype.getIntegervalue = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.Predicate} returns this
+ */
 proto.Predicate.prototype.setIntegervalue = function(value) {
-  jspb.Message.setOneofField(this, 4, proto.Predicate.oneofGroups_[0], value);
+  return jspb.Message.setOneofField(this, 4, proto.Predicate.oneofGroups_[0], value);
 };
 
 
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.Predicate} returns this
+ */
 proto.Predicate.prototype.clearIntegervalue = function() {
-  jspb.Message.setOneofField(this, 4, proto.Predicate.oneofGroups_[0], undefined);
+  return jspb.Message.setOneofField(this, 4, proto.Predicate.oneofGroups_[0], undefined);
 };
 
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.Predicate.prototype.hasIntegervalue = function() {
   return jspb.Message.getField(this, 4) != null;
@@ -4263,24 +4632,31 @@ proto.Predicate.prototype.hasIntegervalue = function() {
  * @return {number}
  */
 proto.Predicate.prototype.getDoublevalue = function() {
-  return /** @type {number} */ (+jspb.Message.getFieldWithDefault(this, 5, 0.0));
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 5, 0.0));
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.Predicate} returns this
+ */
 proto.Predicate.prototype.setDoublevalue = function(value) {
-  jspb.Message.setOneofField(this, 5, proto.Predicate.oneofGroups_[0], value);
+  return jspb.Message.setOneofField(this, 5, proto.Predicate.oneofGroups_[0], value);
 };
 
 
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.Predicate} returns this
+ */
 proto.Predicate.prototype.clearDoublevalue = function() {
-  jspb.Message.setOneofField(this, 5, proto.Predicate.oneofGroups_[0], undefined);
+  return jspb.Message.setOneofField(this, 5, proto.Predicate.oneofGroups_[0], undefined);
 };
 
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.Predicate.prototype.hasDoublevalue = function() {
   return jspb.Message.getField(this, 5) != null;
