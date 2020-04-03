@@ -12,6 +12,8 @@
     <script src="Dependencies/OverPassLayer.bundle.js"></script>
     <script src="Dependencies/leaflet-sidebar.js"></script>
     <link rel="stylesheet" type="text/css" href="Dependencies/leaflet-sidebar.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/osmtogeojson@2.2.12/osmtogeojson.js"></script>
 </head>
 <body>
     <!--Required for this map to be controlled-->
@@ -19,6 +21,7 @@
     <script src="Dependencies/mouseDown.js"></script>
     <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
     <!------------------------------------------>
+    <script src="Dependencies/getInfrastructure.js"></script>
     <div id="sidebar" class="sidebar collapsed">
         <!-- Nav tabs -->
         <div class="sidebar-tabs">
@@ -163,54 +166,85 @@
 
         var selectedObjects = [];
 
+        /*
+        infrastructure:
+            to-do:
+                waterway=spillway
+                monitoring:groundwater
+                waterway=lock gate
+                man made=archimedes screw
+                boundary=water_protection_area
+                landuse=water_wellfield
+                man_made=reservoir_covered
+                landuse=reservoir
+                man_made=pipeline  (additional tags for "underground", "sewage", and "water" have been proposed)
+                landuse=basin
+                landuse=reservoir
+                natural=spring
+                man made=monitoring station (can specify water)
+                waterway=canal
+                waterway=tidal_channel
+                waterway=pressurised
+                waterway=weir
+            done:
+                Here are all the available tags that I deemed potentially relevant. Please feel free to chip in with anything you think I've missed.
+                amenity=fountain
+                waterway=spillway
+                amenity=drinking water
+                man made=water well
+                man made=water works
+                man_made=wastewater_plant
+                waterway=dam
+                landuse=landfill
+                man made=wastewater plant
+                man_made=water_tower
+        */
+
         function mapObjectGetter(objectName){
             let query;
             switch(objectName){
                 case "drinking_water":
-                    query = 'node [amenity=drinking_water][man_made!=water_tap]({{bbox}}); out;';
+                    query = 'amenity=drinking_water';
                     break;
                 case "fountain":
-                    query = 'node [amenity=fountain] ({{bbox}}); out;';
-                    break;
-                case "fire_hydrant":
-                    query = 'node [emergency=fire_hydrant] ({{bbox}}); out;';
+                    query = 'amenity=fountain';
                     break;
                 case "dam":
-                    query = 'way[waterway=dam]({{bbox}}); foreach((._;>;);out 1;); node[waterway=dam]({{bbox}}); out;'
+                    query = 'waterway=dam'
                     break;
                 case "tap_water":
-                    query = 'node[man_made=water_tap]({{bbox}}); out;';
+                    query = 'man_made=water_tap';
                     break;
                 case "water_tower":
-                    query = 'way[man_made=water_tower]({{bbox}}); foreach((._;>;);out 1;); node[man_made=water_tower]({{bbox}}); out;';
+                    query = 'man_made=water_tower';
                     break;
                 case "water_well":
-                    query = 'way[man_made=water_well]({{bbox}}); foreach((._;>;);out 1;); node[man_made=water_well]({{bbox}}); out;';
+                    query = 'man_made=water_well';
                     break;
                 case "water_works":
-                    query = 'way[man_made=water_works]({{bbox}}); foreach((._;>;);out 1;); node[man_made=water_works]({{bbox}}); out;';
+                    query = 'man_made=water_works';
                     break;
                 case "sewage_plant":
-                    query = 'way[man_made=wastewater_plant]({{bbox}}); foreach((._;>;);out 1;); node[man_made=wastewater_plant]({{bbox}}); out;';
+                    query = 'man_made=wastewater_plant';
                     break;
                 
             }
-            return getNewOverPassLayer(query);
+            return query;
         }
 
         selectedObjects.push(mapObjectGetter("drinking_water"));
         selectedObjects.push(mapObjectGetter("fountain"));
-        selectedObjects.push(mapObjectGetter("fire_hydrant"));
         selectedObjects.push(mapObjectGetter("dam"));
         selectedObjects.push(mapObjectGetter("tap_water"));
         selectedObjects.push(mapObjectGetter("water_tower"));
         selectedObjects.push(mapObjectGetter("water_well"));
         selectedObjects.push(mapObjectGetter("water_works"));
         selectedObjects.push(mapObjectGetter("sewage_plant"));
-        selectedObjects.forEach(object => osmMap2.addLayer(object));
+        //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
         function updateOverPassLayer(map){
+            /*
             let whitelist = [];
             map.eachLayer(function(layer){
                 //console.log(layer.options);
@@ -235,7 +269,8 @@
                     map.addLayer(selectedObjects[i]);
                     //markers.addLayers(selectedObjects[i].);
                 }
-            }
+            }*/
+            updateObjects(selectedObjects,osmMap2.getBounds(),null,osmMap2);
         }
 
         function removeOverpassLayer(map, removeLayer){
@@ -276,7 +311,12 @@
         }
 
         parent.addEventListener('updateMaps', function () {
-            updateOverPassLayer(osmMap2);
+            if(osmMap2.getZoom() >= 15){
+                updateOverPassLayer(osmMap2);
+            }
+            else{
+                cleanupCurrentMap(osmMap2);
+            }
         });
 
         osmMap2.on("move", function (e) {
