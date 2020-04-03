@@ -3,22 +3,8 @@ const {TargetedQueryServiceClient} = require('./targeted_query_service_grpc_web_
 
 GRPCQuerier = {
     initialize: function () {
-        const service = new TargetedQueryServiceClient("http://" + window.location.hostname + ":9092")
-
-        stream.on('data', function (response) {
-            for (const strand of response.getStrandsList()) {
-                console.log(strand.getObservationcount());
-                console.log(strand.getFeaturesList())
-            }
-        });
-        stream.on('status', function (status) {
-            console.log(status.code);
-            console.log(status.details);
-            console.log(status.metadata);
-        });
-        stream.on('end', function (end) {
-            // stream end signal
-        });
+        this.service = new TargetedQueryServiceClient("http://" + window.location.hostname + ":9092");
+        return this;
     },
 
     _getTemporalExpresion: function (startEpochMilli, endEpochMilli) {
@@ -36,7 +22,7 @@ GRPCQuerier = {
     },
 
     _getSpatialScopePredicate: function (geohashList) {
-        const geohashes = []
+        const geohashes = [];
         for (const geo of geohashList) {
             const geohash = new Predicate();
             geohash.setStringvalue(geo);
@@ -52,10 +38,12 @@ GRPCQuerier = {
         request.setDataset(datasetName);
         request.setSpatialscopeList(geohashes);
         request.setTemporalscope(temporal);
-        return service.query(request, {});
+        return this.service.query(request, {});
     },
 };
 
-grpc_querier = function(options) {
-    return GRPCQuerier.initialize(options);
+grpc_querier = function() {
+    const grpcQuerier = GRPCQuerier;
+    grpcQuerier.initialize();
+    return grpcQuerier;
 };
