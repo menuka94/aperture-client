@@ -14,58 +14,66 @@ function updateObjects(queryList,bounds,clusterLayer,map){ //gets the objects wi
     };
     let boundsString = bBounds.south + ',' + bBounds.west + ',' + bBounds.north + ',' + bBounds.east;
     for(let i = 0; i < queryList.length; i++){
-        query = queryList[i].replace(/ /g, ''); //remove whitespace
-        let queries = {
-            nodeQuery: 'node[' + query + '](' + boundsString + ');',
-            wayQuery: 'way[' + query + '](' + boundsString + ');',
-            relationQuery: 'relation[' + query + '](' + boundsString + ');'
+        if(map.getZoom() >= queryList[i].zoom){
+            query = queryList[i].query.replace(/ /g, ''); //remove whitespace
+            let queries = {
+                nodeQuery: 'node[' + query + '](' + boundsString + ');',
+                wayQuery: 'way[' + query + '](' + boundsString + ');',
+                relationQuery: 'relation[' + query + '](' + boundsString + ');'
+            }
+            queryFString += queries.nodeQuery + queries.wayQuery + queries.relationQuery;
         }
-        queryFString += queries.nodeQuery + queries.wayQuery + queries.relationQuery;
     }
     let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ');out body geom;';
-    //console.log('https://overpass.kumi.systems/api/interpreter' + fQuery);
+    queryObjectsFromServer(map,fQuery);
+}
+
+function queryObjectsFromServer(map,fQuery){
     $.getJSON('https://overpass.kumi.systems/api/interpreter' + fQuery, function(osmDataAsJson) {
-        let data = osmtogeojson(osmDataAsJson);
-        cleanupCurrentMap(map);
-        let resultLayer = L.geoJson(data, {
-            style: function (feature) {
-                return {color: "#ff0000"};
-            },
-            filter: function (feature, layer) {
-                return true;
-            },
-            onEachFeature: function (feature, layer) {
-                let isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon");
-                let isLineString = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString");
-                let isPoint = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point");
-                latlng = [];
-                if (isPolygon) {
-                    let pos = L.latLngBounds(feature.geometry.coordinates[0]).getCenter();
-                    latlng.push(pos.lat);
-                    latlng.push(pos.lng);
-                }
-                else if(isLineString){
-                    let pos = L.latLngBounds(feature.geometry.coordinates).getCenter();
-                    latlng.push(pos.lat);
-                    latlng.push(pos.lng);
-                }
-                else if(isPoint){
-                    latlng = feature.geometry.coordinates;
-                }   
-                else{
-                    return;
-                }
-                latlng = latlng.reverse();
-                addIconToMap(getIcon('drinking_water'),map,latlng);
-            },
-            pointToLayer: function(geoJsonPoint, latlng) {
-                return L.marker(latlng,{
-                    opacity:0
-                });
-            }
-            
-        }).addTo(map);
+        drawObjectsToMap(map,osmtogeojson(osmDataAsJson));
     });
+}
+
+function drawObjectsToMap(map,dataToDraw){
+    cleanupCurrentMap(map);
+    let resultLayer = L.geoJson(dataToDraw, {
+        style: function (feature) {
+            return {color: "#ff0000"};
+        },
+        filter: function (feature, layer) {
+            return true;
+        },
+        onEachFeature: function (feature, layer) {
+            let isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon");
+            let isLineString = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString");
+            let isPoint = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point");
+            latlng = [];
+            if (isPolygon) {
+                let pos = L.latLngBounds(feature.geometry.coordinates[0]).getCenter();
+                latlng.push(pos.lat);
+                latlng.push(pos.lng);
+            }
+            else if(isLineString){
+                let pos = L.latLngBounds(feature.geometry.coordinates).getCenter();
+                latlng.push(pos.lat);
+                latlng.push(pos.lng);
+            }
+            else if(isPoint){
+                latlng = feature.geometry.coordinates;
+            }   
+            else{
+                return;
+            }
+            latlng = latlng.reverse();
+            addIconToMap(getIcon(parseIconNameFromContext(feature)),map,latlng);
+        },
+        pointToLayer: function(geoJsonPoint, latlng) {
+            return L.marker(latlng,{
+                opacity:0
+            });
+        }
+        
+    }).addTo(map);
 }
 
 function cleanupCurrentMap(map){
@@ -81,6 +89,8 @@ function cleanupCurrentMap(map){
     });
 }
 
+
+
 function updateObjectsPan(query,bounds){ //this function updates the objects around the current viewport, since users 
                                          //generally pan around when looking at the map, therefore there's less 'blank' time.
     $.getJSON('https://overpass.kumi.systems/api/interpreter?data=[out:json];' + query, function(data) {
@@ -89,9 +99,26 @@ function updateObjectsPan(query,bounds){ //this function updates the objects aro
     });
 }
 
-//icon library
+//icon getters ------------------------------------------------
+var commonTagNames = ["amenity","man_made","waterway","landuse"];
+var blacklist = ["yes","amenity"];
+
+function parseIconNameFromContext(feature){
+    //console.log(feature.properties.tags);
+    let params = Object.keys(feature.properties.tags);
+    for(let i = 0; i < params.length; i++){
+        if(commonTagNames.includes(params[i])){
+            if(!blacklist.includes(feature.properties.tags[params[i]])){
+                return feature.properties.tags[params[i]];
+            }
+        }
+        //console.log(feature.properties.tags[Object.keys(feature.properties.tags)[0]]);
+    }
+    return 'drinking_water';
+}
+
 function addIconToMap(mIcon,map,latlng){
-    var marker = L.marker(latlng,{
+    let marker = L.marker(latlng,{
         icon: mIcon
     }).addTo(map);
 }

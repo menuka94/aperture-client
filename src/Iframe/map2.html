@@ -202,34 +202,45 @@
 
         function mapObjectGetter(objectName){
             let query;
+            let zoom;
             switch(objectName){
                 case "drinking_water":
                     query = 'amenity=drinking_water';
+                    zoom = 15;
                     break;
                 case "fountain":
                     query = 'amenity=fountain';
+                    zoom = 15;
                     break;
                 case "dam":
                     query = 'waterway=dam'
+                    zoom = 12;
                     break;
                 case "tap_water":
                     query = 'man_made=water_tap';
+                    zoom = 15;
                     break;
                 case "water_tower":
                     query = 'man_made=water_tower';
+                    zoom = 12;
                     break;
                 case "water_well":
                     query = 'man_made=water_well';
+                    zoom = 15;
                     break;
                 case "water_works":
                     query = 'man_made=water_works';
+                    zoom = 12;
                     break;
                 case "sewage_plant":
                     query = 'man_made=wastewater_plant';
+                    zoom = 12;
                     break;
-                
             }
-            return query;
+            return {
+                query:query,
+                zoom:zoom          
+            };
         }
 
         selectedObjects.push(mapObjectGetter("drinking_water"));
@@ -244,32 +255,6 @@
 
 
         function updateOverPassLayer(map){
-            /*
-            let whitelist = [];
-            map.eachLayer(function(layer){
-                //console.log(layer.options);
-                if(layer.options.id === "OverPassLayer"){
-                    if(layer.options.minZoom > map.getZoom()){
-                        map.removeLayer(layer);
-                    }
-                    else{
-                        whitelist.push(layer.options.query);
-                    }
-                }
-                else if(15 > map.getZoom()){
-                    if(layer.options.icon != null){
-                        map.removeLayer(layer);
-                    }
-                }
-            });
-            //console.log(whitelist);
-            for(let i = 0; i < selectedObjects.length; i++){
-                //console.log(selectedObjects[i]);
-                if(selectedObjects[i].options.minZoom <= map.getZoom() && !whitelist.includes(selectedObjects[i].options.query)){
-                    map.addLayer(selectedObjects[i]);
-                    //markers.addLayers(selectedObjects[i].);
-                }
-            }*/
             updateObjects(selectedObjects,osmMap2.getBounds(),null,osmMap2);
         }
 
@@ -297,21 +282,19 @@
         }
 
         function onUnchecked(element){
-            //console.log(selectedObjects);
             let idx;
             for(let i = 0; i < selectedObjects.length; i++){
-                if(mapObjectGetter(element.id).options.query == selectedObjects[i].options.query){
+                if(selectedObjects[i].query.split('=')[1] == element.id){
                     idx = i;
                     break;
                 }
             }
             selectedObjects.splice(idx,1);
-            removeOverpassLayer(osmMap2,mapObjectGetter(element.id));
-            //console.log(selectedObjects);
+            updateOverPassLayer(osmMap2);
         }
 
         parent.addEventListener('updateMaps', function () {
-            if(osmMap2.getZoom() >= 15){
+            if(osmMap2.getZoom() >= 12){
                 updateOverPassLayer(osmMap2);
             }
             else{
