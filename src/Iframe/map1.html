@@ -91,6 +91,9 @@
         var thisMapsSetter = function(view,zoom){
             mymap.setView(view, mymap.getZoom());
         }
-        parent.setterFunctions.push(thisMapsSetter);
+        parent.setterFunctions.push({
+            setterFunc: thisMapsSetter,
+            mapNum: MAPNUMBER
+        });
     </script> 
 </body>

@@ -56,6 +56,9 @@
             metamap.target.x = (view.lng-90) * Math.PI / 180;
 		    metamap.target.y = view.lat * Math.PI / 180;
         }
-        parent.setterFunctions.push(thisMapsSetter);
+        parent.setterFunctions.push({
+            setterFunc: thisMapsSetter,
+            mapNum: MAPNUMBER
+        });
     </script> 
 </body>

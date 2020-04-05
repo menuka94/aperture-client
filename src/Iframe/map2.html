@@ -316,6 +316,9 @@
         var thisMapsSetter = function(view,zoom){
             osmMap2.setView(view, osmMap2.getZoom());
         }
-        parent.setterFunctions.push(thisMapsSetter);
+        parent.setterFunctions.push({
+            setterFunc: thisMapsSetter,
+            mapNum: MAPNUMBER
+        });
     </script> 
 </body>

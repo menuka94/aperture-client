@@ -2,10 +2,10 @@
 //Purpose: Get osm nodes, ways, and relations, and then translate them onto a leaflet map
 //Dependencies: osmtogeojson, jquery, Leaflet.markerCluster
 
+let currentLayers = [];
 function updateObjects(queryList,bounds,clusterLayer,map){ //gets the objects within the current viewport
     let sw = bounds.getSouthWest().wrap();
     let ne = bounds.getNorthEast().wrap();
-    let queryFString = '';
     let bBounds = {
         north: ne.lat,
         south: sw.lat,
@@ -13,8 +13,21 @@ function updateObjects(queryList,bounds,clusterLayer,map){ //gets the objects wi
         west: sw.lng
     };
     let boundsString = bBounds.south + ',' + bBounds.west + ',' + bBounds.north + ',' + bBounds.east;
+    for(let i = 0; i < queryList.length; i++){ //filter objects that shouldnt render at this level
+        if(queryList[i].zoom > map.getZoom()){
+            queryList.splice(i,1);
+        }
+    }
+    let queryFString = createQuery(queryList,boundsString);
+    let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ');out body geom;';
+    //console.log('https://overpass.kumi.systems/api/interpreter' + fQuery);
+    queryObjectsFromServer(map,fQuery,false);
+    updateObjectsPan(bBounds,boundsString,queryList,map);
+}
+
+function createQuery(queryList,boundsString){
+    let queryFString = '';
     for(let i = 0; i < queryList.length; i++){
-        if(map.getZoom() >= queryList[i].zoom){
             query = queryList[i].query.replace(/ /g, ''); //remove whitespace
             let queries = {
                 nodeQuery: 'node[' + query + '](' + boundsString + ');',
@@ -22,25 +35,29 @@ function updateObjects(queryList,bounds,clusterLayer,map){ //gets the objects wi
                 relationQuery: 'relation[' + query + '](' + boundsString + ');'
             }
             queryFString += queries.nodeQuery + queries.wayQuery + queries.relationQuery;
-        }
     }
-    let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ');out body geom;';
-    queryObjectsFromServer(map,fQuery);
+    return queryFString;
 }
 
-function queryObjectsFromServer(map,fQuery){
+function queryObjectsFromServer(map,fQuery,cleanUpMap){
     $.getJSON('https://overpass.kumi.systems/api/interpreter' + fQuery, function(osmDataAsJson) {
-        drawObjectsToMap(map,osmtogeojson(osmDataAsJson));
+        drawObjectsToMap(map,osmtogeojson(osmDataAsJson),cleanUpMap);
     });
 }
 
-function drawObjectsToMap(map,dataToDraw){
-    cleanupCurrentMap(map);
+function drawObjectsToMap(map,dataToDraw,cleanUpMap){
+    if(cleanUpMap){
+        cleanupCurrentMap(map);
+    }
     let resultLayer = L.geoJson(dataToDraw, {
         style: function (feature) {
             return {color: "#ff0000"};
         },
-        filter: function (feature, layer) {
+        filter: function (feature) {
+            if(currentLayers.includes(feature.id)){
+                return false;
+            }
+            currentLayers.push(feature.id);
             return true;
         },
         onEachFeature: function (feature, layer) {
@@ -91,12 +108,18 @@ function cleanupCurrentMap(map){
 
 
 
-function updateObjectsPan(query,bounds){ //this function updates the objects around the current viewport, since users 
-                                         //generally pan around when looking at the map, therefore there's less 'blank' time.
-    $.getJSON('https://overpass.kumi.systems/api/interpreter?data=[out:json];' + query, function(data) {
-        //data is the JSON string
-        console.log(data);
-    });
+function updateObjectsPan(origBounds,origBoundsString,queryList,map){ //this function updates the objects around the current viewport, since users 
+                                         //generally pan around when looking at the map, therefore there's less loading time seen by the user time.
+    let newBounds = {
+        north: origBounds.north + (origBounds.north - origBounds.south) * 2,
+        south: origBounds.south - (origBounds.north - origBounds.south) * 2,
+        east: origBounds.east + (origBounds.east - origBounds.west) * 2,
+        west: origBounds.west - (origBounds.east - origBounds.west) * 2
+    }
+    let newBoundsString = newBounds.south + ',' + newBounds.west + ',' + newBounds.north + ',' + newBounds.east;
+    let queryFString = createQuery(queryList,newBoundsString);
+    let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
+    queryObjectsFromServer(map,fQuery,false);
 }
 
 //icon getters ------------------------------------------------
@@ -118,9 +141,11 @@ function parseIconNameFromContext(feature){
 }
 
 function addIconToMap(mIcon,map,latlng){
+    //filtration code
     let marker = L.marker(latlng,{
         icon: mIcon
     }).addTo(map);
+    return true;
 }
 
 function getIcon(option) {
