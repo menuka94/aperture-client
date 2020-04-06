@@ -3,9 +3,10 @@
 //Dependencies: osmtogeojson, jquery, Leaflet.markerCluster
 
 let currentLayers = [];
-function updateObjects(queryList,bounds,clusterLayer,map){ //gets the objects within the current viewport
+function updateObjects(queryListOrig,bounds,clusterLayer,map){ //gets the objects within the current viewport
     let sw = bounds.getSouthWest().wrap();
     let ne = bounds.getNorthEast().wrap();
+    let queryList= queryListOrig.slice() //clone querylist
     let bBounds = {
         north: ne.lat,
         south: sw.lat,
@@ -13,15 +14,14 @@ function updateObjects(queryList,bounds,clusterLayer,map){ //gets the objects wi
         west: sw.lng
     };
     let boundsString = bBounds.south + ',' + bBounds.west + ',' + bBounds.north + ',' + bBounds.east;
-    for(let i = 0; i < queryList.length; i++){ //filter objects that shouldnt render at this level
+    /*for(let i = 0; i < queryList.length; i++){ //filter objects that shouldnt render at this level
         if(queryList[i].zoom > map.getZoom()){
             queryList.splice(i,1);
         }
-    }
+    }*/
     let queryFString = createQuery(queryList,boundsString);
     let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ');out body geom;';
-    //console.log('https://overpass.kumi.systems/api/interpreter' + fQuery);
-    queryObjectsFromServer(map,fQuery,false);
+    queryObjectsFromServer(map,fQuery);
     updateObjectsPan(bBounds,boundsString,queryList,map);
 }
 
@@ -39,16 +39,16 @@ function createQuery(queryList,boundsString){
     return queryFString;
 }
 
-function queryObjectsFromServer(map,fQuery,cleanUpMap){
+function queryObjectsFromServer(map,fQuery){
     $.getJSON('https://overpass.kumi.systems/api/interpreter' + fQuery, function(osmDataAsJson) {
-        drawObjectsToMap(map,osmtogeojson(osmDataAsJson),cleanUpMap);
+        drawObjectsToMap(map,osmtogeojson(osmDataAsJson));
     });
 }
 
-function drawObjectsToMap(map,dataToDraw,cleanUpMap){
-    if(cleanUpMap){
+function drawObjectsToMap(map,dataToDraw){
+    /*if(cleanUpMap){
         cleanupCurrentMap(map);
-    }
+    }*/
     let resultLayer = L.geoJson(dataToDraw, {
         style: function (feature) {
             return {color: "#ff0000"};
@@ -56,7 +56,7 @@ function drawObjectsToMap(map,dataToDraw,cleanUpMap){
         filter: function (feature) {
             if(currentLayers.includes(feature.id)){
                 return false;
-            }
+            } 
             currentLayers.push(feature.id);
             return true;
         },
@@ -94,6 +94,7 @@ function drawObjectsToMap(map,dataToDraw,cleanUpMap){
 }
 
 function cleanupCurrentMap(map){
+    currentLayers = [];
     map.eachLayer(function(layer){
         if(layer.feature != null){
             if(layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation'){
@@ -119,7 +120,7 @@ function updateObjectsPan(origBounds,origBoundsString,queryList,map){ //this fun
     let newBoundsString = newBounds.south + ',' + newBounds.west + ',' + newBounds.north + ',' + newBounds.east;
     let queryFString = createQuery(queryList,newBoundsString);
     let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
-    queryObjectsFromServer(map,fQuery,false);
+    queryObjectsFromServer(map,fQuery);
 }
 
 //icon getters ------------------------------------------------
@@ -142,6 +143,9 @@ function parseIconNameFromContext(feature){
 
 function addIconToMap(mIcon,map,latlng){
     //filtration code
+    if(mIcon == null){
+        return false;
+    }
     let marker = L.marker(latlng,{
         icon: mIcon
     }).addTo(map);
