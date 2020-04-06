@@ -3,7 +3,7 @@
 //Dependencies: osmtogeojson, jquery, Leaflet.markerCluster
 
 let currentLayers = [];
-function updateObjects(queryListOrig,bounds,markerCluster,map){ //gets the objects within the current viewport
+function updateObjects(queryListOrig,bounds,markerCluster,map,cleanUpMap){ //gets the objects within the current viewport
     let sw = bounds.getSouthWest().wrap();
     let ne = bounds.getNorthEast().wrap();
     let queryList= queryListOrig.slice() //clone querylist
@@ -21,7 +21,7 @@ function updateObjects(queryListOrig,bounds,markerCluster,map){ //gets the objec
     }*/
     let queryFString = createQuery(queryList,boundsString);
     let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ');out body geom;';
-    queryObjectsFromServer(map,fQuery,markerCluster);
+    queryObjectsFromServer(map,fQuery,markerCluster,cleanUpMap);
     updateObjectsPan(bBounds,boundsString,queryList,map,markerCluster);
 }
 
@@ -39,16 +39,16 @@ function createQuery(queryList,boundsString){
     return queryFString;
 }
 
-function queryObjectsFromServer(map,fQuery,markerCluster){
+function queryObjectsFromServer(map,fQuery,markerCluster,cleanUpMap){
     $.getJSON('https://overpass.kumi.systems/api/interpreter' + fQuery, function(osmDataAsJson) {
-        drawObjectsToMap(map,osmtogeojson(osmDataAsJson),markerCluster);
+        drawObjectsToMap(map,osmtogeojson(osmDataAsJson),markerCluster,cleanUpMap);
     });
 }
 
-function drawObjectsToMap(map,dataToDraw,markerCluster){
-    /*if(cleanUpMap){
-        cleanupCurrentMap(map);
-    }*/
+function drawObjectsToMap(map,dataToDraw,markerCluster,cleanUpMap){
+    if(cleanUpMap){
+        cleanupCurrentMap(map,markerCluster);
+    }
     let resultLayer = L.geoJson(dataToDraw, {
         style: function (feature) {
             return {color: "#ff0000"};
@@ -107,7 +107,6 @@ function cleanupCurrentMap(map,markerCluster){
 }
 
 
-
 function updateObjectsPan(origBounds,origBoundsString,queryList,map,markerCluster){ //this function updates the objects around the current viewport, since users 
                                          //generally pan around when looking at the map, therefore there's less loading time seen by the user time.
     let newBounds = {
@@ -120,6 +119,17 @@ function updateObjectsPan(origBounds,origBoundsString,queryList,map,markerCluste
     let queryFString = createQuery(queryList,newBoundsString);
     let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
     queryObjectsFromServer(map,fQuery,markerCluster);
+}
+
+function removeFromMap(idToRemove,layerToRemoveFrom){
+    let iconUrlToSeachFor = getIcon(idToRemove).options.iconUrl;
+    layerToRemoveFrom.eachLayer(function(layer){
+        if(layer.options.icon){
+            if(iconUrlToSeachFor === layer.options.icon.options.iconUrl){
+                layerToRemoveFrom.removeLayer(layer);
+            }
+        }
+    });
 }
 
 //icon getters ------------------------------------------------
@@ -146,7 +156,8 @@ function addIconToMap(mIcon,map,latlng){
         return false;
     }
     map.addLayer(L.marker(latlng,{
-        icon: mIcon
+        icon: mIcon,
+        opacity: 1
     }));
     return true;
 }

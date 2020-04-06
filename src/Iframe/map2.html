@@ -105,7 +105,8 @@
             showCoverageOnHover: false,
             spiderfyOnMaxZoom: false,
             disableClusteringAtZoom: 17,
-            maxClusterRadius: 45
+            maxClusterRadius: 55,
+            zoomToBoundsOnClick: true
         });
         osmMap2.addLayer(markers);
 
@@ -244,8 +245,7 @@
                     break;
             }
             return {
-                query: query,
-                zoom: zoom
+                query: query
             };
         }
 
@@ -260,8 +260,8 @@
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
-        function updateOverPassLayer(map) {
-            updateObjects(selectedObjects, osmMap2.getBounds(), markers, osmMap2);
+        function updateOverPassLayer(map,reload) {
+            updateObjects(selectedObjects, osmMap2.getBounds(), markers, osmMap2, reload);
         }
 
         function removeOverpassLayer(map, removeLayer) {
@@ -284,7 +284,7 @@
 
         function onCheck(element) {
             selectedObjects.push(mapObjectGetter(element.id));
-            updateOverPassLayer(osmMap2);
+            updateOverPassLayer(osmMap2,true);
         }
 
         function onUnchecked(element) {
@@ -296,12 +296,12 @@
                 }
             }
             selectedObjects.splice(idx, 1);
-            updateOverPassLayer(osmMap2);
+            removeFromMap(element.id,markers);
         }
 
         parent.addEventListener('updateMaps', function () {
             if (osmMap2.getZoom() >= MINRENDERZOOM) {
-                updateOverPassLayer(osmMap2);
+                updateOverPassLayer(osmMap2,false);
             }
             else {
                 cleanupCurrentMap(osmMap2,markers);
