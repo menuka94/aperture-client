@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
         integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
-        crossorigin=""/>
+        crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
         integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
         crossorigin=""></script>
@@ -14,14 +15,18 @@
     <link rel="stylesheet" type="text/css" href="Dependencies/leaflet-sidebar.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://unpkg.com/osmtogeojson@2.2.12/osmtogeojson.js"></script>
+    <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.css">
+    <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.Default.css">
+    <script src="Dependencies/leaflet.markercluster.js"></script>
 </head>
+
 <body>
     <!--Required for this map to be controlled-->
     <script>const MAPNUMBER = 2; //refers to whatever map in the grid this refers to</script>
     <script src="Dependencies/mouseDown.js"></script>
-    <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
+    <script>thisMapNumber = MAPNUMBER; //changes a variable in the mouseDown.js script</script>
     <!------------------------------------------>
-    
+    <script>const MINRENDERZOOM = 12;</script>
     <script src="Dependencies/getInfrastructure.js"></script>
     <div id="sidebar" class="sidebar collapsed">
         <!-- Nav tabs -->
@@ -72,7 +77,8 @@
 
     <div id='map2' class='map'></div>
     <script>
-        osmMap2 = L.map('map2', {renderer: L.canvas(), minZoom: 3, 
+        osmMap2 = L.map('map2', {
+            renderer: L.canvas(), minZoom: 3,
             fullscreenControl: true,
             inertia: false,
             timeDimension: false
@@ -86,18 +92,25 @@
 
 
         var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                maxZoom: 18,
-            maxBounds: [[],[]]
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            maxZoom: 18,
+            maxBounds: [[], []]
         }).addTo(osmMap2);
 
         var sidebar = L.control.sidebar('sidebar', {
             position: 'right'
         }).addTo(map);
 
+        var markers = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            spiderfyOnMaxZoom: false,
+            disableClusteringAtZoom: 17,
+            maxClusterRadius: 45
+        });
+        osmMap2.addLayer(markers);
 
         L.icon = function (option) {
-            switch(option){
+            switch (option) {
                 case "drinking_water":
                     return new L.Icon({
                         iconUrl: "../../images/drinking_fountain.png",
@@ -143,25 +156,25 @@
                         iconUrl: "../../images/sewage.png",
                         iconSize: [25, 25]
                     });
-                
+
             }
         };
 
 
-        function getNewOverPassLayer(query){
+        function getNewOverPassLayer(query) {
             var splitQuery = query.split('=');
             var option;
             option = splitQuery[1].split(']')[0]; //gets the part before the ] but after the =
             //console.log(option);
             return new L.OverPassLayer({
-                        minZoom:  15,
-                        query: query,
-                        markerIcon: L.icon(option),
-                        id: "OverPassLayer",
-                        minZoomIndicatorOptions: {
-                            position: 'bottomleft',
-                            minZoomMessage: 'Current zoom: CURRENTZOOM - Data at: MINZOOMLEVEL'
-                        }
+                minZoom: 15,
+                query: query,
+                markerIcon: L.icon(option),
+                id: "OverPassLayer",
+                minZoomIndicatorOptions: {
+                    position: 'bottomleft',
+                    minZoomMessage: 'Current zoom: CURRENTZOOM - Data at: MINZOOMLEVEL'
+                }
             });
         }
 
@@ -201,46 +214,38 @@
                 man_made=water_tower
         */
 
-        function mapObjectGetter(objectName){
+        function mapObjectGetter(objectName) {
             let query;
             let zoom;
-            switch(objectName){
+            switch (objectName) {
                 case "drinking_water":
                     query = 'amenity=drinking_water';
-                    zoom = 15;
                     break;
                 case "fountain":
                     query = 'amenity=fountain';
-                    zoom = 15;
                     break;
                 case "dam":
                     query = 'waterway=dam'
-                    zoom = 12;
                     break;
                 case "tap_water":
                     query = 'man_made=water_tap';
-                    zoom = 15;
                     break;
                 case "water_tower":
                     query = 'man_made=water_tower';
-                    zoom = 12;
                     break;
                 case "water_well":
                     query = 'man_made=water_well';
-                    zoom = 15;
                     break;
                 case "water_works":
                     query = 'man_made=water_works';
-                    zoom = 12;
                     break;
                 case "sewage_plant":
                     query = 'man_made=wastewater_plant';
-                    zoom = 12;
                     break;
             }
             return {
-                query:query,
-                zoom:zoom          
+                query: query,
+                zoom: zoom
             };
         }
 
@@ -255,71 +260,71 @@
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
-        function updateOverPassLayer(map){
-            updateObjects(selectedObjects,osmMap2.getBounds(),null,osmMap2);
+        function updateOverPassLayer(map) {
+            updateObjects(selectedObjects, osmMap2.getBounds(), markers, osmMap2);
         }
 
-        function removeOverpassLayer(map, removeLayer){
-            map.eachLayer(function(layer){
+        function removeOverpassLayer(map, removeLayer) {
+            map.eachLayer(function (layer) {
                 //console.log(layer.options);
-                if(layer.options.id === "OverPassLayer" && layer.options.query == removeLayer.options.query){
+                if (layer.options.id === "OverPassLayer" && layer.options.query == removeLayer.options.query) {
                     map.removeLayer(layer);
                 }
             });
         }
 
-        function changeChecked(element){
-            if(element.checked){
+        function changeChecked(element) {
+            if (element.checked) {
                 onCheck(element);
             }
-            else{
+            else {
                 onUnchecked(element);
             }
         }
 
-        function onCheck(element){
+        function onCheck(element) {
             selectedObjects.push(mapObjectGetter(element.id));
             updateOverPassLayer(osmMap2);
         }
 
-        function onUnchecked(element){
+        function onUnchecked(element) {
             let idx;
-            for(let i = 0; i < selectedObjects.length; i++){
-                if(selectedObjects[i].query.split('=')[1] == element.id){
+            for (let i = 0; i < selectedObjects.length; i++) {
+                if (selectedObjects[i].query.split('=')[1] == element.id) {
                     idx = i;
                     break;
                 }
             }
-            selectedObjects.splice(idx,1);
+            selectedObjects.splice(idx, 1);
             updateOverPassLayer(osmMap2);
         }
 
         parent.addEventListener('updateMaps', function () {
-            if(osmMap2.getZoom() >= 12){
+            if (osmMap2.getZoom() >= MINRENDERZOOM) {
                 updateOverPassLayer(osmMap2);
             }
-            else{
-                cleanupCurrentMap(osmMap2);
+            else {
+                cleanupCurrentMap(osmMap2,markers);
             }
         });
 
         osmMap2.on("move", function (e) {
-            parent.setGlobalPosition(osmMap2.getCenter(),MAPNUMBER);
+            parent.setGlobalPosition(osmMap2.getCenter(), MAPNUMBER);
         });
         osmMap2.on("zoomend", function () {
-            parent.setGlobalPositionFORCE(osmMap2.getCenter(),MAPNUMBER);
+            parent.setGlobalPositionFORCE(osmMap2.getCenter(), MAPNUMBER);
         }); 
     </script>
 
 
     <!--You must add this map's setter function-->
-    <script> 
-        var thisMapsSetter = function(view,zoom){
+    <script>
+        var thisMapsSetter = function (view, zoom) {
             osmMap2.setView(view, osmMap2.getZoom());
         }
         parent.setterFunctions.push({
             setterFunc: thisMapsSetter,
             mapNum: MAPNUMBER
         });
-    </script> 
+    </script>
 </body>

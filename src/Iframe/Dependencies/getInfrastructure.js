@@ -3,7 +3,7 @@
 //Dependencies: osmtogeojson, jquery, Leaflet.markerCluster
 
 let currentLayers = [];
-function updateObjects(queryListOrig,bounds,clusterLayer,map){ //gets the objects within the current viewport
+function updateObjects(queryListOrig,bounds,markerCluster,map){ //gets the objects within the current viewport
     let sw = bounds.getSouthWest().wrap();
     let ne = bounds.getNorthEast().wrap();
     let queryList= queryListOrig.slice() //clone querylist
@@ -21,8 +21,8 @@ function updateObjects(queryListOrig,bounds,clusterLayer,map){ //gets the object
     }*/
     let queryFString = createQuery(queryList,boundsString);
     let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ');out body geom;';
-    queryObjectsFromServer(map,fQuery);
-    updateObjectsPan(bBounds,boundsString,queryList,map);
+    queryObjectsFromServer(map,fQuery,markerCluster);
+    updateObjectsPan(bBounds,boundsString,queryList,map,markerCluster);
 }
 
 function createQuery(queryList,boundsString){
@@ -39,13 +39,13 @@ function createQuery(queryList,boundsString){
     return queryFString;
 }
 
-function queryObjectsFromServer(map,fQuery){
+function queryObjectsFromServer(map,fQuery,markerCluster){
     $.getJSON('https://overpass.kumi.systems/api/interpreter' + fQuery, function(osmDataAsJson) {
-        drawObjectsToMap(map,osmtogeojson(osmDataAsJson));
+        drawObjectsToMap(map,osmtogeojson(osmDataAsJson),markerCluster);
     });
 }
 
-function drawObjectsToMap(map,dataToDraw){
+function drawObjectsToMap(map,dataToDraw,markerCluster){
     /*if(cleanUpMap){
         cleanupCurrentMap(map);
     }*/
@@ -54,7 +54,7 @@ function drawObjectsToMap(map,dataToDraw){
             return {color: "#ff0000"};
         },
         filter: function (feature) {
-            if(currentLayers.includes(feature.id)){
+            if(currentLayers.includes(feature.id) || map.getZoom() < MINRENDERZOOM){
                 return false;
             } 
             currentLayers.push(feature.id);
@@ -82,7 +82,7 @@ function drawObjectsToMap(map,dataToDraw){
                 return;
             }
             latlng = latlng.reverse();
-            addIconToMap(getIcon(parseIconNameFromContext(feature)),map,latlng);
+            addIconToMap(getIcon(parseIconNameFromContext(feature)),markerCluster,latlng);
         },
         pointToLayer: function(geoJsonPoint, latlng) {
             return L.marker(latlng,{
@@ -91,9 +91,10 @@ function drawObjectsToMap(map,dataToDraw){
         }
         
     }).addTo(map);
+    markerCluster.refreshClusters();
 }
 
-function cleanupCurrentMap(map){
+function cleanupCurrentMap(map,markerCluster){
     currentLayers = [];
     map.eachLayer(function(layer){
         if(layer.feature != null){
@@ -101,15 +102,13 @@ function cleanupCurrentMap(map){
                 map.removeLayer(layer);
             }   
         }
-        if(layer.options.icon != null){
-            map.removeLayer(layer);
-        }
     });
+    markerCluster.clearLayers();
 }
 
 
 
-function updateObjectsPan(origBounds,origBoundsString,queryList,map){ //this function updates the objects around the current viewport, since users 
+function updateObjectsPan(origBounds,origBoundsString,queryList,map,markerCluster){ //this function updates the objects around the current viewport, since users 
                                          //generally pan around when looking at the map, therefore there's less loading time seen by the user time.
     let newBounds = {
         north: origBounds.north + (origBounds.north - origBounds.south) * 2,
@@ -120,7 +119,7 @@ function updateObjectsPan(origBounds,origBoundsString,queryList,map){ //this fun
     let newBoundsString = newBounds.south + ',' + newBounds.west + ',' + newBounds.north + ',' + newBounds.east;
     let queryFString = createQuery(queryList,newBoundsString);
     let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
-    queryObjectsFromServer(map,fQuery);
+    queryObjectsFromServer(map,fQuery,markerCluster);
 }
 
 //icon getters ------------------------------------------------
@@ -146,9 +145,9 @@ function addIconToMap(mIcon,map,latlng){
     if(mIcon == null){
         return false;
     }
-    let marker = L.marker(latlng,{
+    map.addLayer(L.marker(latlng,{
         icon: mIcon
-    }).addTo(map);
+    }));
     return true;
 }
 
