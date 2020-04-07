@@ -2,32 +2,28 @@ NOAA_Visualizer = {
     initialize: function(options) {
         this._options = options || {};
         this._grpcQuerier = grpc_querier();
+
         this._percentageToColor = {
             0.0: [0, 0, 255],
             0.5: [0, 255, 0],
             1.0: [255, 0, 0]
         };
-
     },
 
     _drawStrand: function(strand, ctx, map) {
         const lat_lng = decode_geohash(strand.getGeohash());
         lat_lng.lon += 360;
-        let features;
-        if (strand.getObservationcount() === 1){
-            features = strand.getFeaturesList();
-        } else {
-            features = strand.getMeanList();
-        }
+
         const center = map.latLngToContainerPoint(lat_lng);
         //temperature
-        ctx.fillStyle = this._rgbaToString(this._getColorForPercentage((features[0] - 255) / (310 - 255), 0.5));
+        ctx.fillStyle = this._rgbaToString(this._getColorForPercentage((strand.getMeanList()[0] - 250) / (330 - 250), 0.5));
 
-        ctx.fillRect(center.x, center.y, 1, 1);
+        ctx.clearRect(center.x, center.y, 10, 10);
+        ctx.fillRect(center.x, center.y, 10, 10);
     },
 
     _rgbaToString: function(rgba){
-        return "rgba("+rgba[0]+", "+rgba[1]+", "+rgba[2]+", "+rgba[3]+")"
+        return "rgba("+rgba[0]+", "+rgba[1]+", "+rgba[2]+", "+rgba[3]+")";
     },
 
     _getColorForPercentage: function(pct, alpha) {
@@ -48,7 +44,8 @@ NOAA_Visualizer = {
     },
 
     queryTime: function(startTime, endTime, ctx, map) {
-        const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", ["",], startTime, endTime);
+        const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", ["9",], startTime, endTime);
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         stream.on('data', function (response) {
             for (const strand of response.getStrandsList()) {
                 this._drawStrand(strand, ctx, map);
@@ -57,8 +54,9 @@ NOAA_Visualizer = {
         stream.on('status', function (status) {
             console.log(status.code, status.details, status.metadata);
         });
-        stream.on('end', function (end) { });
-    }
+        stream.on('end', function (end) {
+        }.bind(this));
+    },
 };
 
 noaa_visualizer = function(options) {

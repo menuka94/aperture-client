@@ -56,7 +56,6 @@
         }).addTo(mymap);
 
         td = L.timeDimension.layer.CustomTimeDimension({}, noaa_visualizer({}));
-        td.addTo(mymap);
 
         L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
             _getDisplayDateFormat: function(date){
@@ -67,15 +66,11 @@
         const timeDimensionControl = new L.Control.TimeDimensionCustom({
             autoPlay: false,
             maxSpeed: .5,
-            playerOptions: {
-                buffer: 1,
-                minBufferReady: -1,
-                transitionTime: 1,
-            },
         });
 
         mymap.addControl(timeDimensionControl);
         td.addControlReference(timeDimensionControl);
+        td.addTo(mymap);
 
         mymap.on("move", function () {
             parent.setGlobalPosition(mymap.getCenter(),MAPNUMBER);
@@ -88,6 +83,8 @@
     <!--You must add this map's setter function-->
     <script> 
         var thisMapsSetter = function(view,zoom){
+            if(view.lng < 0)
+                view.lng += 360;
             mymap.setView(view, mymap.getZoom());
         };
         parent.setterFunctions.push(thisMapsSetter);

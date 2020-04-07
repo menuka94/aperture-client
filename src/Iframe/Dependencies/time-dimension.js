@@ -5,15 +5,17 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     initialize: function(options, dataLoader) {
         L.TimeDimension.Layer.prototype.initialize.call(this, options);
         this._dataLoader = dataLoader;
+        this._lastQueryTime = 0;
         this._currentLoadedTime = 0;
-        this._NE = {lat:65.0000, lng:-165.0000};
-		this._SW = {x:3.0000, y:-40.0000};
     },
     
     onAdd: function(map) {
 		this._map = map;
+		this._zoom = map.getZoom();
         L.TimeDimension.Layer.prototype.onAdd.call(this, map);
+
         this._initCanvas();
+
         if (this.options.pane) {
             this.getPane().appendChild(this._canvas);
         }else{
@@ -21,11 +23,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
         }
         this._player = new L.TimeDimension.Player({}, map.timeDimension);
 
-        if (map.options.zoomAnimation && L.Browser.any3d) {
-            map.on('zoomanim', this._animateZoom, this);
-        }
-
 		this._getDataForTime(this._timeDimension.getCurrentTime());
+        map.on('moveend', this._reset, this);
 	},
 
     addTo: function (map) {
@@ -34,7 +33,7 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     },
 
 	addControlReference: function(ctrl) {
-		this._ctrl = ctrl
+		this._ctrl = ctrl;
 	},
 	
     _initCanvas: function () {
@@ -45,36 +44,30 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
         const originProp = L.DomUtil.testProp(['transformOrigin', 'WebkitTransformOrigin', 'msTransformOrigin']);
         canvas.style[originProp] = '50% 50%';
 
-        //canvas.width  = 1000;
-        //canvas.height = 500;
-        var size = this._map.getSize();
-        canvas.width  = size.x;
-        canvas.height = size.y;
+        this._updateBounds();
 
         const animated = this._map.options.zoomAnimation && L.Browser.any3d;
         L.DomUtil.addClass(canvas, 'leaflet-zoom-' + (animated ? 'animated' : 'hide'));
-        this._topLeft = this._map.containerPointToLayerPoint([0, 0]);
-        L.DomUtil.setPosition(this._canvas, this._topLeft);
+        this._reset();
     },
 
-    _animateZoom: function (e) {
-        const scale = this._map.getZoomScale(e.zoom);
-        const offset = this._map._getCenterOffset(e.center)._multiplyBy(-scale).subtract(this._map._getMapPanePos());
-
-        if (L.DomUtil.setTransform) {
-            L.DomUtil.setTransform(this._canvas, offset, scale);
-        } else {
-            this._canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ')';
-        }
+    _updateBounds: function() {
+        const size = this._map.getSize();
+        this._canvas.width  = size.x;
+        this._canvas.height = size.y;
+        const bounds = this._map.getBounds();
+        this._topLeft = {lat: bounds._northEast.lat, lng:bounds._southWest.lng};
+        this._bottomRight = {lat: bounds._southWest.lat, lng:bounds._northEast.lng};
+        this._bottomRight.lng -= 360;
     },
 
     _reset: function () {
-        //const topLeft = this._map.latLngToLayerPoint(this._NE);
-        //L.DomUtil.setPosition(this._canvas, this._topLeft);
-
-        //var size = this._map.getSize();
-       // this._canvas.width = size.x;
-        //this._canvas.height = size.y;
+        const topLeft = this._map.latLngToLayerPoint(this._topLeft);
+        const bottomRight = this._map.latLngToLayerPoint(this._bottomRight);
+        this._canvas.style.width = ""+bottomRight.x - topLeft.x+"px";
+        this._canvas.style.height = ""+bottomRight.y - topLeft.y+"px";
+        L.DomUtil.setPosition(this._canvas, topLeft);
+        console.log(L.DomUtil.getPosition(this._canvas), this._map.getPixelOrigin())
     },
 
     _onNewTimeLoading: function(ev) {
@@ -86,12 +79,19 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     },
 
 	_getDataForTime: function(time) {
-    	const endTime = time + moment.duration(this._timeDimension.options.period).asMilliseconds();
+        if(Math.abs(this._lastQueryTime - new Date().getTime()) < 1000)
+            return;
+        this._lastQueryTime = new Date().getTime();
+
+        this._updateBounds();
+        this._reset();
+        const endTime = time + moment.duration(this._timeDimension.options.period).asMilliseconds();
     	this._dataLoader.queryTime(time, endTime, this._ctx, this._map);
-    	this._currentLoadedTime = time;
-    	this.fire('timeload', {
-    		time: this._currentLoadedTime,
-		});
+
+        this._currentLoadedTime = time;
+        this.fire('timeload', {
+            time: time
+        });
     }
 });
 

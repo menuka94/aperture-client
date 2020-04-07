@@ -39,4 +39,4 @@ static_resources:
     type: logical_dns
     http2_protocol_options: {}
     lb_policy: round_robin
-    hosts: [{ socket_address: { address: "lattice-80.cs.colostate.edu", port_value: 9091 }}]
+    hosts: [{ socket_address: { address: "lattice-81.cs.colostate.edu", port_value: 9091 }}]
