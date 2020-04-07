@@ -49,22 +49,20 @@
                     <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
                 </h1>
                 <div class="selectContainer">
-                    <input type="checkbox" id="drinking_water" onchange="changeChecked(this)" checked>
-                    <label for="drinking_water">Drinking Water</label><br>
                     <input type="checkbox" id="fountain" onchange="changeChecked(this)" checked>
                     <label for="fountain">Fountains</label><br>
-                    <input type="checkbox" id="fire_hydrant" onchange="changeChecked(this)" checked>
-                    <label for="fire_hydrant">Fire Hydrants</label><br>
                     <input type="checkbox" id="dam" onchange="changeChecked(this)" checked>
                     <label for="dam">Dams</label><br>
-                    <input type="checkbox" id="tap_water" onchange="changeChecked(this)" checked>
-                    <label for="tap_water">Water Taps</label><br>
+                    <input type="checkbox" id="water_tap" onchange="changeChecked(this)" checked>
+                    <label for="water_tap">Water Taps</label><br>
                     <input type="checkbox" id="water_tower" onchange="changeChecked(this)" checked>
                     <label for="water_tower">Water Towers</label><br>
                     <input type="checkbox" id="water_well" onchange="changeChecked(this)" checked>
                     <label for="water_well">Water Wells</label><br>
                     <input type="checkbox" id="water_works" onchange="changeChecked(this)" checked>
                     <label for="water_works">Water Works</label><br>
+                    <input type="checkbox" id="wastewater_plant" onchange="changeChecked(this)" checked>
+                    <label for="wastewater_plant">Wastewater Plants</label><br>
                 </div>
             </div>
         </div>
@@ -105,79 +103,9 @@
             showCoverageOnHover: false,
             spiderfyOnMaxZoom: false,
             disableClusteringAtZoom: 17,
-            maxClusterRadius: 55,
-            zoomToBoundsOnClick: true
+            maxClusterRadius: 55
         });
         osmMap2.addLayer(markers);
-
-        L.icon = function (option) {
-            switch (option) {
-                case "drinking_water":
-                    return new L.Icon({
-                        iconUrl: "../../images/drinking_fountain.png",
-                        iconSize: [25, 25]
-                    });
-                case "fountain":
-                    return new L.Icon({
-                        iconUrl: "../../images/fountain.png",
-                        iconSize: [20, 20]
-                    });
-                case "fire_hydrant":
-                    return new L.Icon({
-                        iconUrl: "../../images/fire_hydrant.png",
-                        iconSize: [20, 20]
-                    });
-                case "dam":
-                    return new L.Icon({
-                        iconUrl: "../../images/dam.png",
-                        iconSize: [25, 25]
-                    });
-                case "water_tap":
-                    return new L.Icon({
-                        iconUrl: "../../images/tap_water.png",
-                        iconSize: [25, 25]
-                    });
-                case "water_tower":
-                    return new L.Icon({
-                        iconUrl: "../../images/water_tower.png",
-                        iconSize: [25, 25]
-                    });
-                case "water_well":
-                    return new L.Icon({
-                        iconUrl: "../../images/water_well.png",
-                        iconSize: [25, 25]
-                    });
-                case "water_works":
-                    return new L.Icon({
-                        iconUrl: "../../images/water_works.png",
-                        iconSize: [25, 25]
-                    });
-                case "wastewater_plant":
-                    return new L.Icon({
-                        iconUrl: "../../images/sewage.png",
-                        iconSize: [25, 25]
-                    });
-
-            }
-        };
-
-
-        function getNewOverPassLayer(query) {
-            var splitQuery = query.split('=');
-            var option;
-            option = splitQuery[1].split(']')[0]; //gets the part before the ] but after the =
-            //console.log(option);
-            return new L.OverPassLayer({
-                minZoom: 15,
-                query: query,
-                markerIcon: L.icon(option),
-                id: "OverPassLayer",
-                minZoomIndicatorOptions: {
-                    position: 'bottomleft',
-                    minZoomMessage: 'Current zoom: CURRENTZOOM - Data at: MINZOOMLEVEL'
-                }
-            });
-        }
 
         var selectedObjects = [];
 
@@ -240,7 +168,7 @@
                 case "water_works":
                     query = 'man_made=water_works';
                     break;
-                case "sewage_plant":
+                case "wastewater_plant":
                     query = 'man_made=wastewater_plant';
                     break;
             }
@@ -249,14 +177,13 @@
             };
         }
 
-        selectedObjects.push(mapObjectGetter("drinking_water"));
         selectedObjects.push(mapObjectGetter("fountain"));
         selectedObjects.push(mapObjectGetter("dam"));
         selectedObjects.push(mapObjectGetter("tap_water"));
         selectedObjects.push(mapObjectGetter("water_tower"));
         selectedObjects.push(mapObjectGetter("water_well"));
         selectedObjects.push(mapObjectGetter("water_works"));
-        selectedObjects.push(mapObjectGetter("sewage_plant"));
+        selectedObjects.push(mapObjectGetter("wastewater_plant"));
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
@@ -296,7 +223,7 @@
                 }
             }
             selectedObjects.splice(idx, 1);
-            removeFromMap(element.id,markers);
+            removeFromMap(element.id,markers,osmMap2);
         }
 
         parent.addEventListener('updateMaps', function () {

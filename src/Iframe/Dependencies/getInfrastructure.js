@@ -2,6 +2,15 @@
 //Purpose: Get osm nodes, ways, and relations, and then translate them onto a leaflet map
 //Dependencies: osmtogeojson, jquery, Leaflet.markerCluster
 
+const FLYTOOPTIONS = {
+    easeLinearity: 0.4,
+    duration: 0.25,
+    maxZoom: 17
+};
+const ATTRIBUTE = { //attribute enums
+    icon: 'icon',
+    color: 'color'
+}
 let currentLayers = [];
 function updateObjects(queryListOrig,bounds,markerCluster,map,cleanUpMap){ //gets the objects within the current viewport
     let sw = bounds.getSouthWest().wrap();
@@ -51,7 +60,7 @@ function drawObjectsToMap(map,dataToDraw,markerCluster,cleanUpMap){
     }
     let resultLayer = L.geoJson(dataToDraw, {
         style: function (feature) {
-            return {color: "#ff0000"};
+            return {color: getAttribute(parseIconNameFromContext(feature),ATTRIBUTE.color)};
         },
         filter: function (feature) {
             if(currentLayers.includes(feature.id) || map.getZoom() < MINRENDERZOOM){
@@ -82,11 +91,12 @@ function drawObjectsToMap(map,dataToDraw,markerCluster,cleanUpMap){
                 return;
             }
             latlng = latlng.reverse();
-            addIconToMap(getIcon(parseIconNameFromContext(feature)),markerCluster,latlng);
+            let iconName = parseIconNameFromContext(feature);
+            addIconToMap(getAttribute(iconName,ATTRIBUTE.icon),markerCluster,latlng,map,iconName);
         },
-        pointToLayer: function(geoJsonPoint, latlng) {
-            return L.marker(latlng,{
-                opacity:0
+        pointToLayer: function() {
+            return L.marker([0,0],{
+                opacity: 0
             });
         }
         
@@ -121,12 +131,19 @@ function updateObjectsPan(origBounds,origBoundsString,queryList,map,markerCluste
     queryObjectsFromServer(map,fQuery,markerCluster);
 }
 
-function removeFromMap(idToRemove,layerToRemoveFrom){
-    let iconUrlToSeachFor = getIcon(idToRemove).options.iconUrl;
+function removeFromMap(idToRemove,layerToRemoveFrom,mapToRemoveFrom){
+    let iconUrlToSeachFor = getAttribute(idToRemove,ATTRIBUTE.icon).options.iconUrl;
     layerToRemoveFrom.eachLayer(function(layer){
         if(layer.options.icon){
             if(iconUrlToSeachFor === layer.options.icon.options.iconUrl){
                 layerToRemoveFrom.removeLayer(layer);
+            }
+        }
+    });
+    mapToRemoveFrom.eachLayer(function(layer){
+        if(layer.feature){
+            if(parseIconNameFromContext(layer.feature) == idToRemove){
+                mapToRemoveFrom.removeLayer(layer);
             }
         }
     });
@@ -150,64 +167,93 @@ function parseIconNameFromContext(feature){
     return 'drinking_water';
 }
 
-function addIconToMap(mIcon,map,latlng){
+function addIconToMap(mIcon,markerCluster,latlng,map,popUpContent){
     //filtration code
     if(mIcon == null){
         return false;
     }
-    map.addLayer(L.marker(latlng,{
+    markerCluster.addLayer(L.marker(latlng,{
         icon: mIcon,
         opacity: 1
-    }));
+    }).on('click', function(e) {
+        if(map.getZoom() < 16){
+            map.flyTo(e.latlng,16,FLYTOOPTIONS);
+        }
+        else{
+            map.flyTo(e.latlng,map.getZoom(),FLYTOOPTIONS);
+        }
+    }).bindPopup(popUpContent));
     return true;
 }
 
-function getIcon(option) {
+function getAttribute(option,attribute) {
+    let icon;
+    let color;
     switch(option){
         case "drinking_water":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/drinking_fountain.png",
                 iconSize: [25, 25]
             });
+            break;
         case "fountain":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/fountain.png",
                 iconSize: [20, 20]
             });
+            color = "#0000FF";
+            break;
         case "fire_hydrant":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/fire_hydrant.png",
                 iconSize: [20, 20]
             });
+            break;
         case "dam":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/dam.png",
                 iconSize: [25, 25]
             });
+            color = "#FF0000";
+            break;
         case "water_tap":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/tap_water.png",
                 iconSize: [25, 25]
             });
+            break;
         case "water_tower":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/water_tower.png",
                 iconSize: [25, 25]
             });
+            color = "#00FF00";
+            break;
         case "water_well":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/water_well.png",
                 iconSize: [25, 25]
             });
+            break;
         case "water_works":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/water_works.png",
                 iconSize: [25, 25]
             });
+            color = "#00FFFF";
+            break;
         case "wastewater_plant":
-            return new L.Icon({
+            icon = new L.Icon({
                 iconUrl: "../../../images/sewage.png",
                 iconSize: [25, 25]
             });
+            color = "#FF00FF";
+            break;
+    }
+    if(attribute == ATTRIBUTE.icon){
+        return icon;
+    }
+    else if(attribute == ATTRIBUTE.color){
+        return color;
     }
 };
