@@ -66,3 +66,9 @@ sketch_visualizer = function(percentageToColor) {
     sketchVisualizer.initialize(percentageToColor);
     return sketchVisualizer;
 };
+
+try{
+    module.exports = {
+        sketch_visualizer: sketch_visualizer
+    }
+} catch(e) { }
