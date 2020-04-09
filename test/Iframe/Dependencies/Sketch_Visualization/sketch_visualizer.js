@@ -1,6 +1,4 @@
 const assert = require('assert');
-const L = require("leaflet");
-require('jest-canvas-mock');
 const {sketch_visualizer} = require('../../../../src/Iframe/Dependencies/Sketch_Visualization/sketch_visualizer');
 
 const ptc = {
