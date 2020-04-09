@@ -28,6 +28,10 @@ Sketch_Visualizer = {
         return "rgba("+rgba[0]+", "+rgba[1]+", "+rgba[2]+", "+rgba[3]+")";
     },
 
+    _getColorValue: function(lower, upper, pctLower, pctUpper, idx){
+        return this._percentageToColor[lower][idx]*pctLower + this._percentageToColor[upper][idx]*pctUpper;
+    },
+
     _getColorForPercentage: function(pct, alpha) {
         if(pct === 0) {
             pct += 0.00001;
@@ -39,9 +43,9 @@ Sketch_Visualizer = {
         const rangePct = (pct - lower) / (upper - lower);
         const pctLower = 1 - rangePct;
         const pctUpper = rangePct;
-        const r = Math.floor(this._percentageToColor[lower][0]*pctLower + this._percentageToColor[upper][0]*pctUpper);
-        const g = Math.floor(this._percentageToColor[lower][1]*pctLower + this._percentageToColor[upper][1]*pctUpper);
-        const b = Math.floor(this._percentageToColor[lower][2]*pctLower + this._percentageToColor[upper][2]*pctUpper);
+        const r = Math.floor(this._getColorValue(lower, upper, pctLower, pctUpper, 0));
+        const g = Math.floor(this._getColorValue(lower, upper, pctLower, pctUpper, 1));
+        const b = Math.floor(this._getColorValue(lower, upper, pctLower, pctUpper, 2));
         return [r, g, b, alpha];
     },
 
