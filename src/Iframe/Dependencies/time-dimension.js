@@ -11,7 +11,6 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     
     onAdd: function(map) {
 		this._map = map;
-		this._zoom = map.getZoom();
         L.TimeDimension.Layer.prototype.onAdd.call(this, map);
 
         this._initCanvas();
@@ -21,7 +20,6 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
         }else{
             map._panes.overlayPane.appendChild(this._canvas);
         }
-        this._player = new L.TimeDimension.Player({}, map.timeDimension);
 
 		this._getDataForTime(this._timeDimension.getCurrentTime());
         map.on('moveend', this._reset, this);
@@ -67,7 +65,6 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
         this._canvas.style.width = ""+bottomRight.x - topLeft.x+"px";
         this._canvas.style.height = ""+bottomRight.y - topLeft.y+"px";
         L.DomUtil.setPosition(this._canvas, topLeft);
-        console.log(L.DomUtil.getPosition(this._canvas), this._map.getPixelOrigin())
     },
 
     _onNewTimeLoading: function(ev) {

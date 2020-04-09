@@ -1,12 +1,14 @@
-NOAA_Visualizer = {
-    initialize: function(options) {
-        this._options = options || {};
+Sketch_Visualizer = {
+    initialize: function(percentageToColor) {
         this._grpcQuerier = grpc_querier();
-
-        this._percentageToColor = {
-            0.0: [0, 0, 255],
-            0.5: [0, 255, 0],
-            1.0: [255, 0, 0]
+        this._percentageToColor = percentageToColor;
+        this._zoomToPixelSize = {
+            3: 2,
+            4: 3,
+            5: 5,
+            6: 8,
+            7: 16,
+            8: 35
         };
     },
 
@@ -15,11 +17,11 @@ NOAA_Visualizer = {
         lat_lng.lon += 360;
 
         const center = map.latLngToContainerPoint(lat_lng);
-        //temperature
         ctx.fillStyle = this._rgbaToString(this._getColorForPercentage((strand.getMeanList()[0] - 250) / (330 - 250), 0.5));
 
-        ctx.clearRect(center.x, center.y, 10, 10);
-        ctx.fillRect(center.x, center.y, 10, 10);
+        const pixelSize = this._zoomToPixelSize[map.getZoom()];
+        ctx.clearRect(center.x, center.y, pixelSize, pixelSize);
+        ctx.fillRect(center.x, center.y, pixelSize, pixelSize);
     },
 
     _rgbaToString: function(rgba){
@@ -44,7 +46,7 @@ NOAA_Visualizer = {
     },
 
     queryTime: function(startTime, endTime, ctx, map) {
-        const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", ["9",], startTime, endTime);
+        const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", ["",], startTime, endTime);
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         stream.on('data', function (response) {
             for (const strand of response.getStrandsList()) {
@@ -59,8 +61,8 @@ NOAA_Visualizer = {
     },
 };
 
-noaa_visualizer = function(options) {
-    const noaaVisualizer = NOAA_Visualizer;
-    noaaVisualizer.initialize(options);
-    return noaaVisualizer;
+sketch_visualizer = function(percentageToColor) {
+    const sketchVisualizer = Sketch_Visualizer;
+    sketchVisualizer.initialize(percentageToColor);
+    return sketchVisualizer;
 };
