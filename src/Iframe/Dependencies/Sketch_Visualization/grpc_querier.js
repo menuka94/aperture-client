@@ -47,3 +47,9 @@ grpc_querier = function() {
     grpcQuerier.initialize();
     return grpcQuerier;
 };
+
+try{
+    module.exports = {
+        grpc_querier: grpc_querier
+    }
+} catch(e) { }
