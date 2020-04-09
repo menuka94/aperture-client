@@ -26,7 +26,17 @@
     <script src="Dependencies/mouseDown.js"></script>
     <script>thisMapNumber = MAPNUMBER; //changes a variable in the mouseDown.js script</script>
     <!------------------------------------------>
-    <script>const MINRENDERZOOM = 12;</script>
+    <div class="leaflet-bottom leaflet-left">
+        <div class='queryInfo'>
+            <div id='queryInfoText'>
+
+            </div>
+        </div>
+    </div>
+    <script>
+        const MINRENDERZOOM = 11;
+        let queryAlertText = document.getElementById('queryInfoText');
+    </script>
     <script src="Dependencies/getInfrastructure.js"></script>
     <div id="sidebar" class="sidebar collapsed">
         <!-- Nav tabs -->
@@ -71,8 +81,6 @@
     <div id="map" class="sidebar-map"></div>
 
     <!------------------------------------------>
-
-
     <div id='map2' class='map'></div>
     <script>
         osmMap2 = L.map('map2', {
@@ -171,6 +179,21 @@
                 case "wastewater_plant":
                     query = 'man_made=wastewater_plant';
                     break;
+                case "pipeline":
+                    query = 'man_made=pipeline';
+                    break;
+                case "reservoir":
+                    query = 'water=reservoir';
+                    break;
+                case "canal":
+                    query = 'waterway=canal';
+                    break;
+                case "river":
+                    query = 'waterway=river';
+                    break;
+                case "basin":
+                    query = 'landuse=basin';
+                    break;
             }
             return {
                 query: query
@@ -184,6 +207,10 @@
         selectedObjects.push(mapObjectGetter("water_well"));
         selectedObjects.push(mapObjectGetter("water_works"));
         selectedObjects.push(mapObjectGetter("wastewater_plant"));
+        selectedObjects.push(mapObjectGetter("pipeline"));
+        selectedObjects.push(mapObjectGetter("reservoir"));
+        selectedObjects.push(mapObjectGetter("canal"));
+        selectedObjects.push(mapObjectGetter("river"));
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
@@ -228,9 +255,12 @@
 
         parent.addEventListener('updateMaps', function () {
             if (osmMap2.getZoom() >= MINRENDERZOOM) {
+                queryAlertText.innerHTML = "Loading Data...";
                 updateOverPassLayer(osmMap2,false);
             }
             else {
+                queryAlertText.parentElement.style.display = "block";
+                queryAlertText.innerHTML = "Current Zoom: " + osmMap2.getZoom() + " - Data at: " + MINRENDERZOOM;
                 cleanupCurrentMap(osmMap2,markers);
             }
         });
