@@ -162,10 +162,12 @@ function loaded(){
     }
 }
 
-module.exports = {
-    verifyCorrectMap: verifyCorrectMap,
-    mouseDown: mouseDown,
-    initializeMap: initializeMap,
-    mouseUp: mouseUp,
-    checkIfAnyCanMove: checkIfAnyCanMove
-  }
+try {
+    module.exports = {
+        verifyCorrectMap: verifyCorrectMap,
+        mouseDown: mouseDown,
+        initializeMap: initializeMap,
+        mouseUp: mouseUp,
+        checkIfAnyCanMove: checkIfAnyCanMove
+    };
+} catch(e) { }
