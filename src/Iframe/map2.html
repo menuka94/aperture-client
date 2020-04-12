@@ -9,8 +9,6 @@
         integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
         crossorigin=""></script>
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
-    <link rel="stylesheet" type="text/css" href="Dependencies/OverPassLayer.css">
-    <script src="Dependencies/OverPassLayer.bundle.js"></script>
     <script src="Dependencies/leaflet-sidebar.js"></script>
     <link rel="stylesheet" type="text/css" href="Dependencies/leaflet-sidebar.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -115,6 +113,7 @@
         });
         osmMap2.addLayer(markers);
 
+        config(markers,osmMap2);
         var selectedObjects = [];
 
         /*
@@ -215,7 +214,7 @@
 
 
         function updateOverPassLayer(map,reload) {
-            updateObjects(selectedObjects, osmMap2.getBounds(), markers, osmMap2, reload);
+            updateObjects(selectedObjects, osmMap2.getBounds(), reload);
         }
 
         function removeOverpassLayer(map, removeLayer) {

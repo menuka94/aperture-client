@@ -1,7 +1,7 @@
 //Author: Daniel Reynolds
 //Purpose: Get osm nodes, ways, and relations, and then translate them onto a leaflet map
 //Dependencies: osmtogeojson, jquery, Leaflet.markerCluster
-
+//----globals------------------------------
 const FLYTOOPTIONS = {
     easeLinearity: 0.4,
     duration: 0.25,
@@ -12,7 +12,19 @@ const ATTRIBUTE = { //attribute enums
     color: 'color'
 }
 let currentLayers = [];
-function updateObjects(queryListOrig,bounds,markerCluster,map,cleanUpMap){ //gets the objects within the current viewport
+let currentQueries = [];
+let currentBounds;
+let map;
+let mapBoundsObj;
+let markerCluster;
+//-----------------------------------------
+
+function config(markerCluster,map){
+    this.map = map;
+    this.markerCluster = markerCluster;
+}
+
+function updateObjects(queryListOrig,bounds,cleanUpMap){ //gets the objects within the current viewport
     let sw = bounds.getSouthWest().wrap();
     let ne = bounds.getNorthEast().wrap();
     let queryList = queryListOrig.slice(); //clone querylist
@@ -30,8 +42,8 @@ function updateObjects(queryListOrig,bounds,markerCluster,map,cleanUpMap){ //get
         }
     }*/
     let queryURL = queryDefault(queryList,boundsString);
-    queryObjectsFromServer(queryURL,map,markerCluster,cleanUpMap,bBounds);
-    updateObjectsPan(bBounds,boundsString,queryList,map,markerCluster);
+    queryObjectsFromServer(queryURL,cleanUpMap,bBounds);
+    updateObjectsPan(bBounds,boundsString,queryList);
 }
 
 function createQuery(queryList,boundsString){
@@ -48,23 +60,27 @@ function createQuery(queryList,boundsString){
     return queryFString;
 }
 
-let currentQueries = [];
-let currentBounds;
-function queryObjectsFromServer(queryURL,map,markerCluster,cleanUpMap,bounds){
+function queryObjectsFromServer(queryURL,cleanUpMap,bounds){
     if(!withinBounds(bounds)){
-        for(let i = 0; i < currentQueries.length; i++){
-            if(queryNeedsCancelling(currentQueries[i],bounds)){
-                currentQueries.splice(i,1);
-            }
-        }
+        cleanUpQueries(bounds);
         currentBounds = bounds;
+        let editMap = this.map; //because this.map wont work inside getJSON for some reason
         let query = $.getJSON(queryURL, function(osmDataAsJson) {
-            if(map.getZoom() >= MINRENDERZOOM){
+            if(editMap.getZoom() >= MINRENDERZOOM){
                 queryAlertText.parentElement.style.display = "none";
             }
-            drawObjectsToMap(map,osmtogeojson(osmDataAsJson),markerCluster,cleanUpMap);
+            console.log("query");
+            drawObjectsToMap(osmtogeojson(osmDataAsJson),cleanUpMap);
         });
         currentQueries.push({query:query,bounds:bounds});
+    }
+}
+
+function cleanUpQueries(bounds){
+    for(let i = 0; i < currentQueries.length; i++){
+        if(queryNeedsCancelling(currentQueries[i],bounds)){
+            currentQueries.splice(i,1);
+        }
     }
 }
 
@@ -97,16 +113,17 @@ function queryNaturalGas(){
     //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=-122.554%2C36.544%2C-119.940%2C36.930&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=json
 }
 
-function drawObjectsToMap(map,dataToDraw,markerCluster,cleanUpMap){
+function drawObjectsToMap(dataToDraw,cleanUpMap){
     if(cleanUpMap){
-        cleanupCurrentMap(map,markerCluster);
+        cleanupCurrentMap();
     }
+    let mapToEdit = this.map;
     let resultLayer = L.geoJson(dataToDraw, {
         style: function (feature) {
             return {color: getAttribute(parseIconNameFromContext(feature),ATTRIBUTE.color)};
         },
         filter: function (feature) {
-            if(currentLayers.includes(feature.id) || map.getZoom() < MINRENDERZOOM){
+            if(currentLayers.includes(feature.id) || mapToEdit.getZoom() < MINRENDERZOOM){
                 return false;
             } 
             currentLayers.push(feature.id);
@@ -135,10 +152,10 @@ function drawObjectsToMap(map,dataToDraw,markerCluster,cleanUpMap){
             }
             latlng = latlng.reverse();
             let iconName = parseIconNameFromContext(feature);
-            addIconToMap(getAttribute(iconName,ATTRIBUTE.icon),markerCluster,latlng,map,iconName);
+            addIconToMap(getAttribute(iconName,ATTRIBUTE.icon),latlng,iconName);
             layer.bindPopup(iconName);
             layer.on('click', function(e) {
-                map.flyToBounds(layer.getBounds(),FLYTOOPTIONS);
+                mapToEdit.flyToBounds(layer.getBounds(),FLYTOOPTIONS);
             });
         },
         pointToLayer: function() {
@@ -147,26 +164,26 @@ function drawObjectsToMap(map,dataToDraw,markerCluster,cleanUpMap){
             });
         }
         
-    }).addTo(map);
-    markerCluster.refreshClusters();
+    }).addTo(mapToEdit);
+    this.markerCluster.refreshClusters();
 }
 
-function cleanupCurrentMap(map,markerCluster){
+function cleanupCurrentMap(){
     currentLayers = [];
     currentBounds = null;
     currentQueries = [];
-    map.eachLayer(function(layer){
+    this.map.eachLayer(function(layer){
         if(layer.feature != null){
             if(layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation'){
-                map.removeLayer(layer);
+                this.map.removeLayer(layer);
             }   
         }
     });
-    markerCluster.clearLayers();
+    this.markerCluster.clearLayers();
 }
 
 
-function updateObjectsPan(origBounds,origBoundsString,queryList,map,markerCluster){ //this function updates the objects around the current viewport, since users 
+function updateObjectsPan(origBounds,origBoundsString,queryList){ //this function updates the objects around the current viewport, since users 
                                          //generally pan around when looking at the map, therefore there's less loading time seen by the user time.
     let newBounds = {
         north: origBounds.north + (origBounds.north - origBounds.south),
@@ -177,27 +194,8 @@ function updateObjectsPan(origBounds,origBoundsString,queryList,map,markerCluste
     let newBoundsString = newBounds.south + ',' + newBounds.west + ',' + newBounds.north + ',' + newBounds.east;
     let queryFString = createQuery(queryList,newBoundsString);
     let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
-    queryObjectsFromServer(queryURL,map,markerCluster,false,newBounds);
+    queryObjectsFromServer(queryURL,false,newBounds);
 }
-
-function removeFromMap(idToRemove,layerToRemoveFrom,mapToRemoveFrom){
-    let iconUrlToSeachFor = getAttribute(idToRemove,ATTRIBUTE.icon).options.iconUrl;
-    layerToRemoveFrom.eachLayer(function(layer){
-        if(layer.options.icon){
-            if(iconUrlToSeachFor === layer.options.icon.options.iconUrl){
-                layerToRemoveFrom.removeLayer(layer);
-            }
-        }
-    });
-    mapToRemoveFrom.eachLayer(function(layer){
-        if(layer.feature){
-            if(parseIconNameFromContext(layer.feature) == idToRemove){
-                mapToRemoveFrom.removeLayer(layer);
-            }
-        }
-    });
-}
-
 //icon getters ------------------------------------------------
 var commonTagNames = ["amenity","man_made","waterway","landuse","water"];
 var blacklist = ["yes","amenity"];
@@ -216,20 +214,21 @@ function parseIconNameFromContext(feature){
     return 'drinking_water';
 }
 
-function addIconToMap(mIcon,markerCluster,latlng,map,popUpContent){
+function addIconToMap(mIcon,latlng,popUpContent){
     //filtration code
     if(mIcon == null){
         return false;
     }
-    markerCluster.addLayer(L.marker(latlng,{
+    let mapToEdit = this.map;
+    this.markerCluster.addLayer(L.marker(latlng,{
         icon: mIcon,
         opacity: 1
     }).on('click', function(e) {
-        if(map.getZoom() < 16){
-            map.flyTo(e.latlng,16,FLYTOOPTIONS);
+        if(mapToEdit.getZoom() < 16){
+            mapToEdit.flyTo(e.latlng,16,FLYTOOPTIONS);
         }
         else{
-            map.flyTo(e.latlng,map.getZoom(),FLYTOOPTIONS);
+            mapToEdit.flyTo(e.latlng,mapToEdit.getZoom(),FLYTOOPTIONS);
         }
     }).bindPopup(popUpContent));
     return true;
