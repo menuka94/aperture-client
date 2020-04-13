@@ -42,7 +42,7 @@
         );
         
         mymap.on("load", function () {
-            parent.loaded();
+            //when loading is done
         });
 
         mymap.setView(window.parent.view, window.parent.zoomLevel);
@@ -91,6 +91,9 @@
                 view.lng += 360;
             mymap.setView(view, mymap.getZoom());
         };
-        parent.setterFunctions.push(thisMapsSetter);
+        parent.setterFunctions.push({
+            setterFunc: thisMapsSetter,
+            mapNum: MAPNUMBER
+        });
     </script> 
 </body>

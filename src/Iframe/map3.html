@@ -24,10 +24,6 @@
             zoom: 15,
             indoorsEnabled: true
         });
-        buildingmap.on("initialstreamingcomplete", function () {
-            parent.loaded();
-            parent.setGlobalPositionFORCE(buildingmap.getCenter(),MAPNUMBER);
-        });
         var indoorControl = new WrldIndoorControl("widget-container", buildingmap);
 
 
@@ -44,6 +40,9 @@
             buildingmap.setView(view, buildingmap.getZoom(), {
             });
         }
-        parent.setterFunctions.push(thisMapsSetter);
+        parent.setterFunctions.push({
+            setterFunc: thisMapsSetter,
+            mapNum: MAPNUMBER
+        });
     </script> 
 </body>
