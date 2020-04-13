@@ -49,8 +49,21 @@ Sketch_Visualizer = {
         return [r, g, b, alpha];
     },
 
+    _getBoundingGeohash: function(bounds) {
+        const b1 = encode_geohash(bounds._northEast.lat, bounds._northEast.lng-360);
+        const b2 = encode_geohash(bounds._southWest.lat, bounds._southWest.lng-360);
+        let boundingGeo = "";
+        for(let i = 0; i < b1.length; i++){
+            if (b1.charAt(i) === b2.charAt(i)){
+                boundingGeo += b1.charAt(i)
+            } else { break; }
+        }
+        return boundingGeo
+    },
+
     queryTime: function(startTime, endTime, ctx, map) {
-        const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", ["",], startTime, endTime);
+        const geohashList = [this._getBoundingGeohash(map.getBounds()),];
+        const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", geohashList, startTime, endTime);
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         stream.on('data', function (response) {
             for (const strand of response.getStrandsList()) {
