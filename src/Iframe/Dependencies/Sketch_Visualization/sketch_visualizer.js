@@ -1,3 +1,8 @@
+try{
+    const fs = require('fs');
+    eval(fs.readFileSync('src/display.js')+'');
+} catch(e) { }
+
 Sketch_Visualizer = {
     initialize: function(percentageToColor) {
         this._grpcQuerier = grpc_querier();

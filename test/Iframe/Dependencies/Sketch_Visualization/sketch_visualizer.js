@@ -38,3 +38,14 @@ describe('sketch_visualizer._getColorForPercentage()', function() {
         assert.deepEqual(sv._getColorForPercentage(1, 1), [254, 0, 0, 1]);
     });
 });
+
+describe('sketch_visualizer._getBoundingGeohash()', function() {
+    it('should correctly return the smallest bounding geohash for the given bounds', function() {
+        let bounds = {_northEast: {lat: 90, lng: 30}, _southWest: {lat: 92, lng: 28}};
+        assert.deepEqual(sv._getBoundingGeohash(bounds), "bpbpbpbpbpbp");
+        bounds = {_northEast: {lat: 90, lng: 30}, _southWest: {lat: 0, lng: -180}};
+        assert.deepEqual(sv._getBoundingGeohash(bounds), "");
+        bounds = {_northEast: {lat: 180, lng: 360}, _southWest: {lat: 140, lng: 360}};
+        assert.deepEqual(sv._getBoundingGeohash(bounds), "upbpbpbpbpbp");
+    });
+});
