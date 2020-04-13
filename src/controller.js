@@ -153,14 +153,6 @@ function updateAll() {
     window.dispatchEvent(updateEvent);
 }
 
-var loadCount = 0;
-function loaded(){
-    loadCount++;
-    if(loadCount >= 3){
-        document.getElementById("loadCover").style.display = "none";
-    }
-}
-
 function pauseMap(mapNum){
     if(!pausedMaps.includes(mapNum)){
         pausedMaps.push(mapNum);
