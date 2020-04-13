@@ -2,6 +2,7 @@ var view = { lat: 40.7580, lng: 286.0145 };
 var zoomLevel = 3;
 
 var setterFunctions = []; //these are added at the end of each map's html
+var pausedMaps = [];
 
 //flags which prevent other maps from moving the moused map
 var map1IsBeingMoved = false;
@@ -13,6 +14,7 @@ var map1IsMoused = false;
 var map2IsMoused = false;
 var map3IsMoused = false;
 var map4IsMoused = false;
+
 
 //create update event
 var updateEvent = new CustomEvent("updateMaps");
@@ -35,10 +37,8 @@ function setGlobalZoom(_zoomLevel, mapNumber) { //this isnt used but its here an
 function setGlobalPosition(_view, mapNumber) {
     if (checkIfAnyCanMove()) {
         initializeMap(mapNumber, true);
-        //console.log("map " + mapNumber + " set to true");
     }
     if (!verifyCorrectMap(mapNumber)) {
-        //console.log("map1 wasnt ready for move");
         return;
     }
     //console.log("setting postion of 1");
@@ -54,7 +54,7 @@ function setGlobalPositionFORCE(_view, mapNumber) {
 
 function updateMaps(mapNumber) {
     for (var i = 1; i <= setterFunctions.length; i++) {
-        if (setterFunctions[i - 1].mapNum != mapNumber) {
+        if (setterFunctions[i - 1].mapNum != mapNumber && !pausedMaps.includes(i)) {
             setterFunctions[i - 1].setterFunc(view, zoomLevel);
         }
     }
@@ -158,6 +158,18 @@ function loaded(){
     loadCount++;
     if(loadCount >= 3){
         document.getElementById("loadCover").style.display = "none";
+    }
+}
+
+function pauseMap(mapNum){
+    if(!pausedMaps.includes(mapNum)){
+        pausedMaps.push(mapNum);
+    }
+}
+
+function unPauseMap(mapNum){
+    if(pausedMaps.includes(mapNum)){
+        pausedMaps.splice(pausedMaps.indexOf(mapNum),1);
     }
 }
 
