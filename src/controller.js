@@ -54,9 +54,8 @@ function setGlobalPositionFORCE(_view, mapNumber) {
 
 function updateMaps(mapNumber) {
     for (var i = 1; i <= setterFunctions.length; i++) {
-        if (i != mapNumber) {
-            setterFunctions[i - 1](view, zoomLevel);
-            //console.log("updating map " + i);
+        if (setterFunctions[i - 1].mapNum != mapNumber) {
+            setterFunctions[i - 1].setterFunc(view, zoomLevel);
         }
     }
 }
