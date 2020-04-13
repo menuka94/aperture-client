@@ -1,6 +1,5 @@
 var assert = require('assert');
 var jsdom = require('jsdom-global');
-require("canvas");
 global.L = require('leaflet');
 require("leaflet-timedimension");
 
