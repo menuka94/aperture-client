@@ -67,8 +67,8 @@ Sketch_Visualizer = {
     },
 
     _searchForIntersectingGeohashes: function(bounds, baseGeo, geohashList, precision=2){
-        for (let i = 0; i < Geohash.base32.length; i++) {
-            const candidateGeo = baseGeo + Geohash.base32.charAt(i);
+        for (let i = 0; i < getGeohashBase().length; i++) {
+            const candidateGeo = baseGeo + getGeohashBase().charAt(i);
             const candidateBounds = geohash_bounds(candidateGeo);
             if(this._checkBoundIntersection(bounds, candidateBounds)) {
                 if (candidateGeo.length >= precision) {
