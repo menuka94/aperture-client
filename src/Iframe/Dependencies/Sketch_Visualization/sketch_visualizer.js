@@ -66,8 +66,38 @@ Sketch_Visualizer = {
         return boundingGeo
     },
 
+    _searchForIntersectingGeohashes: function(bounds, baseGeo, geohashList, precision=2){
+        for (let i = 0; i < Geohash.base32.length; i++) {
+            const candidateGeo = baseGeo + Geohash.base32.charAt(i);
+            const candidateBounds = geohash_bounds(candidateGeo);
+            if(this._checkBoundIntersection(bounds, candidateBounds)) {
+                if (candidateGeo.length === precision) {
+                    geohashList.push(candidateGeo);
+                } else {
+                    this._searchForIntersectingGeohashes(bounds, candidateGeo, geohashList, precision)
+                }
+            }
+        }
+        return geohashList;
+    },
+
+    _checkBoundIntersection: function(b1, b2) {
+        return !(b2.sw.lat > b1.ne.lat ||
+            b2.ne.lat < b1.sw.lat ||
+            b2.ne.lng > b1.sw.lng ||
+            b2.sw.lng < b1.ne.lng);
+    },
+
+    _standardizeBounds: function(bounds){
+        return {ne: bounds._northEast, sw: bounds._southWest};
+    },
+
     queryTime: function(startTime, endTime, ctx, map) {
-        const geohashList = [this._getBoundingGeohash(map.getBounds()),];
+        let geohashList = [];
+        this._searchForIntersectingGeohashes(this._standardizeBounds(map.getBounds()),
+            this._getBoundingGeohash(map.getBounds()), geohashList);
+        console.log(geohashList);
+        geohashList = ["",]
         const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", geohashList, startTime, endTime);
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         stream.on('data', function (response) {
