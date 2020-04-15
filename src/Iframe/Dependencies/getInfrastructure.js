@@ -69,7 +69,6 @@ function queryObjectsFromServer(queryURL,cleanUpMap,bounds){
             if(editMap.getZoom() >= MINRENDERZOOM){
                 queryAlertText.parentElement.style.display = "none";
             }
-            console.log("query");
             drawObjectsToMap(osmtogeojson(osmDataAsJson),cleanUpMap);
         });
         currentQueries.push({query:query,bounds:bounds});

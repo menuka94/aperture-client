@@ -32,7 +32,7 @@
         </div>
     </div>
     <script>
-        const MINRENDERZOOM = 11;
+        const MINRENDERZOOM = 12;
         let queryAlertText = document.getElementById('queryInfoText');
     </script>
     <script src="Dependencies/getInfrastructure.js"></script>
@@ -92,7 +92,7 @@
             //-----------
         });
 
-        osmMap2.setView(parent.view, parent.zoomLevel);
+        osmMap2.setView(osmMap2.wrapLatLng(parent.view), parent.zoomLevel);
 
 
         var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -100,7 +100,7 @@
             maxZoom: 18,
             maxBounds: [[], []]
         }).addTo(osmMap2);
-
+        
         var sidebar = L.control.sidebar('sidebar', {
             position: 'right'
         }).addTo(map);
@@ -253,6 +253,11 @@
         }
 
         parent.addEventListener('updateMaps', function () {
+            runQuery();
+        });
+
+        function runQuery(){
+            console.log(osmMap2.getCenter().lng);
             if (osmMap2.getZoom() >= MINRENDERZOOM) {
                 queryAlertText.innerHTML = "Loading Data...";
                 updateOverPassLayer(osmMap2,false);
@@ -262,8 +267,8 @@
                 queryAlertText.innerHTML = "Current Zoom: " + osmMap2.getZoom() + " - Data at: " + MINRENDERZOOM;
                 cleanupCurrentMap(osmMap2,markers);
             }
-        });
-
+        }
+        
         osmMap2.on("move", function (e) {
             parent.setGlobalPosition(osmMap2.getCenter(), MAPNUMBER);
         });
@@ -276,7 +281,8 @@
     <!--You must add this map's setter function-->
     <script>
         var thisMapsSetter = function (view, zoom) {
-            osmMap2.setView(view, osmMap2.getZoom());
+            console.log(osmMap2.wrapLatLng(parent.view));
+            osmMap2.setView(osmMap2.wrapLatLng(parent.view), osmMap2.getZoom());
         }
         parent.setterFunctions.push({
             setterFunc: thisMapsSetter,
