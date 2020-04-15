@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch --config webpack.config.js",
-    "serve": "npm run watch & live-server",
+    "serve": "./src/Iframe/Dependencies/Sketch_Visualization/getenvoy run standard:1.13.1 -- --config-path ./src/Iframe/Dependencies/Sketch_Visualization/envoy.yaml & npm run watch & live-server --ignore='**/node_modules/**'",
     "test": "mocha --recursive -r jsdom-global/register",
     "coverage": "nyc --reporter=lcov mocha"
   },

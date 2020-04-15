@@ -257,7 +257,6 @@
         });
 
         function runQuery(){
-            console.log(osmMap2.getCenter().lng);
             if (osmMap2.getZoom() >= MINRENDERZOOM) {
                 queryAlertText.innerHTML = "Loading Data...";
                 updateOverPassLayer(osmMap2,false);
@@ -281,7 +280,6 @@
     <!--You must add this map's setter function-->
     <script>
         var thisMapsSetter = function (view, zoom) {
-            console.log(osmMap2.wrapLatLng(parent.view));
             osmMap2.setView(osmMap2.wrapLatLng(parent.view), osmMap2.getZoom());
         }
         parent.setterFunctions.push({
