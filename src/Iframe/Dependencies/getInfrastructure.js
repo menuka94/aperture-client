@@ -65,6 +65,8 @@ function queryObjectsFromServer(queryURL,cleanUpMap,bounds){
         cleanUpQueries(bounds);
         currentBounds = bounds;
         let editMap = this.map; //because this.map wont work inside getJSON for some reason
+        queryAlertText.parentElement.style.display = "block";
+        queryAlertText.innerHTML = "Loading Data...";
         let query = $.getJSON(queryURL, function(osmDataAsJson) {
             if(editMap.getZoom() >= MINRENDERZOOM){
                 queryAlertText.parentElement.style.display = "none";
@@ -104,7 +106,7 @@ function queryNeedsCancelling(queryObj,boundsToCheckAgainst){
 
 function queryDefault(queryList,boundsString){
     let queryFString = createQuery(queryList,boundsString);
-    let fQuery = '?data=[out:json][timeout:15];(' + queryFString + ');out body geom;';
+    let fQuery = '?data=[out:json][timeout:30];(' + queryFString + ');out body geom;';
     return 'https://overpass.kumi.systems/api/interpreter' + fQuery;
 }
 
@@ -215,7 +217,7 @@ function parseIconNameFromContext(feature){
 
 function addIconToMap(mIcon,latlng,popUpContent){
     //filtration code
-    if(mIcon == null){
+    if(mIcon == null || mIcon === "noicon"){
         return false;
     }
     let mapToEdit = this.map;
@@ -297,10 +299,7 @@ function getAttribute(option,attribute) {
             color = "#FF00FF";
             break;
         case "pipeline":
-            icon = new L.Icon({
-                iconUrl: "../../../images/sewage.png",
-                iconSize: [25, 25]
-            });
+            icon = "noicon";
             color = "#FFFF00";
             break;
         case "reservoir":
@@ -311,17 +310,11 @@ function getAttribute(option,attribute) {
             color = "#00FFFF";
             break;
         case "canal":
-            icon = new L.Icon({
-                iconUrl: "../../../images/water_works.png",
-                iconSize: [25, 25]
-            });
+            icon = "noicon";
             color = "teal";
             break;
         case "river":
-            icon = new L.Icon({
-                iconUrl: "../../../images/water_works.png",
-                iconSize: [25, 25]
-            });
+            icon = "noicon";
             color = "#00008B";
             break;
         case "basin":
