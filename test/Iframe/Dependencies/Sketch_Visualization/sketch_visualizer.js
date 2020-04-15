@@ -38,3 +38,48 @@ describe('sketch_visualizer._getColorForPercentage()', function() {
         assert.deepEqual(sv._getColorForPercentage(1, 1), [254, 0, 0, 1]);
     });
 });
+
+describe('sketch_visualizer._getBoundingGeohash()', function() {
+    it('should correctly return the smallest bounding geohash for the given bounds', function() {
+        let bounds = {_northEast: {lat: 90, lng: 30}, _southWest: {lat: 92, lng: 28}};
+        assert.deepEqual(sv._getBoundingGeohash(bounds), "bpbpbpbpbpbp");
+        bounds = {_northEast: {lat: 90, lng: 30}, _southWest: {lat: 0, lng: -180}};
+        assert.deepEqual(sv._getBoundingGeohash(bounds), "");
+        bounds = {_northEast: {lat: 180, lng: 360}, _southWest: {lat: 140, lng: 360}};
+        assert.deepEqual(sv._getBoundingGeohash(bounds), "upbpbpbpbpbp");
+    });
+});
+
+describe('sketch_visualizer._standardizeBounds()', function() {
+    it('should correctly return the convert the naming in the bounds object', function() {
+        const bounds = {_northEast: {lat: 90, lng: 30}, _southWest: {lat: 92, lng: 28}};
+        const targetBounds = {ne: {lat: 90, lng: 30}, sw: {lat: 92, lng: 28}};
+        assert.deepEqual(sv._standardizeBounds(bounds), targetBounds);
+    });
+});
+
+describe('sketch_visualizer._checkBoundIntersection()', function() {
+    it('should correctly return whether the given bounds intersect', function() {
+        let bounds1 = {ne: {lat: 90, lng: 30}, sw: {lat: 92, lng: 28}};
+        let bounds2 = {ne: {lat: 89, lng: 30}, sw: {lat: 91, lng: 28}};
+        assert(sv._checkBoundIntersection(bounds1, bounds2) === false);
+        bounds1 = {ne: {lat: 90, lng: 30}, sw: {lat: 92, lng: 28}};
+        bounds2 = {ne: {lat: 92, lng: 28}, sw: {lat: 90, lng: 30}};
+        assert(sv._checkBoundIntersection(bounds1, bounds2) === true);
+    });
+});
+
+describe('sketch_visualizer._searchForIntersectingGeohashes()', function() {
+    it('should correctly fill a list with geohashes intersecting the given bounds', function() {
+        const bounds1 = {ne: {lat: 90, lng: 30}, sw: {lat: 89, lng: 29}};
+        const bounds2 = {ne: {lat: 89, lng: 30}, sw: {lat: 89.5, lng: 30.5}};
+        let geohashList = [];
+        sv._searchForIntersectingGeohashes(bounds2, "", geohashList);
+        assert.deepEqual(geohashList,['bp', 'br', 'bx', 'bz', 'cp', 'cr', 'cx', 'cz', 'fp', 'fr', 'fx', 'fz',
+            'gp', 'gr', 'gx', 'gz', "up", "ur", "ux", "uz", "vp", "vr", "vx", "vz", "yp", "yr", "yx", "yz", "zp", "zr",
+            "zx", "zz"]);
+        geohashList = [];
+        sv._searchForIntersectingGeohashes(bounds2, "", geohashList, 1);
+        assert.deepEqual(geohashList,['b', 'c', 'f', 'g', 'u', 'v', 'y', 'z']);
+    });
+});

@@ -55,8 +55,7 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
         this._canvas.height = size.y;
         const bounds = this._map.getBounds();
         this._topLeft = {lat: bounds._northEast.lat, lng:bounds._southWest.lng};
-        this._bottomRight = {lat: bounds._southWest.lat, lng:bounds._northEast.lng};
-        this._bottomRight.lng -= 360;
+        this._bottomRight = {lat: bounds._southWest.lat, lng:bounds._northEast.lng-360};
     },
 
     _reset: function () {
