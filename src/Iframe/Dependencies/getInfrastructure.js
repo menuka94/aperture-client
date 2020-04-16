@@ -198,16 +198,18 @@ function updateObjectsPan(origBounds,origBoundsString,queryList){ //this functio
     queryObjectsFromServer(queryURL,false,newBounds);
 }
 //icon getters ------------------------------------------------
-var commonTagNames = ["amenity","man_made","waterway","landuse","water"];
+var commonTagNames = ["waterway","man_made","landuse","water","amenity"]; //precedence goes down
 var blacklist = ["yes","amenity"];
 
 function parseIconNameFromContext(feature){
     //console.log(feature.properties.tags);
     let params = Object.keys(feature.properties.tags);
     for(let i = 0; i < params.length; i++){
-        if(commonTagNames.includes(params[i])){
-            if(!blacklist.includes(feature.properties.tags[params[i]])){
-                return feature.properties.tags[params[i]];
+        for(let j = 0; j < commonTagNames.length; j++){
+            if(commonTagNames[j] == params[i]){
+                if(!blacklist.includes(feature.properties.tags[params[i]])){
+                    return feature.properties.tags[params[i]];
+                }
             }
         }
         //console.log(feature.properties.tags[Object.keys(feature.properties.tags)[0]]);

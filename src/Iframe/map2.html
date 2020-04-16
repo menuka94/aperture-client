@@ -257,6 +257,7 @@
         });
 
         function runQuery(){
+            console.log(osmMap2.getCenter());
             if (osmMap2.getZoom() >= MINRENDERZOOM) {
                 updateOverPassLayer(osmMap2,false);
             }
