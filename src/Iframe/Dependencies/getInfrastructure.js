@@ -153,8 +153,9 @@ function drawObjectsToMap(dataToDraw,cleanUpMap){
             }
             latlng = latlng.reverse();
             let iconName = parseIconNameFromContext(feature);
-            addIconToMap(getAttribute(iconName,ATTRIBUTE.icon),latlng,iconName);
-            layer.bindPopup(iconName);
+            let iconDetails = parseDetailsFromContext(feature,iconName);
+            addIconToMap(getAttribute(iconName,ATTRIBUTE.icon),latlng,iconDetails);
+            layer.bindPopup(iconDetails);
             layer.on('click', function(e) {
                 mapToEdit.flyToBounds(layer.getBounds(),FLYTOOPTIONS);
             });
@@ -212,9 +213,29 @@ function parseIconNameFromContext(feature){
                 }
             }
         }
-        //console.log(feature.properties.tags[Object.keys(feature.properties.tags)[0]]);
     }
     return 'drinking_water';
+}
+
+function parseDetailsFromContext(feature,name){
+    name = capitalizeString(underScoreToSpace(name));
+    let params = Object.keys(feature.properties.tags);
+    let details = "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
+    params.forEach(param => details+="<li>"+capitalizeString(underScoreToSpace(param))+": "+capitalizeString(underScoreToSpace(feature.properties.tags[param]))+"</li>");
+    details+="</ul>";
+    return "<b>" + name + "</b>" + "<br>" + details;
+}
+
+function capitalizeString(str) {
+    str = str.split(" ");
+    for (var i = 0, x = str.length; i < x; i++) {
+        str[i] = str[i][0].toUpperCase() + str[i].substr(1);
+    }
+    return str.join(" ");
+}
+
+function underScoreToSpace(str){
+    return str.replace(/_/gi, " ");
 }
 
 function addIconToMap(mIcon,latlng,popUpContent){
