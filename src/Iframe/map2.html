@@ -89,7 +89,7 @@
         });
 
         osmMap2.on("load", function () {
-            //-----------
+            osmMap2.setView(osmMap2.wrapLatLng(parent.view), parent.zoomLevel);
         });
 
         osmMap2.setView(osmMap2.wrapLatLng(parent.view), parent.zoomLevel);
@@ -257,7 +257,6 @@
         });
 
         function runQuery(){
-            console.log(osmMap2.getCenter());
             if (osmMap2.getZoom() >= MINRENDERZOOM) {
                 updateOverPassLayer(osmMap2,false);
             }
