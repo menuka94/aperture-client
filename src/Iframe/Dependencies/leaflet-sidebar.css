@@ -110,7 +110,10 @@
   line-height: 35px;
   font-size: 12.5pt;
   color: #fff;
-  background-color: #0074d9; }
+  background-color: #0074d9; 
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;}
   .sidebar-right .sidebar-header {
      }
 

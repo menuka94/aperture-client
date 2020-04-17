@@ -61,7 +61,7 @@ function createQuery(queryList,boundsString){
 }
 
 function queryObjectsFromServer(queryURL,cleanUpMap,bounds){
-    if(!withinBounds(bounds)){
+    if(!withinBounds(bounds) || cleanUpMap){
         cleanUpQueries(bounds);
         currentBounds = bounds;
         let editMap = this.map; //because this.map wont work inside getJSON for some reason
@@ -71,7 +71,7 @@ function queryObjectsFromServer(queryURL,cleanUpMap,bounds){
             if(editMap.getZoom() >= MINRENDERZOOM){
                 queryAlertText.parentElement.style.display = "none";
             }
-            drawObjectsToMap(osmtogeojson(osmDataAsJson),cleanUpMap);
+            drawObjectsToMap(osmtogeojson(osmDataAsJson));
         });
         currentQueries.push({query:query,bounds:bounds});
     }
@@ -114,10 +114,7 @@ function queryNaturalGas(){
     //https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=-122.554%2C36.544%2C-119.940%2C36.930&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=json
 }
 
-function drawObjectsToMap(dataToDraw,cleanUpMap){
-    if(cleanUpMap){
-        cleanupCurrentMap();
-    }
+function drawObjectsToMap(dataToDraw){
     let mapToEdit = this.map;
     let resultLayer = L.geoJson(dataToDraw, {
         style: function (feature) {
@@ -197,6 +194,27 @@ function updateObjectsPan(origBounds,origBoundsString,queryList){ //this functio
     let queryFString = createQuery(queryList,newBoundsString);
     let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
     queryObjectsFromServer(queryURL,false,newBounds);
+}
+
+function removeFromMap(idToRemove,layerToRemoveFrom,mapToRemoveFrom){
+    let iconUrlToSeachFor = getAttribute(idToRemove,ATTRIBUTE.icon).options.iconUrl;
+    layerToRemoveFrom.eachLayer(function(layer){
+        if(layer.options.icon){
+            if(iconUrlToSeachFor === layer.options.icon.options.iconUrl){
+                layerToRemoveFrom.removeLayer(layer);
+            }
+        }
+    });
+    mapToRemoveFrom.eachLayer(function(layer){
+        if(layer.feature){
+            if(parseIconNameFromContext(layer.feature) == idToRemove){
+                mapToRemoveFrom.removeLayer(layer);
+                if(currentLayers.splice(currentLayers.indexOf(layer.feature.id),1)){
+
+                }
+            }
+        }
+    });
 }
 //icon getters ------------------------------------------------
 var commonTagNames = ["waterway","man_made","landuse","water","amenity"]; //precedence goes down

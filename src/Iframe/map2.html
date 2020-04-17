@@ -71,11 +71,18 @@
                     <label for="water_works">Water Works</label><br>
                     <input type="checkbox" id="wastewater_plant" onchange="changeChecked(this)" checked>
                     <label for="wastewater_plant">Wastewater Plants</label><br>
+                    <input type="checkbox" id="reservoir" onchange="changeChecked(this)" checked>
+                    <label for="reservoir">Reservoirs</label><br>
+                    <input type="checkbox" id="canal" onchange="changeChecked(this)" checked>
+                    <label for="canal">Canals</label><br>
+                    <input type="checkbox" id="river" onchange="changeChecked(this)" checked>
+                    <label for="river">Rivers</label><br>
+                    <input type="checkbox" id="basin" onchange="changeChecked(this)" checked>
+                    <label for="basin">Basins</label><br>
                 </div>
             </div>
         </div>
     </div>
-
     <div id="map" class="sidebar-map"></div>
 
     <!------------------------------------------>
@@ -126,13 +133,9 @@
                 boundary=water_protection_area
                 landuse=water_wellfield
                 man_made=reservoir_covered
-                landuse=reservoir
-                man_made=pipeline  (additional tags for "underground", "sewage", and "water" have been proposed)
-                landuse=basin
-                landuse=reservoir
+                pipeline db
                 natural=spring
                 man made=monitoring station (can specify water)
-                waterway=canal
                 waterway=tidal_channel
                 waterway=pressurised
                 waterway=weir
@@ -148,6 +151,9 @@
                 landuse=landfill
                 man made=wastewater plant
                 man_made=water_tower
+                landuse=basin
+                waterway=canal
+                landuse=reservoir
         */
 
         function mapObjectGetter(objectName) {
@@ -206,7 +212,6 @@
         selectedObjects.push(mapObjectGetter("water_well"));
         selectedObjects.push(mapObjectGetter("water_works"));
         selectedObjects.push(mapObjectGetter("wastewater_plant"));
-        selectedObjects.push(mapObjectGetter("pipeline"));
         selectedObjects.push(mapObjectGetter("reservoir"));
         selectedObjects.push(mapObjectGetter("canal"));
         selectedObjects.push(mapObjectGetter("river"));
