@@ -90,7 +90,7 @@ function withinBounds(boundsToTest){
         return false;
     }
     //console.log(currentBounds.north > boundsToTest.north);
-    if(currentBounds.north > boundsToTest.north && currentBounds.south < boundsToTest.south && currentBounds.west < boundsToTest.west && currentBounds.east > boundsToTest.east){
+    if(currentBounds.north >= boundsToTest.north && currentBounds.south <= boundsToTest.south && currentBounds.west <= boundsToTest.west && currentBounds.east >= boundsToTest.east){
         return true;
     }
     return false;
@@ -197,21 +197,21 @@ function updateObjectsPan(origBounds,origBoundsString,queryList){ //this functio
 }
 
 function removeFromMap(idToRemove,layerToRemoveFrom,mapToRemoveFrom){
-    let iconUrlToSeachFor = getAttribute(idToRemove,ATTRIBUTE.icon).options.iconUrl;
-    layerToRemoveFrom.eachLayer(function(layer){
-        if(layer.options.icon){
-            if(iconUrlToSeachFor === layer.options.icon.options.iconUrl){
-                layerToRemoveFrom.removeLayer(layer);
+    if(getAttribute(idToRemove,ATTRIBUTE.icon) != "noicon"){
+        let iconUrlToSeachFor = getAttribute(idToRemove,ATTRIBUTE.icon).options.iconUrl;
+        layerToRemoveFrom.eachLayer(function(layer){
+            if(layer.options.icon){
+                if(iconUrlToSeachFor === layer.options.icon.options.iconUrl){
+                    layerToRemoveFrom.removeLayer(layer);
+                }
             }
-        }
-    });
+        });
+    }
     mapToRemoveFrom.eachLayer(function(layer){
         if(layer.feature){
             if(parseIconNameFromContext(layer.feature) == idToRemove){
                 mapToRemoveFrom.removeLayer(layer);
-                if(currentLayers.splice(currentLayers.indexOf(layer.feature.id),1)){
-
-                }
+                currentLayers.splice(currentLayers.indexOf(layer.feature.id),1);
             }
         }
     });
@@ -223,23 +223,33 @@ var blacklist = ["yes","amenity"];
 function parseIconNameFromContext(feature){
     //console.log(feature.properties.tags);
     let params = Object.keys(feature.properties.tags);
+    let tagsObj = feature.properties.tags;
+    if(params.length == 0){
+        params = Object.keys(feature.properties.relations[0].reltags);
+        tagsObj = feature.properties.relations[0].reltags;
+    }
     for(let i = 0; i < params.length; i++){
         for(let j = 0; j < commonTagNames.length; j++){
             if(commonTagNames[j] == params[i]){
-                if(!blacklist.includes(feature.properties.tags[params[i]])){
-                    return feature.properties.tags[params[i]];
+                if(!blacklist.includes(tagsObj[params[i]])){
+                    return tagsObj[params[i]];
                 }
             }
         }
     }
-    return 'drinking_water';
+    return 'none';
 }
 
 function parseDetailsFromContext(feature,name){
     name = capitalizeString(underScoreToSpace(name));
     let params = Object.keys(feature.properties.tags);
+    let tagsObj = feature.properties.tags;
+    if(params.length == 0){
+        params = Object.keys(feature.properties.relations[0].reltags);
+        tagsObj = feature.properties.relations[0].reltags;
+    }
     let details = "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
-    params.forEach(param => details+="<li>"+capitalizeString(underScoreToSpace(param))+": "+capitalizeString(underScoreToSpace(feature.properties.tags[param]))+"</li>");
+    params.forEach(param => details+="<li>"+capitalizeString(underScoreToSpace(param))+": "+capitalizeString(underScoreToSpace(tagsObj[param]))+"</li>");
     details+="</ul>";
     return "<b>" + name + "</b>" + "<br>" + details;
 }
@@ -345,7 +355,7 @@ function getAttribute(option,attribute) {
             break;
         case "reservoir":
             icon = new L.Icon({
-                iconUrl: "../../../images/water_works.png",
+                iconUrl: "../../../images/reservoir-lake.png",
                 iconSize: [25, 25]
             });
             color = "#00FFFF";
@@ -360,10 +370,14 @@ function getAttribute(option,attribute) {
             break;
         case "basin":
             icon = new L.Icon({
-                iconUrl: "../../../images/water_works.png",
+                iconUrl: "../../../images/reservoir-lake.png",
                 iconSize: [25, 25]
             });
-            color = "green";
+            color = "#00FFFF";
+            break;
+        case "stream":
+            icon = "noicon";
+            color = "#0000BB";
             break;
         
     }
