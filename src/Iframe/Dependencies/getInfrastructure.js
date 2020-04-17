@@ -228,10 +228,6 @@ function parseIconNameFromContext(feature){
     let pTObj = getParamsAndTags(feature);
     let params = pTObj.params;
     let tagsObj = pTObj.tagsObj;
-    if(params.length == 0){
-        params = Object.keys(feature.properties.relations[0].reltags);
-        tagsObj = feature.properties.relations[0].reltags;
-    }
     for(let i = 0; i < params.length; i++){
         for(let j = 0; j < commonTagNames.length; j++){
             if(commonTagNames[j] == params[i]){
