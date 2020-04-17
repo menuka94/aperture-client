@@ -35,7 +35,7 @@ function updateObjects(queryListOrig,bounds,cleanUpMap){ //gets the objects with
         east: ne.lng,
         west: sw.lng
     };
-    let boundsString = bBounds.south + ',' + bBounds.west + ',' + bBounds.north + ',' + bBounds.east;
+    let boundsString = makeBoundsString(bBounds);
     /*for(let i = 0; i < queryList.length; i++){ //filter objects that shouldnt render at this level
         if(queryList[i].zoom > map.getZoom()){
             queryList.splice(i,1);
@@ -44,6 +44,10 @@ function updateObjects(queryListOrig,bounds,cleanUpMap){ //gets the objects with
     let queryURL = queryDefault(queryList,boundsString);
     queryObjectsFromServer(queryURL,cleanUpMap,bBounds);
     updateObjectsPan(bBounds,boundsString,queryList);
+}
+
+function makeBoundsString(bounds){
+    return bounds.south + ',' + bounds.west + ',' + bounds.north + ',' + bounds.east;
 }
 
 function createQuery(queryList,boundsString){
@@ -190,7 +194,7 @@ function updateObjectsPan(origBounds,origBoundsString,queryList){ //this functio
         east: origBounds.east + (origBounds.east - origBounds.west),
         west: origBounds.west - (origBounds.east - origBounds.west)
     }
-    let newBoundsString = newBounds.south + ',' + newBounds.west + ',' + newBounds.north + ',' + newBounds.east;
+    let newBoundsString = makeBoundsString(newBounds);
     let queryFString = createQuery(queryList,newBoundsString);
     let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
     queryObjectsFromServer(queryURL,false,newBounds);
@@ -221,9 +225,9 @@ var commonTagNames = ["waterway","man_made","landuse","water","amenity"]; //prec
 var blacklist = ["yes","amenity"];
 
 function parseIconNameFromContext(feature){
-    //console.log(feature.properties.tags);
-    let params = Object.keys(feature.properties.tags);
-    let tagsObj = feature.properties.tags;
+    let pTObj = getParamsAndTags(feature);
+    let params = pTObj.params;
+    let tagsObj = pTObj.tagsObj;
     if(params.length == 0){
         params = Object.keys(feature.properties.relations[0].reltags);
         tagsObj = feature.properties.relations[0].reltags;
@@ -240,14 +244,21 @@ function parseIconNameFromContext(feature){
     return 'none';
 }
 
-function parseDetailsFromContext(feature,name){
-    name = capitalizeString(underScoreToSpace(name));
+function getParamsAndTags(feature){
     let params = Object.keys(feature.properties.tags);
     let tagsObj = feature.properties.tags;
     if(params.length == 0){
         params = Object.keys(feature.properties.relations[0].reltags);
         tagsObj = feature.properties.relations[0].reltags;
     }
+    return {params:params,tagsObj:tagsObj};
+}
+
+function parseDetailsFromContext(feature,name){
+    name = capitalizeString(underScoreToSpace(name));
+    let pTObj = getParamsAndTags(feature);
+    let params = pTObj.params;
+    let tagsObj = pTObj.tagsObj;
     let details = "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
     params.forEach(param => details+="<li>"+capitalizeString(underScoreToSpace(param))+": "+capitalizeString(underScoreToSpace(tagsObj[param]))+"</li>");
     details+="</ul>";
@@ -255,6 +266,9 @@ function parseDetailsFromContext(feature,name){
 }
 
 function capitalizeString(str) {
+    if(str == null || str.length == 0){
+        return "";
+    }
     str = str.split(" ");
     for (var i = 0, x = str.length; i < x; i++) {
         str[i] = str[i][0].toUpperCase() + str[i].substr(1);
