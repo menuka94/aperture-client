@@ -1,5 +1,5 @@
 const assert = require('assert');
-const {getInfrastrucuture} = require('../../../src/Iframe/Dependencies/getInfrastructure');
+var getInfrastrucuture = require('../../../src/Iframe/Dependencies/getInfrastructure');
 
 describe('makeBoundsString()', function() {
     it('should return a bounds string from a bounds object', function() {
