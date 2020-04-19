@@ -1,6 +1,6 @@
 const assert = require('assert');
 var getInfrastructure = require('../../../src/Iframe/Dependencies/getInfrastructure');
-
+global.L = require('leaflet');
 
 describe('makeBoundsString()', function() {
     it('should return a bounds string from a bounds object', function() {
@@ -76,11 +76,14 @@ describe('capitalizeString()', function() {
     });
 });
 
-// describe('getAttribute()', function() {
-//     it('gets attributes from a name', function() {
-//         assert.deepEqual(getInfrastructure.getAttribute("drinking_water",getInfrastructure.ATTRIBUTE.icon),"?");
-//     });
-// });
+describe('getAttribute()', function() {
+    it('gets attributes from a name', function() {
+        assert.deepEqual(getInfrastructure.getAttribute("drinking_water",getInfrastructure.ATTRIBUTE.icon),new L.Icon({
+            iconUrl: "../../../images/drinking_fountain.png",
+            iconSize: [25, 25]
+        }));
+    });
+});
 
 
 
