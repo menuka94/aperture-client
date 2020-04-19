@@ -398,23 +398,36 @@ function getAttribute(option,attribute) {
     else if(attribute == ATTRIBUTE.color){
         return color;
     }
-};
+    return false;
+}
 
 try{
     module.exports = {
-        currentLayers: currentLayers,
-        currentQueries: currentQueries,
-        currentBounds: currentBounds,
-        ATTRIBUTE: ATTRIBUTE,
-        changeCurrentBounds: function(value){
-            currentBounds = value;
+        currentLayers: function(val){
+            if(val != null){
+                currentLayers = val;
+            }
+            return currentLayers;
+        },
+        currentQueries: function(val){
+            if(val != null){
+                currentQueries = val;
+            }
+            return currentQueries;
+        },
+        currentBounds: function(val){
+            if(val != null){
+                currentBounds = val;
+            }
             return currentBounds;
         },
+        ATTRIBUTE: ATTRIBUTE,
         makeBoundsString: makeBoundsString,
         createQuery: createQuery,
         withinBounds: withinBounds,
         queryDefault: queryDefault,
         cleanUpQueries: cleanUpQueries,
+        queryNeedsCancelling: queryNeedsCancelling,
         drawObjectsToMap: drawObjectsToMap,
         cleanupCurrentMap: cleanupCurrentMap,
         parseIconNameFromContext: parseIconNameFromContext,
