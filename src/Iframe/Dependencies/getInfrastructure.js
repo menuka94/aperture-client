@@ -169,6 +169,7 @@ function drawObjectsToMap(dataToDraw){
         
     }).addTo(mapToEdit);
     this.markerCluster.refreshClusters();
+    return resultLayer;
 }
 
 function cleanupCurrentMap(){
@@ -398,3 +399,26 @@ function getAttribute(option,attribute) {
         return color;
     }
 };
+
+try{
+    module.exports = {
+        currentLayers: currentLayers,
+        currentQueries: currentQueries,
+        currentBounds: currentBounds,
+        ATTRIBUTE: ATTRIBUTE,
+        makeBoundsString: makeBoundsString,
+        createQuery: createQuery,
+        withinBounds: withinBounds,
+        queryDefault: queryDefault,
+        cleanUpQueries: cleanUpQueries,
+        drawObjectsToMap: drawObjectsToMap,
+        cleanupCurrentMap: cleanupCurrentMap,
+        parseIconNameFromContext: parseIconNameFromContext,
+        parseDetailsFromContext: parseDetailsFromContext,
+        getParamsAndTags: getParamsAndTags,
+        underScoreToSpace: underScoreToSpace,
+        capitalizeString: capitalizeString,
+        addIconToMap: addIconToMap,
+        getAttribute: getAttribute
+    }
+} catch(e) { }
