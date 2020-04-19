@@ -406,6 +406,10 @@ try{
         currentQueries: currentQueries,
         currentBounds: currentBounds,
         ATTRIBUTE: ATTRIBUTE,
+        changeCurrentBounds: function(value){
+            currentBounds = value;
+            return currentBounds;
+        },
         makeBoundsString: makeBoundsString,
         createQuery: createQuery,
         withinBounds: withinBounds,
