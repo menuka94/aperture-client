@@ -1,6 +1,24 @@
 const assert = require('assert');
 var getInfrastructure = require('../../../src/Iframe/Dependencies/getInfrastructure');
+var jsdom = require('jsdom-global');
 global.L = require('leaflet');
+require('leaflet.markercluster');
+
+const elem = document.createElement('div');
+elem.style.cssText = 'width: "100%", height: "800px" ';
+elem.id = 'testMap';
+document.body.appendChild(elem);
+
+const testMap = L.map('testMap', {renderer: L.canvas(), minZoom: 3,
+    fullscreenControl: true
+});
+
+var markers = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    spiderfyOnMaxZoom: false,
+    disableClusteringAtZoom: 17,
+    maxClusterRadius: 55
+});
 
 describe('makeBoundsString()', function() {
     it('should return a bounds string from a bounds object', function() {
@@ -82,8 +100,10 @@ describe('getAttribute()', function() {
             iconUrl: "../../../images/drinking_fountain.png",
             iconSize: [25, 25]
         }));
+        assert.deepEqual(getInfrastructure.getAttribute("reservoir",getInfrastructure.ATTRIBUTE.color),"#00FFFF");
     });
 });
+
 
 
 
@@ -91,5 +111,4 @@ describe('getAttribute()', function() {
 drawObjectsToMap: drawObjectsToMap,
 cleanupCurrentMap: cleanupCurrentMap,
 addIconToMap: addIconToMap,
-getAttribute: getAttribute
 */
