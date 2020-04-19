@@ -46,13 +46,15 @@ describe('queryNeedsCancelling()', function() {
 
 describe('parseIconNameFromContext()', function() {
     it('gets the name of an object from the object passed to it', function() {
-        assert.deepEqual(getInfrastructure.queryNeedsCancelling(),false);
+        assert.deepEqual(getInfrastructure.parseIconNameFromContext({properties:{tags:{man_made:"water_works",waterway:"dam"}}}),"dam");
+        assert.deepEqual(getInfrastructure.parseIconNameFromContext({properties:{tags:{yes:"no"}}}),"none");
     });
 });
 
-describe('parseIconDetailsFromContext()', function() {
-    it('gets details of an object from the object that is passed to it', function() {
-        assert.deepEqual(getInfrastructure.queryNeedsCancelling({bounds:{north:61,south:60,east:31,west:30},query:{abort:function(){}}},{north:61,south:60,east:31,west:30}),false); 
+describe('parseDetailsFromContext()', function() {
+    it('gets the details of an object from the object passed to it', function() {
+        assert.deepEqual(getInfrastructure.parseDetailsFromContext({properties:{tags:{man_made:"water_works",waterway:"dam"}}},"dam"),"<b>Dam</b><br><ul style='padding-inline-start:20px;margin-block-start:2.5px;'><li>Man Made: Water Works</li><li>Waterway: Dam</li></ul>");
+        assert.deepEqual(getInfrastructure.parseDetailsFromContext({properties:{tags:{yes:"no"}}},"none"),"<b>None</b><br><ul style='padding-inline-start:20px;margin-block-start:2.5px;'><li>Yes: No</li></ul>");
     });
 });
 

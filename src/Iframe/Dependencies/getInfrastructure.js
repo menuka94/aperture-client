@@ -229,8 +229,8 @@ function parseIconNameFromContext(feature){
     let pTObj = getParamsAndTags(feature);
     let params = pTObj.params;
     let tagsObj = pTObj.tagsObj;
-    for(let i = 0; i < params.length; i++){
-        for(let j = 0; j < commonTagNames.length; j++){
+    for(let j = 0; j < commonTagNames.length; j++){
+        for(let i = 0; i < params.length; i++){
             if(commonTagNames[j] == params[i]){
                 if(!blacklist.includes(tagsObj[params[i]])){
                     return tagsObj[params[i]];
