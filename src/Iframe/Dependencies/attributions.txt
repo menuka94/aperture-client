@@ -1,0 +1,5 @@
+just keeping track of where the icons came from for a page later on
+reservoir/lake/basin: <div>Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
+water tower: http://icons8.com
+wastewater plant: <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+dam:  http://www.iconsmind.com

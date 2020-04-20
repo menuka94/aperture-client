@@ -12,3 +12,18 @@ body{
     width:100%;
     height:100%;
 }
+.queryInfo{
+    margin:10px;
+    background-color: white;
+    padding:8px;
+    border-radius: 3px;
+    border: 2px solid rgba(0,0,0,0.2);
+}
+#queryInfoText{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    color: #333;
+}
+.leaflet-fade-anim .leaflet-tile,.leaflet-zoom-anim .leaflet-zoom-animated { will-change:auto !important; }

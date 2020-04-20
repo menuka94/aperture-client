@@ -1,4 +1,4 @@
-var view = { lat: 40.7580, lng: 286.0145 };
+var view = { lat: 40.7580, lng: 286.0145};
 var zoomLevel = 3;
 
 var setterFunctions = []; //these are added at the end of each map's html

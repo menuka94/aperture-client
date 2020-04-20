@@ -75,17 +75,16 @@
   background-color: rgba(255, 255, 255, 0.95);
   overflow-x: hidden;
   overflow-y: auto; 
+  height: 75%;
 }
   .sidebar-left .sidebar-content {
     left: 0px;
     top: 54px;
-    border-radius: 3px;
-    height: 201px;}
+    border-radius: 3px;}
   .sidebar-right .sidebar-content {
     right: 0px;
     top: 54px;
-    border-radius: 3px;
-    height: 205px;}
+    border-radius: 3px;}
   .sidebar.collapsed > .sidebar-content {
     overflow-y: hidden; 
     display: none;}
@@ -110,7 +109,10 @@
   line-height: 35px;
   font-size: 12.5pt;
   color: #fff;
-  background-color: #0074d9; }
+  background-color: #0074d9; 
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;}
   .sidebar-right .sidebar-header {
      }
 
@@ -135,7 +137,7 @@
 
 
 .sidebar {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65); 
+  /*box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65); */
 }
   .sidebar.leaflet-touch {
     box-shadow: none;

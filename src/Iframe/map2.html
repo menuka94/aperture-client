@@ -1,24 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
-        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
-        crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
-        integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
         crossorigin=""></script>
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
-    <link rel="stylesheet" type="text/css" href="Dependencies/OverPassLayer.css">
-    <script src="Dependencies/OverPassLayer.bundle.js"></script>
     <script src="Dependencies/leaflet-sidebar.js"></script>
     <link rel="stylesheet" type="text/css" href="Dependencies/leaflet-sidebar.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/osmtogeojson@2.2.12/osmtogeojson.js"></script>
+    <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.css">
+    <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.Default.css">
+    <script src="Dependencies/leaflet.markercluster.js"></script>
 </head>
+
 <body>
     <!--Required for this map to be controlled-->
     <script>const MAPNUMBER = 2; //refers to whatever map in the grid this refers to</script>
     <script src="Dependencies/mouseDown.js"></script>
-    <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
+    <script>thisMapNumber = MAPNUMBER; //changes a variable in the mouseDown.js script</script>
     <!------------------------------------------>
+    <div class="leaflet-bottom leaflet-left">
+        <div class='queryInfo'>
+            <div id='queryInfoText'>
+
+            </div>
+        </div>
+    </div>
+    <script>
+        const MINRENDERZOOM = 12;
+        let queryAlertText = document.getElementById('queryInfoText');
+    </script>
+    <script src="Dependencies/getInfrastructure.js"></script>
     <div id="sidebar" class="sidebar collapsed">
         <!-- Nav tabs -->
         <div class="sidebar-tabs">
@@ -40,262 +57,239 @@
                     <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
                 </h1>
                 <div class="selectContainer">
-                    <input type="checkbox" id="drinking_water" onchange="changeChecked(this)" checked>
-                    <label for="drinking_water">Drinking Water</label><br>
-                    <input type="checkbox" id="fountain" onchange="changeChecked(this)" checked>
-                    <label for="fountain">Fountains</label><br>
-                    <input type="checkbox" id="fire_hydrant" onchange="changeChecked(this)" checked>
-                    <label for="fire_hydrant">Fire Hydrants</label><br>
                     <input type="checkbox" id="dam" onchange="changeChecked(this)" checked>
                     <label for="dam">Dams</label><br>
-                    <input type="checkbox" id="tap_water" onchange="changeChecked(this)" checked>
-                    <label for="tap_water">Water Taps</label><br>
+                    <input type="checkbox" id="water_tap" onchange="changeChecked(this)" checked>
+                    <label for="water_tap">Water Taps</label><br>
                     <input type="checkbox" id="water_tower" onchange="changeChecked(this)" checked>
                     <label for="water_tower">Water Towers</label><br>
                     <input type="checkbox" id="water_well" onchange="changeChecked(this)" checked>
                     <label for="water_well">Water Wells</label><br>
                     <input type="checkbox" id="water_works" onchange="changeChecked(this)" checked>
                     <label for="water_works">Water Works</label><br>
+                    <input type="checkbox" id="wastewater_plant" onchange="changeChecked(this)" checked>
+                    <label for="wastewater_plant">Wastewater Plants</label><br>
+                    <input type="checkbox" id="reservoir" onchange="changeChecked(this)" checked>
+                    <label for="reservoir">Reservoirs</label><br>
+                    <input type="checkbox" id="canal" onchange="changeChecked(this)" checked>
+                    <label for="canal">Canals</label><br>
+                    <input type="checkbox" id="river" onchange="changeChecked(this)" checked>
+                    <label for="river">Rivers</label><br>
+                    <input type="checkbox" id="stream" onchange="changeChecked(this)">
+                    <label for="stream">Streams</label><br>
                 </div>
             </div>
         </div>
     </div>
-
     <div id="map" class="sidebar-map"></div>
 
     <!------------------------------------------>
-
-
     <div id='map2' class='map'></div>
     <script>
-        osmMap2 = L.map('map2', {renderer: L.canvas(), minZoom: 3, 
+        osmMap2 = L.map('map2', {
+            renderer: L.canvas(),
+            minZoom: 3,
             fullscreenControl: true,
             inertia: false,
             timeDimension: false
         });
 
         osmMap2.on("load", function () {
-            //-----------
+            //osmMap2.setView([parent.view.lat,parent.view.lng - 360], parent.zoomLevel);
         });
 
-        osmMap2.setView(parent.view, parent.zoomLevel);
-
-
+        osmMap2.setView(osmMap2.wrapLatLng(parent.view), parent.zoomLevel);
         var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                maxZoom: 18,
-            maxBounds: [[],[]]
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            maxZoom: 18
         }).addTo(osmMap2);
 
         var sidebar = L.control.sidebar('sidebar', {
             position: 'right'
         }).addTo(map);
 
+        var markers = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            spiderfyOnMaxZoom: false,
+            disableClusteringAtZoom: 17,
+            maxClusterRadius: 55
+        });
+        osmMap2.addLayer(markers);
 
-        L.icon = function (option) {
-            switch(option){
-                case "drinking_water":
-                    return new L.Icon({
-                        iconUrl: "../../images/drinking_fountain.png",
-                        iconSize: [25, 25]
-                    });
-                case "fountain":
-                    return new L.Icon({
-                        iconUrl: "../../images/fountain.png",
-                        iconSize: [20, 20]
-                    });
-                case "fire_hydrant":
-                    return new L.Icon({
-                        iconUrl: "../../images/fire_hydrant.png",
-                        iconSize: [20, 20]
-                    });
-                case "dam":
-                    return new L.Icon({
-                        iconUrl: "../../images/dam.png",
-                        iconSize: [25, 25]
-                    });
-                case "water_tap":
-                    return new L.Icon({
-                        iconUrl: "../../images/tap_water.png",
-                        iconSize: [25, 25]
-                    });
-                case "water_tower":
-                    return new L.Icon({
-                        iconUrl: "../../images/water_tower.png",
-                        iconSize: [25, 25]
-                    });
-                case "water_well":
-                    return new L.Icon({
-                        iconUrl: "../../images/water_well.png",
-                        iconSize: [25, 25]
-                    });
-                case "water_works":
-                    return new L.Icon({
-                        iconUrl: "../../images/water_works.png",
-                        iconSize: [25, 25]
-                    });
-                case "wastewater_plant":
-                    return new L.Icon({
-                        iconUrl: "../../images/sewage.png",
-                        iconSize: [25, 25]
-                    });
-                
-            }
-        };
-
-
-        function getNewOverPassLayer(query){
-            var splitQuery = query.split('=');
-            var option;
-            option = splitQuery[1].split(']')[0]; //gets the part before the ] but after the =
-            //console.log(option);
-            return new L.OverPassLayer({
-                        minZoom:  15,
-                        query: query,
-                        markerIcon: L.icon(option),
-                        id: "OverPassLayer",
-                        minZoomIndicatorOptions: {
-                            position: 'bottomleft',
-                            minZoomMessage: 'Current zoom: CURRENTZOOM - Data at: MINZOOMLEVEL'
-                        }
-            });
-        }
-
+        config(markers, osmMap2);
         var selectedObjects = [];
 
-        function mapObjectGetter(objectName){
+        /*
+        infrastructure:
+            to-do:
+                waterway=spillway
+                monitoring:groundwater
+                waterway=lock gate
+                man made=archimedes screw
+                boundary=water_protection_area
+                landuse=water_wellfield
+                man_made=reservoir_covered
+                pipeline db
+                natural=spring
+                man made=monitoring station (can specify water)
+                waterway=tidal_channel
+                waterway=pressurised
+                waterway=weir
+            done:
+                Here are all the available tags that I deemed potentially relevant. Please feel free to chip in with anything you think I've missed.
+                amenity=fountain
+                waterway=spillway
+                amenity=drinking water
+                man made=water well
+                man made=water works
+                man_made=wastewater_plant
+                waterway=dam
+                landuse=landfill
+                man made=wastewater plant
+                man_made=water_tower
+                landuse=basin
+                waterway=canal
+                landuse=reservoir
+        */
+
+        function mapObjectGetter(objectName) {
             let query;
-            switch(objectName){
+            let zoom;
+            switch (objectName) {
                 case "drinking_water":
-                    query = 'node [amenity=drinking_water][man_made!=water_tap]({{bbox}}); out;';
+                    query = 'amenity=drinking_water';
                     break;
                 case "fountain":
-                    query = 'node [amenity=fountain] ({{bbox}}); out;';
-                    break;
-                case "fire_hydrant":
-                    query = 'node [emergency=fire_hydrant] ({{bbox}}); out;';
+                    query = 'amenity=fountain';
                     break;
                 case "dam":
-                    query = 'way[waterway=dam]({{bbox}}); foreach((._;>;);out 1;); node[waterway=dam]({{bbox}}); out;'
+                    query = 'waterway=dam'
                     break;
                 case "tap_water":
-                    query = 'node[man_made=water_tap]({{bbox}}); out;';
+                    query = 'man_made=water_tap';
                     break;
                 case "water_tower":
-                    query = 'way[man_made=water_tower]({{bbox}}); foreach((._;>;);out 1;); node[man_made=water_tower]({{bbox}}); out;';
+                    query = 'man_made=water_tower';
                     break;
                 case "water_well":
-                    query = 'way[man_made=water_well]({{bbox}}); foreach((._;>;);out 1;); node[man_made=water_well]({{bbox}}); out;';
+                    query = 'man_made=water_well';
                     break;
                 case "water_works":
-                    query = 'way[man_made=water_works]({{bbox}}); foreach((._;>;);out 1;); node[man_made=water_works]({{bbox}}); out;';
+                    query = 'man_made=water_works';
                     break;
-                case "sewage_plant":
-                    query = 'way[man_made=wastewater_plant]({{bbox}}); foreach((._;>;);out 1;); node[man_made=wastewater_plant]({{bbox}}); out;';
+                case "wastewater_plant":
+                    query = 'man_made=wastewater_plant';
                     break;
-                
+                case "pipeline":
+                    query = 'man_made=pipeline';
+                    break;
+                case "reservoir":
+                    query = 'water=reservoir';
+                    break;
+                case "canal":
+                    query = 'waterway=canal';
+                    break;
+                case "river":
+                    query = 'waterway=river';
+                    break;
+                case "basin":
+                    query = 'landuse=basin';
+                    break;
+                case "stream":
+                    query = 'waterway=stream';
+                    break;
             }
-            return getNewOverPassLayer(query);
+            return {
+                query: query
+            };
         }
 
-        selectedObjects.push(mapObjectGetter("drinking_water"));
-        selectedObjects.push(mapObjectGetter("fountain"));
-        selectedObjects.push(mapObjectGetter("fire_hydrant"));
         selectedObjects.push(mapObjectGetter("dam"));
         selectedObjects.push(mapObjectGetter("tap_water"));
         selectedObjects.push(mapObjectGetter("water_tower"));
         selectedObjects.push(mapObjectGetter("water_well"));
         selectedObjects.push(mapObjectGetter("water_works"));
-        selectedObjects.push(mapObjectGetter("sewage_plant"));
-        selectedObjects.forEach(object => osmMap2.addLayer(object));
+        selectedObjects.push(mapObjectGetter("wastewater_plant"));
+        selectedObjects.push(mapObjectGetter("reservoir"));
+        selectedObjects.push(mapObjectGetter("canal"));
+        selectedObjects.push(mapObjectGetter("river"));
+        //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
-        function updateOverPassLayer(map){
-            let whitelist = [];
-            map.eachLayer(function(layer){
-                //console.log(layer.options);
-                if(layer.options.id === "OverPassLayer"){
-                    if(layer.options.minZoom > map.getZoom()){
-                        map.removeLayer(layer);
-                    }
-                    else{
-                        whitelist.push(layer.options.query);
-                    }
-                }
-                else if(15 > map.getZoom()){
-                    if(layer.options.icon != null){
-                        map.removeLayer(layer);
-                    }
-                }
-            });
-            //console.log(whitelist);
-            for(let i = 0; i < selectedObjects.length; i++){
-                //console.log(selectedObjects[i]);
-                if(selectedObjects[i].options.minZoom <= map.getZoom() && !whitelist.includes(selectedObjects[i].options.query)){
-                    map.addLayer(selectedObjects[i]);
-                    //markers.addLayers(selectedObjects[i].);
-                }
-            }
+        function updateOverPassLayer(map, reload) {
+            updateObjects(selectedObjects, osmMap2.getBounds(), reload);
         }
 
-        function removeOverpassLayer(map, removeLayer){
-            map.eachLayer(function(layer){
+        function removeOverpassLayer(map, removeLayer) {
+            map.eachLayer(function (layer) {
                 //console.log(layer.options);
-                if(layer.options.id === "OverPassLayer" && layer.options.query == removeLayer.options.query){
+                if (layer.options.id === "OverPassLayer" && layer.options.query == removeLayer.options.query) {
                     map.removeLayer(layer);
                 }
             });
         }
 
-        function changeChecked(element){
-            if(element.checked){
+        function changeChecked(element) {
+            if (element.checked) {
                 onCheck(element);
             }
-            else{
+            else {
                 onUnchecked(element);
             }
         }
 
-        function onCheck(element){
+        function onCheck(element) {
             selectedObjects.push(mapObjectGetter(element.id));
-            updateOverPassLayer(osmMap2);
+            updateOverPassLayer(osmMap2, true);
         }
 
-        function onUnchecked(element){
-            //console.log(selectedObjects);
+        function onUnchecked(element) {
             let idx;
-            for(let i = 0; i < selectedObjects.length; i++){
-                if(mapObjectGetter(element.id).options.query == selectedObjects[i].options.query){
+            for (let i = 0; i < selectedObjects.length; i++) {
+                if (selectedObjects[i].query.split('=')[1] == element.id) {
                     idx = i;
                     break;
                 }
             }
-            selectedObjects.splice(idx,1);
-            removeOverpassLayer(osmMap2,mapObjectGetter(element.id));
-            //console.log(selectedObjects);
+            selectedObjects.splice(idx, 1);
+            removeFromMap(element.id, markers, osmMap2);
         }
 
         parent.addEventListener('updateMaps', function () {
-            updateOverPassLayer(osmMap2);
+            runQuery();
         });
 
+        function runQuery() {
+            if (osmMap2.getZoom() >= MINRENDERZOOM) {
+                updateOverPassLayer(osmMap2, false);
+            }
+            else {
+                queryAlertText.parentElement.style.display = "block";
+                queryAlertText.innerHTML = "Current Zoom: " + osmMap2.getZoom() + " - Data at: " + MINRENDERZOOM;
+                cleanupCurrentMap(osmMap2, markers);
+            }
+        }
+        runQuery();
         osmMap2.on("move", function (e) {
-            parent.setGlobalPosition(osmMap2.getCenter(),MAPNUMBER);
+            parent.setGlobalPosition(osmMap2.getCenter(), MAPNUMBER);
         });
         osmMap2.on("zoomend", function () {
-            parent.setGlobalPositionFORCE(osmMap2.getCenter(),MAPNUMBER);
-        }); 
+            parent.setGlobalPositionFORCE(osmMap2.getCenter(), MAPNUMBER);
+        });  
     </script>
 
 
     <!--You must add this map's setter function-->
-    <script> 
-        var thisMapsSetter = function(view,zoom){
-            osmMap2.setView(view, osmMap2.getZoom());
+    <script>
+        var thisMapsSetter = function (view, zoom) {
+            osmMap2.setView(osmMap2.wrapLatLng(parent.view), osmMap2.getZoom());
         }
         parent.setterFunctions.push({
             setterFunc: thisMapsSetter,
             mapNum: MAPNUMBER
         });
-    </script> 
+        setTimeout(function(){
+            osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat,osmMap2.wrapLatLng(parent.view).lng - 0.25],osmMap2.getZoom());
+        }, 1); //this is a terrible fix but it works for now
+    </script>
 </body>

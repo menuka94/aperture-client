@@ -37,7 +37,7 @@
     <!--You must add this map's setter function-->
     <script> 
         var thisMapsSetter = function(view,zoom){
-            buildingmap.setView(view, buildingmap.getZoom(), {
+            buildingmap.setView(buildingmap.wrapLatLng(view), buildingmap.getZoom(), {
             });
         }
         parent.setterFunctions.push({
