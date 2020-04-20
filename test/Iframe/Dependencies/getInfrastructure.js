@@ -89,8 +89,8 @@ describe('underScoreToSpace()', function() {
 });
 
 describe('capitalizeString()', function() {
-    it('changed first letter of every word to capital', function() {
-        assert.deepEqual(getInfrastructure.capitalizeString("this is a test"),"This Is A Test");
+    it('changed first letter of every word to capital, except for 1 char words', function() {
+        assert.deepEqual(getInfrastructure.capitalizeString("this is a test"),"This Is a Test");
     });
 });
 
@@ -107,8 +107,8 @@ describe('getAttribute()', function() {
 
 
 
+
 /*
-drawObjectsToMap: drawObjectsToMap,
 cleanupCurrentMap: cleanupCurrentMap,
 addIconToMap: addIconToMap,
 */

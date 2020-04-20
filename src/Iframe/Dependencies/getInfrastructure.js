@@ -75,7 +75,7 @@ function queryObjectsFromServer(queryURL, cleanUpMap, bounds, isOsm) {
         queryAlertText.parentElement.style.display = "block";
         queryAlertText.innerHTML = "Loading Data...";
         let query = $.getJSON(queryURL, function (dataAsJson) {
-            if (editMap.getZoom() >= MINRENDERZOOM) {
+            if (editMap.getZoom() >= MINRENDERZOOM && isOsm) {
                 queryAlertText.parentElement.style.display = "none";
             }
             if(isOsm){
@@ -185,7 +185,7 @@ function cleanupCurrentMap() {
     currentQueries = [];
     this.map.eachLayer(function (layer) {
         if (layer.feature != null) {
-            if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation') {
+            if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
                 this.map.removeLayer(layer);
             }
         }
@@ -206,8 +206,12 @@ function updateObjectsPan(origBounds, origBoundsString, queryList) { //this func
     let queryFString = createQuery(queryList, newBoundsString);
     let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
     queryObjectsFromServer(queryURL, false, newBounds, true);
-    queryURL = queryNaturalGas(newBounds);
-    queryObjectsFromServer(queryURL, true, newBounds, false); //natrl gas
+    for(let i = 0; i < queryList.length; i++){
+        if(queryList[i].query === 'custom=Natural_Gas_Pipeline'){
+            queryURL = queryNaturalGas(newBounds);
+            queryObjectsFromServer(queryURL, true, newBounds, false); //natrl gas
+        }
+    }
 }
 
 function removeFromMap(idToRemove, layerToRemoveFrom, mapToRemoveFrom) {
@@ -246,7 +250,7 @@ function parseIconNameFromContext(feature) {
                 }
             }
             if(params[i] == "TYPEPIPE"){
-                return "Natural Gas Pipeline";
+                return "Natural_Gas_Pipeline";
             }
         }
     }
@@ -416,7 +420,7 @@ function getAttribute(option, attribute) {
             icon = "noicon";
             color = "#0000BB";
             break;
-        case "Natural Gas Pipeline":
+        case "Natural_Gas_Pipeline":
             icon = "noicon";
             color = "#FFFB00";
             break;

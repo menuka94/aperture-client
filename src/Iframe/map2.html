@@ -77,6 +77,8 @@
                     <label for="river">Rivers</label><br>
                     <input type="checkbox" id="stream" onchange="changeChecked(this)">
                     <label for="stream">Streams</label><br>
+                    <input type="checkbox" id="Natural_Gas_Pipeline" onchange="changeChecked(this)" checked>
+                    <label for="Natural_Gas_Pipeline">Natural Gas Pipelines</label><br>
                 </div>
             </div>
         </div>
@@ -195,8 +197,8 @@
                 case "stream":
                     query = 'waterway=stream';
                     break;
-                case "natrl_gas_pipeline":
-                    query = 'custom=natrl_gas_pipeline';
+                case "Natural_Gas_Pipeline":
+                    query = 'custom=Natural_Gas_Pipeline';
                     break;
             }
             return {
@@ -213,7 +215,7 @@
         selectedObjects.push(mapObjectGetter("reservoir"));
         selectedObjects.push(mapObjectGetter("canal"));
         selectedObjects.push(mapObjectGetter("river"));
-        selectedObjects.push(mapObjectGetter("natrl_gas_pipeline"));
+        selectedObjects.push(mapObjectGetter("Natural_Gas_Pipeline"));
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
