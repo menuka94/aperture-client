@@ -32,7 +32,7 @@
         </div>
     </div>
     <script>
-        const MINRENDERZOOM = 12;
+        const MINRENDERZOOM = 11;
         let queryAlertText = document.getElementById('queryInfoText');
     </script>
     <script src="Dependencies/getInfrastructure.js"></script>
@@ -180,9 +180,6 @@
                 case "wastewater_plant":
                     query = 'man_made=wastewater_plant';
                     break;
-                case "pipeline":
-                    query = 'man_made=pipeline';
-                    break;
                 case "reservoir":
                     query = 'water=reservoir';
                     break;
@@ -197,6 +194,9 @@
                     break;
                 case "stream":
                     query = 'waterway=stream';
+                    break;
+                case "natrl_gas_pipeline":
+                    query = 'custom=natrl_gas_pipeline';
                     break;
             }
             return {
@@ -213,6 +213,7 @@
         selectedObjects.push(mapObjectGetter("reservoir"));
         selectedObjects.push(mapObjectGetter("canal"));
         selectedObjects.push(mapObjectGetter("river"));
+        selectedObjects.push(mapObjectGetter("natrl_gas_pipeline"));
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
