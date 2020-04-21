@@ -79,6 +79,12 @@
                     <label for="stream">Streams</label><br>
                     <input type="checkbox" id="Natural_Gas_Pipeline" onchange="changeChecked(this)" checked>
                     <label for="Natural_Gas_Pipeline">Natural Gas Pipelines</label><br>
+                    <input type="checkbox" id="lock_gate" onchange="changeChecked(this)" checked>
+                    <label for="lock_gate">Lock Gates</label><br>
+                    <input type="checkbox" id="weir" onchange="changeChecked(this)" checked>
+                    <label for="weir">Weirs</label><br>
+                    <input type="checkbox" id="tidal_channel" onchange="changeChecked(this)" checked>
+                    <label for="tidal_channel">Tidal Channels</label><br>
                 </div>
             </div>
         </div>
@@ -121,39 +127,6 @@
 
         config(markers, osmMap2);
         var selectedObjects = [];
-
-        /*
-        infrastructure:
-            to-do:
-                waterway=spillway
-                monitoring:groundwater
-                waterway=lock gate
-                man made=archimedes screw
-                boundary=water_protection_area
-                landuse=water_wellfield
-                man_made=reservoir_covered
-                pipeline db
-                natural=spring
-                man made=monitoring station (can specify water)
-                waterway=tidal_channel
-                waterway=pressurised
-                waterway=weir
-            done:
-                Here are all the available tags that I deemed potentially relevant. Please feel free to chip in with anything you think I've missed.
-                amenity=fountain
-                waterway=spillway
-                amenity=drinking water
-                man made=water well
-                man made=water works
-                man_made=wastewater_plant
-                waterway=dam
-                landuse=landfill
-                man made=wastewater plant
-                man_made=water_tower
-                landuse=basin
-                waterway=canal
-                landuse=reservoir
-        */
 
         function mapObjectGetter(objectName) {
             let query;
@@ -201,6 +174,17 @@
                 case "Natural_Gas_Pipeline":
                     query = 'custom=Natural_Gas_Pipeline';
                     break;
+                case "lock_gate":
+                    query = 'waterway=lock_gate';
+                    break;
+                case "weir":
+                    query = 'waterway=weir';
+                    break;
+                case "tidal_channel":
+                    query = 'waterway=tidal_channel';
+                    break;
+                
+                    
             }
             return {
                 query: query
@@ -217,6 +201,11 @@
         selectedObjects.push(mapObjectGetter("canal"));
         selectedObjects.push(mapObjectGetter("river"));
         selectedObjects.push(mapObjectGetter("Natural_Gas_Pipeline"));
+        selectedObjects.push(mapObjectGetter("lock_gate"));
+        selectedObjects.push(mapObjectGetter("weir"));
+        selectedObjects.push(mapObjectGetter("tidal_channel"));
+
+
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 

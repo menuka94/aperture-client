@@ -79,7 +79,13 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) {
             queryAlertText.innerHTML = "Loading Data...";
         }
         let query = $.getJSON(queryURL, function (dataAsJson) {
-            if (editMap.getZoom() >= MINRENDERZOOM && isOsm) {
+            for(let i = 0; i < currentQueries.length; i++){
+                if(currentQueries[i].query === query){
+                    currentQueries.splice(i,1)
+                    break;
+                }
+            }
+            if (editMap.getZoom() >= MINRENDERZOOM && currentQueries.length == 0) {
                 queryAlertText.parentElement.style.display = "none";
             }
             if (forceGarbageCleanup) {
@@ -212,25 +218,37 @@ function pointIsWithinBounds(point,bounds){
     return point.lng > bounds.getSouthWest().lng && point.lat > bounds.getSouthWest().lat && point.lng < bounds.getNorthEast().lng && point.lat < bounds.getNorthEast().lat;
 }
 
+function pointIsWithinBoundsX2(point,bounds){
+    if(point == null){
+        return true;
+    }
+    bounds = L.latLngBounds(L.latLng(bounds.getSouth() - (bounds.getNorth() - bounds.getSouth()),bounds.getWest() - (bounds.getEast() - bounds.getWest())),L.latLng(bounds.getNorth() + (bounds.getNorth() - bounds.getSouth()), bounds.getEast() + (bounds.getEast() - bounds.getWest())));
+    return point.lng > bounds.getWest() && point.lat > bounds.getSouth() && point.lng < bounds.getEast() && point.lat < bounds.getNorth();
+}
+
 function cleanupCurrentMap() {
-    currentLayers = [];
-    currentBounds = null;
-    currentQueries = [];
-    blacklist = [];
     this.map.eachLayer(function (layer) {
         if (layer.feature != null) {
             let ltlng = this.map.getCenter;
             if(latLngFromFeature(layer.feature) != null){
                 ltlng = L.latLng(latLngFromFeature(layer.feature));
             }
-            if(!pointIsWithinBounds(ltlng,this.map.getBounds())){
+            if(!pointIsWithinBoundsX2(ltlng,this.map.getBounds())){
                 if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
                     this.map.removeLayer(layer);
+                    currentLayers.splice(currentLayers.indexOf(layer.feature.id),1);
                 }
             }
         }
     });
-    this.markerCluster.clearLayers();
+    let iconsToRemove = [];
+    this.markerCluster.eachLayer(function(layer){
+        let ltlng = layer._latlng;
+        if(!pointIsWithinBoundsX2(ltlng,this.map.getBounds())){
+            iconsToRemove.push(layer);
+        }
+    });
+    this.markerCluster.removeLayers(iconsToRemove);
 }
 
 
@@ -464,6 +482,24 @@ function getAttribute(option, attribute) {
         case "Natural_Gas_Pipeline":
             icon = "noicon";
             color = "#FFFB00";
+            break;
+        case "lock_gate":
+            icon = new L.Icon({
+                iconUrl: "../../../images/lock_gate.png",
+                iconSize: [25, 25]
+            });
+            color = "#FF0000";
+            break;
+        case "weir":
+            icon = new L.Icon({
+                iconUrl: "../../../images/weir.png",
+                iconSize: [25, 25]
+            });
+            color = "#FF0000";
+            break;
+        case "tidal_channel":
+            icon = "noicon";
+            color = "#0080FF";
             break;
 
     }
