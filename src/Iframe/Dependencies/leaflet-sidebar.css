@@ -95,7 +95,7 @@
   right: 0;
   box-sizing: border-box;
   padding: 10px 20px; 
-  max-width: 200px;
+  max-width: 250px;
 }
 .sidebar-pane.active {
   display: block; 

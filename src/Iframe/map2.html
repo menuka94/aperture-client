@@ -32,7 +32,7 @@
         </div>
     </div>
     <script>
-        const MINRENDERZOOM = 12;
+        const MINRENDERZOOM = 10;
         let queryAlertText = document.getElementById('queryInfoText');
     </script>
     <script src="Dependencies/getInfrastructure.js"></script>
@@ -77,6 +77,14 @@
                     <label for="river">Rivers</label><br>
                     <input type="checkbox" id="stream" onchange="changeChecked(this)">
                     <label for="stream">Streams</label><br>
+                    <input type="checkbox" id="Natural_Gas_Pipeline" onchange="changeChecked(this)" checked>
+                    <label for="Natural_Gas_Pipeline">Natural Gas Pipelines</label><br>
+                    <input type="checkbox" id="lock_gate" onchange="changeChecked(this)" checked>
+                    <label for="lock_gate">Lock Gates</label><br>
+                    <input type="checkbox" id="weir" onchange="changeChecked(this)" checked>
+                    <label for="weir">Weirs</label><br>
+                    <input type="checkbox" id="tidal_channel" onchange="changeChecked(this)" checked>
+                    <label for="tidal_channel">Tidal Channels</label><br>
                 </div>
             </div>
         </div>
@@ -91,14 +99,15 @@
             minZoom: 3,
             fullscreenControl: true,
             inertia: false,
-            timeDimension: false
+            timeDimension: false,
+            minZoom: 11
         });
 
         osmMap2.on("load", function () {
             //osmMap2.setView([parent.view.lat,parent.view.lng - 360], parent.zoomLevel);
         });
 
-        osmMap2.setView(osmMap2.wrapLatLng(parent.view), parent.zoomLevel);
+        osmMap2.setView(osmMap2.wrapLatLng(parent.view), 11);
         var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             maxZoom: 18
@@ -118,39 +127,6 @@
 
         config(markers, osmMap2);
         var selectedObjects = [];
-
-        /*
-        infrastructure:
-            to-do:
-                waterway=spillway
-                monitoring:groundwater
-                waterway=lock gate
-                man made=archimedes screw
-                boundary=water_protection_area
-                landuse=water_wellfield
-                man_made=reservoir_covered
-                pipeline db
-                natural=spring
-                man made=monitoring station (can specify water)
-                waterway=tidal_channel
-                waterway=pressurised
-                waterway=weir
-            done:
-                Here are all the available tags that I deemed potentially relevant. Please feel free to chip in with anything you think I've missed.
-                amenity=fountain
-                waterway=spillway
-                amenity=drinking water
-                man made=water well
-                man made=water works
-                man_made=wastewater_plant
-                waterway=dam
-                landuse=landfill
-                man made=wastewater plant
-                man_made=water_tower
-                landuse=basin
-                waterway=canal
-                landuse=reservoir
-        */
 
         function mapObjectGetter(objectName) {
             let query;
@@ -180,9 +156,6 @@
                 case "wastewater_plant":
                     query = 'man_made=wastewater_plant';
                     break;
-                case "pipeline":
-                    query = 'man_made=pipeline';
-                    break;
                 case "reservoir":
                     query = 'water=reservoir';
                     break;
@@ -198,6 +171,20 @@
                 case "stream":
                     query = 'waterway=stream';
                     break;
+                case "Natural_Gas_Pipeline":
+                    query = 'custom=Natural_Gas_Pipeline';
+                    break;
+                case "lock_gate":
+                    query = 'waterway=lock_gate';
+                    break;
+                case "weir":
+                    query = 'waterway=weir';
+                    break;
+                case "tidal_channel":
+                    query = 'waterway=tidal_channel';
+                    break;
+                
+                    
             }
             return {
                 query: query
@@ -213,6 +200,12 @@
         selectedObjects.push(mapObjectGetter("reservoir"));
         selectedObjects.push(mapObjectGetter("canal"));
         selectedObjects.push(mapObjectGetter("river"));
+        selectedObjects.push(mapObjectGetter("Natural_Gas_Pipeline"));
+        selectedObjects.push(mapObjectGetter("lock_gate"));
+        selectedObjects.push(mapObjectGetter("weir"));
+        selectedObjects.push(mapObjectGetter("tidal_channel"));
+
+
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
@@ -240,6 +233,7 @@
 
         function onCheck(element) {
             selectedObjects.push(mapObjectGetter(element.id));
+            removeFromBlacklist(element.id);
             updateOverPassLayer(osmMap2, true);
         }
 
@@ -289,7 +283,7 @@
             mapNum: MAPNUMBER
         });
         setTimeout(function(){
-            osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat,osmMap2.wrapLatLng(parent.view).lng - 0.25],osmMap2.getZoom());
+            osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat,osmMap2.wrapLatLng(parent.view).lng - 0.0002],osmMap2.getZoom());
         }, 1); //this is a terrible fix but it works for now
     </script>
 </body>

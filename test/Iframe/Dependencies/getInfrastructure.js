@@ -47,6 +47,12 @@ describe('queryDefault()', function() {
     });
 });
 
+describe('queryNaturalGas()', function() {
+    it('should return a url to arcgis', function() {
+        assert.deepEqual(getInfrastructure.queryNaturalGas({north:60,south:61,east:30,west:31}),'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=31%2C61%2C30%2C60&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson'); 
+    });
+});
+
 describe('cleanUpQueries()', function() {
     it('should edit the list of queries if they shouldnt render anymore', function() {
         getInfrastructure.currentQueries([{bounds:{north:61,south:60,east:31,west:30},query:{abort:function(){}}}]);
@@ -89,8 +95,8 @@ describe('underScoreToSpace()', function() {
 });
 
 describe('capitalizeString()', function() {
-    it('changed first letter of every word to capital', function() {
-        assert.deepEqual(getInfrastructure.capitalizeString("this is a test"),"This Is A Test");
+    it('changed first letter of every word to capital, except for 1 char words', function() {
+        assert.deepEqual(getInfrastructure.capitalizeString("this is a test"),"This Is a Test");
     });
 });
 
@@ -104,11 +110,38 @@ describe('getAttribute()', function() {
     });
 });
 
+describe('pointIsWithinBounds()', function() {
+    it('return true if a point is with bounds', function() {
+        assert.deepEqual(getInfrastructure.pointIsWithinBounds(L.latLng(0,0),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),true);
+        assert.deepEqual(getInfrastructure.pointIsWithinBounds(L.latLng(-2,-2),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),false);
+    });
+});
+
+describe('pointIsWithinBoundsX2()', function() {
+    it('return true if a point is with bounds plus itself on every axis', function() {
+        assert.deepEqual(getInfrastructure.pointIsWithinBoundsX2(L.latLng(0,0),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),true);
+        assert.deepEqual(getInfrastructure.pointIsWithinBoundsX2(L.latLng(-2,-2),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),true);
+        assert.deepEqual(getInfrastructure.pointIsWithinBoundsX2(L.latLng(-4,-4),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),false);
+    });
+});
+
+describe('removeFromBlacklist()', function() {
+    it('removes tag from blacklist', function() {
+        assert.deepEqual(getInfrastructure.removeFromBlacklist("weir"),false);
+        getInfrastructure.blacklist(["weir"]);
+        assert.deepEqual(getInfrastructure.removeFromBlacklist("weir"),true);
+    });
+});
+
+describe('latLngFromFeature()', function() {
+    it('gets lat and lng from a feature', function() {
+        assert.deepEqual(getInfrastructure.latLngFromFeature({geometry:{type:"none", coordinates:L.latLng(40,90)}}),-1);
+    });
+});
 
 
 
 /*
-drawObjectsToMap: drawObjectsToMap,
 cleanupCurrentMap: cleanupCurrentMap,
 addIconToMap: addIconToMap,
 */
