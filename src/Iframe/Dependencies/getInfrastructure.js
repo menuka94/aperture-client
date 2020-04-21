@@ -481,7 +481,7 @@ function getAttribute(option, attribute) {
             break;
         case "Natural_Gas_Pipeline":
             icon = "noicon";
-            color = "#FFFB00";
+            color = "#8A2BE2";
             break;
         case "lock_gate":
             icon = new L.Icon({
