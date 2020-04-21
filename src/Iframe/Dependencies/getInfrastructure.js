@@ -18,6 +18,7 @@ let map;
 let mapBoundsObj;
 let markerCluster;
 let blacklist = [];
+let forceGarbageCleanup = false;
 //-----------------------------------------
 
 function config(markerCluster, map) {
@@ -25,7 +26,7 @@ function config(markerCluster, map) {
     this.markerCluster = markerCluster;
 }
 
-function updateObjects(queryListOrig, bounds, cleanUpMap) { //gets the objects within the current viewport
+function updateObjects(queryListOrig, bounds, forceDraw) { //gets the objects within the current viewport
     let sw = bounds.getSouthWest().wrap();
     let ne = bounds.getNorthEast().wrap();
     let queryList = queryListOrig.slice(); //clone querylist
@@ -43,7 +44,7 @@ function updateObjects(queryListOrig, bounds, cleanUpMap) { //gets the objects w
         }
     }*/
     let queryURL = queryDefault(queryList, boundsString);
-    queryObjectsFromServer(queryURL, cleanUpMap, bBounds, true);
+    queryObjectsFromServer(queryURL, forceDraw, bBounds, true);
     updateObjectsPan(bBounds, boundsString, queryList);
 }
 
@@ -54,7 +55,7 @@ function makeBoundsString(bounds) {
 function createQuery(queryList, boundsString) {
     let queryFString = '';
     for (let i = 0; i < queryList.length; i++) {
-        if(queryList[i].query.split('=')[0] === 'custom' || blacklist.includes(queryList[i].query.split('=')[1])){
+        if (queryList[i].query.split('=')[0] === 'custom' || blacklist.includes(queryList[i].query.split('=')[1])) {
             continue; //skip if its a custom query and not a osm query, or if blacklisted
         }
         query = queryList[i].query.replace(/ /g, ''); //remove whitespace
@@ -68,12 +69,12 @@ function createQuery(queryList, boundsString) {
     return queryFString;
 }
 
-function queryObjectsFromServer(queryURL, cleanUpMap, bounds, isOsm) {
-    if (!withinBounds(bounds) || cleanUpMap) {
+function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) {
+    if (!withinBounds(bounds) || forceDraw) {
         cleanUpQueries(bounds);
         currentBounds = bounds;
         let editMap = this.map; //because this.map wont work inside getJSON for some reason
-        if(isOsm){
+        if (isOsm) {
             queryAlertText.parentElement.style.display = "block";
             queryAlertText.innerHTML = "Loading Data...";
         }
@@ -81,10 +82,14 @@ function queryObjectsFromServer(queryURL, cleanUpMap, bounds, isOsm) {
             if (editMap.getZoom() >= MINRENDERZOOM && isOsm) {
                 queryAlertText.parentElement.style.display = "none";
             }
-            if(isOsm){
+            if (forceGarbageCleanup) {
+                cleanupCurrentMap();
+                forceGarbageCleanup = false;
+            }
+            if (isOsm) {
                 drawObjectsToMap(osmtogeojson(dataAsJson));
             }
-            else{
+            else {
                 drawObjectsToMap(dataAsJson);
             }
         });
@@ -96,6 +101,7 @@ function cleanUpQueries(bounds) {
     for (let i = 0; i < currentQueries.length; i++) {
         if (queryNeedsCancelling(currentQueries[i], bounds)) {
             currentQueries.splice(i, 1);
+            forceGarbageCleanup = true;
         }
     }
 }
@@ -142,27 +148,10 @@ function drawObjectsToMap(dataToDraw) {
             return true;
         },
         onEachFeature: function (feature, layer) {
-            let isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon");
-            let isLineString = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString");
-            let isPoint = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point");
-            latlng = [];
-            if (isPolygon) {
-                let pos = L.latLngBounds(feature.geometry.coordinates[0]).getCenter();
-                latlng.push(pos.lat);
-                latlng.push(pos.lng);
-            }
-            else if (isLineString) {
-                let pos = L.latLngBounds(feature.geometry.coordinates).getCenter();
-                latlng.push(pos.lat);
-                latlng.push(pos.lng);
-            }
-            else if (isPoint) {
-                latlng = feature.geometry.coordinates;
-            }
-            else {
+            latlng = latLngFromFeature(feature);
+            if(latlng === -1){
                 return;
             }
-            latlng = latlng.reverse();
             let iconName = parseIconNameFromContext(feature);
             let iconDetails = parseDetailsFromContext(feature, iconName);
             addIconToMap(getAttribute(iconName, ATTRIBUTE.icon), latlng, iconDetails);
@@ -182,14 +171,45 @@ function drawObjectsToMap(dataToDraw) {
     return resultLayer;
 }
 
-function removeFromBlacklist(idToRemove){
-    if(blacklist.includes(idToRemove)){
-        blacklist.splice(blacklist.indexOf(idToRemove),1);
+function latLngFromFeature(feature) {
+    let isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon");
+    let isLineString = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString");
+    let isPoint = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point");
+    latlng = [];
+    if (isPolygon) {
+        let pos = L.latLngBounds(feature.geometry.coordinates[0]).getCenter();
+        latlng.push(pos.lat);
+        latlng.push(pos.lng);
+    }
+    else if (isLineString) {
+        let pos = L.latLngBounds(feature.geometry.coordinates).getCenter();
+        latlng.push(pos.lat);
+        latlng.push(pos.lng);
+    }
+    else if (isPoint) {
+        latlng = feature.geometry.coordinates;
+    }
+    else {
+        return -1;
+    }
+    return latlng.reverse();
+}
+
+function removeFromBlacklist(idToRemove) {
+    if (blacklist.includes(idToRemove)) {
+        blacklist.splice(blacklist.indexOf(idToRemove), 1);
         return true;
     }
-    else{
+    else {
         return false;
     }
+}
+
+function pointIsWithinBounds(point,bounds){
+    if(point == null){
+        return true;
+    }
+    return point.lng > bounds.getSouthWest().lng && point.lat > bounds.getSouthWest().lat && point.lng < bounds.getNorthEast().lng && point.lat < bounds.getNorthEast().lat;
 }
 
 function cleanupCurrentMap() {
@@ -199,8 +219,14 @@ function cleanupCurrentMap() {
     blacklist = [];
     this.map.eachLayer(function (layer) {
         if (layer.feature != null) {
-            if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
-                this.map.removeLayer(layer);
+            let ltlng = this.map.getCenter;
+            if(latLngFromFeature(layer.feature) != null){
+                ltlng = L.latLng(latLngFromFeature(layer.feature));
+            }
+            if(!pointIsWithinBounds(ltlng,this.map.getBounds())){
+                if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
+                    this.map.removeLayer(layer);
+                }
             }
         }
     });
@@ -220,8 +246,8 @@ function updateObjectsPan(origBounds, origBoundsString, queryList) { //this func
     let queryFString = createQuery(queryList, newBoundsString);
     let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
     queryObjectsFromServer(queryURL, false, newBounds, true);
-    for(let i = 0; i < queryList.length; i++){
-        if(queryList[i].query === 'custom=Natural_Gas_Pipeline' && !blacklist.includes('Natural_Gas_Pipeline')){
+    for (let i = 0; i < queryList.length; i++) {
+        if (queryList[i].query === 'custom=Natural_Gas_Pipeline' && !blacklist.includes('Natural_Gas_Pipeline')) {
             queryURL = queryNaturalGas(newBounds);
             queryObjectsFromServer(queryURL, true, newBounds, false); //natrl gas
         }
@@ -264,7 +290,7 @@ function parseIconNameFromContext(feature) {
                     return tagsObj[params[i]];
                 }
             }
-            if(params[i] == "TYPEPIPE"){
+            if (params[i] == "TYPEPIPE") {
                 return "Natural_Gas_Pipeline";
             }
         }
@@ -275,7 +301,7 @@ function parseIconNameFromContext(feature) {
 function getParamsAndTags(feature) {
     let params;
     let tagsObj;
-    if(feature.properties.tags){
+    if (feature.properties.tags) {
         params = Object.keys(feature.properties.tags);
         tagsObj = feature.properties.tags;
         if (params.length == 0) {
@@ -283,7 +309,7 @@ function getParamsAndTags(feature) {
             tagsObj = feature.properties.relations[0].reltags;
         }
     }
-    else if(feature.properties){ //non-osm data is here
+    else if (feature.properties) { //non-osm data is here
         params = Object.keys(feature.properties);
         tagsObj = feature.properties;
     }
@@ -307,7 +333,7 @@ function capitalizeString(str) {
     }
     str = str.split(" ");
     for (var i = 0, x = str.length; i < x; i++) {
-        if(str[i] == null || str[i].length <= 1){
+        if (str[i] == null || str[i].length <= 1) {
             continue;
         }
         str[i] = str[i][0].toUpperCase() + str[i].substr(1);
@@ -316,7 +342,7 @@ function capitalizeString(str) {
 }
 
 function underScoreToSpace(str) {
-    if(typeof str !== 'string'){
+    if (typeof str !== 'string') {
         str = str.toString();
     }
     return str.replace(/_/gi, " ");
