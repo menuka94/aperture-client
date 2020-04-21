@@ -15,16 +15,29 @@ Sketch_Visualizer = {
             7: 16,
             8: 35
         };
+        this._zoomScaleFactor = {
+            3: 10,
+            4: 10,
+            5: 8,
+            6: 6,
+            7: 2,
+            8: 0
+        };
+        this._decay = 0.9999;
     },
 
-    _drawStrand: function(strand, ctx, map) {
+    _drawStrand: function(strand, ctx, map, epsilon) {
         const lat_lng = decode_geohash(strand.getGeohash());
         lat_lng.lon += 360;
 
         const center = map.latLngToContainerPoint(lat_lng);
+        center.x = Math.round(center.x);
+        center.y = Math.round(center.y);
         ctx.fillStyle = this._rgbaToString(this._getColorForPercentage((strand.getMeanList()[0] - 250) / (330 - 250), 0.5));
 
-        const pixelSize = this._zoomToPixelSize[map.getZoom()];
+        const pixelSize = this._zoomToPixelSize[map.getZoom()] *
+            Math.max((epsilon * this._zoomScaleFactor[map.getZoom()]), 1);
+
         ctx.clearRect(center.x, center.y, pixelSize, pixelSize);
         ctx.fillRect(center.x, center.y, pixelSize, pixelSize);
     },
@@ -98,9 +111,11 @@ Sketch_Visualizer = {
             this._getBoundingGeohash(map.getBounds()), geohashList);
         const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", geohashList, startTime, endTime);
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        let epsilon = this._zoomToPixelSize[map.getZoom()];
         stream.on('data', function (response) {
             for (const strand of response.getStrandsList()) {
-                this._drawStrand(strand, ctx, map);
+                this._drawStrand(strand, ctx, map, epsilon);
+                epsilon *= this._decay;
             }
         }.bind(this));
         stream.on('status', function (status) {
