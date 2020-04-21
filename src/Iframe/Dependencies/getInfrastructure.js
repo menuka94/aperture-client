@@ -17,6 +17,7 @@ let currentBounds;
 let map;
 let mapBoundsObj;
 let markerCluster;
+let blacklist = [];
 //-----------------------------------------
 
 function config(markerCluster, map) {
@@ -53,8 +54,8 @@ function makeBoundsString(bounds) {
 function createQuery(queryList, boundsString) {
     let queryFString = '';
     for (let i = 0; i < queryList.length; i++) {
-        if(queryList[i].query.split('=')[0] === 'custom'){
-            continue; //skip if its a custom query and not a osm query
+        if(queryList[i].query.split('=')[0] === 'custom' || blacklist.includes(queryList[i].query.split('=')[1])){
+            continue; //skip if its a custom query and not a osm query, or if blacklisted
         }
         query = queryList[i].query.replace(/ /g, ''); //remove whitespace
         let queries = {
@@ -72,8 +73,10 @@ function queryObjectsFromServer(queryURL, cleanUpMap, bounds, isOsm) {
         cleanUpQueries(bounds);
         currentBounds = bounds;
         let editMap = this.map; //because this.map wont work inside getJSON for some reason
-        queryAlertText.parentElement.style.display = "block";
-        queryAlertText.innerHTML = "Loading Data...";
+        if(isOsm){
+            queryAlertText.parentElement.style.display = "block";
+            queryAlertText.innerHTML = "Loading Data...";
+        }
         let query = $.getJSON(queryURL, function (dataAsJson) {
             if (editMap.getZoom() >= MINRENDERZOOM && isOsm) {
                 queryAlertText.parentElement.style.display = "none";
@@ -132,7 +135,7 @@ function drawObjectsToMap(dataToDraw) {
             return { color: getAttribute(parseIconNameFromContext(feature), ATTRIBUTE.color) };
         },
         filter: function (feature) {
-            if (currentLayers.includes(feature.id) || mapToEdit.getZoom() < MINRENDERZOOM) {
+            if (currentLayers.includes(feature.id) || mapToEdit.getZoom() < MINRENDERZOOM || blacklist.includes(parseIconNameFromContext(feature))) {
                 return false;
             }
             currentLayers.push(feature.id);
@@ -179,10 +182,21 @@ function drawObjectsToMap(dataToDraw) {
     return resultLayer;
 }
 
+function removeFromBlacklist(idToRemove){
+    if(blacklist.includes(idToRemove)){
+        blacklist.splice(blacklist.indexOf(idToRemove),1);
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
 function cleanupCurrentMap() {
     currentLayers = [];
     currentBounds = null;
     currentQueries = [];
+    blacklist = [];
     this.map.eachLayer(function (layer) {
         if (layer.feature != null) {
             if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
@@ -207,7 +221,7 @@ function updateObjectsPan(origBounds, origBoundsString, queryList) { //this func
     let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
     queryObjectsFromServer(queryURL, false, newBounds, true);
     for(let i = 0; i < queryList.length; i++){
-        if(queryList[i].query === 'custom=Natural_Gas_Pipeline'){
+        if(queryList[i].query === 'custom=Natural_Gas_Pipeline' && !blacklist.includes('Natural_Gas_Pipeline')){
             queryURL = queryNaturalGas(newBounds);
             queryObjectsFromServer(queryURL, true, newBounds, false); //natrl gas
         }
@@ -233,10 +247,11 @@ function removeFromMap(idToRemove, layerToRemoveFrom, mapToRemoveFrom) {
             }
         }
     });
+    blacklist.push(idToRemove);
 }
 //icon getters ------------------------------------------------
 var commonTagNames = ["waterway", "man_made", "landuse", "water", "amenity"]; //precedence goes down
-var blacklist = ["yes", "amenity"];
+var blacklistTags = ["yes", "amenity"];
 
 function parseIconNameFromContext(feature) {
     let pTObj = getParamsAndTags(feature);
@@ -245,7 +260,7 @@ function parseIconNameFromContext(feature) {
     for (let j = 0; j < commonTagNames.length; j++) {
         for (let i = 0; i < params.length; i++) {
             if (commonTagNames[j] == params[i]) {
-                if (!blacklist.includes(tagsObj[params[i]])) {
+                if (!blacklistTags.includes(tagsObj[params[i]])) {
                     return tagsObj[params[i]];
                 }
             }

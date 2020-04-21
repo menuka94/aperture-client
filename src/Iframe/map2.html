@@ -32,7 +32,7 @@
         </div>
     </div>
     <script>
-        const MINRENDERZOOM = 11;
+        const MINRENDERZOOM = 10;
         let queryAlertText = document.getElementById('queryInfoText');
     </script>
     <script src="Dependencies/getInfrastructure.js"></script>
@@ -93,14 +93,15 @@
             minZoom: 3,
             fullscreenControl: true,
             inertia: false,
-            timeDimension: false
+            timeDimension: false,
+            minZoom: 11
         });
 
         osmMap2.on("load", function () {
             //osmMap2.setView([parent.view.lat,parent.view.lng - 360], parent.zoomLevel);
         });
 
-        osmMap2.setView(osmMap2.wrapLatLng(parent.view), parent.zoomLevel);
+        osmMap2.setView(osmMap2.wrapLatLng(parent.view), 11);
         var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             maxZoom: 18
@@ -243,6 +244,7 @@
 
         function onCheck(element) {
             selectedObjects.push(mapObjectGetter(element.id));
+            removeFromBlacklist(element.id);
             updateOverPassLayer(osmMap2, true);
         }
 
@@ -292,7 +294,7 @@
             mapNum: MAPNUMBER
         });
         setTimeout(function(){
-            osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat,osmMap2.wrapLatLng(parent.view).lng - 0.25],osmMap2.getZoom());
+            osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat,osmMap2.wrapLatLng(parent.view).lng - 0.0002],osmMap2.getZoom());
         }, 1); //this is a terrible fix but it works for now
     </script>
 </body>
