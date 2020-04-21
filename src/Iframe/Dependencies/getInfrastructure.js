@@ -532,6 +532,12 @@ try {
             }
             return currentBounds;
         },
+        blacklist: function (val) {
+            if (val != null) {
+                blacklist = val;
+            }
+            return blacklist;
+        },
         ATTRIBUTE: ATTRIBUTE,
         makeBoundsString: makeBoundsString,
         createQuery: createQuery,
@@ -547,6 +553,11 @@ try {
         underScoreToSpace: underScoreToSpace,
         capitalizeString: capitalizeString,
         addIconToMap: addIconToMap,
-        getAttribute: getAttribute
+        getAttribute: getAttribute,
+        queryNaturalGas: queryNaturalGas,
+        pointIsWithinBounds: pointIsWithinBounds,
+        pointIsWithinBoundsX2: pointIsWithinBoundsX2,
+        removeFromBlacklist: removeFromBlacklist,
+        latLngFromFeature: latLngFromFeature
     }
 } catch (e) { }
