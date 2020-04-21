@@ -115,7 +115,7 @@ Sketch_Visualizer = {
         if (this._stream)
             this._stream.cancel();
 
-        stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", geohashList, startTime, endTime);
+        let stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", geohashList, startTime, endTime);
 
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         let epsilon = this._zoomToPixelSize[map.getZoom()];
