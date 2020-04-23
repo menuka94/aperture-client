@@ -1,6 +1,6 @@
 Sketch_Rasterer = {
     initialize: async function () {
-        const session = new onnx.InferenceSession({});
+        const session = new onnx.InferenceSession({ backendHint: "webgl" });
         const url = "Dependencies/Sketch_Visualization/Deep_Learning/viz_net.onnx";
         await session.loadModel(url).then(() => {
             const input = this._getInput();
@@ -14,13 +14,13 @@ Sketch_Rasterer = {
     },
 
     _getInput: function() {
-        const x = new Float32Array(10 * 400 * 850).fill(0.5);
-        return new onnx.Tensor(x, "float32", [1, 10, 1, 400, 850]);
+        const x = new Float32Array(400 * 850).fill(0.5);
+        return new onnx.Tensor(x, "float32", [1, 1, 1, 400, 850]);
     },
 
     _getQuery: function() {
-        const q = new Float32Array(10 * 13).fill(0.5);
-        return new onnx.Tensor(q, "float32", [10, 13]);
+        const q = new Float32Array(13).fill(0.5);
+        return new onnx.Tensor(q, "float32", [1, 13]);
     }
 };
 
