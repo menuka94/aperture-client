@@ -1,11 +1,11 @@
-const tf = require("tensorflow");
-
 Sketch_Rasterer = {
     initialize: async function () {
-        //const session = new onnx.InferenceSession();
-        //const url = "Sketch_Visualization/Deep_Learning/viz_net.onnx";
-        //await session.loadModel(url);
-        const model =  await tf.loadLayersModel("Sketch_Visualization/Deep_Learning/viz_net.onnx");
+        const session = new onnx.InferenceSession();
+        const url = "Dependencies/Sketch_Visualization/Deep_Learning/viz_net.onnx";
+        await session.loadModel(url);
+       // const model =  await tf.loadLayersModel("Sketch_Visualization/Deep_Learning/saved_model.pb");
+
+        //const runner = await webdnn.load('graph_descriptor');
     },
 
 };

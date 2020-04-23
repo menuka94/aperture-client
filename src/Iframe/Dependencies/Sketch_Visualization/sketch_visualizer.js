@@ -15,6 +15,7 @@ Sketch_Visualizer = {
             7: 16,
             8: 35
         };
+        this._sketchRasterer = sketch_rasterer();
     },
 
     _drawStrand: function(strand, ctx, map) {
