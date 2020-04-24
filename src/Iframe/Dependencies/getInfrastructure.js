@@ -2,7 +2,7 @@
 //Purpose: Get osm nodes, ways, and relations, and then translate them onto a leaflet map
 //Dependencies: osmtogeojson, jquery, Leaflet.markerCluster
 //----globals------------------------------
-const FLYTOOPTIONS = {
+const FLYTOOPTIONS = { //for clicking on icons
     easeLinearity: 0.4,
     duration: 0.25,
     maxZoom: 17
@@ -11,74 +11,71 @@ const ATTRIBUTE = { //attribute enums
     icon: 'icon',
     color: 'color'
 }
-let currentLayers = [];
-let currentQueries = [];
+const commonTagNames = ["waterway", "man_made", "landuse", "water", "amenity"]; //tags that are allowed from OSM data, ie: waterway=dam or man_made=water_works, precedence goes down left to right
+const blacklistTags = ["yes", "amenity"]; //tags that arent allowed for titles, ie: hydropower=yes is NOT a title for a dam
+
+let currentLayers;
+let currentQueries;
 let currentBounds;
 let map;
-let mapBoundsObj;
 let markerCluster;
-let blacklist = [];
+let blacklist;
 let forceGarbageCleanup = false;
 //-----------------------------------------
 
-function config(markerCluster, map) {
-    this.map = map;
-    this.markerCluster = markerCluster;
+function config(markerClusterIn, mapIn) {
+    map = mapIn;
+    markerCluster = markerClusterIn;
+    currentLayers = [];
+    currentQueries = [];
+    currentBounds = null;
+    blacklist = [];
 }
 
-function updateObjects(queryListOrig, bounds, forceDraw) { //gets the objects within the current viewport
-    let sw = bounds.getSouthWest().wrap();
-    let ne = bounds.getNorthEast().wrap();
-    let queryList = queryListOrig.slice(); //clone querylist
-
-    let bBounds = {
-        north: ne.lat,
-        south: sw.lat,
-        east: ne.lng,
-        west: sw.lng
-    };
+function updateObjects(queryListOrig, forceDraw) { //gets the objects within the current viewport
+    let bBounds = leafletBoundsToObj(map.getBounds());
     let boundsString = makeBoundsString(bBounds);
-    /*for(let i = 0; i < queryList.length; i++){ //filter objects that shouldnt render at this level
-        if(queryList[i].zoom > map.getZoom()){
-            queryList.splice(i,1);
-        }
-    }*/
-    let queryURL = queryDefault(queryList, boundsString);
+    let queryURL = queryDefault(queryListOrig, boundsString);
     queryObjectsFromServer(queryURL, forceDraw, bBounds, true);
-    updateObjectsPan(bBounds, boundsString, queryList);
+    updateObjectsPan(bBounds, boundsString, queryListOrig);
 }
 
-function makeBoundsString(bounds) {
-    return bounds.south + ',' + bounds.west + ',' + bounds.north + ',' + bounds.east;
-}
-
-function createQuery(queryList, boundsString) {
-    let queryFString = '';
-    for (let i = 0; i < queryList.length; i++) {
-        if (queryList[i].query.split('=')[0] === 'custom' || blacklist.includes(queryList[i].query.split('=')[1])) {
-            continue; //skip if its a custom query and not a osm query, or if blacklisted
-        }
-        query = queryList[i].query.replace(/ /g, ''); //remove whitespace
-        let queries = {
-            nodeQuery: 'node[' + query + '](' + boundsString + ');',
-            wayQuery: 'way[' + query + '](' + boundsString + ');',
-            relationQuery: 'relation[' + query + '](' + boundsString + ');'
-        }
-        queryFString += queries.nodeQuery + queries.wayQuery + queries.relationQuery;
+function updateObjectsPan(origBounds, origBoundsString, queryList) { //this function updates the objects around the current viewport, since users 
+    //generally pan around when looking at the map, therefore there's less loading time seen by the user time.
+    let newBounds = {
+        north: origBounds.north + (origBounds.north - origBounds.south),
+        south: origBounds.south - (origBounds.north - origBounds.south),
+        east: origBounds.east + (origBounds.east - origBounds.west),
+        west: origBounds.west - (origBounds.east - origBounds.west)
     }
-    return queryFString;
+    let newBoundsString = makeBoundsString(newBounds);
+    let queryFString = createQuery(queryList, newBoundsString);
+    let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
+    queryObjectsFromServer(queryURL, false, newBounds, true);
+    for (let i = 0; i < queryList.length; i++) {
+        if (queryList[i].query === 'custom=Natural_Gas_Pipeline' && !blacklist.includes('Natural_Gas_Pipeline')) {
+            queryURL = queryNaturalGas(newBounds);
+            queryObjectsFromServer(queryURL, true, newBounds, false); //natrl gas
+        }
+    }
 }
 
-function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) {
+function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: queryURL for a json, out: calls rendering methods with geojson
     if (!withinBounds(bounds) || forceDraw) {
         cleanUpQueries(bounds);
-        currentBounds = bounds;
-        let editMap = this.map; //because this.map wont work inside getJSON for some reason
+        let editMap = map; //because map wont work inside getJSON for some reason
         if (isOsm) {
             queryAlertText.parentElement.style.display = "block";
             queryAlertText.innerHTML = "Loading Data...";
         }
+        let startLoad = Date.now();
         let query = $.getJSON(queryURL, function (dataAsJson) {
+            if(!withinBounds(bounds)){
+                currentBounds = bounds;
+            }
+            if(isOsm){
+                console.log("Loadtime: " + (Date.now() - startLoad) + "ms");
+            }
             for(let i = 0; i < currentQueries.length; i++){
                 if(currentQueries[i].query === query){
                     currentQueries.splice(i,1)
@@ -103,51 +100,23 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) {
     }
 }
 
-function cleanUpQueries(bounds) {
+function cleanUpQueries(bounds) { //in: bounds of a query, out: cleans up currently running queries that dont exist in the current viewport
     for (let i = 0; i < currentQueries.length; i++) {
         if (queryNeedsCancelling(currentQueries[i], bounds)) {
             currentQueries.splice(i, 1);
+            console.log("kill");
             forceGarbageCleanup = true;
         }
     }
 }
 
-function withinBounds(boundsToTest) {
-    if (currentBounds == null) {
-        return false;
-    }
-    if (currentBounds.north >= boundsToTest.north && currentBounds.south <= boundsToTest.south && currentBounds.west <= boundsToTest.west && currentBounds.east >= boundsToTest.east) {
-        return true;
-    }
-    return false;
-}
-
-function queryNeedsCancelling(queryObj, boundsToCheckAgainst) {
-    if (queryObj.bounds.east < boundsToCheckAgainst.west || queryObj.bounds.west > boundsToCheckAgainst.east || queryObj.bounds.south > boundsToCheckAgainst.north || queryObj.bounds.north < boundsToCheckAgainst.south) {
-        queryObj.query.abort();
-        return true;
-    }
-    return false;
-}
-
-function queryDefault(queryList, boundsString) {
-    let queryFString = createQuery(queryList, boundsString);
-    let fQuery = '?data=[out:json][timeout:30];(' + queryFString + ');out body geom;';
-    return 'https://overpass.kumi.systems/api/interpreter' + fQuery;
-}
-
-function queryNaturalGas(bounds) {
-    return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
-}
-
-function drawObjectsToMap(dataToDraw) {
-    let mapToEdit = this.map;
+function drawObjectsToMap(dataToDraw) { //in: geoJson containing only things contained in 'getAttributes', out: a map with what is contained in the geoJson
     let resultLayer = L.geoJson(dataToDraw, {
         style: function (feature) {
             return { color: getAttribute(parseIconNameFromContext(feature), ATTRIBUTE.color) };
         },
         filter: function (feature) {
-            if (currentLayers.includes(feature.id) || mapToEdit.getZoom() < MINRENDERZOOM || blacklist.includes(parseIconNameFromContext(feature))) {
+            if (!featureShouldBeDrawn(feature)) {
                 return false;
             }
             currentLayers.push(feature.id);
@@ -163,7 +132,7 @@ function drawObjectsToMap(dataToDraw) {
             addIconToMap(getAttribute(iconName, ATTRIBUTE.icon), latlng, iconDetails);
             layer.bindPopup(iconDetails);
             layer.on('click', function (e) {
-                mapToEdit.flyToBounds(layer.getBounds(), FLYTOOPTIONS);
+                map.flyToBounds(layer.getBounds(), FLYTOOPTIONS);
             });
         },
         pointToLayer: function () {
@@ -172,12 +141,136 @@ function drawObjectsToMap(dataToDraw) {
             });
         }
 
-    }).addTo(mapToEdit);
-    this.markerCluster.refreshClusters();
+    }).addTo(map);
+    markerCluster.refreshClusters();
     return resultLayer;
 }
 
-function latLngFromFeature(feature) {
+function removeFromBlacklist(idToRemove) {
+    if (blacklist.includes(idToRemove)) {
+        blacklist.splice(blacklist.indexOf(idToRemove), 1);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+function cleanupCurrentMap() { //in: nothing, out: cleans up map outside of the current viewport
+    map.eachLayer(function (layer) {
+        if (layer.feature != null) {
+            let ltlng = map.getCenter;
+            if(latLngFromFeature(layer.feature) != null){
+                ltlng = latLngFromFeature(layer.feature);
+            }
+            if(!pointIsWithinBoundsX2(ltlng,map.getBounds())){
+                if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
+                    map.removeLayer(layer);
+                    currentLayers.splice(currentLayers.indexOf(layer.feature.id),1);
+                }
+            }
+        }
+    });
+    let iconsToRemove = [];
+    markerCluster.eachLayer(function(layer){
+        let ltlng = layer._latlng;
+        if(!pointIsWithinBoundsX2(ltlng,map.getBounds())){
+            iconsToRemove.push(layer);
+        }
+    });
+    markerCluster.removeLayers(iconsToRemove);
+}
+
+
+function removeFromMap(idToRemove) { //in: object id, for example 'weir' or 'Natural_Gas_Pipeline', out: removes that id from the map and adds it to the blacklist so it wont render if received
+    if (getAttribute(idToRemove, ATTRIBUTE.icon) != "noicon") {
+        let iconUrlToSeachFor = getAttribute(idToRemove, ATTRIBUTE.icon).options.iconUrl;
+        markerCluster.eachLayer(function (layer) {
+            if (layer.options.icon) {
+                if (iconUrlToSeachFor === layer.options.icon.options.iconUrl) {
+                    markerCluster.removeLayer(layer);
+                }
+            }
+        });
+    }
+    map.eachLayer(function (layer) {
+        if (layer.feature) {
+            if (parseIconNameFromContext(layer.feature) == idToRemove) {
+                map.removeLayer(layer);
+                currentLayers.splice(currentLayers.indexOf(layer.feature.id), 1);
+            }
+        }
+    });
+    blacklist.push(idToRemove);
+}
+
+
+
+
+
+
+
+
+
+
+
+//------------------------------------------------------------
+//-------------------toolbox----------------------------------
+//------------------------------------------------------------
+function createQuery(queryList, boundsString) { //in: list of tags to query, out: a query that can be appended to the url for an overpass interpreter
+    let queryFString = '';
+    for (let i = 0; i < queryList.length; i++) {
+        if (isIllegalOsmQuery(queryList[i])) {
+            continue; //skip if its a custom query and not a osm query, or if blacklisted
+        }
+        query = queryList[i].query.replace(/ /g, ''); //remove whitespace
+        let queries = {
+            nodeQuery: 'node[' + query + '](' + boundsString + ');',
+            wayQuery: 'way[' + query + '](' + boundsString + ');',
+            relationQuery: 'relation[' + query + '](' + boundsString + ');'
+        }
+        queryFString += queries.nodeQuery + queries.wayQuery + queries.relationQuery;
+    }
+    return queryFString;
+}
+
+function isIllegalOsmQuery(queryObj){ //in query ie: man_made:water_works, out: if not in blacklist and is in common tags
+    return queryObj.query.split('=')[0] === 'custom' || blacklist.includes(queryObj.query.split('=')[1]);
+}
+
+function makeBoundsString(bounds) { //in: bounds in form of object with nesw, out: string in order for overpass urls
+    return bounds.south + ',' + bounds.west + ',' + bounds.north + ',' + bounds.east;
+}
+
+function withinBounds(boundsToTest) { //in bounds, out: true if is withing bounds to check against, false if not within or null
+    if (currentBounds == null) {
+        return false;
+    }
+    if (currentBounds.north >= boundsToTest.north && currentBounds.south <= boundsToTest.south && currentBounds.west <= boundsToTest.west && currentBounds.east >= boundsToTest.east) {
+        return true;
+    }
+    return false;
+}
+
+function queryNeedsCancelling(queryObj, boundsToCheckAgainst) { //in queryObj from query objects from server, out: true and cancells query if query is not in viewport, false if not
+    if (queryObj.bounds.east < boundsToCheckAgainst.west || queryObj.bounds.west > boundsToCheckAgainst.east || queryObj.bounds.south > boundsToCheckAgainst.north || queryObj.bounds.north < boundsToCheckAgainst.south) {
+        queryObj.query.abort();
+        return true;
+    }
+    return false;
+}
+
+function queryDefault(queryList, boundsString) { //in: array of queries and a boundsstring, out: valid url to kumi systems
+    let queryFString = createQuery(queryList, boundsString);
+    let fQuery = '?data=[out:json][timeout:30];(' + queryFString + ');out body geom;';
+    return 'https://overpass.kumi.systems/api/interpreter' + fQuery;
+}
+
+function queryNaturalGas(bounds) { //in: bounds, out: url for geoJson from arcgis for natural gas pipelines
+    return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
+}
+
+function latLngFromFeature(feature) { //in: geojson feature, out: its parsed latlng as L.latLng
     let isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon");
     let isLineString = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString");
     let isPoint = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point");
@@ -198,27 +291,17 @@ function latLngFromFeature(feature) {
     else {
         return -1;
     }
-    return latlng.reverse();
+    return L.latLng(latlng[1],latlng[0]);
 }
 
-function removeFromBlacklist(idToRemove) {
-    if (blacklist.includes(idToRemove)) {
-        blacklist.splice(blacklist.indexOf(idToRemove), 1);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-function pointIsWithinBounds(point,bounds){
+function pointIsWithinBounds(point,bounds){ //in: l.latlng and l.latlngbounds, out: true if is within, false if not
     if(point == null){
         return true;
     }
-    return point.lng > bounds.getSouthWest().lng && point.lat > bounds.getSouthWest().lat && point.lng < bounds.getNorthEast().lng && point.lat < bounds.getNorthEast().lat;
+    return point.lng > bounds.getWest() && point.lat > bounds.getSouth() && point.lng < bounds.getEast() && point.lat < bounds.getNorth();
 }
 
-function pointIsWithinBoundsX2(point,bounds){
+function pointIsWithinBoundsX2(point,bounds){ //in: l.latlng and l.latlngbounds, out: true if is within the box plus a box on each side, false if not
     if(point == null){
         return true;
     }
@@ -226,76 +309,19 @@ function pointIsWithinBoundsX2(point,bounds){
     return point.lng > bounds.getWest() && point.lat > bounds.getSouth() && point.lng < bounds.getEast() && point.lat < bounds.getNorth();
 }
 
-function cleanupCurrentMap() {
-    this.map.eachLayer(function (layer) {
-        if (layer.feature != null) {
-            let ltlng = this.map.getCenter;
-            if(latLngFromFeature(layer.feature) != null){
-                ltlng = L.latLng(latLngFromFeature(layer.feature));
-            }
-            if(!pointIsWithinBoundsX2(ltlng,this.map.getBounds())){
-                if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
-                    this.map.removeLayer(layer);
-                    currentLayers.splice(currentLayers.indexOf(layer.feature.id),1);
-                }
-            }
-        }
-    });
-    let iconsToRemove = [];
-    this.markerCluster.eachLayer(function(layer){
-        let ltlng = layer._latlng;
-        if(!pointIsWithinBoundsX2(ltlng,this.map.getBounds())){
-            iconsToRemove.push(layer);
-        }
-    });
-    this.markerCluster.removeLayers(iconsToRemove);
+function leafletBoundsToObj(leafletBounds){ //in L.latlngBounds, out: nesw obj
+    return {north: leafletBounds.getNorth(), east: leafletBounds.getEast(), south: leafletBounds.getSouth(), west: leafletBounds.getWest()};
+}
+
+function featureShouldBeDrawn(feature){
+    return !(currentLayers.includes(feature.id) || map.getZoom() < MINRENDERZOOM || blacklist.includes(parseIconNameFromContext(feature)));
 }
 
 
-function updateObjectsPan(origBounds, origBoundsString, queryList) { //this function updates the objects around the current viewport, since users 
-    //generally pan around when looking at the map, therefore there's less loading time seen by the user time.
-    let newBounds = {
-        north: origBounds.north + (origBounds.north - origBounds.south),
-        south: origBounds.south - (origBounds.north - origBounds.south),
-        east: origBounds.east + (origBounds.east - origBounds.west),
-        west: origBounds.west - (origBounds.east - origBounds.west)
-    }
-    let newBoundsString = makeBoundsString(newBounds);
-    let queryFString = createQuery(queryList, newBoundsString);
-    let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
-    queryObjectsFromServer(queryURL, false, newBounds, true);
-    for (let i = 0; i < queryList.length; i++) {
-        if (queryList[i].query === 'custom=Natural_Gas_Pipeline' && !blacklist.includes('Natural_Gas_Pipeline')) {
-            queryURL = queryNaturalGas(newBounds);
-            queryObjectsFromServer(queryURL, true, newBounds, false); //natrl gas
-        }
-    }
-}
 
-function removeFromMap(idToRemove, layerToRemoveFrom, mapToRemoveFrom) {
-    if (getAttribute(idToRemove, ATTRIBUTE.icon) != "noicon") {
-        let iconUrlToSeachFor = getAttribute(idToRemove, ATTRIBUTE.icon).options.iconUrl;
-        layerToRemoveFrom.eachLayer(function (layer) {
-            if (layer.options.icon) {
-                if (iconUrlToSeachFor === layer.options.icon.options.iconUrl) {
-                    layerToRemoveFrom.removeLayer(layer);
-                }
-            }
-        });
-    }
-    mapToRemoveFrom.eachLayer(function (layer) {
-        if (layer.feature) {
-            if (parseIconNameFromContext(layer.feature) == idToRemove) {
-                mapToRemoveFrom.removeLayer(layer);
-                currentLayers.splice(currentLayers.indexOf(layer.feature.id), 1);
-            }
-        }
-    });
-    blacklist.push(idToRemove);
-}
+
+//-------------------------------------------------------------
 //icon getters ------------------------------------------------
-var commonTagNames = ["waterway", "man_made", "landuse", "water", "amenity"]; //precedence goes down
-var blacklistTags = ["yes", "amenity"];
 
 function parseIconNameFromContext(feature) {
     let pTObj = getParamsAndTags(feature);
@@ -371,16 +397,15 @@ function addIconToMap(mIcon, latlng, popUpContent) {
     if (mIcon == null || mIcon === "noicon") {
         return false;
     }
-    let mapToEdit = this.map;
-    this.markerCluster.addLayer(L.marker(latlng, {
+    markerCluster.addLayer(L.marker(latlng, {
         icon: mIcon,
         opacity: 1
     }).on('click', function (e) {
-        if (mapToEdit.getZoom() < 16) {
-            mapToEdit.flyTo(e.latlng, 16, FLYTOOPTIONS);
+        if (map.getZoom() < 16) {
+            map.flyTo(e.latlng, 16, FLYTOOPTIONS);
         }
         else {
-            mapToEdit.flyTo(e.latlng, mapToEdit.getZoom(), FLYTOOPTIONS);
+            map.flyTo(e.latlng, map.getZoom(), FLYTOOPTIONS);
         }
     }).bindPopup(popUpContent));
     return true;

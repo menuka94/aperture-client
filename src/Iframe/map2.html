@@ -141,7 +141,7 @@
                 case "dam":
                     query = 'waterway=dam'
                     break;
-                case "tap_water":
+                case "water_tap":
                     query = 'man_made=water_tap';
                     break;
                 case "water_tower":
@@ -192,7 +192,7 @@
         }
 
         selectedObjects.push(mapObjectGetter("dam"));
-        selectedObjects.push(mapObjectGetter("tap_water"));
+        selectedObjects.push(mapObjectGetter("water_tap"));
         selectedObjects.push(mapObjectGetter("water_tower"));
         selectedObjects.push(mapObjectGetter("water_well"));
         selectedObjects.push(mapObjectGetter("water_works"));
@@ -246,7 +246,7 @@
                 }
             }
             selectedObjects.splice(idx, 1);
-            removeFromMap(element.id, markers, osmMap2);
+            removeFromMap(element.id);
         }
 
         parent.addEventListener('updateMaps', function () {
