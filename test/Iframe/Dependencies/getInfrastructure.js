@@ -20,6 +20,8 @@ var markers = L.markerClusterGroup({
     maxClusterRadius: 55
 });
 
+getInfrastructure.config(markers,testMap);
+
 describe('makeBoundsString()', function() {
     it('should return a bounds string from a bounds object', function() {
         assert.deepEqual(getInfrastructure.makeBoundsString({north:60,south:61,east:30,west:31}), 61 + ',' + 31 + ',' + 60 + ',' + 30);
@@ -32,18 +34,25 @@ describe('createQuery()', function() {
     });
 });
 
-describe('withinBounds()', function() {
+describe('withinCurrentBounds()', function() {
     it('should return true if input bounds are within global object "currentBounds," should return false if null or not within', function() {
-        assert.deepEqual(getInfrastructure.withinBounds({north:60,south:61,east:30,west:31}),false); //null case
+        assert.deepEqual(getInfrastructure.withinCurrentBounds({north:60,south:61,east:30,west:31}),false); //null case
         getInfrastructure.currentBounds({north:60,south:61,east:30,west:31});
-        assert.deepEqual(getInfrastructure.withinBounds({north:59,south:62,east:29,west:32}),true); //within case
-        assert.deepEqual(getInfrastructure.withinBounds({north:61,south:60,east:31,west:30}),false); //not within case
+        assert.deepEqual(getInfrastructure.withinCurrentBounds({north:59,south:62,east:29,west:32}),true); //within case
+        assert.deepEqual(getInfrastructure.withinCurrentBounds({north:61,south:60,east:31,west:30}),false); //not within case
+    });
+});
+
+describe('withinBounds()', function() {
+    it('should return true if the first input bounds are within the seconds input bounds should return false if null or not within', function() {
+        assert.deepEqual(getInfrastructure.withinBounds({north:59,south:62,east:29,west:32},{north:60,south:61,east:30,west:31}),true); //within case
+        assert.deepEqual(getInfrastructure.withinBounds({north:61,south:60,east:31,west:30},{north:60,south:61,east:30,west:31}),false); //not within case
     });
 });
 
 describe('queryDefault()', function() {
     it('should return a url to kami systems', function() {
-        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],"61,31,60,30"),"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](61,31,60,30);way[waterway=dam](61,31,60,30);relation[waterway=dam](61,31,60,30);node[waterway=river](61,31,60,30);way[waterway=river](61,31,60,30);relation[waterway=river](61,31,60,30););out body geom;"); 
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],{north:60,south:61,east:30,west:31}),"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](61,31,60,30);way[waterway=dam](61,31,60,30);relation[waterway=dam](61,31,60,30);node[waterway=river](61,31,60,30);way[waterway=river](61,31,60,30);relation[waterway=river](61,31,60,30););out body geom;"); 
     });
 });
 

@@ -624,8 +624,10 @@ try {
             return blacklist;
         },
         ATTRIBUTE: ATTRIBUTE,
+        config:config,
         makeBoundsString: makeBoundsString,
         createQuery: createQuery,
+        withinBounds: withinBounds,
         withinCurrentBounds: withinCurrentBounds,
         queryDefault: queryDefault,
         cleanUpQueries: cleanUpQueries,
