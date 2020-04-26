@@ -23,21 +23,20 @@ let blacklist;
 let forceGarbageCleanup = false;
 //-----------------------------------------
 
-function config(markerClusterIn, mapIn) {
+function config(markerClusterIn, mapIn) { //basically a constructor
     map = mapIn;
     markerCluster = markerClusterIn;
     currentLayers = [];
     currentQueries = [];
-    currentBounds = null;
+    currentBounds = {north:0,south:0,east:0,west:0};
     blacklist = [];
 }
 
 function updateObjects(queryListOrig, forceDraw) { //gets the objects within the current viewport
     let bBounds = leafletBoundsToObj(map.getBounds());
-    let boundsString = makeBoundsString(bBounds);
-    let queryURL = queryDefault(queryListOrig, boundsString);
+    let queryURL = queryDefault(queryListOrig, bBounds, null);
     queryObjectsFromServer(queryURL, forceDraw, bBounds, true);
-    updateObjectsPan(bBounds, boundsString, queryListOrig);
+    //updateObjectsPan(bBounds, boundsString, queryListOrig);
 }
 
 function updateObjectsPan(origBounds, origBoundsString, queryList) { //this function updates the objects around the current viewport, since users 
@@ -50,6 +49,7 @@ function updateObjectsPan(origBounds, origBoundsString, queryList) { //this func
     }
     let newBoundsString = makeBoundsString(newBounds);
     let queryFString = createQuery(queryList, newBoundsString);
+    //let queryURL = queryDefault(queryListOrig, boundsString, origBoundsString);
     let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
     queryObjectsFromServer(queryURL, false, newBounds, true);
     for (let i = 0; i < queryList.length; i++) {
@@ -61,7 +61,7 @@ function updateObjectsPan(origBounds, origBoundsString, queryList) { //this func
 }
 
 function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: queryURL for a json, out: calls rendering methods with geojson
-    if (!withinBounds(bounds) || forceDraw) {
+    if (!withinCurrentBounds(bounds) || forceDraw) {
         cleanUpQueries(bounds);
         let editMap = map; //because map wont work inside getJSON for some reason
         if (isOsm) {
@@ -70,8 +70,9 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
         }
         let startLoad = Date.now();
         let query = $.getJSON(queryURL, function (dataAsJson) {
-            if(!withinBounds(bounds)){
+            if(!withinCurrentBounds(bounds)){
                 currentBounds = bounds;
+                console.log(currentBounds);
             }
             if(isOsm){
                 console.log("Loadtime: " + (Date.now() - startLoad) + "ms");
@@ -242,26 +243,35 @@ function makeBoundsString(bounds) { //in: bounds in form of object with nesw, ou
     return bounds.south + ',' + bounds.west + ',' + bounds.north + ',' + bounds.east;
 }
 
-function withinBounds(boundsToTest) { //in bounds, out: true if is withing bounds to check against, false if not within or null
+function withinCurrentBounds(boundsToTest) { //in bounds, out: true if is withing bounds to check against, false if not within or null
     if (currentBounds == null) {
         return false;
     }
-    if (currentBounds.north >= boundsToTest.north && currentBounds.south <= boundsToTest.south && currentBounds.west <= boundsToTest.west && currentBounds.east >= boundsToTest.east) {
+    if (withinBounds(boundsToTest,currentBounds)) {
         return true;
     }
     return false;
 }
 
+function withinBounds(boundsToTest, boundsToTestAgainst){ 
+    return boundsToTestAgainst.north >= boundsToTest.north && boundsToTestAgainst.south <= boundsToTest.south && boundsToTestAgainst.west <= boundsToTest.west && boundsToTestAgainst.east >= boundsToTest.east;
+}
+
+function outsideOfBounds(boundsToTest, boundsToTestAgainst){ 
+    return boundsToTest.east < boundsToTestAgainst.west || boundsToTest.west > boundsToTestAgainst.east || boundsToTest.south > boundsToTestAgainst.north || boundsToTest.north < boundsToTestAgainst.south;
+}
+
 function queryNeedsCancelling(queryObj, boundsToCheckAgainst) { //in queryObj from query objects from server, out: true and cancells query if query is not in viewport, false if not
-    if (queryObj.bounds.east < boundsToCheckAgainst.west || queryObj.bounds.west > boundsToCheckAgainst.east || queryObj.bounds.south > boundsToCheckAgainst.north || queryObj.bounds.north < boundsToCheckAgainst.south) {
+    if (outsideOfBounds(queryObj.bounds,boundsToCheckAgainst)) {
         queryObj.query.abort();
         return true;
     }
     return false;
 }
 
-function queryDefault(queryList, boundsString) { //in: array of queries and a boundsstring, out: valid url to kumi systems
-    let queryFString = createQuery(queryList, boundsString);
+function queryDefault(queryList, queryBounds) { //in: array of queries and a boundsstring, out: valid url to kumi systems
+    //let boundsToQuery = 
+    let queryFString = createQuery(queryList, makeBoundsString(queryBounds));
     let fQuery = '?data=[out:json][timeout:30];(' + queryFString + ');out body geom;';
     return 'https://overpass.kumi.systems/api/interpreter' + fQuery;
 }
@@ -317,11 +327,59 @@ function featureShouldBeDrawn(feature){
     return !(currentLayers.includes(feature.id) || map.getZoom() < MINRENDERZOOM || blacklist.includes(parseIconNameFromContext(feature)));
 }
 
+function subBounds(boundsToSlice, boundSlicer){ //in: 2 bounds objects {nsew}, out: a bounds obj list that is bTS - bS 
+    if(withinBounds(boundsToSlice,boundSlicer) || outsideOfBounds(boundsToSlice,boundSlicer)){
+        return null; //the bounds dont intersect or are within eachother
+    }
+    let returnList = [];
+    if(boundSlicer.west > boundsToSlice.west){
+        returnList.push({
+            north:boundsToSlice.north, 
+            south:boundsToSlice.south,
+            east:boundSlicer.west,
+            west:boundsToSlice.west
+        });
+    }
+    if(boundSlicer.east < boundsToSlice.east){
+        returnList.push({
+            north:boundsToSlice.north, 
+            south:boundsToSlice.south,
+            east: boundsToSlice.east,
+            west: boundSlicer.east
+        });
+    }
+    if(boundSlicer.south > boundsToSlice.south){
+        returnList.push({
+            north:boundSlicer.south, 
+            south:boundsToSlice.south,
+            east:Math.min(boundSlicer.east,boundsToSlice.east),
+            west:Math.max(boundSlicer.west,boundsToSlice.west)
+        });
+    }
+    if(boundSlicer.north < boundsToSlice.north){
+        returnList.push({
+            north:boundsToSlice.north, 
+            south:boundSlicer.north,
+            east:Math.min(boundSlicer.east,boundsToSlice.east),
+            west:Math.max(boundSlicer.west,boundsToSlice.west)
+        });
+    }
+    return returnList;
+}
 
 
 
-//-------------------------------------------------------------
-//icon getters ------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//----------------------------------------
 
 function parseIconNameFromContext(feature) {
     let pTObj = getParamsAndTags(feature);
@@ -537,6 +595,8 @@ function getAttribute(option, attribute) {
     return false;
 }
 
+//mocha-test stuff only down from here
+
 try {
     module.exports = {
         currentLayers: function (val) {
@@ -566,7 +626,7 @@ try {
         ATTRIBUTE: ATTRIBUTE,
         makeBoundsString: makeBoundsString,
         createQuery: createQuery,
-        withinBounds: withinBounds,
+        withinCurrentBounds: withinCurrentBounds,
         queryDefault: queryDefault,
         cleanUpQueries: cleanUpQueries,
         queryNeedsCancelling: queryNeedsCancelling,
@@ -583,6 +643,7 @@ try {
         pointIsWithinBounds: pointIsWithinBounds,
         pointIsWithinBoundsX2: pointIsWithinBoundsX2,
         removeFromBlacklist: removeFromBlacklist,
-        latLngFromFeature: latLngFromFeature
+        latLngFromFeature: latLngFromFeature,
+        subBounds, subBounds
     }
 } catch (e) { }

@@ -139,7 +139,17 @@ describe('latLngFromFeature()', function() {
     });
 });
 
-
+describe('subBounds()', function() {
+    it('subtracts one rect from another, returning a set of new rects', function() {
+        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:55,west:45}),[{north:60,south:40,east:45,west:40},{north:60,south:40,east:60,west:55},{north:45,south:40,east:55,west:45},{north:60,south:55,east:55,west:45}]); //case all (boundSlicer in within boundsToSlice, returns 4 rects)
+        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:70,west:30}),[{north:45,south:40,east:60,west:40},{north:60,south:55,east:60,west:40}]); //case 'hamburger' (it looks like a hamburger!, 2 rects above and below 1, wider rect)
+        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:45,south:30,east:45,west:30}),[{north:60,south:40,east:60,west:45},{north:60,south:45,east:45,west:40}]); //case corner (slicer hits corner of boundsToSlice, returns 2 rects)
+        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:45,south:40,east:55,west:45}),[{north:60,south:40,east:45,west:40},{north:60,south:40,east:60,west:55},{north:60,south:45,east:55,west:45}]); //case 'helmet' (slicer hits bottom of boundsToSlice, creating 3 rects)
+        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:70,south:30,east:45,west:30}),[{north:60,south:40,east:60,west:45}]); //case side (slicer cuts side off boundsToSlice)
+        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:39,south:38,east:60,west:40}),null); //outside of case
+        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:61,south:39,east:61,west:39}),null); //within case case
+    });
+});
 
 /*
 cleanupCurrentMap: cleanupCurrentMap,
