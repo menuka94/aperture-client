@@ -28,14 +28,18 @@ function config(markerClusterIn, mapIn) { //basically a constructor
     markerCluster = markerClusterIn;
     currentLayers = [];
     currentQueries = [];
-    currentBounds = {north:0,south:0,east:0,west:0};
+    currentBounds = [];
     blacklist = [];
 }
 
 function updateObjects(queryListOrig, forceDraw) { //gets the objects within the current viewport
     let bBounds = leafletBoundsToObj(map.getBounds());
-    let queryURL = queryDefault(queryListOrig, bBounds, null);
-    queryObjectsFromServer(queryURL, forceDraw, bBounds, true);
+    let queryURLs = queryDefault(queryListOrig, bBounds); 
+    if(queryURLs != null){
+        queryURLs.forEach(queryURL =>
+            queryObjectsFromServer(queryURL, forceDraw, bBounds, true)
+        );
+    }
     //updateObjectsPan(bBounds, boundsString, queryListOrig);
 }
 
@@ -63,7 +67,6 @@ function updateObjectsPan(origBounds, origBoundsString, queryList) { //this func
 function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: queryURL for a json, out: calls rendering methods with geojson
     if (!withinCurrentBounds(bounds) || forceDraw) {
         cleanUpQueries(bounds);
-        let editMap = map; //because map wont work inside getJSON for some reason
         if (isOsm) {
             queryAlertText.parentElement.style.display = "block";
             queryAlertText.innerHTML = "Loading Data...";
@@ -71,8 +74,7 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
         let startLoad = Date.now();
         let query = $.getJSON(queryURL, function (dataAsJson) {
             if(!withinCurrentBounds(bounds)){
-                currentBounds = bounds;
-                console.log(currentBounds);
+                currentBounds.push(bounds);
             }
             if(isOsm){
                 console.log("Loadtime: " + (Date.now() - startLoad) + "ms");
@@ -83,7 +85,7 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
                     break;
                 }
             }
-            if (editMap.getZoom() >= MINRENDERZOOM && currentQueries.length == 0) {
+            if (map.getZoom() >= MINRENDERZOOM && currentQueries.length == 0) {
                 queryAlertText.parentElement.style.display = "none";
             }
             if (forceGarbageCleanup) {
@@ -106,6 +108,7 @@ function cleanUpQueries(bounds) { //in: bounds of a query, out: cleans up curren
         if (queryNeedsCancelling(currentQueries[i], bounds)) {
             currentQueries.splice(i, 1);
             console.log("kill");
+            currentBounds = [];
             forceGarbageCleanup = true;
         }
     }
@@ -150,6 +153,7 @@ function drawObjectsToMap(dataToDraw) { //in: geoJson containing only things con
 function removeFromBlacklist(idToRemove) {
     if (blacklist.includes(idToRemove)) {
         blacklist.splice(blacklist.indexOf(idToRemove), 1);
+        currentBounds = [];
         return true;
     }
     else {
@@ -244,11 +248,13 @@ function makeBoundsString(bounds) { //in: bounds in form of object with nesw, ou
 }
 
 function withinCurrentBounds(boundsToTest) { //in bounds, out: true if is withing bounds to check against, false if not within or null
-    if (currentBounds == null) {
+    if (currentBounds == []) {
         return false;
     }
-    if (withinBounds(boundsToTest,currentBounds)) {
-        return true;
+    for(let i = 0; i < currentBounds.length; i++){
+        if (withinBounds(boundsToTest,currentBounds[i])) {
+            return true;
+        }
     }
     return false;
 }
@@ -270,10 +276,38 @@ function queryNeedsCancelling(queryObj, boundsToCheckAgainst) { //in queryObj fr
 }
 
 function queryDefault(queryList, queryBounds) { //in: array of queries and a boundsstring, out: valid url to kumi systems
-    //let boundsToQuery = 
-    let queryFString = createQuery(queryList, makeBoundsString(queryBounds));
-    let fQuery = '?data=[out:json][timeout:30];(' + queryFString + ');out body geom;';
-    return 'https://overpass.kumi.systems/api/interpreter' + fQuery;
+    let boundsToQuery;
+    if(currentBounds == [] || currentBounds.length == 0){
+        boundsToQuery = [queryBounds];
+    }
+    else{
+        boundsToQuery = subBounds(queryBounds,currentBounds[0]);
+        if(boundsToQuery != []){
+            for(let j = 1; j < currentBounds.length; j++){
+                let tempBoundsToQuery = [];
+                for(let k = 0; k < boundsToQuery.length; k++){
+                    tempBoundsToQuery = tempBoundsToQuery.concat(subBounds(boundsToQuery[k],currentBounds[j]));
+                }
+                boundsToQuery = tempBoundsToQuery;
+            }
+        }
+    }
+    if(boundsToQuery == null || boundsToQuery == [] || boundsToQuery.length == 0){
+        return null;
+    }
+    let queries = [];
+    for(let i = 0; i < boundsToQuery.length; i++){
+        let polygon = L.polygon([
+            [boundsToQuery[i].south,boundsToQuery[i].west],
+            [boundsToQuery[i].south,boundsToQuery[i].east],
+            [boundsToQuery[i].north,boundsToQuery[i].east],
+            [boundsToQuery[i].north,boundsToQuery[i].west],
+            [boundsToQuery[i].south,boundsToQuery[i].west]
+        ],{color:'#'+Math.floor(Math.random()*16777215).toString(16)}).addTo(map);
+        setTimeout(function(){ map.removeLayer(polygon) }, 3000);
+        queries.push('https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(' + createQuery(queryList, makeBoundsString(boundsToQuery[i])) + ');out body geom;');
+    }
+    return queries;
 }
 
 function queryNaturalGas(bounds) { //in: bounds, out: url for geoJson from arcgis for natural gas pipelines
@@ -316,7 +350,7 @@ function pointIsWithinBoundsX2(point,bounds){ //in: l.latlng and l.latlngbounds,
         return true;
     }
     bounds = L.latLngBounds(L.latLng(bounds.getSouth() - (bounds.getNorth() - bounds.getSouth()),bounds.getWest() - (bounds.getEast() - bounds.getWest())),L.latLng(bounds.getNorth() + (bounds.getNorth() - bounds.getSouth()), bounds.getEast() + (bounds.getEast() - bounds.getWest())));
-    return point.lng > bounds.getWest() && point.lat > bounds.getSouth() && point.lng < bounds.getEast() && point.lat < bounds.getNorth();
+    return pointIsWithinBounds(point,bounds);
 }
 
 function leafletBoundsToObj(leafletBounds){ //in L.latlngBounds, out: nesw obj
@@ -328,8 +362,11 @@ function featureShouldBeDrawn(feature){
 }
 
 function subBounds(boundsToSlice, boundSlicer){ //in: 2 bounds objects {nsew}, out: a bounds obj list that is bTS - bS 
-    if(withinBounds(boundsToSlice,boundSlicer) || outsideOfBounds(boundsToSlice,boundSlicer)){
-        return null; //the bounds dont intersect or are within eachother
+    if(withinBounds(boundsToSlice,boundSlicer)){
+        return []; //the bounds are within eachother
+    }
+    if(outsideOfBounds(boundsToSlice,boundSlicer)){
+        return [boundsToSlice];
     }
     let returnList = [];
     if(boundSlicer.west > boundsToSlice.west){
