@@ -52,7 +52,8 @@ describe('withinBounds()', function() {
 
 describe('queryDefault()', function() {
     it('should return a url to kami systems', function() {
-        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],{north:60,south:61,east:30,west:31}),"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](61,31,60,30);way[waterway=dam](61,31,60,30);relation[waterway=dam](61,31,60,30);node[waterway=river](61,31,60,30);way[waterway=river](61,31,60,30);relation[waterway=river](61,31,60,30););out body geom;"); 
+        getInfrastructure.currentBounds([]);
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],{north:60,south:61,east:30,west:31})[0].query,"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](61,31,60,30);way[waterway=dam](61,31,60,30);relation[waterway=dam](61,31,60,30);node[waterway=river](61,31,60,30);way[waterway=river](61,31,60,30);relation[waterway=river](61,31,60,30););out body geom;"); 
     });
 });
 
@@ -65,15 +66,18 @@ describe('queryNaturalGas()', function() {
 describe('cleanUpQueries()', function() {
     it('should edit the list of queries if they shouldnt render anymore', function() {
         getInfrastructure.currentQueries([{bounds:{north:61,south:60,east:31,west:30},query:{abort:function(){}}}]);
-        getInfrastructure.cleanUpQueries({north:59,south:60,east:31,west:30});
+        testMap.fitBounds(L.latLngBounds(L.latLng(60,30),L.latLng(59,31)));
+        getInfrastructure.cleanUpQueries();
         assert.deepEqual(getInfrastructure.currentQueries(null).length,0);
     });
 });
 
 describe('queryNeedsCancelling()', function() {
     it('checks if a query shouldnt render anymore', function() {
-        assert.deepEqual(getInfrastructure.queryNeedsCancelling({bounds:{north:61,south:60,east:31,west:30},query:{abort:function(){}}},{north:61,south:60,east:31,west:30}),false); //false case
-        assert.deepEqual(getInfrastructure.queryNeedsCancelling({bounds:{north:61,south:60,east:31,west:30},query:{abort:function(){}}},{north:59,south:60,east:31,west:30}),true); //true case
+        testMap.fitBounds(L.latLngBounds(L.latLng(60,30),L.latLng(61,31)));
+        assert.deepEqual(getInfrastructure.queryNeedsCancelling({bounds:{north:61,south:60,east:31,west:30},query:{abort:function(){}}}),false); //false case
+        testMap.fitBounds(L.latLngBounds(L.latLng(60,30),L.latLng(59,31)));
+        assert.deepEqual(getInfrastructure.queryNeedsCancelling({bounds:{north:61,south:60,east:31,west:30},query:{abort:function(){}}}),true); //true case
     });
 });
 

@@ -115,7 +115,7 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
     }
 }
 
-function cleanUpQueries(bounds) { //in: bounds of a query, out: cleans up currently running queries that dont exist in the current viewport
+function cleanUpQueries() { //in: none, out: cleans up currently running queries that dont exist in the current viewport
     for (let i = 0; i < currentQueries.length; i++) {
         if (queryNeedsCancelling(currentQueries[i])) {
             currentQueries.splice(i, 1);
