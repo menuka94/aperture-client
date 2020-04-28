@@ -20,6 +20,8 @@ var markers = L.markerClusterGroup({
     maxClusterRadius: 55
 });
 
+testMap.fitBounds(L.latLngBounds(L.latLng(61,31),L.latLng(60,30)));
+
 getInfrastructure.config(markers,testMap);
 
 describe('makeBoundsString()', function() {
@@ -36,8 +38,6 @@ describe('createQuery()', function() {
 
 describe('withinCurrentBounds()', function() {
     it('should return true if input bounds are within global object "currentBounds," should return false if null or not within', function() {
-        assert.deepEqual(getInfrastructure.withinCurrentBounds({north:60,south:61,east:30,west:31}),false); //null case
-        getInfrastructure.currentBounds({north:60,south:61,east:30,west:31});
         assert.deepEqual(getInfrastructure.withinCurrentBounds({north:59,south:62,east:29,west:32}),true); //within case
         assert.deepEqual(getInfrastructure.withinCurrentBounds({north:61,south:60,east:31,west:30}),false); //not within case
     });
@@ -156,7 +156,19 @@ describe('subBounds()', function() {
         assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:45,south:40,east:55,west:45}),[{north:60,south:40,east:45,west:40},{north:60,south:40,east:60,west:55},{north:60,south:45,east:55,west:45}]); //case 'helmet' (slicer hits bottom of boundsToSlice, creating 3 rects)
         assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:70,south:30,east:45,west:30}),[{north:60,south:40,east:60,west:45}]); //case side (slicer cuts side off boundsToSlice)
         assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:39,south:38,east:60,west:40}),[{north:60,south:40,east:60,west:40}]); //outside of case
-        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:61,south:39,east:61,west:39}),null); //within case case
+        assert.deepEqual(getInfrastructure.subBounds({north:60,south:40,east:60,west:40},{north:61,south:39,east:61,west:39}),[]); //within case case
+    });
+});
+
+describe('concatBounds()', function() {
+    it('concatinates two rects', function() {
+        assert.deepEqual(getInfrastructure.concatBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:65,west:35}),{north:60,south:40,east:65,west:35}); //case all (boundSlicer in within boundsToSlice, returns 4 rects)
+    });
+});
+
+describe('boundListSubstitution()', function() {
+    it('removes a bound from a list of bounds', function() {
+        assert.deepEqual(getInfrastructure.boundListSubstitution({north:55,south:45,east:55,west:45},[{north:60,south:40,east:60,west:40}]),[{north:60,south:40,east:45,west:40},{north:60,south:40,east:60,west:55},{north:45,south:40,east:55,west:45},{north:60,south:55,east:55,west:45}]); 
     });
 });
 

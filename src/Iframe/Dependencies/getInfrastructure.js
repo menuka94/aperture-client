@@ -37,7 +37,7 @@ function updateObjects(queryListOrig, forceDraw) { //gets the objects within the
     let queryURLs = queryDefault(queryListOrig, bBounds); 
     if(queryURLs != null){
         queryURLs.forEach(queryURL =>
-            queryObjectsFromServer(queryURL, forceDraw, bBounds, true)
+            queryObjectsFromServer(queryURL.query, forceDraw, queryURL.bounds, true)
         );
     }
     //updateObjectsPan(bBounds, boundsString, queryListOrig);
@@ -65,15 +65,23 @@ function updateObjectsPan(origBounds, origBoundsString, queryList) { //this func
 }
 
 function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: queryURL for a json, out: calls rendering methods with geojson
-    if (!withinCurrentBounds(bounds) || forceDraw) {
+    if (withinCurrentBounds(bounds) || forceDraw) {
         cleanUpQueries(bounds);
         if (isOsm) {
             queryAlertText.parentElement.style.display = "block";
             queryAlertText.innerHTML = "Loading Data...";
         }
         let startLoad = Date.now();
+        let polygon = L.polygon([
+            [bounds.south,bounds.west],
+            [bounds.south,bounds.east],
+            [bounds.north,bounds.east],
+            [bounds.north,bounds.west],
+            [bounds.south,bounds.west]
+        ],{color:'#BB0000'}).addTo(map);
         let query = $.getJSON(queryURL, function (dataAsJson) {
-            if(!withinCurrentBounds(bounds)){
+            map.removeLayer(polygon);
+            if(withinCurrentBounds(bounds)){
                 currentBounds.push(bounds);
             }
             if(isOsm){
@@ -105,10 +113,10 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
 
 function cleanUpQueries(bounds) { //in: bounds of a query, out: cleans up currently running queries that dont exist in the current viewport
     for (let i = 0; i < currentQueries.length; i++) {
-        if (queryNeedsCancelling(currentQueries[i], bounds)) {
+        if (queryNeedsCancelling(currentQueries[i])) {
             currentQueries.splice(i, 1);
             console.log("kill");
-            currentBounds = [];
+            //currentBounds = [];
             forceGarbageCleanup = true;
         }
     }
@@ -151,9 +159,9 @@ function drawObjectsToMap(dataToDraw) { //in: geoJson containing only things con
 }
 
 function removeFromBlacklist(idToRemove) {
+    currentBounds = [];
     if (blacklist.includes(idToRemove)) {
         blacklist.splice(blacklist.indexOf(idToRemove), 1);
-        currentBounds = [];
         return true;
     }
     else {
@@ -248,15 +256,7 @@ function makeBoundsString(bounds) { //in: bounds in form of object with nesw, ou
 }
 
 function withinCurrentBounds(boundsToTest) { //in bounds, out: true if is withing bounds to check against, false if not within or null
-    if (currentBounds == []) {
-        return false;
-    }
-    for(let i = 0; i < currentBounds.length; i++){
-        if (withinBounds(boundsToTest,currentBounds[i])) {
-            return true;
-        }
-    }
-    return false;
+    return withinBounds(boundsToTest,leafletBoundsToObj(map.getBounds()));
 }
 
 function withinBounds(boundsToTest, boundsToTestAgainst){ 
@@ -267,8 +267,8 @@ function outsideOfBounds(boundsToTest, boundsToTestAgainst){
     return boundsToTest.east < boundsToTestAgainst.west || boundsToTest.west > boundsToTestAgainst.east || boundsToTest.south > boundsToTestAgainst.north || boundsToTest.north < boundsToTestAgainst.south;
 }
 
-function queryNeedsCancelling(queryObj, boundsToCheckAgainst) { //in queryObj from query objects from server, out: true and cancells query if query is not in viewport, false if not
-    if (outsideOfBounds(queryObj.bounds,boundsToCheckAgainst)) {
+function queryNeedsCancelling(queryObj) { //in queryObj from query objects from server, out: true and cancells query if query is not in viewport, false if not
+    if (outsideOfBounds(queryObj.bounds,leafletBoundsToObj(map.getBounds()))) {
         queryObj.query.abort();
         return true;
     }
@@ -284,11 +284,12 @@ function queryDefault(queryList, queryBounds) { //in: array of queries and a bou
         boundsToQuery = subBounds(queryBounds,currentBounds[0]);
         if(boundsToQuery != []){
             for(let j = 1; j < currentBounds.length; j++){
-                let tempBoundsToQuery = [];
-                for(let k = 0; k < boundsToQuery.length; k++){
-                    tempBoundsToQuery = tempBoundsToQuery.concat(subBounds(boundsToQuery[k],currentBounds[j]));
-                }
-                boundsToQuery = tempBoundsToQuery;
+                boundsToQuery = boundListSubstitution(currentBounds[j],boundsToQuery);
+            }
+        }
+        if(boundsToQuery != []){
+            for(let n = 0; n < currentQueries.length; n++){
+                boundsToQuery = boundListSubstitution(currentQueries[n].bounds,boundsToQuery);
             }
         }
     }
@@ -297,15 +298,10 @@ function queryDefault(queryList, queryBounds) { //in: array of queries and a bou
     }
     let queries = [];
     for(let i = 0; i < boundsToQuery.length; i++){
-        let polygon = L.polygon([
-            [boundsToQuery[i].south,boundsToQuery[i].west],
-            [boundsToQuery[i].south,boundsToQuery[i].east],
-            [boundsToQuery[i].north,boundsToQuery[i].east],
-            [boundsToQuery[i].north,boundsToQuery[i].west],
-            [boundsToQuery[i].south,boundsToQuery[i].west]
-        ],{color:'#'+Math.floor(Math.random()*16777215).toString(16)}).addTo(map);
-        setTimeout(function(){ map.removeLayer(polygon) }, 3000);
-        queries.push('https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(' + createQuery(queryList, makeBoundsString(boundsToQuery[i])) + ');out body geom;');
+        queries.push({
+            query:'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(' + createQuery(queryList, makeBoundsString(boundsToQuery[i])) + ');out body geom;',
+            bounds:boundsToQuery[i]
+        });
     }
     return queries;
 }
@@ -404,8 +400,26 @@ function subBounds(boundsToSlice, boundSlicer){ //in: 2 bounds objects {nsew}, o
     return returnList;
 }
 
+function boundListSubstitution(boundSlicer,boundList){ //in: a bound obj and a list of bound objs, out: the list of bound objects with the first bound removed from them
+    let tempBoundsList = [];
+    for(let k = 0; k < boundList.length; k++){
+        tempBoundsList = tempBoundsList.concat(subBounds(boundList[k],boundSlicer));
+    }
+    return tempBoundsList;
+}
 
+function optimizeBounds(boundsArr){ //in: array of {nsew} bounds objects, out: a shorter array of bounds objects
 
+}
+
+function concatBounds(bound1, bound2){ //in: 2 {nswe} bounds objects, out: 1 combined object
+    return {
+        north:Math.max(bound1.north,bound2.north),
+        south:Math.min(bound1.south,bound2.south),
+        east:Math.max(bound1.east,bound2.east),
+        west:Math.min(bound1.west,bound2.west)
+    };
+}
 
 
 
@@ -683,6 +697,8 @@ try {
         pointIsWithinBoundsX2: pointIsWithinBoundsX2,
         removeFromBlacklist: removeFromBlacklist,
         latLngFromFeature: latLngFromFeature,
-        subBounds, subBounds
+        subBounds: subBounds,
+        concatBounds: concatBounds,
+        boundListSubstitution: boundListSubstitution
     }
 } catch (e) { }
