@@ -160,9 +160,81 @@ describe('subBounds()', function() {
     });
 });
 
+describe('optimizeBounds()', function() {
+    it('concatinates a list of rects where necessary', function() {
+        assert.deepEqual(getInfrastructure.optimizeBounds([
+            {
+                north:60,
+                south:40,
+                east:60,
+                west:40
+            },
+            {
+                north:60,
+                south:40,
+                east:80,
+                west:60
+            },
+            {
+                north:80,
+                south:40,
+                east:40,
+                west:20
+            }
+        ],0),[
+            {
+                north:80,
+                south:40,
+                east:40,
+                west:20
+            },
+            {
+                north:60,
+                south:40,
+                east:80,
+                west:40
+            }
+        ]);
+        assert.deepEqual(getInfrastructure.optimizeBounds([
+            {
+                north:60,
+                south:39,
+                east:60,
+                west:40
+            },
+            {
+                north:61,
+                south:40,
+                east:80,
+                west:60
+            },
+            {
+                north:80,
+                south:40,
+                east:40,
+                west:20
+            }
+        ],2),[
+            {
+                north:80,
+                south:40,
+                east:40,
+                west:20
+            },
+            {
+                north:60,
+                south:40,
+                east:80,
+                west:40
+            }
+        ]);
+    });
+});
+
 describe('concatBounds()', function() {
     it('concatinates two rects', function() {
-        assert.deepEqual(getInfrastructure.concatBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:65,west:35}),{north:60,south:40,east:65,west:35}); //case all (boundSlicer in within boundsToSlice, returns 4 rects)
+        assert.deepEqual(getInfrastructure.concatBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:65,west:35},getInfrastructure.NSEW.ns),{north:55,south:45,east:65,west:35}); 
+        assert.deepEqual(getInfrastructure.concatBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:65,west:35},getInfrastructure.NSEW.ew),{north:60,south:40,east:60,west:40}); 
     });
 });
 

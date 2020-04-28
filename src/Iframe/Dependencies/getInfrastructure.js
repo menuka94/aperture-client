@@ -7,6 +7,10 @@ const FLYTOOPTIONS = { //for clicking on icons
     duration: 0.25,
     maxZoom: 17
 };
+const NSEW = {
+    ns:0,
+    ew:1
+}
 const ATTRIBUTE = { //attribute enums
     icon: 'icon',
     color: 'color'
@@ -296,6 +300,7 @@ function queryDefault(queryList, queryBounds) { //in: array of queries and a bou
     if(boundsToQuery == null || boundsToQuery == [] || boundsToQuery.length == 0){
         return null;
     }
+    boundsToQuery = optimizeBounds(boundsToQuery,0.005);
     let queries = [];
     for(let i = 0; i < boundsToQuery.length; i++){
         queries.push({
@@ -408,17 +413,54 @@ function boundListSubstitution(boundSlicer,boundList){ //in: a bound obj and a l
     return tempBoundsList;
 }
 
-function optimizeBounds(boundsArr){ //in: array of {nsew} bounds objects, out: a shorter array of bounds objects
-
+function optimizeBounds(boundsArr, epsilon){ //in: array of {nsew} bounds objects, out: a shorter array of bounds objects
+    for(let i = 0; i < boundsArr.length; i++){
+        for(let j = 0; j < boundsArr.length; j++){
+            if(j === i || i < 0 || j < 0){
+                continue;
+            }
+            let minimize = false;
+            if(Math.abs(boundsArr[i].north - boundsArr[j].north) <= epsilon && Math.abs(boundsArr[i].south - boundsArr[j].south) <= epsilon){
+                minimize = true;
+                boundsArr.push(concatBounds(boundsArr[i],boundsArr[j],NSEW.ns));
+            }
+            if(Math.abs(boundsArr[i].east - boundsArr[j].east) <= epsilon && Math.abs(boundsArr[i].west - boundsArr[j].west) <= epsilon){
+                minimize = true;
+                boundsArr.push(concatBounds(boundsArr[i],boundsArr[j],NSEW.ew));
+            }
+            if(minimize){
+                boundsArr.splice(i,1);
+                i--;
+                if(i < j){
+                    boundsArr.splice(j - 1,1);
+                }
+                else{
+                    boundsArr.splice(j,1);
+                }
+                j--;
+            }
+        }
+    }
+    return boundsArr;
 }
 
-function concatBounds(bound1, bound2){ //in: 2 {nswe} bounds objects, out: 1 combined object
-    return {
-        north:Math.max(bound1.north,bound2.north),
-        south:Math.min(bound1.south,bound2.south),
-        east:Math.max(bound1.east,bound2.east),
-        west:Math.min(bound1.west,bound2.west)
-    };
+function concatBounds(bound1, bound2, axis){ //in: 2 {nswe} bounds objects, out: 1 combined object
+    if(axis == NSEW.ns){
+        return {
+            north:Math.min(bound1.north,bound2.north),
+            south:Math.max(bound1.south,bound2.south),
+            east:Math.max(bound1.east,bound2.east),
+            west:Math.min(bound1.west,bound2.west)
+        };
+    }
+    else{
+        return {
+            north:Math.max(bound1.north,bound2.north),
+            south:Math.min(bound1.south,bound2.south),
+            east:Math.min(bound1.east,bound2.east),
+            west:Math.max(bound1.west,bound2.west)
+        };
+    }
 }
 
 
@@ -675,6 +717,7 @@ try {
             return blacklist;
         },
         ATTRIBUTE: ATTRIBUTE,
+        NSEW: NSEW,
         config:config,
         makeBoundsString: makeBoundsString,
         createQuery: createQuery,
@@ -699,6 +742,7 @@ try {
         latLngFromFeature: latLngFromFeature,
         subBounds: subBounds,
         concatBounds: concatBounds,
-        boundListSubstitution: boundListSubstitution
+        boundListSubstitution: boundListSubstitution,
+        optimizeBounds, optimizeBounds
     }
 } catch (e) { }
