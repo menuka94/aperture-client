@@ -88,6 +88,7 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             if(withinCurrentBounds(bounds)){
                 currentBounds.push(bounds);
             }
+            currentBounds = optimizeBounds(currentBounds,0.005);
             if(isOsm){
                 console.log("Loadtime: " + (Date.now() - startLoad) + "ms");
             }
@@ -111,17 +112,19 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
                 drawObjectsToMap(dataAsJson);
             }
         });
-        currentQueries.push({ query: query, bounds: bounds });
+        currentQueries.push({ query: query, bounds: bounds, polygon:polygon });
     }
 }
 
 function cleanUpQueries() { //in: none, out: cleans up currently running queries that dont exist in the current viewport
     for (let i = 0; i < currentQueries.length; i++) {
         if (queryNeedsCancelling(currentQueries[i])) {
+            map.removeLayer(currentQueries[i].polygon);
             currentQueries.splice(i, 1);
             console.log("kill");
+
             //currentBounds = [];
-            forceGarbageCleanup = true;
+            //forceGarbageCleanup = true;
         }
     }
 }
@@ -281,18 +284,35 @@ function queryNeedsCancelling(queryObj) { //in queryObj from query objects from 
 
 function queryDefault(queryList, queryBounds) { //in: array of queries and a boundsstring, out: valid url to kumi systems
     let boundsToQuery;
-    if(currentBounds == [] || currentBounds.length == 0){
+    if((currentBounds.length == 0 && currentQueries.length == 0)){
         boundsToQuery = [queryBounds];
     }
     else{
-        boundsToQuery = subBounds(queryBounds,currentBounds[0]);
-        if(boundsToQuery != []){
-            for(let j = 1; j < currentBounds.length; j++){
-                boundsToQuery = boundListSubstitution(currentBounds[j],boundsToQuery);
+        if(currentBounds.length > 0){
+            boundsToQuery = subBounds(queryBounds,currentBounds[0]);
+            if(boundsToQuery != []){
+                for(let j = 1; j < currentBounds.length; j++){
+                    boundsToQuery = boundListSubstitution(currentBounds[j],boundsToQuery);
+                }
             }
+            currentBounds.forEach(bounds => {
+                let polygon = L.polygon([
+                    [bounds.south,bounds.west],
+                    [bounds.south,bounds.east],
+                    [bounds.north,bounds.east],
+                    [bounds.north,bounds.west],
+                    [bounds.south,bounds.west]
+                ],{color:'#00BBBB'}).addTo(map);
+                setTimeout(function(){ map.removeLayer(polygon) }, 3000);
+            });
         }
-        if(boundsToQuery != []){
-            for(let n = 0; n < currentQueries.length; n++){
+        if(currentQueries.length > 0){
+            let startIndex = 0;
+            if(boundsToQuery == null){
+                boundsToQuery = subBounds(queryBounds,currentQueries[0].bounds);
+                startIndex = 1;
+            }
+            for(let n = startIndex; n < currentQueries.length; n++){
                 boundsToQuery = boundListSubstitution(currentQueries[n].bounds,boundsToQuery);
             }
         }
@@ -420,15 +440,17 @@ function optimizeBounds(boundsArr, epsilon){ //in: array of {nsew} bounds object
                 continue;
             }
             let minimize = false;
-            if(Math.abs(boundsArr[i].north - boundsArr[j].north) <= epsilon && Math.abs(boundsArr[i].south - boundsArr[j].south) <= epsilon){
+            if(Math.abs(boundsArr[i].north - boundsArr[j].north) <= epsilon && Math.abs(boundsArr[i].south - boundsArr[j].south) <= epsilon && (Math.abs(boundsArr[i].east - boundsArr[j].west) <= epsilon || Math.abs(boundsArr[i].west - boundsArr[j].east) <= epsilon)){
                 minimize = true;
                 boundsArr.push(concatBounds(boundsArr[i],boundsArr[j],NSEW.ns));
             }
-            if(Math.abs(boundsArr[i].east - boundsArr[j].east) <= epsilon && Math.abs(boundsArr[i].west - boundsArr[j].west) <= epsilon){
+            if(Math.abs(boundsArr[i].east - boundsArr[j].east) <= epsilon && Math.abs(boundsArr[i].west - boundsArr[j].west) <= epsilon && (Math.abs(boundsArr[i].south - boundsArr[j].north) <= epsilon || Math.abs(boundsArr[i].north - boundsArr[j].south) <= epsilon)){
                 minimize = true;
                 boundsArr.push(concatBounds(boundsArr[i],boundsArr[j],NSEW.ew));
             }
             if(minimize){
+                //boundsArr.forEach(element => console.log(element));
+                //console.log("bind");
                 boundsArr.splice(i,1);
                 i--;
                 if(i < j){
