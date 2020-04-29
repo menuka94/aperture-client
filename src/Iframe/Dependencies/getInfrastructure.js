@@ -44,24 +44,25 @@ function updateObjects(queryListOrig, forceDraw) { //gets the objects within the
             queryObjectsFromServer(queryURL.query, forceDraw, queryURL.bounds, true)
         );
     }
-    //updateObjectsPan(bBounds, boundsString, queryListOrig);
+    updateObjectsPan(bBounds, queryListOrig);
 }
 
-function updateObjectsPan(origBounds, origBoundsString, queryList) { //this function updates the objects around the current viewport, since users 
-    //generally pan around when looking at the map, therefore there's less loading time seen by the user time.
+function updateObjectsPan(origBounds, queryListOrig) { //this function updates the objects around the current viewport, since users 
+    //generally pan around when looking at the map, therefore there's less loading time seen by the user.
     let newBounds = {
         north: origBounds.north + (origBounds.north - origBounds.south),
         south: origBounds.south - (origBounds.north - origBounds.south),
         east: origBounds.east + (origBounds.east - origBounds.west),
         west: origBounds.west - (origBounds.east - origBounds.west)
     }
-    let newBoundsString = makeBoundsString(newBounds);
-    let queryFString = createQuery(queryList, newBoundsString);
-    //let queryURL = queryDefault(queryListOrig, boundsString, origBoundsString);
-    let queryURL = 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:15];(' + queryFString + ')->.a;(.a;-node(' + origBoundsString + ');)->.a;(.a;-way(' + origBoundsString + ');)->.a;(.a;-relation(' + origBoundsString + '););out body geom;';
-    queryObjectsFromServer(queryURL, false, newBounds, true);
-    for (let i = 0; i < queryList.length; i++) {
-        if (queryList[i].query === 'custom=Natural_Gas_Pipeline' && !blacklist.includes('Natural_Gas_Pipeline')) {
+    let queryURLs = queryDefault(queryListOrig, newBounds);
+    if(queryURLs != null){
+        queryURLs.forEach(queryURL =>
+            queryObjectsFromServer(queryURL.query, true, queryURL.bounds, true)
+        );
+    }
+    for (let i = 0; i < queryListOrig.length; i++) {
+        if (queryListOrig[i].query === 'custom=Natural_Gas_Pipeline' && !blacklist.includes('Natural_Gas_Pipeline')) {
             queryURL = queryNaturalGas(newBounds);
             queryObjectsFromServer(queryURL, true, newBounds, false); //natrl gas
         }
@@ -82,13 +83,14 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             [bounds.north,bounds.east],
             [bounds.north,bounds.west],
             [bounds.south,bounds.west]
-        ],{color:'#BB0000'}).addTo(map);
+        ],{color:'#BB0000'});
         let query = $.getJSON(queryURL, function (dataAsJson) {
             map.removeLayer(polygon);
-            if(withinCurrentBounds(bounds)){
+            if(isOsm){
                 currentBounds.push(bounds);
+                console.log(currentBounds);
+                currentBounds = optimizeBounds(currentBounds,0.005);
             }
-            currentBounds = optimizeBounds(currentBounds,0.005);
             if(isOsm){
                 console.log("Loadtime: " + (Date.now() - startLoad) + "ms");
             }
@@ -275,7 +277,14 @@ function outsideOfBounds(boundsToTest, boundsToTestAgainst){
 }
 
 function queryNeedsCancelling(queryObj) { //in queryObj from query objects from server, out: true and cancells query if query is not in viewport, false if not
-    if (outsideOfBounds(queryObj.bounds,leafletBoundsToObj(map.getBounds()))) {
+    let bound = leafletBoundsToObj(map.getBounds());
+    bound = {
+        north: bound.north + (bound.north - bound.south),
+        south: bound.south - (bound.north - bound.south),
+        east: bound.east + (bound.east - bound.west),
+        west: bound.west - (bound.east - bound.west)
+    };
+    if (outsideOfBounds(queryObj.bounds,bound)) {
         queryObj.query.abort();
         return true;
     }
@@ -302,7 +311,7 @@ function queryDefault(queryList, queryBounds) { //in: array of queries and a bou
                     [bounds.north,bounds.east],
                     [bounds.north,bounds.west],
                     [bounds.south,bounds.west]
-                ],{color:'#00BBBB'}).addTo(map);
+                ],{color:'#00BBBB'});
                 setTimeout(function(){ map.removeLayer(polygon) }, 3000);
             });
         }
@@ -461,6 +470,12 @@ function optimizeBounds(boundsArr, epsilon){ //in: array of {nsew} bounds object
                 }
                 j--;
             }
+        }
+    }
+    for(let i = 0; i < boundsArr.length; i++){
+        if(boundsArr[i].east - boundsArr[i].west < epsilon || boundsArr[i].north - boundsArr[i].south < epsilon){
+            boundsArr.splice(i,1);
+            i--;
         }
     }
     return boundsArr;
