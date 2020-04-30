@@ -72,6 +72,10 @@ function updateObjectsPan(origBounds, queryListOrig) { //this function updates t
 function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: queryURL for a json, out: calls rendering methods with geojson
     if (withinCurrentBounds(bounds) || forceDraw) {
         cleanUpQueries(bounds);
+        //console.log(currentLayers.length);
+        if(currentBounds.length > 10){
+            cleanupCurrentMap();
+        }
         if (isOsm) {
             queryAlertText.parentElement.style.display = "block";
             queryAlertText.innerHTML = "Loading Data...";
@@ -83,12 +87,10 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             [bounds.north,bounds.east],
             [bounds.north,bounds.west],
             [bounds.south,bounds.west]
-        ],{color:'#BB0000'});
+        ],{color:'#BB0000'})
         let query = $.getJSON(queryURL, function (dataAsJson) {
-            map.removeLayer(polygon);
             if(isOsm){
                 currentBounds.push(bounds);
-                console.log(currentBounds);
                 currentBounds = optimizeBounds(currentBounds,0.005);
             }
             if(isOsm){
@@ -113,6 +115,9 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             else {
                 drawObjectsToMap(dataAsJson);
             }
+            if(currentLayers.length > 5000){
+                cleanupCurrentMap();
+            }
         });
         currentQueries.push({ query: query, bounds: bounds, polygon:polygon });
     }
@@ -123,7 +128,7 @@ function cleanUpQueries() { //in: none, out: cleans up currently running queries
         if (queryNeedsCancelling(currentQueries[i])) {
             map.removeLayer(currentQueries[i].polygon);
             currentQueries.splice(i, 1);
-            console.log("kill");
+            //console.log("kill");
 
             //currentBounds = [];
             //forceGarbageCleanup = true;
@@ -179,6 +184,7 @@ function removeFromBlacklist(idToRemove) {
 }
 
 function cleanupCurrentMap() { //in: nothing, out: cleans up map outside of the current viewport
+    //console.log("cleanup");
     map.eachLayer(function (layer) {
         if (layer.feature != null) {
             let ltlng = map.getCenter;
@@ -201,6 +207,7 @@ function cleanupCurrentMap() { //in: nothing, out: cleans up map outside of the 
         }
     });
     markerCluster.removeLayers(iconsToRemove);
+    currentBounds = [leafletBoundsToObj(map.getBounds())];
 }
 
 
