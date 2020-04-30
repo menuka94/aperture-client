@@ -24,7 +24,6 @@ let currentBounds;
 let map;
 let markerCluster;
 let blacklist;
-let forceGarbageCleanup = false;
 //-----------------------------------------
 
 function config(markerClusterIn, mapIn) { //basically a constructor
@@ -81,13 +80,6 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             queryAlertText.innerHTML = "Loading Data...";
         }
         let startLoad = Date.now();
-        let polygon = L.polygon([
-            [bounds.south,bounds.west],
-            [bounds.south,bounds.east],
-            [bounds.north,bounds.east],
-            [bounds.north,bounds.west],
-            [bounds.south,bounds.west]
-        ],{color:'#BB0000'})
         let query = $.getJSON(queryURL, function (dataAsJson) {
             if(isOsm){
                 currentBounds.push(bounds);
@@ -105,10 +97,6 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             if (map.getZoom() >= MINRENDERZOOM && currentQueries.length == 0) {
                 queryAlertText.parentElement.style.display = "none";
             }
-            if (forceGarbageCleanup) {
-                cleanupCurrentMap();
-                forceGarbageCleanup = false;
-            }
             if (isOsm) {
                 drawObjectsToMap(osmtogeojson(dataAsJson));
             }
@@ -119,19 +107,14 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
                 cleanupCurrentMap();
             }
         });
-        currentQueries.push({ query: query, bounds: bounds, polygon:polygon });
+        currentQueries.push({ query: query, bounds: bounds});
     }
 }
 
 function cleanUpQueries() { //in: none, out: cleans up currently running queries that dont exist in the current viewport
     for (let i = 0; i < currentQueries.length; i++) {
         if (queryNeedsCancelling(currentQueries[i])) {
-            map.removeLayer(currentQueries[i].polygon);
             currentQueries.splice(i, 1);
-            //console.log("kill");
-
-            //currentBounds = [];
-            //forceGarbageCleanup = true;
         }
     }
 }
@@ -311,16 +294,6 @@ function queryDefault(queryList, queryBounds) { //in: array of queries and a bou
                     boundsToQuery = boundListSubstitution(currentBounds[j],boundsToQuery);
                 }
             }
-            currentBounds.forEach(bounds => {
-                let polygon = L.polygon([
-                    [bounds.south,bounds.west],
-                    [bounds.south,bounds.east],
-                    [bounds.north,bounds.east],
-                    [bounds.north,bounds.west],
-                    [bounds.south,bounds.west]
-                ],{color:'#00BBBB'});
-                setTimeout(function(){ map.removeLayer(polygon) }, 3000);
-            });
         }
         if(currentQueries.length > 0){
             let startIndex = 0;

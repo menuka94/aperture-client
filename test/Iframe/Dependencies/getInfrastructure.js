@@ -53,7 +53,7 @@ describe('withinBounds()', function() {
 describe('queryDefault()', function() {
     it('should return a url to kami systems', function() {
         getInfrastructure.currentBounds([]);
-        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],{north:60,south:61,east:30,west:31})[0].query,"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](61,31,60,30);way[waterway=dam](61,31,60,30);relation[waterway=dam](61,31,60,30);node[waterway=river](61,31,60,30);way[waterway=river](61,31,60,30);relation[waterway=river](61,31,60,30););out body geom;"); 
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],{north:60,south:59,east:31,west:30})[0].query,"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](59,30,60,31);way[waterway=dam](59,30,60,31);relation[waterway=dam](59,30,60,31);node[waterway=river](59,30,60,31);way[waterway=river](59,30,60,31);relation[waterway=river](59,30,60,31););out body geom;"); 
     });
 });
 
