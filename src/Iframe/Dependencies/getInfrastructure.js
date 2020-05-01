@@ -72,9 +72,6 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
     if (withinCurrentBounds(bounds) || forceDraw) {
         cleanUpQueries(bounds);
         //console.log(currentLayers.length);
-        if(currentBounds.length > 10){
-            cleanupCurrentMap();
-        }
         if (isOsm) {
             queryAlertText.parentElement.style.display = "block";
             queryAlertText.innerHTML = "Loading Data...";
@@ -105,6 +102,9 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             }
             if(currentLayers.length > 5000){
                 cleanupCurrentMap();
+            }
+            else if(currentBounds.length > 10){
+                currentBounds = [leafletBoundsToObj(map.getBounds())];
             }
         });
         currentQueries.push({ query: query, bounds: bounds});
@@ -310,6 +310,9 @@ function queryDefault(queryList, queryBounds) { //in: array of queries and a bou
         return null;
     }
     boundsToQuery = optimizeBounds(boundsToQuery,0.005);
+    if(boundsToQuery == null || boundsToQuery == [] || boundsToQuery.length == 0){
+        return null;
+    }
     let queries = [];
     for(let i = 0; i < boundsToQuery.length; i++){
         queries.push({
@@ -424,8 +427,14 @@ function boundListSubstitution(boundSlicer,boundList){ //in: a bound obj and a l
 
 function optimizeBounds(boundsArr, epsilon){ //in: array of {nsew} bounds objects, out: a shorter array of bounds objects
     for(let i = 0; i < boundsArr.length; i++){
-        for(let j = 0; j < boundsArr.length; j++){
-            if(j === i || i < 0 || j < 0){
+        if(boundsArr[i].east - boundsArr[i].west < epsilon || boundsArr[i].north - boundsArr[i].south < epsilon){
+            boundsArr.splice(i,1);
+            i--;
+        }
+    }
+    for(let i = 0; i < boundsArr.length; i++){
+        for(let j = i + 1; j < boundsArr.length; j++){
+            if(i < 0 || j < 0){
                 continue;
             }
             let minimize = false;
@@ -433,29 +442,16 @@ function optimizeBounds(boundsArr, epsilon){ //in: array of {nsew} bounds object
                 minimize = true;
                 boundsArr.push(concatBounds(boundsArr[i],boundsArr[j],NSEW.ns));
             }
-            if(Math.abs(boundsArr[i].east - boundsArr[j].east) <= epsilon && Math.abs(boundsArr[i].west - boundsArr[j].west) <= epsilon && (Math.abs(boundsArr[i].south - boundsArr[j].north) <= epsilon || Math.abs(boundsArr[i].north - boundsArr[j].south) <= epsilon)){
+            else if(Math.abs(boundsArr[i].east - boundsArr[j].east) <= epsilon && Math.abs(boundsArr[i].west - boundsArr[j].west) <= epsilon && (Math.abs(boundsArr[i].south - boundsArr[j].north) <= epsilon || Math.abs(boundsArr[i].north - boundsArr[j].south) <= epsilon)){
                 minimize = true;
                 boundsArr.push(concatBounds(boundsArr[i],boundsArr[j],NSEW.ew));
             }
             if(minimize){
-                //boundsArr.forEach(element => console.log(element));
-                //console.log("bind");
                 boundsArr.splice(i,1);
                 i--;
-                if(i < j){
-                    boundsArr.splice(j - 1,1);
-                }
-                else{
-                    boundsArr.splice(j,1);
-                }
+                boundsArr.splice(j - 1,1);
                 j--;
             }
-        }
-    }
-    for(let i = 0; i < boundsArr.length; i++){
-        if(boundsArr[i].east - boundsArr[i].west < epsilon || boundsArr[i].north - boundsArr[i].south < epsilon){
-            boundsArr.splice(i,1);
-            i--;
         }
     }
     return boundsArr;
