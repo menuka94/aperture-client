@@ -8,8 +8,8 @@ const FLYTOOPTIONS = { //for clicking on icons
     maxZoom: 17
 };
 const NSEW = {
-    ns:0,
-    ew:1
+    ns: 0,
+    ew: 1
 }
 const ATTRIBUTE = { //attribute enums
     icon: 'icon',
@@ -37,8 +37,8 @@ function config(markerClusterIn, mapIn) { //basically a constructor
 
 function updateObjects(queryListOrig, forceDraw) { //gets the objects within the current viewport
     let bBounds = leafletBoundsToObj(map.getBounds());
-    let queryURLs = queryDefault(queryListOrig, bBounds); 
-    if(queryURLs != null){
+    let queryURLs = queryDefault(queryListOrig, bBounds);
+    if (queryURLs != null) {
         queryURLs.forEach(queryURL =>
             queryObjectsFromServer(queryURL.query, forceDraw, queryURL.bounds, true)
         );
@@ -48,14 +48,9 @@ function updateObjects(queryListOrig, forceDraw) { //gets the objects within the
 
 function updateObjectsPan(origBounds, queryListOrig) { //this function updates the objects around the current viewport, since users 
     //generally pan around when looking at the map, therefore there's less loading time seen by the user.
-    let newBounds = {
-        north: origBounds.north + (origBounds.north - origBounds.south),
-        south: origBounds.south - (origBounds.north - origBounds.south),
-        east: origBounds.east + (origBounds.east - origBounds.west),
-        west: origBounds.west - (origBounds.east - origBounds.west)
-    }
+    let newBounds = expandBoundsX2(origBounds);
     let queryURLs = queryDefault(queryListOrig, newBounds);
-    if(queryURLs != null){
+    if (queryURLs != null) {
         queryURLs.forEach(queryURL =>
             queryObjectsFromServer(queryURL.query, true, queryURL.bounds, true)
         );
@@ -76,18 +71,14 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             queryAlertText.parentElement.style.display = "block";
             queryAlertText.innerHTML = "Loading Data...";
         }
-        let startLoad = Date.now();
         let query = $.getJSON(queryURL, function (dataAsJson) {
-            if(isOsm){
+            if (isOsm) {
                 currentBounds.push(bounds);
-                currentBounds = optimizeBounds(currentBounds,0.005);
+                currentBounds = optimizeBounds(currentBounds, 0.005);
             }
-            if(isOsm){
-                console.log("Loadtime: " + (Date.now() - startLoad) + "ms");
-            }
-            for(let i = 0; i < currentQueries.length; i++){
-                if(currentQueries[i].query === query){
-                    currentQueries.splice(i,1)
+            for (let i = 0; i < currentQueries.length; i++) {
+                if (currentQueries[i].query === query) {
+                    currentQueries.splice(i, 1)
                     break;
                 }
             }
@@ -100,14 +91,14 @@ function queryObjectsFromServer(queryURL, forceDraw, bounds, isOsm) { //in: quer
             else {
                 drawObjectsToMap(dataAsJson);
             }
-            if(currentLayers.length > 5000){
+            if (currentLayers.length > 5000) {
                 cleanupCurrentMap();
             }
-            else if(currentBounds.length > 10){
+            else if (currentBounds.length > 10) {
                 currentBounds = [leafletBoundsToObj(map.getBounds())];
             }
         });
-        currentQueries.push({ query: query, bounds: bounds});
+        currentQueries.push({ query: query, bounds: bounds });
     }
 }
 
@@ -133,7 +124,7 @@ function drawObjectsToMap(dataToDraw) { //in: geoJson containing only things con
         },
         onEachFeature: function (feature, layer) {
             latlng = latLngFromFeature(feature);
-            if(latlng === -1){
+            if (latlng === -1) {
                 return;
             }
             let iconName = parseIconNameFromContext(feature);
@@ -171,21 +162,21 @@ function cleanupCurrentMap() { //in: nothing, out: cleans up map outside of the 
     map.eachLayer(function (layer) {
         if (layer.feature != null) {
             let ltlng = map.getCenter;
-            if(latLngFromFeature(layer.feature) != null){
+            if (latLngFromFeature(layer.feature) != null) {
                 ltlng = latLngFromFeature(layer.feature);
             }
-            if(!pointIsWithinBoundsX2(ltlng,map.getBounds())){
+            if (!pointIsWithinBounds(ltlng, expandBoundsX2(leafletBoundsToObj(map.getBounds())))) {
                 if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
                     map.removeLayer(layer);
-                    currentLayers.splice(currentLayers.indexOf(layer.feature.id),1);
+                    currentLayers.splice(currentLayers.indexOf(layer.feature.id), 1);
                 }
             }
         }
     });
     let iconsToRemove = [];
-    markerCluster.eachLayer(function(layer){
+    markerCluster.eachLayer(function (layer) {
         let ltlng = layer._latlng;
-        if(!pointIsWithinBoundsX2(ltlng,map.getBounds())){
+        if (!pointIsWithinBounds(ltlng, expandBoundsX2(leafletBoundsToObj(map.getBounds())))) {
             iconsToRemove.push(layer);
         }
     });
@@ -246,7 +237,7 @@ function createQuery(queryList, boundsString) { //in: list of tags to query, out
     return queryFString;
 }
 
-function isIllegalOsmQuery(queryObj){ //in query ie: man_made:water_works, out: if not in blacklist and is in common tags
+function isIllegalOsmQuery(queryObj) { //in query ie: man_made:water_works, out: if not in blacklist and is in common tags
     return queryObj.query.split('=')[0] === 'custom' || blacklist.includes(queryObj.query.split('=')[1]);
 }
 
@@ -255,26 +246,21 @@ function makeBoundsString(bounds) { //in: bounds in form of object with nesw, ou
 }
 
 function withinCurrentBounds(boundsToTest) { //in bounds, out: true if is withing bounds to check against, false if not within or null
-    return withinBounds(boundsToTest,leafletBoundsToObj(map.getBounds()));
+    return withinBounds(boundsToTest, leafletBoundsToObj(map.getBounds()));
 }
 
-function withinBounds(boundsToTest, boundsToTestAgainst){ 
+function withinBounds(boundsToTest, boundsToTestAgainst) {
     return boundsToTestAgainst.north >= boundsToTest.north && boundsToTestAgainst.south <= boundsToTest.south && boundsToTestAgainst.west <= boundsToTest.west && boundsToTestAgainst.east >= boundsToTest.east;
 }
 
-function outsideOfBounds(boundsToTest, boundsToTestAgainst){ 
+function outsideOfBounds(boundsToTest, boundsToTestAgainst) {
     return boundsToTest.east < boundsToTestAgainst.west || boundsToTest.west > boundsToTestAgainst.east || boundsToTest.south > boundsToTestAgainst.north || boundsToTest.north < boundsToTestAgainst.south;
 }
 
 function queryNeedsCancelling(queryObj) { //in queryObj from query objects from server, out: true and cancells query if query is not in viewport, false if not
     let bound = leafletBoundsToObj(map.getBounds());
-    bound = {
-        north: bound.north + (bound.north - bound.south),
-        south: bound.south - (bound.north - bound.south),
-        east: bound.east + (bound.east - bound.west),
-        west: bound.west - (bound.east - bound.west)
-    };
-    if (outsideOfBounds(queryObj.bounds,bound)) {
+    bound = expandBoundsX2(bound);
+    if (outsideOfBounds(queryObj.bounds, bound)) {
         queryObj.query.abort();
         return true;
     }
@@ -282,42 +268,36 @@ function queryNeedsCancelling(queryObj) { //in queryObj from query objects from 
 }
 
 function queryDefault(queryList, queryBounds) { //in: array of queries and a boundsstring, out: valid url to kumi systems
-    let boundsToQuery;
-    if((currentBounds.length == 0 && currentQueries.length == 0)){
+    let boundsToQuery = [];
+    if ((currentBounds.length == 0 && currentQueries.length == 0)) {
         boundsToQuery = [queryBounds];
     }
-    else{
-        if(currentBounds.length > 0){
-            boundsToQuery = subBounds(queryBounds,currentBounds[0]);
-            if(boundsToQuery != []){
-                for(let j = 1; j < currentBounds.length; j++){
-                    boundsToQuery = boundListSubstitution(currentBounds[j],boundsToQuery);
+    else {
+        if (currentBounds.length > 0) {
+            boundsToQuery = subBounds(queryBounds, currentBounds[0]);
+            if (boundsToQuery.length > 0) {
+                for (let j = 1; j < currentBounds.length; j++) {
+                    boundsToQuery = boundListSubstitution(currentBounds[j], boundsToQuery);
                 }
             }
         }
-        if(currentQueries.length > 0){
-            let startIndex = 0;
-            if(boundsToQuery == null){
-                boundsToQuery = subBounds(queryBounds,currentQueries[0].bounds);
-                startIndex = 1;
-            }
-            for(let n = startIndex; n < currentQueries.length; n++){
-                boundsToQuery = boundListSubstitution(currentQueries[n].bounds,boundsToQuery);
+        if (currentQueries.length > 0) {
+            boundsToQuery = subBounds(queryBounds, currentQueries[0].bounds);
+            if (boundsToQuery.length > 0) {
+                for (let n = 1; n < currentQueries.length; n++) {
+                    boundsToQuery = boundListSubstitution(currentQueries[n].bounds, boundsToQuery);
+                }
             }
         }
     }
-    if(boundsToQuery == null || boundsToQuery == [] || boundsToQuery.length == 0){
-        return null;
-    }
-    boundsToQuery = optimizeBounds(boundsToQuery,0.005);
-    if(boundsToQuery == null || boundsToQuery == [] || boundsToQuery.length == 0){
-        return null;
-    }
+    if (boundsToQuery.length == 0) return null;
+    boundsToQuery = optimizeBounds(boundsToQuery, 0.005);
+    if (boundsToQuery.length == 0) return null;
     let queries = [];
-    for(let i = 0; i < boundsToQuery.length; i++){
+    for (let i = 0; i < boundsToQuery.length; i++) {
         queries.push({
-            query:'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(' + createQuery(queryList, makeBoundsString(boundsToQuery[i])) + ');out body geom;',
-            bounds:boundsToQuery[i]
+            query: 'https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(' + createQuery(queryList, makeBoundsString(boundsToQuery[i])) + ');out body geom;',
+            bounds: boundsToQuery[i]
         });
     }
     return queries;
@@ -348,108 +328,100 @@ function latLngFromFeature(feature) { //in: geojson feature, out: its parsed lat
     else {
         return -1;
     }
-    return L.latLng(latlng[1],latlng[0]);
+    return L.latLng(latlng[1], latlng[0]);
 }
 
-function pointIsWithinBounds(point,bounds){ //in: l.latlng and l.latlngbounds, out: true if is within, false if not
-    if(point == null){
+function pointIsWithinBounds(point, bounds) { //in: l.latlng and l.latlngbounds, out: true if is within, false if not
+    if (point == null) {
         return true;
     }
-    return point.lng > bounds.getWest() && point.lat > bounds.getSouth() && point.lng < bounds.getEast() && point.lat < bounds.getNorth();
+    return point.lng > bounds.west && point.lat > bounds.south && point.lng < bounds.east && point.lat < bounds.north;
 }
 
-function pointIsWithinBoundsX2(point,bounds){ //in: l.latlng and l.latlngbounds, out: true if is within the box plus a box on each side, false if not
-    if(point == null){
-        return true;
-    }
-    bounds = L.latLngBounds(L.latLng(bounds.getSouth() - (bounds.getNorth() - bounds.getSouth()),bounds.getWest() - (bounds.getEast() - bounds.getWest())),L.latLng(bounds.getNorth() + (bounds.getNorth() - bounds.getSouth()), bounds.getEast() + (bounds.getEast() - bounds.getWest())));
-    return pointIsWithinBounds(point,bounds);
+function leafletBoundsToObj(leafletBounds) { //in L.latlngBounds, out: nesw obj
+    return { north: leafletBounds.getNorth(), east: leafletBounds.getEast(), south: leafletBounds.getSouth(), west: leafletBounds.getWest() };
 }
 
-function leafletBoundsToObj(leafletBounds){ //in L.latlngBounds, out: nesw obj
-    return {north: leafletBounds.getNorth(), east: leafletBounds.getEast(), south: leafletBounds.getSouth(), west: leafletBounds.getWest()};
-}
-
-function featureShouldBeDrawn(feature){
+function featureShouldBeDrawn(feature) {
     return !(currentLayers.includes(feature.id) || map.getZoom() < MINRENDERZOOM || blacklist.includes(parseIconNameFromContext(feature)));
 }
 
-function subBounds(boundsToSlice, boundSlicer){ //in: 2 bounds objects {nsew}, out: a bounds obj list that is bTS - bS 
-    if(withinBounds(boundsToSlice,boundSlicer)){
+function subBounds(boundsToSlice, boundSlicer) { //in: 2 bounds objects {nsew}, out: a bounds obj list that is bTS - bS 
+    if (withinBounds(boundsToSlice, boundSlicer)) {
         return []; //the bounds are within eachother
     }
-    if(outsideOfBounds(boundsToSlice,boundSlicer)){
+    if (outsideOfBounds(boundsToSlice, boundSlicer)) {
         return [boundsToSlice];
     }
     let returnList = [];
-    if(boundSlicer.west > boundsToSlice.west){
+    if (boundSlicer.west > boundsToSlice.west) {
         returnList.push({
-            north:boundsToSlice.north, 
-            south:boundsToSlice.south,
-            east:boundSlicer.west,
-            west:boundsToSlice.west
+            north: boundsToSlice.north,
+            south: boundsToSlice.south,
+            east: boundSlicer.west,
+            west: boundsToSlice.west
         });
     }
-    if(boundSlicer.east < boundsToSlice.east){
+    if (boundSlicer.east < boundsToSlice.east) {
         returnList.push({
-            north:boundsToSlice.north, 
-            south:boundsToSlice.south,
+            north: boundsToSlice.north,
+            south: boundsToSlice.south,
             east: boundsToSlice.east,
             west: boundSlicer.east
         });
     }
-    if(boundSlicer.south > boundsToSlice.south){
+    if (boundSlicer.south > boundsToSlice.south) {
         returnList.push({
-            north:boundSlicer.south, 
-            south:boundsToSlice.south,
-            east:Math.min(boundSlicer.east,boundsToSlice.east),
-            west:Math.max(boundSlicer.west,boundsToSlice.west)
+            north: boundSlicer.south,
+            south: boundsToSlice.south,
+            east: Math.min(boundSlicer.east, boundsToSlice.east),
+            west: Math.max(boundSlicer.west, boundsToSlice.west)
         });
     }
-    if(boundSlicer.north < boundsToSlice.north){
+    if (boundSlicer.north < boundsToSlice.north) {
         returnList.push({
-            north:boundsToSlice.north, 
-            south:boundSlicer.north,
-            east:Math.min(boundSlicer.east,boundsToSlice.east),
-            west:Math.max(boundSlicer.west,boundsToSlice.west)
+            north: boundsToSlice.north,
+            south: boundSlicer.north,
+            east: Math.min(boundSlicer.east, boundsToSlice.east),
+            west: Math.max(boundSlicer.west, boundsToSlice.west)
         });
     }
     return returnList;
 }
 
-function boundListSubstitution(boundSlicer,boundList){ //in: a bound obj and a list of bound objs, out: the list of bound objects with the first bound removed from them
+function boundListSubstitution(boundSlicer, boundList) { //in: a bound obj and a list of bound objs, out: the list of bound objects with the first bound removed from them
     let tempBoundsList = [];
-    for(let k = 0; k < boundList.length; k++){
-        tempBoundsList = tempBoundsList.concat(subBounds(boundList[k],boundSlicer));
+    for (let k = 0; k < boundList.length; k++) {
+        tempBoundsList = tempBoundsList.concat(subBounds(boundList[k], boundSlicer));
     }
     return tempBoundsList;
 }
 
-function optimizeBounds(boundsArr, epsilon){ //in: array of {nsew} bounds objects, out: a shorter array of bounds objects
-    for(let i = 0; i < boundsArr.length; i++){
-        if(boundsArr[i].east - boundsArr[i].west < epsilon || boundsArr[i].north - boundsArr[i].south < epsilon){
-            boundsArr.splice(i,1);
+function optimizeBounds(boundsArr, epsilon) { //in: array of {nsew} bounds objects, out: a shorter array of bounds objects
+    for (let i = 0; i < boundsArr.length; i++) {
+        if (boundsArr[i].east - boundsArr[i].west < epsilon || boundsArr[i].north - boundsArr[i].south < epsilon) {
+            boundsArr.splice(i, 1);
             i--;
         }
     }
-    for(let i = 0; i < boundsArr.length; i++){
-        for(let j = i + 1; j < boundsArr.length; j++){
-            if(i < 0 || j < 0){
+    for (let i = 0; i < boundsArr.length; i++) {
+        for (let j = i + 1; j < boundsArr.length; j++) {
+            if (i < 0 || j < 0) {
                 continue;
             }
             let minimize = false;
-            if(Math.abs(boundsArr[i].north - boundsArr[j].north) <= epsilon && Math.abs(boundsArr[i].south - boundsArr[j].south) <= epsilon && (Math.abs(boundsArr[i].east - boundsArr[j].west) <= epsilon || Math.abs(boundsArr[i].west - boundsArr[j].east) <= epsilon)){
+            if (Math.abs(boundsArr[i].north - boundsArr[j].north) <= epsilon && Math.abs(boundsArr[i].south - boundsArr[j].south) <= epsilon && (Math.abs(boundsArr[i].east - boundsArr[j].west) <= epsilon || Math.abs(boundsArr[i].west - boundsArr[j].east) <= epsilon)) {
                 minimize = true;
-                boundsArr.push(concatBounds(boundsArr[i],boundsArr[j],NSEW.ns));
+                boundsArr.push(concatBounds(boundsArr[i], boundsArr[j], NSEW.ns));
             }
-            else if(Math.abs(boundsArr[i].east - boundsArr[j].east) <= epsilon && Math.abs(boundsArr[i].west - boundsArr[j].west) <= epsilon && (Math.abs(boundsArr[i].south - boundsArr[j].north) <= epsilon || Math.abs(boundsArr[i].north - boundsArr[j].south) <= epsilon)){
+            else if (Math.abs(boundsArr[i].east - boundsArr[j].east) <= epsilon && Math.abs(boundsArr[i].west - boundsArr[j].west) <= epsilon && (Math.abs(boundsArr[i].south - boundsArr[j].north) <= epsilon || Math.abs(boundsArr[i].north - boundsArr[j].south) <= epsilon)) {
                 minimize = true;
-                boundsArr.push(concatBounds(boundsArr[i],boundsArr[j],NSEW.ew));
+                boundsArr.push(concatBounds(boundsArr[i], boundsArr[j], NSEW.ew));
             }
-            if(minimize){
-                boundsArr.splice(i,1);
+            if (minimize) {
+                boundsArr.splice(i, 1);
                 i--;
-                boundsArr.splice(j - 1,1);
+                boundsArr.splice(j - 1, 1);
                 j--;
             }
         }
@@ -457,23 +429,32 @@ function optimizeBounds(boundsArr, epsilon){ //in: array of {nsew} bounds object
     return boundsArr;
 }
 
-function concatBounds(bound1, bound2, axis){ //in: 2 {nswe} bounds objects, out: 1 combined object
-    if(axis == NSEW.ns){
+function concatBounds(bound1, bound2, axis) { //in: 2 {nswe} bounds objects, out: 1 combined object
+    if (axis == NSEW.ns) {
         return {
-            north:Math.min(bound1.north,bound2.north),
-            south:Math.max(bound1.south,bound2.south),
-            east:Math.max(bound1.east,bound2.east),
-            west:Math.min(bound1.west,bound2.west)
+            north: Math.min(bound1.north, bound2.north),
+            south: Math.max(bound1.south, bound2.south),
+            east: Math.max(bound1.east, bound2.east),
+            west: Math.min(bound1.west, bound2.west)
         };
     }
-    else{
+    else {
         return {
-            north:Math.max(bound1.north,bound2.north),
-            south:Math.min(bound1.south,bound2.south),
-            east:Math.min(bound1.east,bound2.east),
-            west:Math.max(bound1.west,bound2.west)
+            north: Math.max(bound1.north, bound2.north),
+            south: Math.min(bound1.south, bound2.south),
+            east: Math.min(bound1.east, bound2.east),
+            west: Math.max(bound1.west, bound2.west)
         };
     }
+}
+
+function expandBoundsX2(bounds) {
+    return {
+        north: bounds.north + (bounds.north - bounds.south),
+        south: bounds.south - (bounds.north - bounds.south),
+        east: bounds.east + (bounds.east - bounds.west),
+        west: bounds.west - (bounds.east - bounds.west)
+    };
 }
 
 
@@ -731,7 +712,7 @@ try {
         },
         ATTRIBUTE: ATTRIBUTE,
         NSEW: NSEW,
-        config:config,
+        config: config,
         makeBoundsString: makeBoundsString,
         createQuery: createQuery,
         withinBounds: withinBounds,
@@ -750,12 +731,12 @@ try {
         getAttribute: getAttribute,
         queryNaturalGas: queryNaturalGas,
         pointIsWithinBounds: pointIsWithinBounds,
-        pointIsWithinBoundsX2: pointIsWithinBoundsX2,
         removeFromBlacklist: removeFromBlacklist,
         latLngFromFeature: latLngFromFeature,
         subBounds: subBounds,
         concatBounds: concatBounds,
         boundListSubstitution: boundListSubstitution,
-        optimizeBounds, optimizeBounds
+        optimizeBounds, optimizeBounds,
+        expandBoundsX2, expandBoundsX2
     }
 } catch (e) { }
