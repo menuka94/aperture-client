@@ -54,6 +54,12 @@ describe('queryDefault()', function() {
     it('should return a url to kami systems', function() {
         getInfrastructure.currentBounds([]);
         assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],{north:60,south:59,east:31,west:30})[0].query,"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](59,30,60,31);way[waterway=dam](59,30,60,31);relation[waterway=dam](59,30,60,31);node[waterway=river](59,30,60,31);way[waterway=river](59,30,60,31);relation[waterway=river](59,30,60,31););out body geom;"); 
+        getInfrastructure.currentBounds([{north:55,south:45,east:70,west:30}]);
+        getInfrastructure.currentQueries([{bounds:{north:62,south:58,east:42,west:38}}]);
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[0].bounds,{north:45,south:40,east:60,west:40}); 
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[1].bounds,{north:60,south:55,east:60,west:42}); 
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[2].bounds,{north:58,south:55,east:42,west:40}); 
+        
     });
 });
 
@@ -125,16 +131,14 @@ describe('getAttribute()', function() {
 
 describe('pointIsWithinBounds()', function() {
     it('return true if a point is with bounds', function() {
-        assert.deepEqual(getInfrastructure.pointIsWithinBounds(L.latLng(0,0),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),true);
-        assert.deepEqual(getInfrastructure.pointIsWithinBounds(L.latLng(-2,-2),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),false);
+        assert.deepEqual(getInfrastructure.pointIsWithinBounds(L.latLng(0,0),{north:1,south:-1,east:1,west:-1}),true);
+        assert.deepEqual(getInfrastructure.pointIsWithinBounds(L.latLng(-2,-2),{north:1,south:-1,east:1,west:-1}),false);
     });
 });
 
-describe('pointIsWithinBoundsX2()', function() {
-    it('return true if a point is with bounds plus itself on every axis', function() {
-        assert.deepEqual(getInfrastructure.pointIsWithinBoundsX2(L.latLng(0,0),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),true);
-        assert.deepEqual(getInfrastructure.pointIsWithinBoundsX2(L.latLng(-2,-2),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),true);
-        assert.deepEqual(getInfrastructure.pointIsWithinBoundsX2(L.latLng(-4,-4),L.latLngBounds(L.latLng(-1,-1),L.latLng(1,1))),false);
+describe('expandBoundsX2()', function() {
+    it('return return a bounds obj that is 6x bigger than the one passed in', function() {
+        assert.deepEqual(getInfrastructure.expandBoundsX2({north:60,south:58,east:60,west:58}),{north:62,south:56,east:62,west:56});
     });
 });
 
@@ -232,6 +236,53 @@ describe('optimizeBounds()', function() {
                 west:40
             }
         ]);
+        assert.deepEqual(getInfrastructure.optimizeBounds([ //5 to 1 optimization!
+            {
+                north:60,
+                south:40,
+                east:60,
+                west:40
+            },
+            {
+                north:80,
+                south:60,
+                east:60,
+                west:40
+            },
+            {
+                north:40,
+                south:20,
+                east:60,
+                west:40
+            },
+            {
+                north:80,
+                south:20,
+                east:40,
+                west:20
+            },
+            {
+                north:80,
+                south:20,
+                east:80,
+                west:60
+            }
+        ],1),[
+            {
+                north:80,
+                south:20,
+                east:80,
+                west:20
+            }
+        ]);
+        assert.deepEqual(getInfrastructure.optimizeBounds([ 
+            {
+                north:60,
+                south:40,
+                east:40.5,
+                west:40
+            }
+        ],1),[]);
     });
 });
 

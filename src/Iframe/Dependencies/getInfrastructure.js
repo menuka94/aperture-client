@@ -282,9 +282,13 @@ function queryDefault(queryList, queryBounds) { //in: array of queries and a bou
             }
         }
         if (currentQueries.length > 0) {
-            boundsToQuery = subBounds(queryBounds, currentQueries[0].bounds);
+            let startIndex = 0;
+            if(boundsToQuery.length == 0){
+                boundsToQuery = subBounds(queryBounds, currentQueries[0].bounds);
+                startIndex = 1;
+            }
             if (boundsToQuery.length > 0) {
-                for (let n = 1; n < currentQueries.length; n++) {
+                for (let n = startIndex; n < currentQueries.length; n++) {
                     boundsToQuery = boundListSubstitution(currentQueries[n].bounds, boundsToQuery);
                 }
             }
