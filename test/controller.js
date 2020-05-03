@@ -28,6 +28,11 @@ describe('verifyCorrectMap()', function() {
       controller.initializeMap(4, true);
       assert.deepEqual(controller.verifyCorrectMap(4), true);
       controller.mouseUp();
+
+      controller.mouseDown(4);
+      controller.initializeMap(4, true);
+      assert.deepEqual(controller.verifyCorrectMap(-1), false);
+      controller.mouseUp();
   });
 });
 
@@ -41,5 +46,43 @@ describe('checkIfAnyCanMove()', function() {
       assert.deepEqual(controller.checkIfAnyCanMove(), false);
     });
 });
+
+describe('pauseMap()', function() {
+  it('should add a map to the pausedMaps list', function() {
+    controller.pauseMap(1);
+    assert.deepEqual(controller.pausedMaps(null), [1]);
+  });
+});
+
+describe('unPauseMap()', function() {
+  it('should remove a map from the pausedMaps list', function() {
+    controller.pausedMaps([1,2])
+    controller.unPauseMap(1);
+    assert.deepEqual(controller.pausedMaps(null), [2]);
+  });
+});
+
+describe('setGlobalPosition()', function() {
+  it('should trigger all setter functions', function() {
+    controller.mouseUp(); 
+    controller.mouseDown(1);
+    controller.setterFunctions([
+      {setterFunc:function(v,z){},mapNum:1,setterFunc:function(v,z){},mapNum:1}
+    ]);
+    assert.deepEqual(controller.setGlobalPosition({n:1,s:1,e:1,w:1},1),true);
+    controller.mouseUp(); 
+    controller.initializeMap(1,true);
+    controller.mouseDown(1);
+    assert.deepEqual(controller.setGlobalPosition({n:1,s:1,e:1,w:1},1),true);
+    assert.deepEqual(controller.setGlobalPosition({n:1,s:1,e:1,w:1},2),false);
+  });
+});
+
+describe('setGlobalPositionFORCE()', function() {
+  it('should trigger all setter functions', function() {
+    assert.deepEqual(controller.setGlobalPositionFORCE({n:1,s:1,e:1,w:1},2),true);
+  });
+});
+
 
 
