@@ -36,7 +36,16 @@ static_resources:
   clusters:
   - name: TargetedQueryService
     connect_timeout: 0.25s
-    type: logical_dns
+    type: strict_dns
     http2_protocol_options: {}
     lb_policy: round_robin
-    hosts: [{ socket_address: { address: "lattice-186.cs.colostate.edu", port_value: 9091 }}]
+    hosts: [{ socket_address: { address: "lattice-180.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-181.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-182.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-183.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-184.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-185.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-186.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-187.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-188.cs.colostate.edu", port_value: 9091 }},
+            { socket_address: { address: "lattice-189.cs.colostate.edu", port_value: 9091 }}]

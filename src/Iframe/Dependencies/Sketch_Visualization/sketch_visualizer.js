@@ -24,12 +24,38 @@ Sketch_Visualizer = {
             8: 0
         };
         this._decay = 0.9999;
-        this._stream = undefined;
+        this._streams = undefined;
+        this._target = undefined;
+        this._iter = -1;
+        this.times = [];
+        this._cos = [];
+        this.pointTimes = [];
+    },
+
+    _cosineSim: function(A,B){
+        let avgCos = 0;
+        let avgDist = 0;
+        let count = 0;
+        for(let i = 0; i < A.length; i+=4){
+            if(A[i] === 0 && A[i+1] === 0 && A[i+2] === 0 &&
+                B[i] === 0 && B[i+1] === 0 && B[i+2] === 0)
+                continue;
+            count++;
+            //const dotProduct = (A[i] * B[i]) + (A[i+1] * B[i+1]) + (A[i+2] * B[i+2]);
+            //const mA  = (A[i] * A[i]) + (A[i+1] * A[i+1]) + (A[i+2] * A[i+2]);
+            //const mB  = (B[i] * B[i]) + (B[i+1] * B[i+1]) + (B[i+2] * B[i+2]);
+            const dist = Math.hypot(A[i] - B[i], A[i+1] - B[i+1], A[i+2] - B[i+2]);
+
+            //avgCos += (dotProduct)/(1e-8+Math.sqrt(mA*mB));
+            avgDist += dist;
+        }
+
+        return avgDist/count;
     },
 
     _drawStrand: function(strand, ctx, map, epsilon) {
         const lat_lng = decode_geohash(strand.getGeohash());
-        lat_lng.lon += 360;
+        //lat_lng.lon += 360;
 
         const center = map.latLngToContainerPoint(lat_lng);
         ctx.fillStyle = this._rgbaToString(this._getColorForPercentage((strand.getMeanList()[0] - 250) / (330 - 250), 0.5));
@@ -42,6 +68,19 @@ Sketch_Visualizer = {
 
         ctx.clearRect(center.x, center.y, pixelSize, pixelSize);
         ctx.fillRect(center.x, center.y, pixelSize, pixelSize);
+
+        //this.pointTimes.push(new Date().getTime() - this._start);
+
+        if(this._iter === 0) {
+            //this._target.fillStyle = this._rgbaToString(this._getColorForPercentage((strand.getMeanList()[0] - 250) / (330 - 250), 0.5));
+            //this._target.clearRect(center.x, center.y, this._zoomToPixelSize[map.getZoom()], this._zoomToPixelSize[map.getZoom()]);
+            //this._target.fillRect(center.x, center.y, this._zoomToPixelSize[map.getZoom()], this._zoomToPixelSize[map.getZoom()]);
+        } else {
+            //if (Math.random() > 0.9) {
+            //    this._cos.push(this._cosineSim(this._target.getImageData(0, 0, this._target.canvas.width, this._target.canvas.height).data,
+            //        ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data))
+            //}
+        }
     },
 
     _rgbaToString: function(rgba){
@@ -107,32 +146,86 @@ Sketch_Visualizer = {
         return {ne: bounds._northEast, sw: bounds._southWest};
     },
 
-    queryTime: function(startTime, endTime, ctx, map) {
+    cancelActiveStreams: function(){
+        if (this._streams) {
+            this._streams.forEach(stream => stream.cancel());
+            this._streams = undefined;
+        }
+    },
+
+    queryTime: function(startTime, endTime, ctx, map, numChannels=1) {
         const geohashList = [];
         this._searchForIntersectingGeohashes(this._standardizeBounds(map.getBounds()),
             this._getBoundingGeohash(map.getBounds()), geohashList);
 
-        if (this._stream)
-            this._stream.cancel();
+        this.cancelActiveStreams();
 
-        let stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", geohashList, startTime, endTime);
+        if (!this._target){
+            const canvas = L.DomUtil.create('canvas', 'leaflet-time-dimension-layer leaflet-layer');
 
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        let epsilon = this._zoomToPixelSize[map.getZoom()];
-        stream.on('data', function (response) {
-            for (const strand of response.getStrandsList()) {
-                this._drawStrand(strand, ctx, map, epsilon);
-                epsilon *= this._decay;
-            }
-        }.bind(this));
-        stream.on('status', function (status) {
-            console.log(status.code, status.details, status.metadata);
-        });
-        stream.on('end', function (end) {
-        }.bind(this));
+            const originProp = L.DomUtil.testProp(['transformOrigin', 'WebkitTransformOrigin', 'msTransformOrigin']);
+            canvas.style[originProp] = '50% 50%';
 
-        this._stream = stream;
+            const animated = map.options.zoomAnimation && L.Browser.any3d;
+            L.DomUtil.addClass(canvas, 'leaflet-zoom-' + (animated ? 'animated' : 'hide'));
+
+            canvas.height = ctx.canvas.height;
+            canvas.width = ctx.canvas.width;
+            const oc = canvas.transferControlToOffscreen();
+            this._target = oc.getContext("2d");
+            this._target.globalCompositeOperation = "lighter";
+            this._target.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        }
+
+        this._streams = this._runQuery(geohashList, startTime, endTime, ctx, map, numChannels);
     },
+
+    _runQuery: function(geohashList, startTime, endTime, ctx, map, numChannels){
+        const chunkList = this._chunkList(geohashList, numChannels);
+        const streams = [];
+        this._iter += 1;
+        this.pointTimes = [];
+        for (let i =0; i < chunkList.length; i++) {
+            const stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", chunkList[i], startTime, endTime);
+            streams.push(stream);
+
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            let epsilon = this._zoomToPixelSize[map.getZoom()];
+            this._start = new Date().getTime();
+            stream.on('data', function (response) {
+                for (const strand of response.getStrandsList()) {
+                    this._drawStrand(strand, ctx, map, epsilon);
+                    epsilon *= this._decay;
+                    //epsilon -= 0.00001;
+                }
+            }.bind(this));
+            stream.on('status', function (status) {
+                console.log(status.code, status.details, status.metadata);
+            });
+            stream.on('end', function (end) {
+                //console.log(JSON.stringify(this.pointTimes));
+                //console.log(JSON.stringify(this._cos));
+                //if(this._iter === 1)
+                //this.queryTime(startTime, endTime, ctx, map)
+                this._completionTime = new Date().getTime() - this._start;
+                if(this.times.length > this._iter){
+                    this.times[this._iter] = Math.max(this.times[this._iter], new Date().getTime() - this._start)
+                } else {
+                    this.times.push(new Date().getTime() - this._start);
+                }
+            }.bind(this));
+        }
+        return streams;
+    },
+
+    _chunkList: function(a, numChunks){
+        const outArray = [];
+        const chunk = Math.ceil(a.length / numChunks);
+        for (let i = 0,  j = a.length; i < j; i+=chunk) {
+            outArray.push(a.slice(i,i+chunk));
+        }
+        return outArray;
+    }
 };
 
 sketch_visualizer = function(percentageToColor) {
