@@ -94,6 +94,10 @@ Sketch_Visualizer = {
     },
 
     queryTime: function(startTime, endTime, ctx, map) {
+        if(true){
+            this._sketchRasterer.queryTime(startTime, endTime, ctx, map);
+            return;
+        }
         const geohashList = [];
         this._searchForIntersectingGeohashes(this._standardizeBounds(map.getBounds()),
             this._getBoundingGeohash(map.getBounds()), geohashList);

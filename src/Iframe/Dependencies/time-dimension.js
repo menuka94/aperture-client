@@ -8,7 +8,7 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
         this._lastQueryTime = 0;
         this._currentLoadedTime = 0;
     },
-    
+
     onAdd: function(map) {
 		this._map = map;
         L.TimeDimension.Layer.prototype.onAdd.call(this, map);
@@ -33,7 +33,7 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
 	addControlReference: function(ctrl) {
 		this._ctrl = ctrl;
 	},
-	
+
     _initCanvas: function () {
         const canvas = this._canvas = L.DomUtil.create('canvas', 'leaflet-time-dimension-layer leaflet-layer');
 		this._ctx = canvas.getContext("2d");
@@ -51,8 +51,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
 
     _updateBounds: function() {
         const size = this._map.getSize();
-        this._canvas.width  = size.x;
-        this._canvas.height = size.y;
+        this._canvas.width  = 850//size.x;
+        this._canvas.height = 400//size.y;
         const bounds = this._map.getBounds();
         this._topLeft = {lat: bounds._northEast.lat, lng:bounds._southWest.lng};
         this._bottomRight = {lat: bounds._southWest.lat, lng:bounds._northEast.lng-360};
