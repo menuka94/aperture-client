@@ -57,7 +57,7 @@ let RenderInfrastructure = {
                 return { color: getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color) };
             },
             filter: function (feature) {
-                if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < MINRENDERZOOM || RenderInfrastructure.blacklist.includes(Util.getNameFromGeoJsonFeature(feature))) {
+                if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(Util.getNameFromGeoJsonFeature(feature))) {
                     return false;
                 }
                 RenderInfrastructure.currentLayers.push(feature.id);
@@ -83,12 +83,15 @@ let RenderInfrastructure = {
             }
 
         }).addTo(RenderInfrastructure.map);
-        if (RenderInfrastructure.map.getZoom() >= MINRENDERZOOM && RenderInfrastructure.currentQueries.length == 0) {
-            RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
-        }
-        else {
-            RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
-            RenderInfrastructure.options.queryAlertText.innerHTML = "Loading Data...";
+        console.log(resultLayer);
+        if(RenderInfrastructure.options.queryAlertText){
+            if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
+                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
+            }
+            else {
+                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
+                RenderInfrastructure.options.queryAlertText.innerHTML = "Loading Data...";
+            }
         }
         RenderInfrastructure.markerLayer.refreshClusters();
         return resultLayer;
@@ -618,9 +621,13 @@ function getAttribute(option, attribute) {
 
 try {
     module.exports = {
-        RenderInfrastructure: RenderInfrastructure,
+        RenderInfrastructure: function(val){
+            if(val != null){
+                RenderInfrastructure = val;
+            } 
+            return RenderInfrastructure;
+        },
         Querier: Querier,
         Util: Util
-        
     }
 } catch (e) { }

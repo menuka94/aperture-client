@@ -1,29 +1,79 @@
 const assert = require('assert');
 var getInfrastructure = require('../../../src/Iframe/Dependencies/getInfrastructure');
 var jsdom = require('jsdom-global');
+const { createCanvas, loadImage } = require('canvas');
+const canvas = createCanvas(200, 200);
+const ctx = canvas.getContext('2d');
+global.$ = require('jquery');
 global.L = require('leaflet');
-require('leaflet.markercluster');
+L.Map.prototype.setSize = function (width, height) {
+    this._size = new L.Point(width, height);
+    this._resetView(this.getCenter(), this.getZoom());
+    return this;
+};
+window.HTMLCanvasElement.prototype.getContext = function (a) {
+    return ctx;
+}
+global.osmtogeojson = require('osmtogeojson');
 
 const elem = document.createElement('div');
 elem.style.cssText = 'width: "100%", height: "800px" ';
 elem.id = 'testMap';
 document.body.appendChild(elem);
 
-const testMap = L.map('testMap', {renderer: L.canvas(), minZoom: 3,
+const elem2 = document.createElement('div');
+document.body.appendChild(elem2);
+
+const testMap = L.map('testMap', {
+    renderer: L.canvas(), minZoom: 3,
     fullscreenControl: true
+}).setView(L.latLng(40.494351, -105.295029), 13);
+
+
+testMap.setSize(800, 800);
+
+testMap.refreshClusters = function () { };
+
+
+
+
+describe('RenderInfrastructure', function () {
+    describe('config()', function () {
+        it('should configurate the renderer', function () {
+            getInfrastructure.RenderInfrastructure(null).config(testMap, testMap, { timeout: 15, queryAlertText: elem2 });
+            assert.deepEqual(getInfrastructure.RenderInfrastructure(null).map, testMap);
+            assert.deepEqual(getInfrastructure.RenderInfrastructure(null).options.timeout, 15);
+            assert.deepEqual(getInfrastructure.RenderInfrastructure(null).options.minRenderZoom, 10);
+        });
+    });
+    describe('update()', function () {
+        it('should attempt to call the renderer for the current map bounds', function () {
+            getInfrastructure.RenderInfrastructure(null).update([{ query: "waterway=dam" }]);
+            assert.deepEqual(getInfrastructure.RenderInfrastructure(null).currentQueries[0].bounds,
+                {
+                    north: 40.54654802898779,
+                    east: -105.2263641357422,
+                    south: 40.44211337197962,
+                    west: -105.3636932373047
+                }
+            );
+        });
+    });
+    describe('renderGeoJson()', function () {
+        it('should render geojson onto map', function () {
+            // testMap.setView(setView(L.latLng(40.494351, -105.295029), 13));
+            // getInfrastructure.RenderInfrastructure(null).currentQueries = [];
+            // getInfrastructure.RenderInfrastructure(null).currentBounds = [];
+            // getInfrastructure.RenderInfrastructure(null).update([{ query: "waterway=dam" }]);
+
+            // assert.deepEqual(getInfrastructure.RenderInfrastructure(null).currentQueries[0].bounds,
+               
+            // );
+        });
+    });
 });
 
-var markers = L.markerClusterGroup({
-    showCoverageOnHover: false,
-    spiderfyOnMaxZoom: false,
-    disableClusteringAtZoom: 17,
-    maxClusterRadius: 55
-});
-
-testMap.fitBounds(L.latLngBounds(L.latLng(61,31),L.latLng(60,30)));
-
-getInfrastructure.config(markers,testMap);
-
+/*
 describe('makeBoundsString()', function() {
     it('should return a bounds string from a bounds object', function() {
         assert.deepEqual(getInfrastructure.makeBoundsString({north:60,south:61,east:30,west:31}), 61 + ',' + 31 + ',' + 60 + ',' + 30);
@@ -53,19 +103,19 @@ describe('withinBounds()', function() {
 describe('queryDefault()', function() {
     it('should return a url to kami systems', function() {
         getInfrastructure.currentBounds([]);
-        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],{north:60,south:59,east:31,west:30})[0].query,"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](59,30,60,31);way[waterway=dam](59,30,60,31);relation[waterway=dam](59,30,60,31);node[waterway=river](59,30,60,31);way[waterway=river](59,30,60,31);relation[waterway=river](59,30,60,31););out body geom;"); 
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"},{query:"waterway=river"}],{north:60,south:59,east:31,west:30})[0].query,"https://overpass.kumi.systems/api/interpreter?data=[out:json][timeout:30];(node[waterway=dam](59,30,60,31);way[waterway=dam](59,30,60,31);relation[waterway=dam](59,30,60,31);node[waterway=river](59,30,60,31);way[waterway=river](59,30,60,31);relation[waterway=river](59,30,60,31););out body geom;");
         getInfrastructure.currentBounds([{north:55,south:45,east:70,west:30}]);
         getInfrastructure.currentQueries([{bounds:{north:62,south:58,east:42,west:38}}]);
-        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[0].bounds,{north:45,south:40,east:60,west:40}); 
-        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[1].bounds,{north:60,south:55,east:60,west:42}); 
-        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[2].bounds,{north:58,south:55,east:42,west:40}); 
-        
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[0].bounds,{north:45,south:40,east:60,west:40});
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[1].bounds,{north:60,south:55,east:60,west:42});
+        assert.deepEqual(getInfrastructure.queryDefault([{query:"waterway=dam"}],{north:60,south:40,east:60,west:40})[2].bounds,{north:58,south:55,east:42,west:40});
+
     });
 });
 
 describe('queryNaturalGas()', function() {
     it('should return a url to arcgis', function() {
-        assert.deepEqual(getInfrastructure.queryNaturalGas({north:60,south:61,east:30,west:31}),'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=31%2C61%2C30%2C60&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson'); 
+        assert.deepEqual(getInfrastructure.queryNaturalGas({north:60,south:61,east:30,west:31}),'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=31%2C61%2C30%2C60&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson');
     });
 });
 
@@ -275,7 +325,7 @@ describe('optimizeBounds()', function() {
                 west:20
             }
         ]);
-        assert.deepEqual(getInfrastructure.optimizeBounds([ 
+        assert.deepEqual(getInfrastructure.optimizeBounds([
             {
                 north:60,
                 south:40,
@@ -288,17 +338,17 @@ describe('optimizeBounds()', function() {
 
 describe('concatBounds()', function() {
     it('concatinates two rects', function() {
-        assert.deepEqual(getInfrastructure.concatBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:65,west:35},getInfrastructure.NSEW.ns),{north:55,south:45,east:65,west:35}); 
-        assert.deepEqual(getInfrastructure.concatBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:65,west:35},getInfrastructure.NSEW.ew),{north:60,south:40,east:60,west:40}); 
+        assert.deepEqual(getInfrastructure.concatBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:65,west:35},getInfrastructure.NSEW.ns),{north:55,south:45,east:65,west:35});
+        assert.deepEqual(getInfrastructure.concatBounds({north:60,south:40,east:60,west:40},{north:55,south:45,east:65,west:35},getInfrastructure.NSEW.ew),{north:60,south:40,east:60,west:40});
     });
 });
 
 describe('boundListSubstitution()', function() {
     it('removes a bound from a list of bounds', function() {
-        assert.deepEqual(getInfrastructure.boundListSubstitution({north:55,south:45,east:55,west:45},[{north:60,south:40,east:60,west:40}]),[{north:60,south:40,east:45,west:40},{north:60,south:40,east:60,west:55},{north:45,south:40,east:55,west:45},{north:60,south:55,east:55,west:45}]); 
+        assert.deepEqual(getInfrastructure.boundListSubstitution({north:55,south:45,east:55,west:45},[{north:60,south:40,east:60,west:40}]),[{north:60,south:40,east:45,west:40},{north:60,south:40,east:60,west:55},{north:45,south:40,east:55,west:45},{north:60,south:55,east:55,west:45}]);
     });
 });
-
+*/
 /*
 cleanupCurrentMap: cleanupCurrentMap,
 addIconToMap: addIconToMap,
