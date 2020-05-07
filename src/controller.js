@@ -19,37 +19,23 @@ var map4IsMoused = false;
 //create update event
 var updateEvent = new CustomEvent("updateMaps");
 
-
-/*
-function setGlobalZoom(_zoomLevel, mapNumber) { //this isnt used but its here anyways
-    if (checkIfAnyCanMove()) {
-        initializeMap(mapNumber, true);
-    }
-    if (!verifyCorrectMap(mapNumber)) {
-        //console.log("map " + mapNumber + " wasnt the corrent map");
-        return;
-    }
-    //console.log("setting global zoom to map " + mapNumber);
-    //zoomLevel = _zoomLevel;
-    //updateMaps(mapNumber);
-}*/
-
 function setGlobalPosition(_view, mapNumber) {
     if (checkIfAnyCanMove()) {
         initializeMap(mapNumber, true);
     }
     if (!verifyCorrectMap(mapNumber)) {
-        return;
+        return false;
     }
-    //console.log("setting postion of 1");
     view = _view;
     updateMaps(mapNumber);
+    return true;
 }
 
 function setGlobalPositionFORCE(_view, mapNumber) {
     view = _view;
     updateMaps(mapNumber);
     updateAll();
+    return true;
 }
 
 function updateMaps(mapNumber) {
@@ -167,10 +153,26 @@ function unPauseMap(mapNum){
 
 try {
     module.exports = {
+        setGlobalPosition:setGlobalPosition,
+        setGlobalPositionFORCE:setGlobalPositionFORCE,
         verifyCorrectMap: verifyCorrectMap,
         mouseDown: mouseDown,
         initializeMap: initializeMap,
         mouseUp: mouseUp,
-        checkIfAnyCanMove: checkIfAnyCanMove
+        checkIfAnyCanMove: checkIfAnyCanMove,
+        pauseMap:pauseMap,
+        unPauseMap:unPauseMap,
+        setterFunctions: function (val) {
+            if (val != null) {
+                setterFunctions = val;
+            }
+            return setterFunctions;
+        },
+        pausedMaps: function (val) {
+            if (val != null) {
+                pausedMaps = val;
+            }
+            return pausedMaps;
+        }
     };
 } catch(e) { }
