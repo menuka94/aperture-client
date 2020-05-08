@@ -83,7 +83,6 @@ let RenderInfrastructure = {
             }
 
         }).addTo(RenderInfrastructure.map);
-        console.log(resultLayer);
         if(RenderInfrastructure.options.queryAlertText){
             if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
                 RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
@@ -127,8 +126,8 @@ let RenderInfrastructure = {
         this.map.eachLayer(function (layer) {
             if (layer.feature) {
                 if (Util.getNameFromGeoJsonFeature(layer.feature) == featureId) {
-                    this.map.removeLayer(layer);
-                    this.currentLayers.splice(this.currentLayers.indexOf(layer.feature.id), 1);
+                    RenderInfrastructure.map.removeLayer(layer);
+                    RenderInfrastructure.currentLayers.splice(RenderInfrastructure.currentLayers.indexOf(layer.feature.id), 1);
                 }
             }
         });
@@ -139,10 +138,10 @@ let RenderInfrastructure = {
         this.map.eachLayer(function (layer) {
             if (layer.feature != null) {
                 let ltlng = RenderInfrastructure.map.getCenter;
-                if (latLngFromFeature(layer.feature) != null) {
-                    ltlng = latLngFromFeature(layer.feature);
+                if (Util.getLatLngFromGeoJsonFeature(layer.feature) != null) {
+                    ltlng = Util.getLatLngFromGeoJsonFeature(layer.feature);
                 }
-                if (!pointIsWithinBounds(ltlng, expandBoundsX2(leafletBoundsToObj(RenderInfrastructure.map.getBounds())))) {
+                if (!Util.pointIsWithinBounds(ltlng, Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds())))) {
                     if (layer.feature.properties.type == 'node' || layer.feature.properties.type == 'way' || layer.feature.properties.type == 'relation' || layer.feature.properties.TYPEPIPE != null) {
                         RenderInfrastructure.map.removeLayer(layer);
                         RenderInfrastructure.currentLayers.splice(RenderInfrastructure.currentLayers.indexOf(layer.feature.id), 1);
@@ -151,14 +150,14 @@ let RenderInfrastructure = {
             }
         });
         let iconsToRemove = [];
-        this.markerCluster.eachLayer(function (layer) {
+        this.markerLayer.eachLayer(function (layer) {
             let ltlng = layer._latlng;
-            if (!pointIsWithinBounds(ltlng, expandBoundsX2(leafletBoundsToObj(RenderInfrastructure.map.getBounds())))) {
+            if (!Util.pointIsWithinBounds(ltlng, Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds())))) {
                 iconsToRemove.push(layer);
             }
         });
-        this.markerCluster.removeLayers(iconsToRemove);
-        this.currentBounds = [leafletBoundsToObj(this.map.getBounds())];
+        this.markerLayer.removeLayers(iconsToRemove);
+        this.currentBounds = [Util.Convert.leafletBoundsToNESWObject(this.map.getBounds())];
         return true;
     },
     removeFromBlacklist: function (tagToRemove) {
@@ -175,6 +174,7 @@ let RenderInfrastructure = {
 
 const Querier = {
     queryGeoJsonFromServer: function (queryURL, bounds, isOsmData, callbackFn) {
+        this.removeUnnecessaryQueries();
         let query = $.getJSON(queryURL, function (dataAsJson) {
             for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
                 if (RenderInfrastructure.currentQueries[i].query === query) {
@@ -196,17 +196,25 @@ const Querier = {
             }
         });
         RenderInfrastructure.currentQueries.push({ query: query, bounds: bounds });
+        if(RenderInfrastructure.options.queryAlertText){
+            if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
+                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
+            }
+            else {
+                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
+                RenderInfrastructure.options.queryAlertText.innerHTML = "Loading Data...";
+            }
+        }
     },
     removeUnnecessaryQueries: function () {
         for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
-            let bound = Util.Convert(map.getBounds());
+            let bound = Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds());
             bound = Util.expandBounds(bound);
             if (Util.boundsAreOutsideOfBounds(RenderInfrastructure.currentQueries[i].bounds, bound)) {
-                RenderInfrastructure.currentQueries.splice(i, 1);
                 RenderInfrastructure.currentQueries[i].query.abort();
-                return true;
+                RenderInfrastructure.currentQueries.splice(i, 1);
+                i--;
             }
-            return false;
         }
     },
     createOverpassQueryList: function (queryList, queryBounds) {
@@ -219,7 +227,7 @@ const Querier = {
                 boundsToQuery = Util.subtractBounds(queryBounds, RenderInfrastructure.currentBounds[0]);
                 if (boundsToQuery.length > 0) {
                     for (let j = 1; j < RenderInfrastructure.currentBounds.length; j++) {
-                        boundsToQuery = Util.subtractBoundsFromList(RenderInfrastructure.currentBounds[j], boundsToQuery);
+                        boundsToQuery = Util.subtractBoundsFromList(boundsToQuery,RenderInfrastructure.currentBounds[j]);
                     }
                 }
             }
@@ -231,7 +239,7 @@ const Querier = {
                 }
                 if (boundsToQuery.length > 0) {
                     for (let n = startIndex; n < RenderInfrastructure.currentQueries.length; n++) {
-                        boundsToQuery = Util.subtractBoundsFromList(RenderInfrastructure.currentQueries[n].bounds, boundsToQuery);
+                        boundsToQuery = Util.subtractBoundsFromList(boundsToQuery, RenderInfrastructure.currentQueries[n].bounds);
                     }
                 }
             }
@@ -280,9 +288,6 @@ const Util = {
         createOverpassBoundsString: function (bounds) {
             return bounds.south + ',' + bounds.west + ',' + bounds.north + ',' + bounds.east;
         }
-    },
-    boundsAreWithinCurrentViewport: function (boundsToCheck) {
-        return this.boundsAreWithinBounds(boundsToCheck, this.Convert.leafletBoundsToNESWObject(map.getBounds()));
     },
     boundsAreWithinBounds: function (boundsToCheck, boundsToCheckAgainst) {
         return boundsToCheckAgainst.north >= boundsToCheck.north && boundsToCheckAgainst.south <= boundsToCheck.south && boundsToCheckAgainst.west <= boundsToCheck.west && boundsToCheckAgainst.east >= boundsToCheck.east;
@@ -364,7 +369,7 @@ const Util = {
     subtractBoundsFromList: function (boundsListToEdit, boundsToRemove) {
         let tempBoundsList = [];
         for (let k = 0; k < boundsListToEdit.length; k++) {
-            tempBoundsList = tempBoundsList.concat(this.subBounds(boundsListToEdit[k], boundsToRemove));
+            tempBoundsList = tempBoundsList.concat(this.subtractBounds(boundsListToEdit[k], boundsToRemove));
         }
         return tempBoundsList;
     },
@@ -621,12 +626,7 @@ function getAttribute(option, attribute) {
 
 try {
     module.exports = {
-        RenderInfrastructure: function(val){
-            if(val != null){
-                RenderInfrastructure = val;
-            } 
-            return RenderInfrastructure;
-        },
+        RenderInfrastructure: RenderInfrastructure,
         Querier: Querier,
         Util: Util
     }
