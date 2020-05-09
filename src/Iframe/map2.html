@@ -126,7 +126,10 @@
         osmMap2.addLayer(markers);
 
         RenderInfrastructure.config(osmMap2, markers, {
-            queryAlertText: document.getElementById('queryInfoText')
+            queryAlertText: document.getElementById('queryInfoText'),
+        });
+        $.getJSON("Dependencies/waterInfrastructure.json",function(data){
+            RenderInfrastructure.options.attributeData = data;
         });
         var selectedObjects = [];
 

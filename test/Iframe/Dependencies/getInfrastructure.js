@@ -21,6 +21,9 @@ elem.style.cssText = 'width: "100%", height: "800px" ';
 elem.id = 'testMap';
 document.body.appendChild(elem);
 
+let jsonData = require("../../../src/Iframe/Dependencies/waterInfrastructure.json");
+
+
 const elem2 = document.createElement('div');
 document.body.appendChild(elem2);
 
@@ -43,7 +46,7 @@ const sampleQuery = { "type": "FeatureCollection", "features": [{ "type": "Featu
 describe('RenderInfrastructure', function () {
     describe('config()', function () {
         it('should configurate the renderer', function () {
-            getInfrastructure.RenderInfrastructure.config(testMap, testMap, { timeout: 15, queryAlertText: elem2 });
+            getInfrastructure.RenderInfrastructure.config(testMap, testMap, { timeout: 15, queryAlertText: elem2,attributeData:jsonData });
             assert.deepEqual(getInfrastructure.RenderInfrastructure.map, testMap);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.options.timeout, 15);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.options.minRenderZoom, 10);
@@ -88,6 +91,21 @@ describe('RenderInfrastructure', function () {
             assert.deepEqual(Object.keys(getInfrastructure.RenderInfrastructure.map._layers).length, 4);
         });
     });
+    describe('getAttribute()', function() {
+        it('gets attributes from a name', function() {
+            getInfrastructure.RenderInfrastructure.config(testMap,testMap,{});
+            console.log("server");
+            console.log(getInfrastructure.RenderInfrastructure.options.attributeData);
+            assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("drinking_water",getInfrastructure.ATTRIBUTE.icon),"noicon");
+            assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("reservoir",getInfrastructure.ATTRIBUTE.color),"#000000");
+            getInfrastructure.RenderInfrastructure.config(testMap,testMap,{attributeData:jsonData});
+            assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("drinking_water",getInfrastructure.ATTRIBUTE.icon),new L.Icon({
+                iconUrl: "../../../images/drinking_fountain.png",
+                iconSize: [25, 25]
+            }));
+            assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("reservoir",getInfrastructure.ATTRIBUTE.color),"#00FFFF");
+        });
+    });
 });
 describe('Querier', function () {
     describe('removeUnnecessaryQueries()', function () {
@@ -106,6 +124,7 @@ describe('Querier', function () {
             assert.deepEqual(getInfrastructure.Querier.createOverpassQueryList([{ query: "waterway=dam" }], { north: 60, south: 40, east: 60, west: 40 })[2].bounds, { north: 58, south: 55, east: 42, west: 40 });
         });
     });
+
 });
 
 describe('Util', function () {

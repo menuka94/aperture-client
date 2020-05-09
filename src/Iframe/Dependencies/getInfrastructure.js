@@ -15,6 +15,18 @@ const ATTRIBUTE = { //attribute enums
     icon: 'icon',
     color: 'color'
 }
+const DEFAULTOPTIONS = {
+    overpassInterpreter: 'https://overpass.kumi.systems/api/interpreter',
+    timeout: 30,
+    maxElements: 5000,
+    maxLayers: 10,
+    minRenderZoom: 10,
+    commonTagNames: ["waterway", "man_made", "landuse", "water", "amenity"],
+    blacklistedTagValues: ["yes", "amenity"],
+    queryAlertText: null,
+    attributeData: null,
+    iconSize: [25,25]
+};
 
 let RenderInfrastructure = {
     map: null,
@@ -23,19 +35,11 @@ let RenderInfrastructure = {
     currentLayers: [],
     currentQueries: [],
     blacklist: [],
-    options: {
-        overpassInterpreter: 'https://overpass.kumi.systems/api/interpreter',
-        timeout: 30,
-        maxElements: 5000,
-        maxLayers: 10,
-        minRenderZoom: 10,
-        commonTagNames: ["waterway", "man_made", "landuse", "water", "amenity"],
-        blacklistedTagValues: ["yes", "amenity"],
-        queryAlertText: null
-    },
+    options: JSON.parse(JSON.stringify(DEFAULTOPTIONS)),
     config: function (map, markerLayer, options) { //basically a constructor
+        this.options = JSON.parse(JSON.stringify(DEFAULTOPTIONS));
         L.Util.setOptions(this, options);
-        this.map = map;
+        this.map = map; 
         this.markerLayer = markerLayer;
         this.currentBounds = [];
         this.currentLayers = [];
@@ -54,7 +58,7 @@ let RenderInfrastructure = {
     renderGeoJson: function (geoJsonData) {
         let resultLayer = L.geoJson(geoJsonData, {
             style: function (feature) {
-                return { color: getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color) };
+                return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color) };
             },
             filter: function (feature) {
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(Util.getNameFromGeoJsonFeature(feature))) {
@@ -70,7 +74,7 @@ let RenderInfrastructure = {
                 }
                 let iconName = Util.getNameFromGeoJsonFeature(feature);
                 let iconDetails = Util.getDetailsFromGeoJsonFeature(feature, iconName);
-                RenderInfrastructure.addIconToMap(getAttribute(iconName, ATTRIBUTE.icon), latlng, iconDetails);
+                RenderInfrastructure.addIconToMap(RenderInfrastructure.getAttribute(iconName, ATTRIBUTE.icon), latlng, iconDetails);
                 layer.bindPopup(iconDetails);
                 layer.on('click', function (e) {
                     RenderInfrastructure.map.flyToBounds(layer.getBounds(), FLYTOOPTIONS);
@@ -83,15 +87,7 @@ let RenderInfrastructure = {
             }
 
         }).addTo(RenderInfrastructure.map);
-        if(RenderInfrastructure.options.queryAlertText){
-            if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
-                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
-            }
-            else {
-                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
-                RenderInfrastructure.options.queryAlertText.innerHTML = "Loading Data...";
-            }
-        }
+        Util.refreshInfoPopup();
         RenderInfrastructure.markerLayer.refreshClusters();
         return resultLayer;
     },
@@ -99,22 +95,22 @@ let RenderInfrastructure = {
         if (icon == null || icon === "noicon") {
             return false;
         }
-        this.markerLayer.addLayer(L.marker(latLng, {
+        RenderInfrastructure.markerLayer.addLayer(L.marker(latLng, {
             icon: icon,
             opacity: 1
         }).on('click', function (e) {
-            if (this.map.getZoom() < 16) {
-                this.map.flyTo(e.latlng, 16, FLYTOOPTIONS);
+            if (RenderInfrastructure.map.getZoom() < 16) {
+                RenderInfrastructure.map.flyTo(e.latlng, 16, FLYTOOPTIONS);
             }
             else {
-                this.map.flyTo(e.latlng, this.map.getZoom(), FLYTOOPTIONS);
+                RenderInfrastructure.map.flyTo(e.latlng, RenderInfrastructure.map.getZoom(), FLYTOOPTIONS);
             }
         }).bindPopup(popUpContent));
         return true;
     },
     removeFeatureFromMap: function (featureId) {
-        if (getAttribute(featureId, ATTRIBUTE.icon) != "noicon") {
-            let iconUrlToSeachFor = getAttribute(featureId, ATTRIBUTE.icon).options.iconUrl;
+        if (RenderInfrastructure.getAttribute(featureId, ATTRIBUTE.icon) != "noicon") {
+            let iconUrlToSeachFor = RenderInfrastructure.getAttribute(featureId, ATTRIBUTE.icon).options.iconUrl;
             this.markerLayer.eachLayer(function (layer) {
                 if (layer.options.icon) {
                     if (iconUrlToSeachFor === layer.options.icon.options.iconUrl) {
@@ -169,6 +165,29 @@ let RenderInfrastructure = {
         else {
             return false;
         }
+    },
+    getAttribute:function(tag,attribute){
+        if(this.options.attributeData){
+            if(this.options.attributeData[tag]){
+                if(attribute == ATTRIBUTE.color){
+                    if(this.options.attributeData[tag]["color"]){
+                        return this.options.attributeData[tag]["color"];
+                    }
+                }
+                else{
+                    if(this.options.attributeData[tag]["iconAddr"]){
+                        return Util.makeIcon(this.options.attributeData[tag]["iconAddr"]);
+                    }
+                }
+            }
+        }
+
+        if(attribute == ATTRIBUTE.color){
+            return "#000000";
+        }
+        else{
+            return "noicon"
+        }
     }
 }
 
@@ -196,15 +215,7 @@ const Querier = {
             }
         });
         RenderInfrastructure.currentQueries.push({ query: query, bounds: bounds });
-        if(RenderInfrastructure.options.queryAlertText){
-            if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
-                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
-            }
-            else {
-                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
-                RenderInfrastructure.options.queryAlertText.innerHTML = "Loading Data...";
-            }
-        }
+        Util.refreshInfoPopup();
     },
     removeUnnecessaryQueries: function () {
         for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
@@ -272,6 +283,9 @@ const Querier = {
             queryFString += queries.nodeQuery + queries.wayQuery + queries.relationQuery;
         }
         return RenderInfrastructure.options.overpassInterpreter + '?data=[out:json][timeout:' + RenderInfrastructure.options.timeout + '];(' + queryFString + ');out body geom;';
+    },
+    createNaturalGasQueryURL: function (bounds) {
+        return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     }
 }
 
@@ -493,139 +507,32 @@ const Util = {
             str = str.toString();
         }
         return str.replace(/_/gi, " ");
-    }
-}
-
-function getAttribute(option, attribute) {
-    let icon;
-    let color;
-    switch (option) {
-        case "drinking_water":
-            icon = new L.Icon({
-                iconUrl: "../../../images/drinking_fountain.png",
-                iconSize: [25, 25]
-            });
-            break;
-        case "fountain":
-            icon = new L.Icon({
-                iconUrl: "../../../images/fountain.png",
-                iconSize: [20, 20]
-            });
-            color = "#0000FF";
-            break;
-        case "fire_hydrant":
-            icon = new L.Icon({
-                iconUrl: "../../../images/fire_hydrant.png",
-                iconSize: [20, 20]
-            });
-            break;
-        case "dam":
-            icon = new L.Icon({
-                iconUrl: "../../../images/dam.png",
-                iconSize: [25, 25]
-            });
-            color = "#FF0000";
-            break;
-        case "water_tap":
-            icon = new L.Icon({
-                iconUrl: "../../../images/tap_water.png",
-                iconSize: [25, 25]
-            });
-            break;
-        case "water_tower":
-            icon = new L.Icon({
-                iconUrl: "../../../images/water_tower.png",
-                iconSize: [25, 25]
-            });
-            color = "#00FF00";
-            break;
-        case "water_well":
-            icon = new L.Icon({
-                iconUrl: "../../../images/water_well.png",
-                iconSize: [25, 25]
-            });
-            break;
-        case "water_works":
-            icon = new L.Icon({
-                iconUrl: "../../../images/water_works.png",
-                iconSize: [25, 25]
-            });
-            color = "black";
-            break;
-        case "wastewater_plant":
-            icon = new L.Icon({
-                iconUrl: "../../../images/sewage.png",
-                iconSize: [25, 25]
-            });
-            color = "#FF00FF";
-            break;
-        case "pipeline":
-            icon = "noicon";
-            color = "#FFFF00";
-            break;
-        case "reservoir":
-            icon = new L.Icon({
-                iconUrl: "../../../images/reservoir-lake.png",
-                iconSize: [25, 25]
-            });
-            color = "#00FFFF";
-            break;
-        case "canal":
-            icon = "noicon";
-            color = "teal";
-            break;
-        case "river":
-            icon = "noicon";
-            color = "#00008B";
-            break;
-        case "basin":
-            icon = new L.Icon({
-                iconUrl: "../../../images/reservoir-lake.png",
-                iconSize: [25, 25]
-            });
-            color = "#00FFFF";
-            break;
-        case "stream":
-            icon = "noicon";
-            color = "#0000BB";
-            break;
-        case "Natural_Gas_Pipeline":
-            icon = "noicon";
-            color = "#8A2BE2";
-            break;
-        case "lock_gate":
-            icon = new L.Icon({
-                iconUrl: "../../../images/lock_gate.png",
-                iconSize: [25, 25]
-            });
-            color = "#FF0000";
-            break;
-        case "weir":
-            icon = new L.Icon({
-                iconUrl: "../../../images/weir.png",
-                iconSize: [25, 25]
-            });
-            color = "#FF0000";
-            break;
-        case "tidal_channel":
-            icon = "noicon";
-            color = "#0080FF";
-            break;
-
-    }
-    if (attribute == ATTRIBUTE.icon) {
+    },
+    makeIcon: function(address){
+        icon = new L.Icon({
+            iconUrl: address,
+            iconSize: RenderInfrastructure.options.iconSize
+        });
         return icon;
+    },
+    refreshInfoPopup: function(){
+        if(RenderInfrastructure.options.queryAlertText){
+            if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
+                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
+            }
+            else {
+                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
+                RenderInfrastructure.options.queryAlertText.innerHTML = "Loading Data...";
+            }
+        }
     }
-    else if (attribute == ATTRIBUTE.color) {
-        return color;
-    }
-    return false;
 }
 
 //mocha-test stuff only down from here
 
 try {
     module.exports = {
+        ATTRIBUTE:ATTRIBUTE,
         RenderInfrastructure: RenderInfrastructure,
         Querier: Querier,
         Util: Util
