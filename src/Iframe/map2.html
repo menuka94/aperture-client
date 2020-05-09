@@ -238,7 +238,7 @@
 
         function onCheck(element) {
             selectedObjects.push(mapObjectGetter(element.id));
-            removeFromBlacklist(element.id);
+            RenderInfrastructure.removeFromBlacklist(element.id);
             updateOverPassLayer(osmMap2, true);
         }
 
@@ -251,7 +251,7 @@
                 }
             }
             selectedObjects.splice(idx, 1);
-            removeFromMap(element.id);
+            RenderInfrastructure.removeFeatureFromMap(element.id);
         }
 
         parent.addEventListener('updateMaps', function () {

@@ -54,6 +54,23 @@ let RenderInfrastructure = {
                 Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
             });
         }
+        //pan loading bit
+        bounds = Util.expandBounds(bounds);
+        usefulQueries = Querier.createOverpassQueryList(queries, bounds);
+        if (usefulQueries != null) {
+            usefulQueries.forEach(query => {
+                Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
+            });
+        }
+        this.updateCustom(queries);
+    },
+    updateCustom: function (queries) {
+        let bounds = Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(this.map.getBounds()));
+        queries.forEach(query => {
+            if(query.query === "custom=Natural_Gas_Pipeline"){
+                Querier.queryGeoJsonFromServer(Querier.createNaturalGasQueryURL(bounds), bounds, false, RenderInfrastructure.renderGeoJson);
+            }
+        });
     },
     renderGeoJson: function (geoJsonData) {
         let resultLayer = L.geoJson(geoJsonData, {
@@ -208,6 +225,7 @@ const Querier = {
                 RenderInfrastructure.currentBounds = [Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds())];
             }
             if (isOsmData) {
+                RenderInfrastructure.currentBounds.push(bounds);
                 callbackFn(osmtogeojson(dataAsJson));
             }
             else {

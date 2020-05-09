@@ -54,7 +54,7 @@ describe('RenderInfrastructure', function () {
     });
     describe('update()', function () {
         it('should attempt to call the renderer for the current map bounds', function () {
-            getInfrastructure.RenderInfrastructure.update([{ query: "waterway=dam" }]);
+            getInfrastructure.RenderInfrastructure.update([{ query: "waterway=dam" },{query:"custom=Natural_Gas_Pipeline"}]);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.currentQueries[0].bounds,
                 {
                     north: 40.54654802898779,
