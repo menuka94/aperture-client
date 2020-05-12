@@ -266,6 +266,12 @@ describe('Util', function () {
             assert.deepEqual(getInfrastructure.Util.getLatLngFromGeoJsonFeature({geometry:{type:"none", coordinates:L.latLng(40,90)}}),-1);
         });
     });
+    describe('binaryToBool()', function() {
+        it('converts 110 to true, true, false and such', function() {
+            assert.deepEqual(getInfrastructure.Util.binaryToBool(111),{node:true,way:true,relation:true});
+            assert.deepEqual(getInfrastructure.Util.binaryToBool(101),{node:true,way:false,relation:true});
+        });
+    });
 });
 
 /*

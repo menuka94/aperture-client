@@ -27,6 +27,11 @@ const DEFAULTOPTIONS = {
     attributeData: null,
     iconSize: [25,25]
 };
+const GEOM = {
+    node: 100,
+    way: 10,
+    relation: 1
+}
 
 let RenderInfrastructure = {
     map: null,
@@ -233,7 +238,7 @@ const Querier = {
             }
         });
         RenderInfrastructure.currentQueries.push({ query: query, bounds: bounds });
-        Util.refreshInfoPopup();
+        if(isOsmData) Util.refreshInfoPopup();
     },
     removeUnnecessaryQueries: function () {
         for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
@@ -279,26 +284,30 @@ const Querier = {
         let queries = [];
         for (let i = 0; i < boundsToQuery.length; i++) {
             queries.push({
-                query: this.createOverpassQueryURL(queryList, boundsToQuery[i]),
+                query: this.createOverpassQueryURL(queryList, boundsToQuery[i], 111),
                 bounds: boundsToQuery[i]
             });
         }
         return queries;
     },
-    createOverpassQueryURL: function (queryList, bounds) {
+    createOverpassQueryURL: function (queryList, bounds, node_way_relation) {
         let queryFString = '';
         let boundsString = Util.Convert.createOverpassBoundsString(bounds);
+        let nWR = Util.binaryToBool(node_way_relation);
         for (let i = 0; i < queryList.length; i++) {
             if (queryList[i].query.split('=')[0] === 'custom' || RenderInfrastructure.blacklist.includes(queryList[i].query.split('=')[1])) {
                 continue; //skip if its a custom query and not a osm query, or if blacklisted
             }
             query = queryList[i].query.replace(/ /g, ''); //remove whitespace
-            let queries = {
-                nodeQuery: 'node[' + query + '](' + boundsString + ');',
-                wayQuery: 'way[' + query + '](' + boundsString + ');',
-                relationQuery: 'relation[' + query + '](' + boundsString + ');'
+            if(nWR.node){
+                queryFString += 'node[' + query + '](' + boundsString + ');';
             }
-            queryFString += queries.nodeQuery + queries.wayQuery + queries.relationQuery;
+            if(nWR.way){
+                queryFString += 'way[' + query + '](' + boundsString + ');';
+            }
+            if(nWR.relation){
+                queryFString += 'relation[' + query + '](' + boundsString + ');';
+            }
         }
         return RenderInfrastructure.options.overpassInterpreter + '?data=[out:json][timeout:' + RenderInfrastructure.options.timeout + '];(' + queryFString + ');out body geom;';
     },
@@ -543,6 +552,28 @@ const Util = {
                 RenderInfrastructure.options.queryAlertText.innerHTML = "Loading Data...";
             }
         }
+    },
+    binaryToBool: function(bin){
+        //not real binary, but it converts 110 to true, true, false and such 
+        let nWR = {
+            node:false,
+            way:false,
+            relation:false
+        }
+        for(let j = 0; j < 3; j++){
+            if(bin % 10 === 1){
+                nWR.relation = true;
+            }
+            bin = Math.floor(bin / 10);
+            if(bin % 10 === 1){
+                nWR.way = true;
+            }
+            bin = Math.floor(bin / 10);
+            if(bin % 10 === 1){
+                nWR.node = true;
+            }
+        }
+        return nWR;
     }
 }
 
