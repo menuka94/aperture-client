@@ -95,7 +95,7 @@ let RenderInfrastructure = {
                     return;
                 }
                 let iconName = Util.getNameFromGeoJsonFeature(feature);
-                let iconDetails = Util.getDetailsFromGeoJsonFeature(feature, iconName);
+                let iconDetails = Util.createDetailsFromGeoJsonFeature(feature, iconName);
                 RenderInfrastructure.addIconToMap(RenderInfrastructure.getAttribute(iconName, ATTRIBUTE.icon), latlng, iconDetails);
                 layer.bindPopup(iconDetails);
                 layer.on('click', function (e) {
@@ -489,7 +489,7 @@ const Util = {
         }
         return 'none';
     },
-    getDetailsFromGeoJsonFeature: function (feature) {
+    createDetailsFromGeoJsonFeature: function (feature,name) {
         name = this.capitalizeString(this.underScoreToSpace(name));
         let pTObj = this.getParamsAndTagsFromGeoJsonFeature(feature);
         let params = pTObj.params;
