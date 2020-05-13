@@ -1,0 +1,68 @@
+{
+    "drinking_water": {
+        "iconAddr": "../../../images/drinking_fountain.png"
+    },
+    "fountain": {
+        "iconAddr": "../../../images/fountain.png",
+        "color": "#0000FF"
+    },
+    "fire_hydrant": {
+        "iconAddr": "../../../images/fire_hydrant.png"
+    },
+    "dam": {
+        "iconAddr": "../../../images/dam.png",
+        "color": "#FF0000"
+    },
+    "water_tap": {
+        "iconAddr": "../../../images/tap_water.png"
+    },
+    "water_tower": {
+        "iconAddr": "../../../images/water_tower.png",
+        "color": "#00FF00"
+    },
+    "water_well": {
+        "iconAddr": "../../../images/water_well.png"
+    },
+    "water_works": {
+        "iconAddr": "../../../images/water_works.png",
+        "color": "black"
+    },
+    "wastewater_plant": {
+        "iconAddr": "../../../images/sewage.png",
+        "color": "#FF00FF"
+    },
+    "pipeline": {
+        "color": "#FFFF00"
+    },
+    "reservoir": {
+        "iconAddr": "../../../images/reservoir-lake.png",
+        "color": "#00FFFF"
+    },
+    "canal": {
+        "color": "teal"
+    },
+    "river": {
+        "color": "#00008B"
+    },
+    "basin": {
+        "iconAddr": "../../../images/reservoir-lake.png",
+        "color": "#00FFFF"
+    },
+    "stream": {
+        "color": "#0000BB"
+    },
+    "Natural_Gas_Pipeline": {
+        "color": "#8A2BE2"
+    },
+    "lock_gate": {
+        "iconAddr": "../../../images/lock_gate.png",
+        "color": "#FF0000"
+    },
+    "weir": {
+        "iconAddr": "../../../images/weir.png",
+        "color": "#FF0000"
+    },
+    "tidal_channel": {
+        "color": "#0080FF"
+    }
+}

@@ -125,7 +125,12 @@
         });
         osmMap2.addLayer(markers);
 
-        config(markers, osmMap2);
+        RenderInfrastructure.config(osmMap2, markers, {
+            queryAlertText: document.getElementById('queryInfoText'),
+        });
+        $.getJSON("Dependencies/waterInfrastructure.json",function(data){
+            RenderInfrastructure.options.attributeData = data;
+        });
         var selectedObjects = [];
 
         function mapObjectGetter(objectName) {
@@ -141,7 +146,7 @@
                 case "dam":
                     query = 'waterway=dam'
                     break;
-                case "tap_water":
+                case "water_tap":
                     query = 'man_made=water_tap';
                     break;
                 case "water_tower":
@@ -192,7 +197,7 @@
         }
 
         selectedObjects.push(mapObjectGetter("dam"));
-        selectedObjects.push(mapObjectGetter("tap_water"));
+        selectedObjects.push(mapObjectGetter("water_tap"));
         selectedObjects.push(mapObjectGetter("water_tower"));
         selectedObjects.push(mapObjectGetter("water_well"));
         selectedObjects.push(mapObjectGetter("water_works"));
@@ -210,7 +215,7 @@
 
 
         function updateOverPassLayer(map, reload) {
-            updateObjects(selectedObjects, osmMap2.getBounds(), reload);
+            RenderInfrastructure.update(selectedObjects);
         }
 
         function removeOverpassLayer(map, removeLayer) {
@@ -233,7 +238,7 @@
 
         function onCheck(element) {
             selectedObjects.push(mapObjectGetter(element.id));
-            removeFromBlacklist(element.id);
+            RenderInfrastructure.removeFromBlacklist(element.id);
             updateOverPassLayer(osmMap2, true);
         }
 
@@ -246,7 +251,7 @@
                 }
             }
             selectedObjects.splice(idx, 1);
-            removeFromMap(element.id, markers, osmMap2);
+            RenderInfrastructure.removeFeatureFromMap(element.id);
         }
 
         parent.addEventListener('updateMaps', function () {
