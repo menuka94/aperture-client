@@ -1,68 +1,85 @@
 {
-    "drinking_water": {
-        "iconAddr": "../../../images/drinking_fountain.png"
-    },
-    "fountain": {
-        "iconAddr": "../../../images/fountain.png",
-        "color": "#0000FF"
-    },
-    "fire_hydrant": {
-        "iconAddr": "../../../images/fire_hydrant.png"
-    },
     "dam": {
         "iconAddr": "../../../images/dam.png",
-        "color": "#FF0000"
+        "color": "#FF0000",
+        "defaultRender": true,
+        "query":"waterway=dam"
     },
     "water_tap": {
-        "iconAddr": "../../../images/tap_water.png"
+        "iconAddr": "../../../images/tap_water.png",
+        "defaultRender": true,
+        "query":"man_made=water_tap"
     },
     "water_tower": {
         "iconAddr": "../../../images/water_tower.png",
-        "color": "#00FF00"
+        "color": "#00FF00",
+        "defaultRender": true,
+        "query":"man_made=water_tower"
     },
     "water_well": {
-        "iconAddr": "../../../images/water_well.png"
+        "iconAddr": "../../../images/water_well.png",
+        "defaultRender": true,
+        "query":"man_made=water_well"
     },
     "water_works": {
         "iconAddr": "../../../images/water_works.png",
-        "color": "black"
+        "color": "black",
+        "defaultRender": true,
+        "query":"man_made=water_works"
     },
     "wastewater_plant": {
         "iconAddr": "../../../images/sewage.png",
-        "color": "#FF00FF"
-    },
-    "pipeline": {
-        "color": "#FFFF00"
+        "color": "#FF00FF",
+        "defaultRender": true,
+        "query":"man_made=wastewater_plant"
     },
     "reservoir": {
         "iconAddr": "../../../images/reservoir-lake.png",
-        "color": "#00FFFF"
+        "color": "#00FFFF",
+        "defaultRender": true,
+        "query":"water=reservoir"
     },
     "canal": {
-        "color": "teal"
+        "color": "teal",
+        "defaultRender": true,
+        "query":"waterway=canal"
     },
     "river": {
-        "color": "#00008B"
+        "color": "#00008B",
+        "defaultRender": true,
+        "query":"waterway=river"
     },
     "basin": {
         "iconAddr": "../../../images/reservoir-lake.png",
-        "color": "#00FFFF"
+        "color": "#00FFFF",
+        "defaultRender": true,
+        "query":"landuse=basin"
     },
     "stream": {
-        "color": "#0000BB"
+        "color": "#0000BB",
+        "defaultRender": false,
+        "query":"waterway=dam"
     },
     "Natural_Gas_Pipeline": {
-        "color": "#8A2BE2"
+        "color": "#8A2BE2",
+        "defaultRender": true,
+        "query":"custom=Natural_Gas_Pipeline"
     },
     "lock_gate": {
         "iconAddr": "../../../images/lock_gate.png",
-        "color": "#FF0000"
+        "color": "#FF0000",
+        "defaultRender": true,
+        "query":"waterway=lock_gate"
     },
     "weir": {
         "iconAddr": "../../../images/weir.png",
-        "color": "#FF0000"
+        "color": "#FF0000",
+        "defaultRender": true,
+        "query":"waterway=weir"
     },
     "tidal_channel": {
-        "color": "#0080FF"
+        "color": "#0080FF",
+        "defaultRender": true,
+        "query":"waterway=tidal_channel"
     }
 }

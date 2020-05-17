@@ -24,7 +24,6 @@ const DEFAULTOPTIONS = {
     commonTagNames: ["waterway", "man_made", "landuse", "water", "amenity"],
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
-    attributeData: null,
     iconSize: [25,25]
 };
 const GEOM = {
@@ -36,24 +35,31 @@ const GEOM = {
 let RenderInfrastructure = {
     map: null,
     markerLayer: null,
+    data:null,
+    queries: [],
     currentBounds: [],
     currentLayers: [],
     currentQueries: [],
     blacklist: [],
     options: JSON.parse(JSON.stringify(DEFAULTOPTIONS)),
-    config: function (map, markerLayer, options) { //basically a constructor
+    config: function (map, markerLayer, data, options) { //basically a constructor
         this.options = JSON.parse(JSON.stringify(DEFAULTOPTIONS));
         L.Util.setOptions(this, options);
         this.map = map; 
         this.markerLayer = markerLayer;
+        this.data = data;
         this.currentBounds = [];
         this.currentLayers = [];
         this.currentQueries = [];
         this.blacklist = [];
+        this.queries = Util.jsonToQueryList(this.data);
     },
-    update: function (queries) {
+    update: function () {
+        if(this.map == null || this.queries.length == 0){
+            return;
+        }
         let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
-        let usefulQueries = Querier.createOverpassQueryList(queries, bounds);
+        let usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
         if (usefulQueries != null) {
             usefulQueries.forEach(query => {
                 Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
@@ -61,18 +67,18 @@ let RenderInfrastructure = {
         }
         //pan loading bit
         bounds = Util.expandBounds(bounds);
-        usefulQueries = Querier.createOverpassQueryList(queries, bounds);
+        usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
         if (usefulQueries != null) {
             usefulQueries.forEach(query => {
                 Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
             });
         }
-        this.updateCustom(queries);
+        this.updateCustom(this.queries);
     },
     updateCustom: function (queries) {
         let bounds = Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(this.map.getBounds()));
         queries.forEach(query => {
-            if(query.query === "custom=Natural_Gas_Pipeline"){
+            if(query === "custom=Natural_Gas_Pipeline"){
                 Querier.queryGeoJsonFromServer(Querier.createNaturalGasQueryURL(bounds), bounds, false, RenderInfrastructure.renderGeoJson);
             }
         });
@@ -131,6 +137,7 @@ let RenderInfrastructure = {
         return true;
     },
     removeFeatureFromMap: function (featureId) {
+        this.queries.splice(this.queries.indexOf(featureId),1);
         if (RenderInfrastructure.getAttribute(featureId, ATTRIBUTE.icon) != "noicon") {
             let iconUrlToSeachFor = RenderInfrastructure.getAttribute(featureId, ATTRIBUTE.icon).options.iconUrl;
             this.markerLayer.eachLayer(function (layer) {
@@ -151,6 +158,18 @@ let RenderInfrastructure = {
         });
         this.blacklist.push(featureId);
         return true;
+    },
+    addFeatureToMap: function (featureId) {
+        this.currentBounds = [];
+        if (this.blacklist.includes(featureId)) {
+            this.blacklist.splice(this.blacklist.indexOf(featureId), 1);
+            this.queries.push(featureId);
+            this.update();
+            return true;
+        }
+        else {
+            return false;
+        }
     },
     cleanupMap: function () {
         this.map.eachLayer(function (layer) {
@@ -178,27 +197,17 @@ let RenderInfrastructure = {
         this.currentBounds = [Util.Convert.leafletBoundsToNESWObject(this.map.getBounds())];
         return true;
     },
-    removeFromBlacklist: function (tagToRemove) {
-        this.currentBounds = [];
-        if (this.blacklist.includes(tagToRemove)) {
-            this.blacklist.splice(this.blacklist.indexOf(tagToRemove), 1);
-            return true;
-        }
-        else {
-            return false;
-        }
-    },
     getAttribute:function(tag,attribute){
-        if(this.options.attributeData){
-            if(this.options.attributeData[tag]){
+        if(this.data){
+            if(this.data[tag]){
                 if(attribute == ATTRIBUTE.color){
-                    if(this.options.attributeData[tag]["color"]){
-                        return this.options.attributeData[tag]["color"];
+                    if(this.data[tag]["color"]){
+                        return this.data[tag]["color"];
                     }
                 }
                 else{
-                    if(this.options.attributeData[tag]["iconAddr"]){
-                        return Util.makeIcon(this.options.attributeData[tag]["iconAddr"]);
+                    if(this.data[tag]["iconAddr"]){
+                        return Util.makeIcon(this.data[tag]["iconAddr"]);
                     }
                 }
             }
@@ -214,7 +223,7 @@ let RenderInfrastructure = {
 }
 
 const Querier = {
-    queryGeoJsonFromServer: function (queryURL, bounds, isOsmData, callbackFn) {
+    queryGeoJsonFromServer: async function (queryURL, bounds, isOsmData, callbackFn) {
         this.removeUnnecessaryQueries();
         let query = $.getJSON(queryURL, function (dataAsJson) {
             for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
@@ -295,10 +304,10 @@ const Querier = {
         let boundsString = Util.Convert.createOverpassBoundsString(bounds);
         let nWR = Util.binaryToBool(node_way_relation);
         for (let i = 0; i < queryList.length; i++) {
-            if (queryList[i].query.split('=')[0] === 'custom' || RenderInfrastructure.blacklist.includes(queryList[i].query.split('=')[1])) {
+            if (queryList[i].split('=')[0] === 'custom' || RenderInfrastructure.blacklist.includes(queryList[i].split('=')[1])) {
                 continue; //skip if its a custom query and not a osm query, or if blacklisted
             }
-            query = queryList[i].query.replace(/ /g, ''); //remove whitespace
+            query = queryList[i].replace(/ /g, ''); //remove whitespace
             if(nWR.node){
                 queryFString += 'node[' + query + '](' + boundsString + ');';
             }
@@ -574,6 +583,15 @@ const Util = {
             }
         }
         return nWR;
+    },
+    jsonToQueryList:function(json){
+        let ret = [];
+        for(e in json){
+            if(json[e]['defaultRender']){
+                ret.push(json[e]['query']);
+            }
+        }
+        return ret;
     }
 }
 

@@ -16,6 +16,7 @@
     <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.css">
     <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.Default.css">
     <script src="Dependencies/leaflet.markercluster.js"></script>
+    <script src="Dependencies/selectGenerator.js"></script>
 </head>
 
 <body>
@@ -56,35 +57,7 @@
                     Water Infrastructure
                     <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
                 </h1>
-                <div class="selectContainer">
-                    <input type="checkbox" id="dam" onchange="changeChecked(this)" checked>
-                    <label for="dam">Dams</label><br>
-                    <input type="checkbox" id="water_tap" onchange="changeChecked(this)" checked>
-                    <label for="water_tap">Water Taps</label><br>
-                    <input type="checkbox" id="water_tower" onchange="changeChecked(this)" checked>
-                    <label for="water_tower">Water Towers</label><br>
-                    <input type="checkbox" id="water_well" onchange="changeChecked(this)" checked>
-                    <label for="water_well">Water Wells</label><br>
-                    <input type="checkbox" id="water_works" onchange="changeChecked(this)" checked>
-                    <label for="water_works">Water Works</label><br>
-                    <input type="checkbox" id="wastewater_plant" onchange="changeChecked(this)" checked>
-                    <label for="wastewater_plant">Wastewater Plants</label><br>
-                    <input type="checkbox" id="reservoir" onchange="changeChecked(this)" checked>
-                    <label for="reservoir">Reservoirs</label><br>
-                    <input type="checkbox" id="canal" onchange="changeChecked(this)" checked>
-                    <label for="canal">Canals</label><br>
-                    <input type="checkbox" id="river" onchange="changeChecked(this)" checked>
-                    <label for="river">Rivers</label><br>
-                    <input type="checkbox" id="stream" onchange="changeChecked(this)">
-                    <label for="stream">Streams</label><br>
-                    <input type="checkbox" id="Natural_Gas_Pipeline" onchange="changeChecked(this)" checked>
-                    <label for="Natural_Gas_Pipeline">Natural Gas Pipelines</label><br>
-                    <input type="checkbox" id="lock_gate" onchange="changeChecked(this)" checked>
-                    <label for="lock_gate">Lock Gates</label><br>
-                    <input type="checkbox" id="weir" onchange="changeChecked(this)" checked>
-                    <label for="weir">Weirs</label><br>
-                    <input type="checkbox" id="tidal_channel" onchange="changeChecked(this)" checked>
-                    <label for="tidal_channel">Tidal Channels</label><br>
+                <div class="selectContainer" id="checkboxLocation">
                 </div>
             </div>
         </div>
@@ -101,10 +74,6 @@
             inertia: false,
             timeDimension: false,
             minZoom: 11
-        });
-
-        osmMap2.on("load", function () {
-            //osmMap2.setView([parent.view.lat,parent.view.lng - 360], parent.zoomLevel);
         });
 
         osmMap2.setView(osmMap2.wrapLatLng(parent.view), 11);
@@ -125,97 +94,21 @@
         });
         osmMap2.addLayer(markers);
 
-        RenderInfrastructure.config(osmMap2, markers, {
-            queryAlertText: document.getElementById('queryInfoText'),
+        $.getJSON("Dependencies/waterInfrastructure.json", function (data) {
+            RenderInfrastructure.config(osmMap2, markers, data, {
+                queryAlertText: document.getElementById('queryInfoText'),
+                overpassInterpreter: 'https://overpass.nchc.org.tw/api/interpreter'
+            });
+            Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked);
+            runQuery();
         });
-        $.getJSON("Dependencies/waterInfrastructure.json",function(data){
-            RenderInfrastructure.options.attributeData = data;
-        });
-        var selectedObjects = [];
-
-        function mapObjectGetter(objectName) {
-            let query;
-            let zoom;
-            switch (objectName) {
-                case "drinking_water":
-                    query = 'amenity=drinking_water';
-                    break;
-                case "fountain":
-                    query = 'amenity=fountain';
-                    break;
-                case "dam":
-                    query = 'waterway=dam'
-                    break;
-                case "water_tap":
-                    query = 'man_made=water_tap';
-                    break;
-                case "water_tower":
-                    query = 'man_made=water_tower';
-                    break;
-                case "water_well":
-                    query = 'man_made=water_well';
-                    break;
-                case "water_works":
-                    query = 'man_made=water_works';
-                    break;
-                case "wastewater_plant":
-                    query = 'man_made=wastewater_plant';
-                    break;
-                case "reservoir":
-                    query = 'water=reservoir';
-                    break;
-                case "canal":
-                    query = 'waterway=canal';
-                    break;
-                case "river":
-                    query = 'waterway=river';
-                    break;
-                case "basin":
-                    query = 'landuse=basin';
-                    break;
-                case "stream":
-                    query = 'waterway=stream';
-                    break;
-                case "Natural_Gas_Pipeline":
-                    query = 'custom=Natural_Gas_Pipeline';
-                    break;
-                case "lock_gate":
-                    query = 'waterway=lock_gate';
-                    break;
-                case "weir":
-                    query = 'waterway=weir';
-                    break;
-                case "tidal_channel":
-                    query = 'waterway=tidal_channel';
-                    break;
-                
-                    
-            }
-            return {
-                query: query
-            };
-        }
-
-        selectedObjects.push(mapObjectGetter("dam"));
-        selectedObjects.push(mapObjectGetter("water_tap"));
-        selectedObjects.push(mapObjectGetter("water_tower"));
-        selectedObjects.push(mapObjectGetter("water_well"));
-        selectedObjects.push(mapObjectGetter("water_works"));
-        selectedObjects.push(mapObjectGetter("wastewater_plant"));
-        selectedObjects.push(mapObjectGetter("reservoir"));
-        selectedObjects.push(mapObjectGetter("canal"));
-        selectedObjects.push(mapObjectGetter("river"));
-        selectedObjects.push(mapObjectGetter("Natural_Gas_Pipeline"));
-        selectedObjects.push(mapObjectGetter("lock_gate"));
-        selectedObjects.push(mapObjectGetter("weir"));
-        selectedObjects.push(mapObjectGetter("tidal_channel"));
 
 
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
 
-        function updateOverPassLayer(map, reload) {
-            RenderInfrastructure.update(selectedObjects);
+        function updateOverPassLayer() {
+            RenderInfrastructure.update();
         }
 
         function removeOverpassLayer(map, removeLayer) {
@@ -229,29 +122,11 @@
 
         function changeChecked(element) {
             if (element.checked) {
-                onCheck(element);
+                RenderInfrastructure.addFeatureToMap(element.id);
             }
             else {
-                onUnchecked(element);
+                RenderInfrastructure.removeFeatureFromMap(element.id);
             }
-        }
-
-        function onCheck(element) {
-            selectedObjects.push(mapObjectGetter(element.id));
-            RenderInfrastructure.removeFromBlacklist(element.id);
-            updateOverPassLayer(osmMap2, true);
-        }
-
-        function onUnchecked(element) {
-            let idx;
-            for (let i = 0; i < selectedObjects.length; i++) {
-                if (selectedObjects[i].query.split('=')[1] == element.id) {
-                    idx = i;
-                    break;
-                }
-            }
-            selectedObjects.splice(idx, 1);
-            RenderInfrastructure.removeFeatureFromMap(element.id);
         }
 
         parent.addEventListener('updateMaps', function () {
@@ -268,7 +143,7 @@
                 cleanupCurrentMap(osmMap2, markers);
             }
         }
-        runQuery();
+        
         osmMap2.on("move", function (e) {
             parent.setGlobalPosition(osmMap2.getCenter(), MAPNUMBER);
         });
@@ -287,8 +162,8 @@
             setterFunc: thisMapsSetter,
             mapNum: MAPNUMBER
         });
-        setTimeout(function(){
-            osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat,osmMap2.wrapLatLng(parent.view).lng - 0.0002],osmMap2.getZoom());
+        setTimeout(function () {
+            osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat, osmMap2.wrapLatLng(parent.view).lng - 0.0002], osmMap2.getZoom());
         }, 1); //this is a terrible fix but it works for now
     </script>
 </body>
