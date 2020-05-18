@@ -24,7 +24,7 @@ const DEFAULTOPTIONS = {
     commonTagNames: ["waterway", "man_made", "landuse", "water", "amenity"],
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
-    iconSize: [25,25]
+    iconSize: [25, 25]
 };
 const GEOM = {
     node: 100,
@@ -32,21 +32,33 @@ const GEOM = {
     relation: 1
 }
 
+/**
+ * Where the Rendering/Management related functions are
+ * @namespace RenderInfrastructure
+*/
 let RenderInfrastructure = {
     map: null,
     markerLayer: null,
-    data:null,
+    data: null,
     queries: [],
     currentBounds: [],
     currentLayers: [],
     currentQueries: [],
     blacklist: [],
     options: JSON.parse(JSON.stringify(DEFAULTOPTIONS)),
-
+    /**
+     * Sets up instance of renderer
+     * @memberof RenderInfrastructure
+     * @alias RenderInfrastructure.config
+     * @param {L.Map} map - Leaflet map that will have things rendered to it
+     * @param {L.markerClusterGroup} markerLayer - Marker cluster that will contain markers
+     * @param {JSON} data - JSON that contains needed information for renderable things
+     * @param {object} options - object with attributes
+     */
     config: function (map, markerLayer, data, options) { //basically a constructor
         this.options = JSON.parse(JSON.stringify(DEFAULTOPTIONS));
         L.Util.setOptions(this, options);
-        this.map = map; 
+        this.map = map;
         this.markerLayer = markerLayer;
         this.data = data;
         this.currentBounds = [];
@@ -55,8 +67,12 @@ let RenderInfrastructure = {
         this.blacklist = [];
         this.queries = Util.jsonToQueryList(this.data);
     },
+    /**
+     * Call this when the map should be updated
+     * @memberof RenderInfrastructure
+     */
     update: function () {
-        if(this.map == null || this.queries.length == 0){
+        if (this.map == null || this.queries.length == 0) {
             return;
         }
         let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
@@ -79,7 +95,7 @@ let RenderInfrastructure = {
     updateCustom: function (queries) {
         let bounds = Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(this.map.getBounds()));
         queries.forEach(query => {
-            if(query === "custom=Natural_Gas_Pipeline"){
+            if (query === "custom=Natural_Gas_Pipeline") {
                 Querier.queryGeoJsonFromServer(Querier.createNaturalGasQueryURL(bounds), bounds, false, RenderInfrastructure.renderGeoJson);
             }
         });
@@ -137,8 +153,21 @@ let RenderInfrastructure = {
         }).bindPopup(popUpContent));
         return true;
     },
+    /**
+     * Removes a feature id from the map
+     * @memberof RenderInfrastructure
+     * @alias RenderInfrastructure.removeFeatureFromMap
+     * @param {string} featureId id which should be removed from map, ex: 'dam' or 'weir'
+     * @returns {boolean} true if feature was removed, false if not
+     */
     removeFeatureFromMap: function (featureId) {
-        this.queries.splice(this.queries.indexOf(featureId),1);
+        if (!this.data[featureId]) {
+            return false;
+        }
+        else if (!this.queries.includes(this.data[featureId]['query'])) {
+            return false;
+        }
+        this.queries.splice(this.queries.indexOf(this.data[featureId]['query']), 1);
         if (RenderInfrastructure.getAttribute(featureId, ATTRIBUTE.icon) != "noicon") {
             let iconUrlToSeachFor = RenderInfrastructure.getAttribute(featureId, ATTRIBUTE.icon).options.iconUrl;
             this.markerLayer.eachLayer(function (layer) {
@@ -160,17 +189,27 @@ let RenderInfrastructure = {
         this.blacklist.push(featureId);
         return true;
     },
+    /**
+     * Adds a feature id to the map and forces an update
+     * @memberof RenderInfrastructure
+     * @alias RenderInfrastructure.addFeatureToMap
+     * @param {string} featureId id which should be added to map, ex: 'dam' or 'weir'
+     * @returns {boolean} true if feature was added, false if JSON doesnt contain tag or objects is already being rendered
+     */
     addFeatureToMap: function (featureId) {
-        this.currentBounds = [];
-        if (this.blacklist.includes(featureId)) {
-            this.blacklist.splice(this.blacklist.indexOf(featureId), 1);
-            this.queries.push(featureId);
-            this.update();
-            return true;
+        if (this.data[featureId]) {
+            if (!this.queries.includes(this.data[featureId]['query'])) {
+                this.currentBounds = [];
+                this.currentQueries.forEach(e => {
+                    e.bounds = {north:0,south:0,east:0,west:0}
+                });
+                this.blacklist.splice(this.blacklist.indexOf(featureId), 1);
+                this.queries.push(this.data[featureId]['query']);
+                this.update();
+                return true;
+            }
         }
-        else {
-            return false;
-        }
+        return false;
     },
     cleanupMap: function () {
         this.map.eachLayer(function (layer) {
@@ -198,32 +237,43 @@ let RenderInfrastructure = {
         this.currentBounds = [Util.Convert.leafletBoundsToNESWObject(this.map.getBounds())];
         return true;
     },
-    getAttribute:function(tag,attribute){
-        if(this.data){
-            if(this.data[tag]){
-                if(attribute == ATTRIBUTE.color){
-                    if(this.data[tag]["color"]){
+    getAttribute: function (tag, attribute) {
+        if (this.data) {
+            if (this.data[tag]) {
+                if (attribute == ATTRIBUTE.color) {
+                    if (this.data[tag]["color"]) {
                         return this.data[tag]["color"];
                     }
                 }
-                else{
-                    if(this.data[tag]["iconAddr"]){
+                else {
+                    if (this.data[tag]["iconAddr"]) {
                         return Util.makeIcon(this.data[tag]["iconAddr"]);
                     }
                 }
             }
         }
-
-        if(attribute == ATTRIBUTE.color){
+        if (attribute == ATTRIBUTE.color) {
             return "#000000";
         }
-        else{
+        else {
             return "noicon"
         }
     }
 }
-
+/**
+ * Where the querying related functions are
+ * @namespace Querier 
+*/
 const Querier = {
+    /**
+     * Queries geoJSON or OSM Xml from an endpoint and returns it as geoJSON
+     * @memberof Querier
+     * @alias Querier.queryGeoJsonFromServer
+     * @param {string} queryURL URL where geoJSON/Osm Xml is
+     * @param {object} bounds (not necessary when using this function by itself) bounds object like: {north:?,east:?,south:?,west:?}
+     * @param {boolean} isOsmData is the url going to return OSM Xml data? (such as overpass queries)
+     * @param {Function} callbackFn where the geoJSON will be sent on return, should be a 1-parameter function
+     */
     queryGeoJsonFromServer: async function (queryURL, bounds, isOsmData, callbackFn) {
         this.removeUnnecessaryQueries();
         let query = $.getJSON(queryURL, function (dataAsJson) {
@@ -248,7 +298,7 @@ const Querier = {
             }
         });
         RenderInfrastructure.currentQueries.push({ query: query, bounds: bounds });
-        if(isOsmData) Util.refreshInfoPopup();
+        if (isOsmData) Util.refreshInfoPopup();
     },
     removeUnnecessaryQueries: function () {
         for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
@@ -271,7 +321,7 @@ const Querier = {
                 boundsToQuery = Util.subtractBounds(queryBounds, RenderInfrastructure.currentBounds[0]);
                 if (boundsToQuery.length > 0) {
                     for (let j = 1; j < RenderInfrastructure.currentBounds.length; j++) {
-                        boundsToQuery = Util.subtractBoundsFromList(boundsToQuery,RenderInfrastructure.currentBounds[j]);
+                        boundsToQuery = Util.subtractBoundsFromList(boundsToQuery, RenderInfrastructure.currentBounds[j]);
                     }
                 }
             }
@@ -300,6 +350,15 @@ const Querier = {
         }
         return queries;
     },
+    /**
+     * Creates a overpass query URL 
+     * @memberof Querier
+     * @alias Querier.createOverpassQueryURL
+     * @param {Array<string>} queryList list of queries ex: ['waterway=dam','natural=lake']
+     * @param {object} bounds bounds object in the form: {north:?,east:?,south:?,west:?}, which states WHERE to query
+     * @param {number} node_way_relation binary choice for node,way,relation -- ex:111 = nodes, ways, AND relations -- 101 = nodes AND relations -- 100 = nodes only
+     * @returns {string} a valid overpass URL
+     */
     createOverpassQueryURL: function (queryList, bounds, node_way_relation) {
         let queryFString = '';
         let boundsString = Util.Convert.createOverpassBoundsString(bounds);
@@ -309,13 +368,13 @@ const Querier = {
                 continue; //skip if its a custom query and not a osm query, or if blacklisted
             }
             query = queryList[i].replace(/ /g, ''); //remove whitespace
-            if(nWR.node){
+            if (nWR.node) {
                 queryFString += 'node[' + query + '](' + boundsString + ');';
             }
-            if(nWR.way){
+            if (nWR.way) {
                 queryFString += 'way[' + query + '](' + boundsString + ');';
             }
-            if(nWR.relation){
+            if (nWR.relation) {
                 queryFString += 'relation[' + query + '](' + boundsString + ');';
             }
         }
@@ -499,7 +558,7 @@ const Util = {
         }
         return 'none';
     },
-    createDetailsFromGeoJsonFeature: function (feature,name) {
+    createDetailsFromGeoJsonFeature: function (feature, name) {
         name = this.capitalizeString(this.underScoreToSpace(name));
         let pTObj = this.getParamsAndTagsFromGeoJsonFeature(feature);
         let params = pTObj.params;
@@ -545,15 +604,15 @@ const Util = {
         }
         return str.replace(/_/gi, " ");
     },
-    makeIcon: function(address){
+    makeIcon: function (address) {
         icon = new L.Icon({
             iconUrl: address,
             iconSize: RenderInfrastructure.options.iconSize
         });
         return icon;
     },
-    refreshInfoPopup: function(){
-        if(RenderInfrastructure.options.queryAlertText){
+    refreshInfoPopup: function () {
+        if (RenderInfrastructure.options.queryAlertText) {
             if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
                 RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
             }
@@ -563,32 +622,32 @@ const Util = {
             }
         }
     },
-    binaryToBool: function(bin){
+    binaryToBool: function (bin) {
         //not real binary, but it converts 110 to true, true, false and such 
         let nWR = {
-            node:false,
-            way:false,
-            relation:false
+            node: false,
+            way: false,
+            relation: false
         }
-        for(let j = 0; j < 3; j++){
-            if(bin % 10 === 1){
+        for (let j = 0; j < 3; j++) {
+            if (bin % 10 === 1) {
                 nWR.relation = true;
             }
             bin = Math.floor(bin / 10);
-            if(bin % 10 === 1){
+            if (bin % 10 === 1) {
                 nWR.way = true;
             }
             bin = Math.floor(bin / 10);
-            if(bin % 10 === 1){
+            if (bin % 10 === 1) {
                 nWR.node = true;
             }
         }
         return nWR;
     },
-    jsonToQueryList:function(json){
+    jsonToQueryList: function (json) {
         let ret = [];
-        for(e in json){
-            if(json[e]['defaultRender']){
+        for (e in json) {
+            if (json[e]['defaultRender']) {
                 ret.push(json[e]['query']);
             }
         }
@@ -600,7 +659,7 @@ const Util = {
 
 try {
     module.exports = {
-        ATTRIBUTE:ATTRIBUTE,
+        ATTRIBUTE: ATTRIBUTE,
         RenderInfrastructure: RenderInfrastructure,
         Querier: Querier,
         Util: Util

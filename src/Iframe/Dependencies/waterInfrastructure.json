@@ -58,7 +58,7 @@
     "stream": {
         "color": "#0000BB",
         "defaultRender": false,
-        "query":"waterway=dam"
+        "query":"waterway=stream"
     },
     "Natural_Gas_Pipeline": {
         "color": "#8A2BE2",
