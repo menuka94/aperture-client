@@ -25,3 +25,11 @@ let Generator = {
         }
     }
 }
+
+//mocha-test stuff only down from here
+
+try {
+    module.exports = {
+        Generator:Generator
+    }
+} catch (e) { }

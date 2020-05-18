@@ -46,7 +46,7 @@ const sampleQuery = { "type": "FeatureCollection", "features": [{ "type": "Featu
 describe('RenderInfrastructure', function () {
     describe('config()', function () {
         it('should configurate the renderer', function () {
-            getInfrastructure.RenderInfrastructure.config(testMap, testMap, { timeout: 15, queryAlertText: elem2,attributeData:jsonData });
+            getInfrastructure.RenderInfrastructure.config(testMap, testMap, jsonData, { timeout: 15, queryAlertText: elem2,attributeData:jsonData });
             assert.deepEqual(getInfrastructure.RenderInfrastructure.map, testMap);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.options.timeout, 15);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.options.minRenderZoom, 10);
@@ -54,7 +54,7 @@ describe('RenderInfrastructure', function () {
     });
     describe('update()', function () {
         it('should attempt to call the renderer for the current map bounds', function () {
-            getInfrastructure.RenderInfrastructure.update([{ query: "waterway=dam" },{query:"custom=Natural_Gas_Pipeline"}]);
+            getInfrastructure.RenderInfrastructure.update(["waterway=dam" ,"custom=Natural_Gas_Pipeline"]);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.currentQueries[0].bounds,
                 {
                     north: 40.54654802898779,
@@ -84,27 +84,37 @@ describe('RenderInfrastructure', function () {
     });
     describe('cleanupMap()', function () {
         it('should remove features outside the current viewport', function () {
-            getInfrastructure.RenderInfrastructure.removeFromBlacklist('dam');
+            getInfrastructure.RenderInfrastructure.removeFeatureFromMap('dam');
             getInfrastructure.RenderInfrastructure.renderGeoJson(sampleQuery);
             testMap.setView(L.latLng(48.494351, -105.295029), 13);
             getInfrastructure.RenderInfrastructure.cleanupMap();
-            assert.deepEqual(Object.keys(getInfrastructure.RenderInfrastructure.map._layers).length, 4);
+            assert.deepEqual(Object.keys(getInfrastructure.RenderInfrastructure.map._layers).length, 3);
         });
     });
     describe('getAttribute()', function() {
         it('gets attributes from a name', function() {
-            getInfrastructure.RenderInfrastructure.config(testMap,testMap,{});
+            getInfrastructure.RenderInfrastructure.config(testMap,testMap,jsonData,{overpassInterpreter: 'https://overpass.nchc.org.tw/api/interpreter'});
             console.log("server");
             console.log(getInfrastructure.RenderInfrastructure.options.attributeData);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("drinking_water",getInfrastructure.ATTRIBUTE.icon),"noicon");
-            assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("reservoir",getInfrastructure.ATTRIBUTE.color),"#000000");
-            getInfrastructure.RenderInfrastructure.config(testMap,testMap,{attributeData:jsonData});
-            assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("drinking_water",getInfrastructure.ATTRIBUTE.icon),new L.Icon({
-                iconUrl: "../../../images/drinking_fountain.png",
+            assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("reservoir",getInfrastructure.ATTRIBUTE.color),"#00FFFF");
+            assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("dam",getInfrastructure.ATTRIBUTE.icon),new L.Icon({
+                iconUrl: "../../../images/dam.png",
                 iconSize: [25, 25]
             }));
             assert.deepEqual(getInfrastructure.RenderInfrastructure.getAttribute("reservoir",getInfrastructure.ATTRIBUTE.color),"#00FFFF");
         });
+    });
+    describe('addFeatureToMap()', function () {
+        it('should add feature to map', function () {
+            getInfrastructure.RenderInfrastructure.removeFeatureFromMap('dam');
+            getInfrastructure.RenderInfrastructure.addFeatureToMap('dam');
+            getInfrastructure.RenderInfrastructure.addFeatureToMap('water_tap');
+            assert.deepEqual(getInfrastructure.RenderInfrastructure.currentBounds, []);
+        });
+    });
+    getInfrastructure.RenderInfrastructure.currentQueries.forEach(element => {
+        element.query.abort();
     });
 });
 describe('Querier', function () {
@@ -119,9 +129,9 @@ describe('Querier', function () {
         it('should create a list of queries based on cropped bounds', function () {
             getInfrastructure.RenderInfrastructure.currentBounds = [{ north: 55, south: 45, east: 70, west: 30 }];
             getInfrastructure.RenderInfrastructure.currentQueries = [{ bounds: { north: 62, south: 58, east: 42, west: 38 } }];
-            assert.deepEqual(getInfrastructure.Querier.createOverpassQueryList([{ query: "waterway=dam" }], { north: 60, south: 40, east: 60, west: 40 })[0].bounds, { north: 45, south: 40, east: 60, west: 40 });
-            assert.deepEqual(getInfrastructure.Querier.createOverpassQueryList([{ query: "waterway=dam" }], { north: 60, south: 40, east: 60, west: 40 })[1].bounds, { north: 60, south: 55, east: 60, west: 42 });
-            assert.deepEqual(getInfrastructure.Querier.createOverpassQueryList([{ query: "waterway=dam" }], { north: 60, south: 40, east: 60, west: 40 })[2].bounds, { north: 58, south: 55, east: 42, west: 40 });
+            assert.deepEqual(getInfrastructure.Querier.createOverpassQueryList(["waterway=dam"], { north: 60, south: 40, east: 60, west: 40 })[0].bounds, { north: 45, south: 40, east: 60, west: 40 });
+            assert.deepEqual(getInfrastructure.Querier.createOverpassQueryList(["waterway=dam"], { north: 60, south: 40, east: 60, west: 40 })[1].bounds, { north: 60, south: 55, east: 60, west: 42 });
+            assert.deepEqual(getInfrastructure.Querier.createOverpassQueryList(["waterway=dam"], { north: 60, south: 40, east: 60, west: 40 })[2].bounds, { north: 58, south: 55, east: 42, west: 40 });
         });
     });
 

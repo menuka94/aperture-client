@@ -42,6 +42,7 @@ let RenderInfrastructure = {
     currentQueries: [],
     blacklist: [],
     options: JSON.parse(JSON.stringify(DEFAULTOPTIONS)),
+
     config: function (map, markerLayer, data, options) { //basically a constructor
         this.options = JSON.parse(JSON.stringify(DEFAULTOPTIONS));
         L.Util.setOptions(this, options);
