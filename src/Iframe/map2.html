@@ -33,7 +33,6 @@
         </div>
     </div>
     <script>
-        const MINRENDERZOOM = 10;
         let queryAlertText = document.getElementById('queryInfoText');
     </script>
     <script src="Dependencies/getInfrastructure.js"></script>
@@ -73,7 +72,7 @@
             fullscreenControl: true,
             inertia: false,
             timeDimension: false,
-            minZoom: 11
+            minZoom: 10
         });
 
         osmMap2.setView(osmMap2.wrapLatLng(parent.view), 11);
@@ -97,7 +96,7 @@
         $.getJSON("Dependencies/waterInfrastructure.json", function (data) {
             RenderInfrastructure.config(osmMap2, markers, data, {
                 queryAlertText: document.getElementById('queryInfoText'),
-                overpassInterpreter: 'https://overpass.nchc.org.tw/api/interpreter'
+                overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter'
             });
             Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked);
             runQuery();
@@ -134,14 +133,7 @@
         });
 
         function runQuery() {
-            if (osmMap2.getZoom() >= MINRENDERZOOM) {
-                updateOverPassLayer(osmMap2, false);
-            }
-            else {
-                queryAlertText.parentElement.style.display = "block";
-                queryAlertText.innerHTML = "Current Zoom: " + osmMap2.getZoom() + " - Data at: " + MINRENDERZOOM;
-                cleanupCurrentMap(osmMap2, markers);
-            }
+            updateOverPassLayer();
         }
         
         osmMap2.on("move", function (e) {

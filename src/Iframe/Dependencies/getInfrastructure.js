@@ -72,7 +72,8 @@ let RenderInfrastructure = {
      * @memberof RenderInfrastructure
      */
     update: function () {
-        if (this.map == null || this.queries.length == 0) {
+        if (this.map == null || this.queries.length == 0 || this.options.minRenderZoom < this.map.currentZoom) {
+            Util.refreshInfoPopup();
             return;
         }
         let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
@@ -615,6 +616,10 @@ const Util = {
         if (RenderInfrastructure.options.queryAlertText) {
             if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
                 RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
+            }
+            else if(RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom){
+                RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
+                RenderInfrastructure.options.queryAlertText.innerHTML = "Current Zoom: " + RenderInfrastructure.map.getZoom() + ", Data at: " + RenderInfrastructure.options.minRenderZoom;
             }
             else {
                 RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
