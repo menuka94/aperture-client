@@ -21,7 +21,8 @@ let Generator = {
         }
         for(element in elementsJson){
             let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
-            selectContainer.innerHTML+='<input type="checkbox" id="' + element + '" onchange="' + callFunc.name + '(this)" ' + checked + '><label for="' + element + '">' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label><br>'
+            let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
+            selectContainer.innerHTML+='<div style="margin-top:3px;margin-bottom:3px"><input type="checkbox" id="' + element + '" onchange="' + callFunc.name + '(this)" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>'
         }
     }
 }
