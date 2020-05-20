@@ -49,7 +49,6 @@
     <!--You must add this map's setter function-->
     <script>
         var thisMapsSetter = function(view,zoom){
-          console.log(view)
           buildingmap.setPosition({ latitude: view.lat, longitude: view.lng-360 });
         }
         parent.setterFunctions.push({
