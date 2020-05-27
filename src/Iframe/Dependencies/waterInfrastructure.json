@@ -33,12 +33,6 @@
         "defaultRender": true,
         "query":"man_made=wastewater_plant"
     },
-    "reservoir": {
-        "iconAddr": "../../../images/reservoir-lake.png",
-        "color": "#00FFFF",
-        "defaultRender": true,
-        "query":"water=reservoir"
-    },
     "canal": {
         "color": "teal",
         "defaultRender": true,
@@ -48,12 +42,6 @@
         "color": "#00008B",
         "defaultRender": true,
         "query":"waterway=river"
-    },
-    "basin": {
-        "iconAddr": "../../../images/reservoir-lake.png",
-        "color": "#00FFFF",
-        "defaultRender": true,
-        "query":"landuse=basin"
     },
     "stream": {
         "color": "#0000BB",
@@ -81,5 +69,36 @@
         "color": "#0080FF",
         "defaultRender": true,
         "query":"waterway=tidal_channel"
+    },
+    "reservoir": {
+        "iconAddr": "../../../images/reservoir-lake.png",
+        "color": "#00FFFF",
+        "defaultRender": true,
+        "query":"water=reservoir"
+    },
+    "basin": {
+        "iconAddr": "../../../images/reservoir-lake.png",
+        "color": "#00FFFF",
+        "defaultRender": true,
+        "query":"landuse=basin"
+    },
+    "pond":{
+        "color": "#00FFFF",
+        "iconAddr": "../../../images/reservoir-lake.png",
+        "defaultRender": true,
+        "query": "water=pond"
+    },
+    "lake":{
+        "color": "#00FFFF",
+        "iconAddr": "../../../images/reservoir-lake.png",
+        "defaultRender": true,
+        "query": "water=lake"
+    },
+    "water":{
+        "color": "#00FFFF",
+        "iconAddr": "../../../images/reservoir-lake.png",
+        "defaultRender": true,
+        "query": "natural=water"
     }
+
 }

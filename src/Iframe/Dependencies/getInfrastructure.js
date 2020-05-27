@@ -15,13 +15,18 @@ const ATTRIBUTE = { //attribute enums
     icon: 'icon',
     color: 'color'
 }
+const FEATURETYPE = { //attribute enums
+    point:0,
+    lineString:1,
+    polygon:2
+}
 const DEFAULTOPTIONS = {
     overpassInterpreter: 'https://overpass.kumi.systems/api/interpreter',
     timeout: 30,
     maxElements: 5000,
     maxLayers: 10,
     minRenderZoom: 10,
-    commonTagNames: ["waterway", "man_made", "landuse", "water", "amenity"],
+    commonTagNames: ["waterway", "man_made", "landuse", "water", "amenity", "natural"],
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
     iconSize: [25, 25]
@@ -99,9 +104,13 @@ let RenderInfrastructure = {
             if (query === "custom=Natural_Gas_Pipeline") {
                 Querier.queryGeoJsonFromServer(Querier.createNaturalGasQueryURL(bounds), bounds, false, RenderInfrastructure.renderGeoJson);
             }
+            else if(query === "custom=flood_boundary"){
+                Querier.queryGeoJsonFromServer(Querier.createFloodBoundaryQueryURL(bounds), bounds, false, RenderInfrastructure.renderGeoJson);
+            }
         });
     },
     renderGeoJson: function (geoJsonData) {
+        Util.simplifyGeoJSON(geoJsonData,0.0005);
         let resultLayer = L.geoJson(geoJsonData, {
             style: function (feature) {
                 return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color) };
@@ -383,6 +392,12 @@ const Querier = {
     },
     createNaturalGasQueryURL: function (bounds) {
         return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
+    },
+    createFloodBoundaryQueryURL: function (bounds){
+        return 'https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/26/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
+    },
+    createSubStationQueryURL: function (bounds){
+        return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     }
 }
 
@@ -413,27 +428,64 @@ const Util = {
         return latLngPoint.lng > boundsToCheckAgainst.west && latLngPoint.lat > boundsToCheckAgainst.south && latLngPoint.lng < boundsToCheckAgainst.east && latLngPoint.lat < boundsToCheckAgainst.north;
     },
     getLatLngFromGeoJsonFeature: function (feature) {
-        let isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon");
-        let isLineString = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString");
-        let isPoint = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point");
+        let type = this.getFeatureType(feature);
         latlng = [];
-        if (isPolygon) {
+        if (type === FEATURETYPE.polygon) {
             let pos = L.latLngBounds(feature.geometry.coordinates[0]).getCenter();
             latlng.push(pos.lat);
             latlng.push(pos.lng);
         }
-        else if (isLineString) {
+        else if (type === FEATURETYPE.lineString) {
             let pos = L.latLngBounds(feature.geometry.coordinates).getCenter();
             latlng.push(pos.lat);
             latlng.push(pos.lng);
         }
-        else if (isPoint) {
+        else if (type === FEATURETYPE.point) {
             latlng = feature.geometry.coordinates;
         }
         else {
-            return -1;
+            return [0,0];
         }
         return L.latLng(latlng[1], latlng[0]);
+    },
+    getFeatureType:function(feature){
+        if((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon")){
+            return FEATURETYPE.polygon;
+        }
+        else if((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString")){
+            return FEATURETYPE.lineString;
+        }
+        else if((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point")){
+            return FEATURETYPE.point;
+        }
+        else{
+            return -1;
+        }
+    },
+    simplifyGeoJSON:function(geoJSON,threshold){
+        geoJSON.features.forEach(feature => {
+            this.simplifyFeatureCoords(feature,threshold);
+        });
+    },
+    simplifyFeatureCoords:function(feature,threshold){
+        let type = this.getFeatureType(feature);
+        if(type === -1 || type === FEATURETYPE.point){
+            return;
+        }
+        if (type === FEATURETYPE.polygon) {
+            // console.log("before");
+            // console.log(JSON.parse(JSON.stringify(feature.geometry.coordinates[0])));
+            feature.geometry.coordinates[0] = simplify(feature.geometry.coordinates[0],threshold,false);
+            // console.log("after");
+            // console.log(feature.geometry.coordinates[0]);
+        }
+        else if (type === FEATURETYPE.lineString) {
+            // console.log("before");
+            // console.log(JSON.parse(JSON.stringify(feature.geometry.coordinates)));
+            feature.geometry.coordinates = simplify(feature.geometry.coordinates,threshold,false);
+            // console.log("after");
+            // console.log(feature.geometry.coordinates);
+        }
     },
     subtractBounds: function (boundsToSlice, boundSlicer) {
         if (this.boundsAreWithinBounds(boundsToSlice, boundSlicer)) {
@@ -552,8 +604,11 @@ const Util = {
                         return tagsObj[params[i]];
                     }
                 }
-                if (params[i] == "TYPEPIPE") {
+                else if (params[i] == "TYPEPIPE") {
                     return "Natural_Gas_Pipeline";
+                }
+                else if (params[i] == "LN_TYP") {
+                    return "flood_boundary";
                 }
             }
         }
@@ -584,6 +639,9 @@ const Util = {
             params = Object.keys(feature.properties);
             tagsObj = feature.properties;
         }
+        else{
+            return "nodata";
+        }
         return { params: params, tagsObj: tagsObj };
     },
     capitalizeString: function (str) {
@@ -600,6 +658,9 @@ const Util = {
         return str.join(" ");
     },
     underScoreToSpace: function (str) {
+        if(str == null){
+            return "noname"
+        }
         if (typeof str !== 'string') {
             str = str.toString();
         }
