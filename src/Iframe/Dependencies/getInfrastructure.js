@@ -29,7 +29,8 @@ const DEFAULTOPTIONS = {
     commonTagNames: ["waterway", "man_made", "landuse", "water", "amenity", "natural"],
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
-    iconSize: [25, 25]
+    iconSize: [25, 25],
+    simplifyThreshold:0.0001
 };
 const GEOM = {
     node: 100,
@@ -110,7 +111,9 @@ let RenderInfrastructure = {
         });
     },
     renderGeoJson: function (geoJsonData) {
-        Util.simplifyGeoJSON(geoJsonData,0.0005);
+        if(RenderInfrastructure.options.simplifyThreshold !== -1){
+            Util.simplifyGeoJSON(geoJsonData,RenderInfrastructure.options.simplifyThreshold);
+        }
         let resultLayer = L.geoJson(geoJsonData, {
             style: function (feature) {
                 return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color) };

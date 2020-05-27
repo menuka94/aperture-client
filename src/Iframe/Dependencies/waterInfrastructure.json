@@ -99,6 +99,11 @@
         "iconAddr": "../../../images/reservoir-lake.png",
         "defaultRender": true,
         "query": "natural=water"
+    },
+    "flood_boundary":{
+        "color": "#800000",
+        "defaultRender": true,
+        "query": "custom=flood_boundary"
     }
 
 }
