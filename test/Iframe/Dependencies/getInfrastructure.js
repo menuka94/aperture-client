@@ -6,6 +6,7 @@ const canvas = createCanvas(200, 200);
 const ctx = canvas.getContext('2d');
 global.$ = require('jquery');
 global.L = require('leaflet');
+global.simplify = require('../../../src/Iframe/Dependencies/simplify.js');
 L.Map.prototype.setSize = function (width, height) {
     this._size = new L.Point(width, height);
     this._resetView(this.getCenter(), this.getZoom());
@@ -273,7 +274,7 @@ describe('Util', function () {
     });
     describe('getLatLngFromGeoJsonFeature()', function() {
         it('gets latlng from the object passed to it', function() {
-            assert.deepEqual(getInfrastructure.Util.getLatLngFromGeoJsonFeature({geometry:{type:"none", coordinates:L.latLng(40,90)}}),-1);
+            assert.deepEqual(getInfrastructure.Util.getLatLngFromGeoJsonFeature({geometry:{type:"none", coordinates:L.latLng(40,90)}}),[0,0]);
         });
     });
     describe('binaryToBool()', function() {

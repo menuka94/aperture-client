@@ -16,9 +16,9 @@ const ATTRIBUTE = { //attribute enums
     color: 'color'
 }
 const FEATURETYPE = { //attribute enums
-    point:0,
-    lineString:1,
-    polygon:2
+    point: 0,
+    lineString: 1,
+    polygon: 2
 }
 const DEFAULTOPTIONS = {
     overpassInterpreter: 'https://overpass.kumi.systems/api/interpreter',
@@ -30,7 +30,7 @@ const DEFAULTOPTIONS = {
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
     iconSize: [25, 25],
-    simplifyThreshold:0.0001
+    simplifyThreshold: 0.0001
 };
 const GEOM = {
     node: 100,
@@ -82,11 +82,13 @@ let RenderInfrastructure = {
             Util.refreshInfoPopup();
             return;
         }
+        let customQueryBounds = [];
         let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
         let usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
         if (usefulQueries != null) {
             usefulQueries.forEach(query => {
                 Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
+                customQueryBounds.push(query.bounds);
             });
         }
         //pan loading bit
@@ -95,24 +97,28 @@ let RenderInfrastructure = {
         if (usefulQueries != null) {
             usefulQueries.forEach(query => {
                 Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
+                customQueryBounds.push(query.bounds);
             });
         }
-        this.updateCustom(this.queries);
+        this.updateCustom(this.queries, customQueryBounds);
     },
-    updateCustom: function (queries) {
-        let bounds = Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(this.map.getBounds()));
+    updateCustom: function (queries, bounds) {
         queries.forEach(query => {
             if (query === "custom=Natural_Gas_Pipeline") {
-                Querier.queryGeoJsonFromServer(Querier.createNaturalGasQueryURL(bounds), bounds, false, RenderInfrastructure.renderGeoJson);
+                bounds.forEach(bound => {
+                    Querier.queryGeoJsonFromServer(Querier.createNaturalGasQueryURL(bound), bound, false, RenderInfrastructure.renderGeoJson);
+                });
             }
-            else if(query === "custom=flood_boundary"){
-                Querier.queryGeoJsonFromServer(Querier.createFloodBoundaryQueryURL(bounds), bounds, false, RenderInfrastructure.renderGeoJson);
+            else if (query === "custom=flood_boundary") {
+                bounds.forEach(bound => {
+                    Querier.queryGeoJsonFromServer(Querier.createFloodBoundaryQueryURL(bound), bound, false, RenderInfrastructure.renderGeoJson);
+                });            
             }
         });
     },
     renderGeoJson: function (geoJsonData) {
-        if(RenderInfrastructure.options.simplifyThreshold !== -1){
-            Util.simplifyGeoJSON(geoJsonData,RenderInfrastructure.options.simplifyThreshold);
+        if (RenderInfrastructure.options.simplifyThreshold !== -1) {
+            Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);
         }
         let resultLayer = L.geoJson(geoJsonData, {
             style: function (feature) {
@@ -214,7 +220,7 @@ let RenderInfrastructure = {
             if (!this.queries.includes(this.data[featureId]['query'])) {
                 this.currentBounds = [];
                 this.currentQueries.forEach(e => {
-                    e.bounds = {north:0,south:0,east:0,west:0}
+                    e.bounds = { north: 0, south: 0, east: 0, west: 0 }
                 });
                 this.blacklist.splice(this.blacklist.indexOf(featureId), 1);
                 this.queries.push(this.data[featureId]['query']);
@@ -396,10 +402,10 @@ const Querier = {
     createNaturalGasQueryURL: function (bounds) {
         return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     },
-    createFloodBoundaryQueryURL: function (bounds){
+    createFloodBoundaryQueryURL: function (bounds) {
         return 'https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/26/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     },
-    createSubStationQueryURL: function (bounds){
+    createSubStationQueryURL: function (bounds) {
         return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     }
 }
@@ -447,45 +453,45 @@ const Util = {
             latlng = feature.geometry.coordinates;
         }
         else {
-            return [0,0];
+            return [0, 0];
         }
         return L.latLng(latlng[1], latlng[0]);
     },
-    getFeatureType:function(feature){
-        if((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon")){
+    getFeatureType: function (feature) {
+        if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon")) {
             return FEATURETYPE.polygon;
         }
-        else if((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString")){
+        else if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString")) {
             return FEATURETYPE.lineString;
         }
-        else if((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point")){
+        else if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point")) {
             return FEATURETYPE.point;
         }
-        else{
+        else {
             return -1;
         }
     },
-    simplifyGeoJSON:function(geoJSON,threshold){
+    simplifyGeoJSON: function (geoJSON, threshold) {
         geoJSON.features.forEach(feature => {
-            this.simplifyFeatureCoords(feature,threshold);
+            this.simplifyFeatureCoords(feature, threshold);
         });
     },
-    simplifyFeatureCoords:function(feature,threshold){
+    simplifyFeatureCoords: function (feature, threshold) {
         let type = this.getFeatureType(feature);
-        if(type === -1 || type === FEATURETYPE.point){
+        if (type === -1 || type === FEATURETYPE.point) {
             return;
         }
         if (type === FEATURETYPE.polygon) {
             // console.log("before");
             // console.log(JSON.parse(JSON.stringify(feature.geometry.coordinates[0])));
-            feature.geometry.coordinates[0] = simplify(feature.geometry.coordinates[0],threshold,false);
+            feature.geometry.coordinates[0] = simplify(feature.geometry.coordinates[0], threshold, false);
             // console.log("after");
             // console.log(feature.geometry.coordinates[0]);
         }
         else if (type === FEATURETYPE.lineString) {
             // console.log("before");
             // console.log(JSON.parse(JSON.stringify(feature.geometry.coordinates)));
-            feature.geometry.coordinates = simplify(feature.geometry.coordinates,threshold,false);
+            feature.geometry.coordinates = simplify(feature.geometry.coordinates, threshold, false);
             // console.log("after");
             // console.log(feature.geometry.coordinates);
         }
@@ -642,7 +648,7 @@ const Util = {
             params = Object.keys(feature.properties);
             tagsObj = feature.properties;
         }
-        else{
+        else {
             return "nodata";
         }
         return { params: params, tagsObj: tagsObj };
@@ -661,7 +667,7 @@ const Util = {
         return str.join(" ");
     },
     underScoreToSpace: function (str) {
-        if(str == null){
+        if (str == null) {
             return "noname"
         }
         if (typeof str !== 'string') {
@@ -681,7 +687,7 @@ const Util = {
             if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
                 RenderInfrastructure.options.queryAlertText.parentElement.style.display = "none";
             }
-            else if(RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom){
+            else if (RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom) {
                 RenderInfrastructure.options.queryAlertText.parentElement.style.display = "block";
                 RenderInfrastructure.options.queryAlertText.innerHTML = "Current Zoom: " + RenderInfrastructure.map.getZoom() + ", Data at: " + RenderInfrastructure.options.minRenderZoom;
             }
