@@ -104,15 +104,26 @@ let RenderInfrastructure = {
     },
     updateCustom: function (queries, bounds) {
         queries.forEach(query => {
+            let func;
             if (query === "custom=Natural_Gas_Pipeline") {
-                bounds.forEach(bound => {
-                    Querier.queryGeoJsonFromServer(Querier.createNaturalGasQueryURL(bound), bound, false, RenderInfrastructure.renderGeoJson);
-                });
+                func = Querier.createNaturalGasQueryURL;
             }
             else if (query === "custom=flood_boundary") {
+                func = Querier.createFloodBoundaryQueryURL;
+            }
+            else if (query === "custom=water_pipeline") {
+                func = Querier.createWaterPipelineQueryURL;
+            }
+            else if (query === "custom=substation") {
+                func = Querier.createSubstationQueryURL;
+            }
+            else if(query === "custom=power_transmission_line"){
+                func = Querier.createPowerTransmissionLineQueryURL;
+            }
+            if (func != null) {
                 bounds.forEach(bound => {
-                    Querier.queryGeoJsonFromServer(Querier.createFloodBoundaryQueryURL(bound), bound, false, RenderInfrastructure.renderGeoJson);
-                });            
+                    Querier.queryGeoJsonFromServer(func(bound), bound, false, RenderInfrastructure.renderGeoJson);
+                });
             }
         });
     },
@@ -152,7 +163,7 @@ let RenderInfrastructure = {
 
         }).addTo(RenderInfrastructure.map);
         Util.refreshInfoPopup();
-        RenderInfrastructure.markerLayer.refreshClusters();
+        //RenderInfrastructure.markerLayer.refreshClusters();
         return resultLayer;
     },
     addIconToMap: function (icon, latLng, popUpContent) {
@@ -405,8 +416,14 @@ const Querier = {
     createFloodBoundaryQueryURL: function (bounds) {
         return 'https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/26/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     },
-    createSubStationQueryURL: function (bounds) {
-        return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
+    createWaterPipelineQueryURL: function (bounds) {
+        return 'https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/3/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
+    },
+    createSubstationQueryURL: function (bounds) {
+        return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Substations_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
+    },
+    createPowerTransmissionLineQueryURL: function(bounds){
+        return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     }
 }
 
@@ -618,6 +635,12 @@ const Util = {
                 }
                 else if (params[i] == "LN_TYP") {
                     return "flood_boundary";
+                }
+                else if (params[i] == "TYPE" && tagsObj[params[i]] == "SUBSTATION") {
+                    return "substation";
+                }
+                else if(params[i] == "TYPE" && tagsObj[params[i]] == "AC"){
+                    return "power_transmission_line";
                 }
             }
         }

@@ -100,10 +100,14 @@
         "defaultRender": true,
         "query": "natural=water"
     },
-    "flood_boundary":{
-        "color": "#800000",
+    "substation":{
+        "iconAddr": "../../../images/substation.png",
         "defaultRender": true,
-        "query": "custom=flood_boundary"
+        "query": "custom=substation"
+    },
+    "power_transmission_line":{
+        "color": "#000000",
+        "defaultRender": true,
+        "query": "custom=power_transmission_line"
     }
-
 }
