@@ -109,5 +109,10 @@
         "color": "#000000",
         "defaultRender": true,
         "query": "custom=power_transmission_line"
+    },
+    "flood_zone":{
+        "color":"#800000",
+        "defaultRender":false,
+        "query": "custom=flood_zone"
     }
 }

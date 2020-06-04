@@ -120,6 +120,9 @@ let RenderInfrastructure = {
             else if(query === "custom=power_transmission_line"){
                 func = Querier.createPowerTransmissionLineQueryURL;
             }
+            else if(query === "custom=flood_zone"){
+                func = Querier.createFloodZoneQueryURL;
+            }
             if (func != null) {
                 bounds.forEach(bound => {
                     Querier.queryGeoJsonFromServer(func(bound), bound, false, RenderInfrastructure.renderGeoJson);
@@ -424,6 +427,9 @@ const Querier = {
     },
     createPowerTransmissionLineQueryURL: function(bounds){
         return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
+    },
+    createFloodZoneQueryURL: function(bounds){
+        return "https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/27/query?where=FLD_ZONE = 'AE' OR FLD_ZONE = 'A' OR FLD_ZONE = 'AH' OR FLD_ZONE = 'A0'&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
     }
 }
 
@@ -489,9 +495,11 @@ const Util = {
         }
     },
     simplifyGeoJSON: function (geoJSON, threshold) {
-        geoJSON.features.forEach(feature => {
-            this.simplifyFeatureCoords(feature, threshold);
-        });
+        if(geoJSON.features){
+            geoJSON.features.forEach(feature => {
+                this.simplifyFeatureCoords(feature, threshold);
+            });
+        }
     },
     simplifyFeatureCoords: function (feature, threshold) {
         let type = this.getFeatureType(feature);
@@ -499,18 +507,10 @@ const Util = {
             return;
         }
         if (type === FEATURETYPE.polygon) {
-            // console.log("before");
-            // console.log(JSON.parse(JSON.stringify(feature.geometry.coordinates[0])));
             feature.geometry.coordinates[0] = simplify(feature.geometry.coordinates[0], threshold, false);
-            // console.log("after");
-            // console.log(feature.geometry.coordinates[0]);
         }
         else if (type === FEATURETYPE.lineString) {
-            // console.log("before");
-            // console.log(JSON.parse(JSON.stringify(feature.geometry.coordinates)));
             feature.geometry.coordinates = simplify(feature.geometry.coordinates, threshold, false);
-            // console.log("after");
-            // console.log(feature.geometry.coordinates);
         }
     },
     subtractBounds: function (boundsToSlice, boundSlicer) {
@@ -641,6 +641,9 @@ const Util = {
                 }
                 else if(params[i] == "TYPE" && tagsObj[params[i]] == "AC"){
                     return "power_transmission_line";
+                }
+                else if(params[i] == "FLD_ZONE"){
+                    return "flood_zone";
                 }
             }
         }
