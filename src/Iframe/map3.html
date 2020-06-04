@@ -11,6 +11,8 @@
     <script src="https://cdn.osmbuildings.org/4.0.7/OSMBuildings.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="Dependencies/Census_Visualization/grpc_querier.bundle.js"></script>
+    <script type="text/javascript" src="Dependencies/Census_Visualization/census_visualizer.js"></script>
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
 </head>
 <body>
@@ -33,9 +35,10 @@
           attribution: '© Data <a href="https://openstreetmap.org/copyright/">OpenStreetMap</a> © Map <a href="https://mapbox.com/">Mapbox</a> © 3D <a href="https://osmbuildings.org/copyright/">OSM Buildings</a>'
         });
 
-
         buildingmap.addMapTiles('https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w');
         buildingmap.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/dixw8kmb/tile/{z}/{x}/{y}.json');
+
+        const censusViz = census_visualizer();
 
         console.log(buildingmap)
 
