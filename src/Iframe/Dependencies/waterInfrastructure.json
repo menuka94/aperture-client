@@ -114,5 +114,30 @@
         "color":"#800000",
         "defaultRender":false,
         "query": "custom=flood_zone"
+    },
+    "power_plant":{
+        "iconAddr": "../../../images/power_plant.png",
+        "defaultRender":true,
+        "query": "custom=power_plant"
+    },
+    "landfill":{
+        "iconAddr": "../../../images/landfill.png",
+        "defaultRender":true,
+        "query": "custom=landfill"
+    },
+    "fire_station":{
+        "iconAddr": "../../../images/fire_station.png",
+        "defaultRender":true,
+        "query": "custom=fire_station"
+    },
+    "hospital":{
+        "iconAddr": "../../../images/hospital.png",
+        "defaultRender":true,
+        "query": "custom=hosptial"
+    },
+    "urgent_care":{
+        "iconAddr": "../../../images/urgent_care.png",
+        "defaultRender":true,
+        "query": "custom=urgent_care"
     }
 }
