@@ -15,7 +15,7 @@ describe('SelectGenerator', function () {
             selectGenerator.Generator.config(jsonData, null, true, notAFunction);
             assert.deepEqual(elem.innerHTML,'');
             selectGenerator.Generator.config(jsonData, elem, true, notAFunction);
-            assert.deepEqual(elem.childElementCount,15);
+            assert.deepEqual(elem.childElementCount,26);
         });
     });
 });

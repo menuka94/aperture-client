@@ -30,7 +30,7 @@ const DEFAULTOPTIONS = {
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
     iconSize: [25, 25],
-    simplifyThreshold: 0.0001
+    simplifyThreshold: -1
 };
 const GEOM = {
     node: 100,
@@ -117,25 +117,25 @@ let RenderInfrastructure = {
             else if (query === "custom=substation") {
                 func = Querier.createSubstationQueryURL;
             }
-            else if(query === "custom=power_transmission_line"){ 
+            else if (query === "custom=power_transmission_line") {
                 func = Querier.createPowerTransmissionLineQueryURL;
             }
-            else if(query === "custom=flood_zone"){
+            else if (query === "custom=flood_zone") {
                 func = Querier.createFloodZoneQueryURL;
             }
-            else if(query === "custom=power_plant"){
+            else if (query === "custom=power_plant") {
                 func = Querier.createPowerPlantQueryURL;
             }
-            else if(query === "custom=landfill"){
+            else if (query === "custom=landfill") {
                 func = Querier.createLandfillQueryURL;
             }
-            else if(query === "custom=fire_station"){
+            else if (query === "custom=fire_station") {
                 func = Querier.createFireStationQueryURL;
             }
-            else if(query === "custom=hospital"){
+            else if (query === "custom=hospital") {
                 func = Querier.createHospitalQueryURL;
             }
-            else if(query === "custom=urgent_care"){
+            else if (query === "custom=urgent_care") {
                 func = Querier.createUrgentCareQueryURL;
             }
             if (func != null) {
@@ -212,7 +212,13 @@ let RenderInfrastructure = {
         if (!this.data[featureId]) {
             return false;
         }
-        else if (!this.queries.includes(this.data[featureId]['query'])) {
+        else if (!this.queries.includes(this.data[featureId]['query']) && this.data[featureId]['query']) {
+            return false;
+        }
+        else if (this.data[featureId]['refrences']) {
+            this.data[featureId]['refrences'].forEach(element => {
+                this.removeFeatureFromMap(element);
+            });
             return false;
         }
         this.queries.splice(this.queries.indexOf(this.data[featureId]['query']), 1);
@@ -387,7 +393,7 @@ const Querier = {
             }
         }
         if (boundsToQuery.length == 0) return null;
-        boundsToQuery = Util.optimizeBoundsList(boundsToQuery, 0.005);
+        boundsToQuery = Util.optimizeBoundsList(boundsToQuery, RenderInfrastructure.options.simplifyThreshold);
         if (boundsToQuery.length == 0) return null;
         let queries = [];
         for (let i = 0; i < boundsToQuery.length; i++) {
@@ -440,25 +446,25 @@ const Querier = {
     createSubstationQueryURL: function (bounds) {
         return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Substations_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     },
-    createPowerTransmissionLineQueryURL: function(bounds){
+    createPowerTransmissionLineQueryURL: function (bounds) {
         return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
     },
-    createFloodZoneQueryURL: function(bounds){
+    createFloodZoneQueryURL: function (bounds) {
         return "https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/27/query?where=FLD_ZONE = 'AE' OR FLD_ZONE = 'A' OR FLD_ZONE = 'AH' OR FLD_ZONE = 'A0'&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
     },
-    createPowerPlantQueryURL: function(bounds){
+    createPowerPlantQueryURL: function (bounds) {
         return "https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_PowerPlants/MapServer/12/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
     },
-    createLandfillQueryURL: function(bounds){
+    createLandfillQueryURL: function (bounds) {
         return "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Solid_Waste_Landfill_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
     },
-    createFireStationQueryURL: function(bounds){
+    createFireStationQueryURL: function (bounds) {
         return "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Fire_Station/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
     },
-    createUrgentCareQueryURL: function(bounds){
+    createUrgentCareQueryURL: function (bounds) {
         return "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
     },
-    createHospitalQueryURL: function(bounds){
+    createHospitalQueryURL: function (bounds) {
         return "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hospitals_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
     }
 }
@@ -525,7 +531,7 @@ const Util = {
         }
     },
     simplifyGeoJSON: function (geoJSON, threshold) {
-        if(geoJSON.features){
+        if (geoJSON.features) {
             geoJSON.features.forEach(feature => {
                 this.simplifyFeatureCoords(feature, threshold);
             });
@@ -660,40 +666,24 @@ const Util = {
                         return tagsObj[params[i]];
                     }
                 }
-                else if (params[i] == "TYPEPIPE") {
-                    return "Natural_Gas_Pipeline";
-                }
-                else if (params[i] == "LN_TYP") {
-                    return "flood_boundary";
-                }
-                else if (params[i] == "TYPE" && tagsObj[params[i]] == "SUBSTATION") {
-                    return "substation";
-                }
-                else if(params[i] == "TYPE" && tagsObj[params[i]] == "AC"){
-                    return "power_transmission_line";
-                }
-                else if(params[i] == "FLD_ZONE"){
-                    return "flood_zone";
-                }
-                else if(params[i] == "BEDS"){
-                    return "hospital";
-                }
-                else if(params[i] == "BEDS"){
-                    return "hospital";
-                }
-                else if(params[i] == "EMERGEXT"){
-                    return "urgent_care";
-                }
-                else if(params[i] == "ISLANDMARK"){
-                    return "fire_station";
-                }
-                else if(params[i] == "CLOSE_DATE"){
-                    return "landfill";
-                }
-                else if(params[i] == "ENERGY_SRC_DESC1"){
-                    return "power_plant";
+            }
+        }
+        for (element in RenderInfrastructure.data) {
+            if (RenderInfrastructure.data[element]["identityField"]) {
+                for(let i = 0; i < params.length; i++){
+                    if (params[i] == RenderInfrastructure.data[element]["identityField"]) {
+                        if (RenderInfrastructure.data[element]["identityKey"]) {
+                            if (tagsObj[params[i]] == RenderInfrastructure.data[element]["identityKey"]) {
+                                return element;
+                            }
+                        }
+                        else {
+                            return element;
+                        }
+                    }
                 }
             }
+
         }
         return 'none';
     },
@@ -796,7 +786,7 @@ const Util = {
     jsonToQueryList: function (json) {
         let ret = [];
         for (e in json) {
-            if (json[e]['defaultRender']) {
+            if (json[e]['defaultRender'] && json[e]['query']) {
                 ret.push(json[e]['query']);
             }
         }
