@@ -151,7 +151,14 @@ let RenderInfrastructure = {
         }
         let resultLayer = L.geoJson(geoJsonData, {
             style: function (feature) {
-                return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color) };
+                let type = Util.getFeatureType(feature);
+                let weight = 3;
+                let fillOpacity = 0.2;
+                if(type === FEATURETYPE.polygon){
+                    weight = 0;
+                    fillOpacity = 0.75;
+                }
+                return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color), weight:weight, fillOpacity:fillOpacity };
             },
             filter: function (feature) {
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(Util.getNameFromGeoJsonFeature(feature))) {
