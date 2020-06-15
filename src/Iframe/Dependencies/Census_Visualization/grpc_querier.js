@@ -8,18 +8,17 @@ GRPCQuerier = {
     },
 
     getResultsFromQuery: function (datasetName, geohashList, startEpochMilli, endEpochMilli) {
-        const request = new MedianAgeRequest();
-        const spatialTemporalInfo = new SpatialTemporalInfo();
-        spatialTemporalInfo.setResolution("county");
-        spatialTemporalInfo.setDecade(Decade.ten2010);
-        const boundingBox = new BoundingBox();
-        boundingBox.setX1(40.5); //Southwest
-        boundingBox.setY1(-105.0); //Southwest
-        boundingBox.setX2(41.5); //Northeast
-        boundingBox.setY2(-104.0); //Northeast
-        spatialTemporalInfo.setBoundingbox(boundingBox); //40.5);
-        //spatialTemporalInfo.setLongitude(-80.0);
-        request.setSpatialtemporalinfo(spatialTemporalInfo);
+        const spatialTemporalInfo = {
+            resolution: "tract",
+            boundingBox: {
+                x1: 40.5,
+                y1: -105.0,
+                x2: 41.5,
+                y2: -104.0
+            },
+            decade: "_2010"
+        };
+        const request = {spatialTemporalInfo: spatialTemporalInfo};
         return this.service.getTotalPopulation(request, {}, function(err, response) {
   if (err) {
     console.log(err.code);
