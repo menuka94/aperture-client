@@ -9,7 +9,7 @@ Census_Visualizer = {
         if (this._stream)
             this._stream.cancel();
 
-        let stream = this._grpcQuerier.getStreamForQuery("noaa_2015_jan", [], startTime, endTime);
+        let stream = this._grpcQuerier.getResultsFromQuery("noaa_2015_jan", [], startTime, endTime);
 
       //  stream.on('data', function (response) {
       //    console.log("hi")

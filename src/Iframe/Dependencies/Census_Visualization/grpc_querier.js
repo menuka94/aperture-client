@@ -1,4 +1,4 @@
-const {TargetedQueryRequest, CensusResolution, Predicate, Decade, SpatialTemporalInfo, TotalPopulationRequest, MedianAgeRequest} = require("./census_pb.js")
+const {TargetedQueryRequest, CensusResolution, Predicate, Decade, SpatialTemporalInfo, TotalPopulationRequest, MedianAgeRequest, BoundingBox} = require("./census_pb.js")
 const {CensusClient} = require('./census_grpc_web_pb.js');
 
 
@@ -7,13 +7,18 @@ GRPCQuerier = {
         this.service = new CensusClient("http://" + window.location.hostname + ":9092", "census");
     },
 
-    getStreamForQuery: function (datasetName, geohashList, startEpochMilli, endEpochMilli) {
-        const request = new TotalPopulationRequest();
+    getResultsFromQuery: function (datasetName, geohashList, startEpochMilli, endEpochMilli) {
+        const request = new MedianAgeRequest();
         const spatialTemporalInfo = new SpatialTemporalInfo();
-        spatialTemporalInfo.setResolution("state");
+        spatialTemporalInfo.setResolution("county");
         spatialTemporalInfo.setDecade(Decade.ten2010);
-        spatialTemporalInfo.setLatitude(40.5);
-        spatialTemporalInfo.setLongitude(-80.0);
+        const boundingBox = new BoundingBox();
+        boundingBox.setX1(40.5); //Southwest
+        boundingBox.setY1(-105.0); //Southwest
+        boundingBox.setX2(41.5); //Northeast
+        boundingBox.setY2(-104.0); //Northeast
+        spatialTemporalInfo.setBoundingbox(boundingBox); //40.5);
+        //spatialTemporalInfo.setLongitude(-80.0);
         request.setSpatialtemporalinfo(spatialTemporalInfo);
         return this.service.getTotalPopulation(request, {}, function(err, response) {
   if (err) {
