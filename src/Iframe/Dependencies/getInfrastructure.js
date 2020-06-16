@@ -26,7 +26,7 @@ const DEFAULTOPTIONS = {
     maxElements: 5000,
     maxLayers: 10,
     minRenderZoom: 10,
-    commonTagNames: ["waterway", "man_made", "landuse", "water", "amenity", "natural"],
+    commonTagNames: ["streamflow","waterway", "man_made", "landuse", "water", "amenity", "natural"],
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
     iconSize: [25, 25],
@@ -46,6 +46,7 @@ let RenderInfrastructure = {
     map: null,
     markerLayer: null,
     data: null,
+    preProcessData: null,
     queries: [],
     currentBounds: [],
     currentLayers: [],
@@ -145,10 +146,11 @@ let RenderInfrastructure = {
             }
         });
     },
-    renderGeoJson: function (geoJsonData) {
+    renderGeoJson: function (geoJsonData,preProcessed) {
         if (RenderInfrastructure.options.simplifyThreshold !== -1) {
             Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);
         }
+        let preProcess = [];
         let resultLayer = L.geoJson(geoJsonData, {
             style: function (feature) {
                 let type = Util.getFeatureType(feature);
@@ -161,7 +163,12 @@ let RenderInfrastructure = {
                 return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color), weight:weight, fillOpacity:fillOpacity };
             },
             filter: function (feature) {
-                if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(Util.getNameFromGeoJsonFeature(feature))) {
+                let name = Util.getNameFromGeoJsonFeature(feature);
+                if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || RenderInfrastructure.data[name] == null) {
+                    return false;
+                }
+                if(RenderInfrastructure.data[name]["preProcess"] && preProcessed !== true){
+                    preProcess.push(feature);
                     return false;
                 }
                 RenderInfrastructure.currentLayers.push(feature.id);
@@ -187,8 +194,12 @@ let RenderInfrastructure = {
             }
 
         }).addTo(RenderInfrastructure.map);
+
         Util.refreshInfoPopup();
         //RenderInfrastructure.markerLayer.refreshClusters();
+        if(!preProcessed){
+            Querier.preProcessQuery(preProcess);
+        }
         return resultLayer;
     },
     addIconToMap: function (icon, latLng, popUpContent) {
@@ -440,6 +451,60 @@ const Querier = {
             }
         }
         return RenderInfrastructure.options.overpassInterpreter + '?data=[out:json][timeout:' + RenderInfrastructure.options.timeout + '];(' + queryFString + ');out body geom;';
+    },
+    preProcessQuery: function(features){
+        if(features.length == 0){
+            return;
+        }
+        if(!RenderInfrastructure.preProcessData){
+            RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(features),true);
+        }
+        let hits = [];
+        let misses = [];
+        features.forEach(fea => {
+            let hit = RenderInfrastructure.preProcessData[fea.id];
+            if(hit){
+                hits.push({feature:fea,stations:hit.stations});
+            }
+            else{
+                misses.push(fea);
+            }
+        });
+        //RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(hit),true);
+        let splitHits = [];
+        for(let j = 0; j < hits.length; j++){
+            let stations = hits[j].stations;
+            for(let i = 0; i < stations.length; i++){
+                let feature = JSON.parse(JSON.stringify(hits[j].feature));
+                feature.properties.tags.streamflow = "streamflowData";
+                if(stations.length === 1){
+                    feature.station = stations[i];
+                    feature.properties.tags.strflowGeohash = stations[i].geohash;
+                    splitHits.push(feature);
+                    break;
+                }
+                let minDist = 99999.99999;
+                let indx = 0;
+                for(let k = 0; k < feature.geometry.coordinates.length; k++){
+                    let d = Util.dist2d(stations[i].latlng,feature.geometry.coordinates[k]);
+                    if(d < minDist){
+                        minDist = d;
+                        indx = k;
+                    }
+                }
+                let newCoords = feature.geometry.coordinates.splice(indx + 1);
+                if(feature.geometry.type == 'Polygon'){
+                    feature.geometry.coordinates.push(feature.geometry.coordinates[0]);
+                }
+                //console.log(feature.geometry.coordinates);
+                hits[j].feature.geometry.coordinates = newCoords;
+                feature.station = stations[i];
+                feature.properties.tags.strflowGeohash = stations[i].geohash;
+                splitHits.push(feature);
+            }
+        }
+        RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(splitHits),true);
+        RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(misses),true);
     },
     createNaturalGasQueryURL: function (bounds) {
         return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
@@ -798,6 +863,22 @@ const Util = {
             }
         }
         return ret;
+    },
+    createGeoJsonObj: function(features){
+        let geojson = {
+            "type": "FeatureCollection",
+            "features":[]
+        }
+        features.forEach(fea => {
+            geojson["features"].push(fea);
+        });
+        return geojson;
+    },
+    dist2d: function(p1,p2){ //p2 latlng array is reversed
+        return Math.pow(p1[0] - p2[1],2) + Math.pow(p1[1] - p2[0],2);
+    },
+    dist2dr: function(p1,p2){ //p2 latlng array is not reversed
+        return Math.pow(p1[0] - p2[0],2) + Math.pow(p1[1] - p2[1],2);
     }
 }
 

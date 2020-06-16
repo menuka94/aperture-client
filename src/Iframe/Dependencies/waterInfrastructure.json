@@ -36,17 +36,26 @@
     "canal": {
         "color": "teal",
         "defaultRender": true,
-        "query":"waterway=canal"
+        "query":"waterway=canal",
+        "preProcess":true
     },
     "river": {
         "color": "#00008B",
         "defaultRender": true,
-        "query":"waterway=river"
+        "query":"waterway=river",
+        "preProcess":true
     },
     "stream": {
         "color": "#0000BB",
         "defaultRender": false,
-        "query":"waterway=stream"
+        "query":"waterway=stream",
+        "preProcess":true
+    },
+    "ditch": {
+        "color": "#0000BB",
+        "defaultRender": false,
+        "query":"waterway=ditch",
+        "preProcess":true
     },
     "Natural_Gas_Pipeline": {
         "color": "#8A2BE2",
@@ -168,5 +177,8 @@
         "defaultRender":true,
         "query": "custom=urgent_care",
         "identityField": "EMERGEXT"
+    },
+    "streamflowData":{
+        "color":"#FFC0CB"
     }
 }

@@ -95,17 +95,19 @@
         });
         osmMap2.addLayer(markers);
 
-        $.getJSON("Dependencies/waterInfrastructure.json", function (data) {
-            RenderInfrastructure.config(osmMap2, markers, data, {
-                queryAlertText: document.getElementById('queryInfoText'),
-                overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
-                maxElements: 10000,
-                simplifyThreshold: 0.00005
+        $.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
+            RenderInfrastructure.preProcessData = mdata;
+            $.getJSON("Dependencies/waterInfrastructure.json", function (data) {
+                RenderInfrastructure.config(osmMap2, markers, data, {
+                    queryAlertText: document.getElementById('queryInfoText'),
+                    overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
+                    maxElements: 10000,
+                    simplifyThreshold: 0.00005
+                });
+                Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked);
+                runQuery();
             });
-            Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked);
-            runQuery();
         });
-
 
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 
@@ -139,7 +141,7 @@
         function runQuery() {
             updateOverPassLayer();
         }
-        
+
         osmMap2.on("move", function (e) {
             parent.setGlobalPosition(osmMap2.getCenter(), MAPNUMBER);
         });
