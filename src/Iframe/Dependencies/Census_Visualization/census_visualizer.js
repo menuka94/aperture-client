@@ -1,27 +1,22 @@
 Census_Visualizer = {
     initialize: function() {
         this._grpcQuerier = grpc_querier();
-        this._stream = undefined;
-        this.queryTime(0,0,0)
     },
 
-    queryTime: function(startTime, endTime, map) {
-        if (this._stream)
-            this._stream.cancel();
+    updateViz: function(map) {
+        const callback = function(err, response) {
+                              if (err) {
+                              } else {
+                                const medIncome = response.getMedianhouseholdincome();
+                                console.log(medIncome);
+                                var polygon = L.rectangle(map.getBounds(), {color: 'red'}).addTo(map);
+                              }
+                            };
 
-        let stream = this._grpcQuerier.getResultsFromQuery("noaa_2015_jan", [], startTime, endTime);
+        let query = this._grpcQuerier.getCensusData("tract", [map.getBounds()._southWest.lat, map.getBounds()._southWest.lng],
+         [map.getBounds()._northEast.lat, map.getBounds()._northEast.lng], "2010", callback, "medianHouseholdIncome");
 
-      //  stream.on('data', function (response) {
-      //    console.log("hi")
-      //  }.bind(this));
-        //stream.on('status', function (status) {
-      //      console.log(status.code, status.details, status.metadata);
-    //    });
-        //stream.on('end', function (end) {
-        //  console.log("hi")
-      //  }.bind(this));
 
-        this._stream = stream;
     },
 };
 

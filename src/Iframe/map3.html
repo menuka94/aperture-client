@@ -7,10 +7,7 @@
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
         integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
         crossorigin=""></script>
-    <link href="https://cdn.osmbuildings.org/4.0.7/OSMBuildings.css" rel="stylesheet">
-    <script src="https://cdn.osmbuildings.org/4.0.7/OSMBuildings.js"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
     <script type="text/javascript" src="Dependencies/Census_Visualization/grpc_querier.bundle.js"></script>
     <script type="text/javascript" src="Dependencies/Census_Visualization/census_visualizer.js"></script>
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
@@ -24,36 +21,37 @@
     <div id='map3' class='map'>
     </div>
     <script>
-        var buildingmap = new OSMBuildings({
-          container: 'map3',
-          position: { latitude: parent.view.lat, longitude: parent.view.lng },
-          zoom: 15,
-          minZoom: 15,
-          maxZoom: 20,
-          tilt: 40,
-          effects: ['shadows'],
-          attribution: '© Data <a href="https://openstreetmap.org/copyright/">OpenStreetMap</a> © Map <a href="https://mapbox.com/">Mapbox</a> © 3D <a href="https://osmbuildings.org/copyright/">OSM Buildings</a>'
-        });
+        var buildingmap = new L.Map('map3');
+        buildingmap.setView(parent.view, 16, false);
 
-        buildingmap.addMapTiles('https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w');
-        buildingmap.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/dixw8kmb/tile/{z}/{x}/{y}.json');
+        new L.TileLayer('https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w', {
+          attribution: '© Map tiles <a href="https://mapbox.com">Mapbox</a>',
+          maxZoom: 18,
+          maxNativeZoom: 20
+        }).addTo(buildingmap);
+
+        var osmb = new OSMBuildings(buildingmap).load('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
 
         const censusViz = census_visualizer();
-
-        console.log(buildingmap)
+        censusViz.updateViz(buildingmap);
 
         //updates controller----------------------------------------------
         buildingmap.on("move", function () {
-            parent.setGlobalPosition({ lat: buildingmap.position.latitude, lng: buildingmap.position.longitude },MAPNUMBER);
+            parent.setGlobalPosition(buildingmap.getCenter(),MAPNUMBER);
+        });
+        buildingmap.on("zoomend", function () {
+            parent.setGlobalPositionFORCE(buildingmap.getCenter(),MAPNUMBER);
         });
         //----------------------------------------------------------------
     </script>
 
     <!--You must add this map's setter function-->
     <script>
-        var thisMapsSetter = function(view,zoom){
-          buildingmap.setPosition({ latitude: view.lat, longitude: view.lng-360 });
-        }
+    var thisMapsSetter = function(view,zoom){
+        if(view.lng < 0)
+            view.lng += 360;
+        buildingmap.setView(view, buildingmap.getZoom());
+    }
         parent.setterFunctions.push({
             setterFunc: thisMapsSetter,
             mapNum: MAPNUMBER

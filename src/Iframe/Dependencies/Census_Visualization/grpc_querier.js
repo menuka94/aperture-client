@@ -1,4 +1,6 @@
-const {TargetedQueryRequest, CensusResolution, Predicate, Decade, SpatialTemporalInfo, TotalPopulationRequest, MedianAgeRequest, BoundingBox} = require("./census_pb.js")
+const {TargetedQueryRequest, CensusResolution, Predicate, Decade, SpatialTemporalInfo, TotalPopulationRequest,
+  MedianAgeRequest, BoundingBox, SingleCoordinate, MedianHouseholdIncomeRequest,
+  PovertyRequest} = require("./census_pb.js")
 const {CensusClient} = require('./census_grpc_web_pb.js');
 
 
@@ -7,29 +9,51 @@ GRPCQuerier = {
         this.service = new CensusClient("http://" + window.location.hostname + ":9092", "census");
     },
 
-    getResultsFromQuery: function (datasetName, geohashList, startEpochMilli, endEpochMilli) {
-        const request = new MedianAgeRequest();
+    _getQueryType: function(queryType){
+      if (queryType === "totalPopulation"){
+        return new TotalPopulationRequest();
+      } else if (queryType === "medianAge"){
+        return new MedianAgeRequest();
+      } else if (queryType === "medianHouseholdIncome"){
+        return new MedianHouseholdIncomeRequest();
+      } else if (queryType === "poverty"){
+        return new PovertyRequest();
+      } else if (queryType === "race"){
+        return new RaceRequest();
+      }
+    },
+
+    getCensusData: function (resolution, southwest, northeast, decade, callback, queryType) {
+        const request = this._getQueryType(queryType);
         const spatialTemporalInfo = new SpatialTemporalInfo();
-        spatialTemporalInfo.setResolution("county");
-        spatialTemporalInfo.setDecade(Decade.ten2010);
+        spatialTemporalInfo.setResolution(resolution);
+        if (decade === "2010"){
+            spatialTemporalInfo.setDecade(Decade.ten2010);
+        } else if (decade === "2000") {
+            spatialTemporalInfo.setDecade(Decade.zero2000);
+        } else if (decade === "1990"){
+            spatialTemporalInfo.setDecade(Decade.nineteen1990);
+        } else if (decade === "1980"){
+            spatialTemporalInfo.setDecade(Decade.nineen1980);
+        }
         const boundingBox = new BoundingBox();
-        boundingBox.setX1(40.5); //Southwest
-        boundingBox.setY1(-105.0); //Southwest
-        boundingBox.setX2(41.5); //Northeast
-        boundingBox.setY2(-104.0); //Northeast
-        spatialTemporalInfo.setBoundingbox(boundingBox); //40.5);
-        //spatialTemporalInfo.setLongitude(-80.0);
+        boundingBox.setX1(southwest[0]); //Southwest
+        boundingBox.setY1(southwest[1]); //Southwest
+        boundingBox.setX2(northeast[0]); //Northeast
+        boundingBox.setY2(northeast[1]); //Northeast
+        spatialTemporalInfo.setBoundingbox(boundingBox);
         request.setSpatialtemporalinfo(spatialTemporalInfo);
-        return this.service.getTotalPopulation(request, {}, function(err, response) {
-  if (err) {
-    console.log(err.code);
-    console.log(err.message);
-  } else {
-    console.log(response)
-    console.log(response.getPopulation())
-    console.log("hi");
-  }
-});
+        if (queryType === "totalPopulation"){
+          return this.service.getTotalPopulation(request, {}, callback);;
+        } else if (queryType === "medianAge"){
+          return this.service.getMedianAge(request, {}, callback);;
+        } else if (queryType === "medianHouseholdIncome"){
+          return this.service.getMedianHouseholdIncome(request, {}, callback);;
+        } else if (queryType === "poverty"){
+          return this.service.getPoverty(request, {}, callback);;
+        } else if (queryType === "race"){
+          return this.service.getRace(request, {}, callback);;
+        }
     },
 };
 
