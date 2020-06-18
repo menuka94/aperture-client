@@ -26,7 +26,7 @@ const DEFAULTOPTIONS = {
     maxElements: 5000,
     maxLayers: 10,
     minRenderZoom: 10,
-    commonTagNames: ["streamflow","waterway", "man_made", "landuse", "water", "amenity", "natural"],
+    commonTagNames: ["streamflow", "waterway", "man_made", "landuse", "water", "amenity", "natural"],
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
     iconSize: [25, 25],
@@ -105,48 +105,15 @@ let RenderInfrastructure = {
     },
     updateCustom: function (queries, bounds) {
         queries.forEach(query => {
-            let func;
-            if (query === "custom=Natural_Gas_Pipeline") {
-                func = Querier.createNaturalGasQueryURL;
-            }
-            else if (query === "custom=flood_boundary") {
-                func = Querier.createFloodBoundaryQueryURL;
-            }
-            else if (query === "custom=water_pipeline") {
-                func = Querier.createWaterPipelineQueryURL;
-            }
-            else if (query === "custom=substation") {
-                func = Querier.createSubstationQueryURL;
-            }
-            else if (query === "custom=power_transmission_line") {
-                func = Querier.createPowerTransmissionLineQueryURL;
-            }
-            else if (query === "custom=flood_zone") {
-                func = Querier.createFloodZoneQueryURL;
-            }
-            else if (query === "custom=power_plant") {
-                func = Querier.createPowerPlantQueryURL;
-            }
-            else if (query === "custom=landfill") {
-                func = Querier.createLandfillQueryURL;
-            }
-            else if (query === "custom=fire_station") {
-                func = Querier.createFireStationQueryURL;
-            }
-            else if (query === "custom=hospital") {
-                func = Querier.createHospitalQueryURL;
-            }
-            else if (query === "custom=urgent_care") {
-                func = Querier.createUrgentCareQueryURL;
-            }
-            if (func != null) {
+            let url = Util.queryToQueryURL(query);
+            if (url != null) {
                 bounds.forEach(bound => {
-                    Querier.queryGeoJsonFromServer(func(bound), bound, false, RenderInfrastructure.renderGeoJson);
+                    Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url,bound), bound, false, RenderInfrastructure.renderGeoJson);
                 });
             }
         });
     },
-    renderGeoJson: function (geoJsonData,preProcessed) {
+    renderGeoJson: function (geoJsonData, preProcessed) {
         if (RenderInfrastructure.options.simplifyThreshold !== -1) {
             Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);
         }
@@ -156,18 +123,18 @@ let RenderInfrastructure = {
                 let type = Util.getFeatureType(feature);
                 let weight = 3;
                 let fillOpacity = 0.2;
-                if(type === FEATURETYPE.polygon){
+                if (type === FEATURETYPE.polygon) {
                     weight = 0;
                     fillOpacity = 0.75;
                 }
-                return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color), weight:weight, fillOpacity:fillOpacity };
+                return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color), weight: weight, fillOpacity: fillOpacity };
             },
             filter: function (feature) {
                 let name = Util.getNameFromGeoJsonFeature(feature);
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || RenderInfrastructure.data[name] == null) {
                     return false;
                 }
-                if(RenderInfrastructure.data[name]["preProcess"] && preProcessed !== true){
+                if (RenderInfrastructure.data[name]["preProcess"] && preProcessed !== true) {
                     preProcess.push(feature);
                     return false;
                 }
@@ -197,7 +164,7 @@ let RenderInfrastructure = {
 
         Util.refreshInfoPopup();
         //RenderInfrastructure.markerLayer.refreshClusters();
-        if(!preProcessed){
+        if (!preProcessed) {
             Querier.preProcessQuery(preProcess);
         }
         return resultLayer;
@@ -452,32 +419,33 @@ const Querier = {
         }
         return RenderInfrastructure.options.overpassInterpreter + '?data=[out:json][timeout:' + RenderInfrastructure.options.timeout + '];(' + queryFString + ');out body geom;';
     },
-    preProcessQuery: function(features){
-        if(features.length == 0){
+    preProcessQuery: function (features) {
+        if (features.length == 0) {
             return;
         }
-        if(!RenderInfrastructure.preProcessData){
-            RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(features),true);
+        if (!RenderInfrastructure.preProcessData) {
+            RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(features), true);
+            return;
         }
         let hits = [];
         let misses = [];
         features.forEach(fea => {
             let hit = RenderInfrastructure.preProcessData[fea.id];
-            if(hit){
-                hits.push({feature:fea,stations:hit.stations});
+            if (hit) {
+                hits.push({ feature: fea, stations: hit.stations });
             }
-            else{
+            else {
                 misses.push(fea);
             }
         });
         //RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(hit),true);
         let splitHits = [];
-        for(let j = 0; j < hits.length; j++){
+        for (let j = 0; j < hits.length; j++) {
             let stations = hits[j].stations;
-            for(let i = 0; i < stations.length; i++){
+            for (let i = 0; i < stations.length; i++) {
                 let feature = JSON.parse(JSON.stringify(hits[j].feature));
                 feature.properties.tags.streamflow = "streamflowData";
-                if(stations.length === 1){
+                if (stations.length === 1) {
                     feature.station = stations[i];
                     feature.properties.tags.strflowGeohash = stations[i].geohash;
                     splitHits.push(feature);
@@ -485,15 +453,15 @@ const Querier = {
                 }
                 let minDist = 99999.99999;
                 let indx = 0;
-                for(let k = 0; k < feature.geometry.coordinates.length; k++){
-                    let d = Util.dist2d(stations[i].latlng,feature.geometry.coordinates[k]);
-                    if(d < minDist){
+                for (let k = 0; k < feature.geometry.coordinates.length; k++) {
+                    let d = Util.dist2d(stations[i].latlng, feature.geometry.coordinates[k]);
+                    if (d < minDist) {
                         minDist = d;
                         indx = k;
                     }
                 }
                 let newCoords = feature.geometry.coordinates.splice(indx + 1);
-                if(feature.geometry.type == 'Polygon'){
+                if (feature.geometry.type == 'Polygon') {
                     feature.geometry.coordinates.push(feature.geometry.coordinates[0]);
                 }
                 //console.log(feature.geometry.coordinates);
@@ -503,41 +471,11 @@ const Querier = {
                 splitHits.push(feature);
             }
         }
-        RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(splitHits),true);
-        RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(misses),true);
+        RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(splitHits), true);
+        RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(misses), true);
     },
-    createNaturalGasQueryURL: function (bounds) {
-        return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
-    },
-    createFloodBoundaryQueryURL: function (bounds) {
-        return 'https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/26/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
-    },
-    createWaterPipelineQueryURL: function (bounds) {
-        return 'https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/3/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
-    },
-    createSubstationQueryURL: function (bounds) {
-        return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Substations_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
-    },
-    createPowerTransmissionLineQueryURL: function (bounds) {
-        return 'https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=' + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson';
-    },
-    createFloodZoneQueryURL: function (bounds) {
-        return "https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/27/query?where=FLD_ZONE = 'AE' OR FLD_ZONE = 'A' OR FLD_ZONE = 'AH' OR FLD_ZONE = 'A0'&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
-    },
-    createPowerPlantQueryURL: function (bounds) {
-        return "https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_PowerPlants/MapServer/12/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
-    },
-    createLandfillQueryURL: function (bounds) {
-        return "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Solid_Waste_Landfill_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
-    },
-    createFireStationQueryURL: function (bounds) {
-        return "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Fire_Station/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
-    },
-    createUrgentCareQueryURL: function (bounds) {
-        return "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
-    },
-    createHospitalQueryURL: function (bounds) {
-        return "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hospitals_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry=" + bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north + "&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson";
+    createCustomQueryURL: function (URL, bounds) {
+        return URL.replace('{{BOUNDS}}', bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north);
     }
 }
 
@@ -742,7 +680,7 @@ const Util = {
         }
         for (element in RenderInfrastructure.data) {
             if (RenderInfrastructure.data[element]["identityField"]) {
-                for(let i = 0; i < params.length; i++){
+                for (let i = 0; i < params.length; i++) {
                     if (params[i] == RenderInfrastructure.data[element]["identityField"]) {
                         if (RenderInfrastructure.data[element]["identityKey"]) {
                             if (tagsObj[params[i]] == RenderInfrastructure.data[element]["identityKey"]) {
@@ -864,21 +802,29 @@ const Util = {
         }
         return ret;
     },
-    createGeoJsonObj: function(features){
+    createGeoJsonObj: function (features) {
         let geojson = {
             "type": "FeatureCollection",
-            "features":[]
+            "features": []
         }
         features.forEach(fea => {
             geojson["features"].push(fea);
         });
         return geojson;
     },
-    dist2d: function(p1,p2){ //p2 latlng array is reversed
-        return Math.pow(p1[0] - p2[1],2) + Math.pow(p1[1] - p2[0],2);
+    dist2d: function (p1, p2) { //p2 latlng array is reversed
+        return Math.pow(p1[0] - p2[1], 2) + Math.pow(p1[1] - p2[0], 2);
     },
-    dist2dr: function(p1,p2){ //p2 latlng array is not reversed
-        return Math.pow(p1[0] - p2[0],2) + Math.pow(p1[1] - p2[1],2);
+    queryToQueryURL: function (query) {
+        if (!RenderInfrastructure.data) {
+            return;
+        }
+        for (x in RenderInfrastructure.data) {
+            //console.log(RenderInfrastructure.data[x]["query"]);
+            if (RenderInfrastructure.data[x]["query"] && RenderInfrastructure.data[x]["query"] === query && RenderInfrastructure.data[x]["queryURL"]) {
+                return RenderInfrastructure.data[x]["queryURL"];
+            }
+        }
     }
 }
 

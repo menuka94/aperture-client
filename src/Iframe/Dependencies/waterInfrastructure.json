@@ -57,12 +57,6 @@
         "query":"waterway=ditch",
         "preProcess":true
     },
-    "Natural_Gas_Pipeline": {
-        "color": "#8A2BE2",
-        "defaultRender": true,
-        "query":"custom=Natural_Gas_Pipeline",
-        "identityField": "TYPEPIPE"
-    },
     "lock_gate": {
         "iconAddr": "../../../images/lock_gate.png",
         "color": "#FF0000",
@@ -104,10 +98,18 @@
         "defaultRender": true,
         "query": "water=lake"
     },
+    "Natural_Gas_Pipeline": {
+        "color": "#8A2BE2",
+        "defaultRender": true,
+        "query":"custom=Natural_Gas_Pipeline",
+        "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
+        "identityField": "TYPEPIPE"
+    },
     "substation":{
         "iconAddr": "../../../images/substation.png",
         "defaultRender": true,
         "query": "custom=substation",
+        "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Substations_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "TYPE",
         "identityKey": "SUBSTATION"
     },
@@ -115,12 +117,14 @@
         "color": "#000000",
         "defaultRender": true,
         "query": "custom=power_transmission_line",
+        "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "TYPE",
         "identityKey": "AC"
     },
     "flood_zones":{
         "defaultRender":false,
         "query": "custom=flood_zone",
+        "queryURL":"https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/27/query?where=FLD_ZONE = 'AE' OR FLD_ZONE = 'A' OR FLD_ZONE = 'AH' OR FLD_ZONE = 'A0'&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "refrences":["flood_zone_A","flood_zone_AE","flood_zone_AH","flood_zone_AO","floodway"]
     },
     "floodway":{
@@ -152,33 +156,38 @@
         "iconAddr": "../../../images/power_plant.png",
         "defaultRender":true,
         "query": "custom=power_plant",
+        "queryURL":"https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_PowerPlants/MapServer/12/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "ENERGY_SRC_DESC1"
     },
     "landfill":{
         "iconAddr": "../../../images/landfill.png",
         "defaultRender":true,
         "query": "custom=landfill",
+        "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Solid_Waste_Landfill_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "CLOSE_DATE"
     },
     "fire_station":{
         "iconAddr": "../../../images/fire_station.png",
         "defaultRender":true,
         "query": "custom=fire_station",
+        "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Fire_Station/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "ISLANDMARK"
     },
     "hospital":{
         "iconAddr": "../../../images/hospital.png",
         "defaultRender":true,
         "query": "custom=hosptial",
+        "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hospitals_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "BEDS"
     },
     "urgent_care":{
         "iconAddr": "../../../images/urgent_care.png",
         "defaultRender":true,
         "query": "custom=urgent_care",
+        "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "EMERGEXT"
     },
     "streamflowData":{
-        "color":"#FFC0CB"
+        "color":"#FF00FF"
     }
 }
