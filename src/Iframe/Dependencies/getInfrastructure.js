@@ -95,7 +95,7 @@ let RenderInfrastructure = {
         //pan loading bit
         bounds = Util.expandBounds(bounds);
         usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
-        if (usefulQueries != null) {
+        if (usefulQueries) {
             usefulQueries.forEach(query => {
                 Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
                 customQueryBounds.push(query.bounds);
@@ -106,7 +106,7 @@ let RenderInfrastructure = {
     updateCustom: function (queries, bounds) {
         queries.forEach(query => {
             let url = Util.queryToQueryURL(query);
-            if (url != null) {
+            if (url) {
                 bounds.forEach(bound => {
                     Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url,bound), bound, false, RenderInfrastructure.renderGeoJson);
                 });
