@@ -39,4 +39,16 @@ body{
     outline: none;
     font-size: 15px;
 }
+#clearFeatures{
+    color: white;
+    background-color: red;
+    border: none;
+    border-radius: 3px;
+    padding: 4px;
+    margin-top: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    text-align: left;
+    outline: none;
+}
 .leaflet-fade-anim .leaflet-tile,.leaflet-zoom-anim .leaflet-zoom-animated { will-change:auto !important; }

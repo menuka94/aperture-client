@@ -228,6 +228,26 @@ let RenderInfrastructure = {
         this.blacklist.push(featureId);
         return true;
     },
+    removeAllFeaturesFromMap: function () {
+        this.markerLayer.eachLayer(function (layer) {
+            RenderInfrastructure.markerLayer.removeLayer(layer);
+        });
+        this.map.eachLayer(function (layer) {
+            if (layer.feature) {
+                RenderInfrastructure.map.removeLayer(layer);
+            }
+        });
+        this.blacklist = [];
+        this.queries = [];
+        this.currentBounds = [];
+        this.currentLayers = [];
+        for(x in RenderInfrastructure.data){
+            if(RenderInfrastructure.data[x]['query']){
+                this.blacklist.push(x);
+            }
+        }
+        return true;
+    },
     /**
      * Adds a feature id to the map and forces an update
      * @memberof RenderInfrastructure

@@ -156,7 +156,7 @@
     },
     "power_plant":{
         "iconAddr": "../../../images/power_plant.png",
-        "defaultRender":true,
+        "defaultRender":false,
         "query": "custom=power_plant",
         "queryURL":"https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_PowerPlants/MapServer/12/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "ENERGY_SRC_DESC1",
