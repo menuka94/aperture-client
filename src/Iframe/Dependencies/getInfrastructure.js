@@ -108,7 +108,7 @@ let RenderInfrastructure = {
             let url = Util.queryToQueryURL(query);
             if (url) {
                 bounds.forEach(bound => {
-                    Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url,bound), bound, false, RenderInfrastructure.renderGeoJson);
+                    Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url, bound), bound, false, RenderInfrastructure.renderGeoJson);
                 });
             }
         });
@@ -241,8 +241,8 @@ let RenderInfrastructure = {
         this.queries = [];
         this.currentBounds = [];
         this.currentLayers = [];
-        for(x in RenderInfrastructure.data){
-            if(RenderInfrastructure.data[x]['query']){
+        for (x in RenderInfrastructure.data) {
+            if (RenderInfrastructure.data[x]['query']) {
                 this.blacklist.push(x);
             }
         }
@@ -718,14 +718,8 @@ const Util = {
         return 'none';
     },
     createDetailsFromGeoJsonFeature: function (feature, name) {
-        name = this.capitalizeString(this.underScoreToSpace(name));
         let pTObj = this.getParamsAndTagsFromGeoJsonFeature(feature);
-        let params = pTObj.params;
-        let tagsObj = pTObj.tagsObj;
-        let details = "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
-        params.forEach(param => details += "<li>" + this.capitalizeString(this.underScoreToSpace(param)) + ": " + this.capitalizeString(this.underScoreToSpace(tagsObj[param])) + "</li>");
-        details += "</ul>";
-        return "<b>" + name + "</b>" + "<br>" + details;
+        return this.createPopup(name,pTObj);
     },
     getParamsAndTagsFromGeoJsonFeature: function (feature) {
         let params;
@@ -845,6 +839,35 @@ const Util = {
                 return RenderInfrastructure.data[x]["queryURL"];
             }
         }
+    },
+    createPopup: function (id, pTObj) {
+        let params = pTObj.params;
+        let tagsObj = pTObj.tagsObj;
+        let details = "<b>" + this.capitalizeString(this.underScoreToSpace(id)) + "</b><br>";
+        if (!RenderInfrastructure.data[id]['popup']) {
+            details += "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
+            params.forEach(param => details += "<li>" + this.capitalizeString(this.underScoreToSpace(param)) + ": " + this.capitalizeString(this.underScoreToSpace(tagsObj[param])) + "</li>");
+            details += "</ul>";
+        }
+        else {
+            let tokens = RenderInfrastructure.data[id]['popup'].split(" ");
+            tokens.forEach(token => {
+                if(token.substring(0,2) === "@@"){
+                    let to = token.substring(2).indexOf("@@"); //second @@
+                    let tokenMark = tagsObj[token.substring(2,to + 2)];
+                    if(tokenMark.length > 2){
+                        tokenMark = this.capitalizeString(tokenMark.toLowerCase());
+                    }
+                    details += tokenMark + token.substring(to + 4);
+                }
+                else{
+                    details += token;
+                }
+                details += " ";
+            });
+            details = details.substring(0,details.length - 1);
+        }
+        return details;
     }
 }
 

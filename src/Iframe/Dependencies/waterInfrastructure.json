@@ -1,11 +1,4 @@
 {
-    "dam": {
-        "iconAddr": "../../../images/dam.png",
-        "color": "#FF0000",
-        "defaultRender": true,
-        "query":"waterway=dam",
-        "groupMem":"Water (Man Made)"
-    },
     "water_works": {
         "iconAddr": "../../../images/water_works.png",
         "color": "black",
@@ -102,7 +95,8 @@
         "query":"custom=Natural_Gas_Pipeline",
         "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Natural_Gas_Liquid_Pipelines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "TYPEPIPE",
-        "groupMem":"Energy"
+        "groupMem":"Energy",
+        "popup": "A(n) @@TYPEPIPE@@ natural gas pipeline operated by @@Operator@@."
     },
     "substation":{
         "iconAddr": "../../../images/substation.png",
@@ -111,7 +105,8 @@
         "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Substations_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "TYPE",
         "identityKey": "SUBSTATION",
-        "groupMem":"Energy"
+        "groupMem":"Energy",
+        "popup": "@@NAME@@ substation. An @@STATUS@@ substation in @@COUNTY@@ county with a max voltage of @@MAX_VOLT@@. Sourced from @@SOURCE@@."
     },
     "power_transmission_line":{
         "color": "#000000",
@@ -120,7 +115,8 @@
         "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "TYPE",
         "identityKey": "AC",
-        "groupMem":"Energy"
+        "groupMem":"Energy",
+        "popup": "A(n) @@TYPE@@ power transmission line owned by @@OWNER@@, spanning from @@SUB_1@@ to @@SUB_2@@. Sourced from @@SOURCE@@."
     },
     "flood_zones":{
         "defaultRender":false,
@@ -132,27 +128,54 @@
     "floodway":{
         "color":"#D60BB1",
         "identityField": "ZONE_SUBTY",
-        "identityKey": "FLOODWAY"
+        "identityKey": "FLOODWAY",
+        "popup": "A channel of a river or other watercourse and the adjacent land areas that must be reserved in order to discharge the base flood without cumulatively increasing the water surface elevation more than a designated height."
     },
     "flood_zone_A":{
         "color":"#880000",
         "identityField": "FLD_ZONE",
-        "identityKey": "A"
+        "identityKey": "A",
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
     },
     "flood_zone_AE":{
-        "color":"#888000",
+        "color":"#880000",
         "identityField": "FLD_ZONE",
-        "identityKey": "AE"
+        "identityKey": "AE",
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
     },
     "flood_zone_AH":{
         "color":"#008080",
         "identityField": "FLD_ZONE",
-        "identityKey": "AH"
+        "identityKey": "AH",
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of ponding with average depths between one and three feet."
     },
     "flood_zone_AO":{
         "color":"#000080",
         "identityField": "FLD_ZONE",
-        "identityKey": "AO"
+        "identityKey": "AO",
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of sheet flow with average depths between one and three feet."
+    },
+    "flood_zone_V":{
+        "color":"#000080",
+        "identityField": "FLD_ZONE",
+        "identityKey": "V",
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
+    },
+    "flood_zone_VE":{
+        "color":"#000080",
+        "identityField": "FLD_ZONE",
+        "identityKey": "VE",
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
+    },
+    "dam": {
+        "iconAddr": "../../../images/dam.png",
+        "color": "#FF0000",
+        "defaultRender": true,
+        "query":"custom=dam",
+        "groupMem":"Water (Man Made)",
+        "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Dam_Lines/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
+        "identityField": "DAM_HEIGHT",
+        "popup": "@@NAME@@ dam, located along the @@RIVER@@, standing @@DAM_HEIGHT@@ feet high, located in @@COUNTY@@ county, @@STATE@@. This dam primarily affects @@CITYAFFECT@@, @@NIDSTATE@@."
     },
     "power_plant":{
         "iconAddr": "../../../images/power_plant.png",
@@ -162,21 +185,14 @@
         "identityField": "ENERGY_SRC_DESC1",
         "groupMem":"Energy"
     },
-    "landfill":{
-        "iconAddr": "../../../images/landfill.png",
-        "defaultRender":true,
-        "query": "custom=landfill",
-        "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Solid_Waste_Landfill_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
-        "identityField": "CLOSE_DATE",
-        "groupMem":"Resources"
-    },
     "fire_station":{
         "iconAddr": "../../../images/fire_station.png",
         "defaultRender":true,
         "query": "custom=fire_station",
         "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Fire_Station/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "ISLANDMARK",
-        "groupMem":"Emergency & Medical"
+        "groupMem":"Emergency & Medical",
+        "popup": "@@NAME@@, located in @@CITY@@, @@STATE@@."
     },
     "hospital":{
         "iconAddr": "../../../images/hospital.png",
@@ -184,7 +200,8 @@
         "query": "custom=hosptial",
         "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hospitals_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "BEDS",
-        "groupMem":"Emergency & Medical"
+        "groupMem":"Emergency & Medical",
+        "popup": "@@NAME@@, a @@OWNER@@ hospital with @@BEDS@@ beds, located in @@CITY@@, @@STATE@@."
     },
     "urgent_care":{
         "iconAddr": "../../../images/urgent_care.png",
@@ -192,7 +209,8 @@
         "query": "custom=urgent_care",
         "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "EMERGEXT",
-        "groupMem":"Emergency & Medical"
+        "groupMem":"Emergency & Medical",
+        "popup": "@@NAME@@, an urgent care facility located in @@CITY@@, @@STATE@@."
     },
     "streamflowData":{
         "color":"#FF00FF"
