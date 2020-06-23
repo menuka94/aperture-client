@@ -20,7 +20,6 @@ let Generator = {
             return;
         }
         let groupInfo = this.groupMods(elementsJson);
-        console.log(JSON.stringify(groupInfo));
         for (let i = 0; i < groupInfo.groups.length; i++) {
             selectContainer.innerHTML+="<button type='button' class='collapsible'>" + groupInfo.groups[i] + "</button>"
             let innerHTML = "";

@@ -129,42 +129,49 @@
         "color":"#D60BB1",
         "identityField": "ZONE_SUBTY",
         "identityKey": "FLOODWAY",
+        "noBorder":true,
         "popup": "A channel of a river or other watercourse and the adjacent land areas that must be reserved in order to discharge the base flood without cumulatively increasing the water surface elevation more than a designated height."
     },
     "flood_zone_A":{
         "color":"#880000",
         "identityField": "FLD_ZONE",
         "identityKey": "A",
+        "noBorder":true,
         "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
     },
     "flood_zone_AE":{
         "color":"#880000",
         "identityField": "FLD_ZONE",
         "identityKey": "AE",
+        "noBorder":true,
         "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
     },
     "flood_zone_AH":{
         "color":"#008080",
         "identityField": "FLD_ZONE",
         "identityKey": "AH",
+        "noBorder":true,
         "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of ponding with average depths between one and three feet."
     },
     "flood_zone_AO":{
         "color":"#000080",
         "identityField": "FLD_ZONE",
         "identityKey": "AO",
+        "noBorder":true,
         "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of sheet flow with average depths between one and three feet."
     },
     "flood_zone_V":{
         "color":"#000080",
         "identityField": "FLD_ZONE",
         "identityKey": "V",
+        "noBorder":true,
         "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
     },
     "flood_zone_VE":{
         "color":"#000080",
         "identityField": "FLD_ZONE",
         "identityKey": "VE",
+        "noBorder":true,
         "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
     },
     "dam": {

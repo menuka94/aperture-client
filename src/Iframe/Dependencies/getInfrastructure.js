@@ -88,7 +88,6 @@ let RenderInfrastructure = {
         let usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
         if (usefulQueries) {
             usefulQueries.forEach(query => {
-                console.log(query.query);
                 Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
                 customQueryBounds.push(query.bounds);
             });
@@ -125,11 +124,12 @@ let RenderInfrastructure = {
                 let type = Util.getFeatureType(feature);
                 let weight = 3;
                 let fillOpacity = 0.2;
-                if (type === FEATURETYPE.polygon) {
+                let name = Util.getNameFromGeoJsonFeature(feature);
+                if (RenderInfrastructure.data[name] && RenderInfrastructure.data[name]["noBorder"]) {
                     weight = 0;
                     fillOpacity = 0.75;
                 }
-                return { color: RenderInfrastructure.getAttribute(Util.getNameFromGeoJsonFeature(feature), ATTRIBUTE.color), weight: weight, fillOpacity: fillOpacity };
+                return { color: RenderInfrastructure.getAttribute(name, ATTRIBUTE.color), weight: weight, fillOpacity: fillOpacity };
             },
             filter: function (feature) {
                 let name = Util.getNameFromGeoJsonFeature(feature);
@@ -150,7 +150,7 @@ let RenderInfrastructure = {
                 }
                 let iconName = Util.getNameFromGeoJsonFeature(feature);
                 let iconDetails = Util.createDetailsFromGeoJsonFeature(feature, iconName);
-                RenderInfrastructure.addIconToMap(RenderInfrastructure.getAttribute(iconName, ATTRIBUTE.icon), latlng, iconDetails);
+                RenderInfrastructure.addIconToMap(iconName, latlng, iconDetails);
                 layer.bindPopup(iconDetails);
                 layer.on('click', function (e) {
                     RenderInfrastructure.map.flyToBounds(layer.getBounds(), FLYTOOPTIONS);
@@ -171,14 +171,17 @@ let RenderInfrastructure = {
         }
         return resultLayer;
     },
-    addIconToMap: function (icon, latLng, popUpContent) {
-        if (icon == null || icon === "noicon") {
+    addIconToMap: function (iconName, latLng, popUpContent) {
+        let icon = RenderInfrastructure.getAttribute(iconName, ATTRIBUTE.icon)
+        if (!icon || icon === "noicon") {
             return false;
         }
-        RenderInfrastructure.markerLayer.addLayer(L.marker(latLng, {
+        let marker = L.marker(latLng, {
             icon: icon,
             opacity: 1
-        }).on('click', function (e) {
+        });
+        marker.uniqueId = iconName;
+        RenderInfrastructure.markerLayer.addLayer(marker.on('click', function (e) {
             if (RenderInfrastructure.map.getZoom() < 16) {
                 RenderInfrastructure.map.flyTo(e.latlng, 16, FLYTOOPTIONS);
             }
@@ -210,28 +213,22 @@ let RenderInfrastructure = {
         }
         this.queries.splice(this.queries.indexOf(this.data[featureId]['query']), 1);
         if (RenderInfrastructure.getAttribute(featureId, ATTRIBUTE.icon) != "noicon") {
-            let iconUrlToSeachFor = RenderInfrastructure.getAttribute(featureId, ATTRIBUTE.icon).options.iconUrl;
             this.markerLayer.eachLayer(function (layer) {
-                if (layer.options.icon) {
-                    if (iconUrlToSeachFor === layer.options.icon.options.iconUrl) {
-                        RenderInfrastructure.markerLayer.removeLayer(layer);
-                    }
+                if (layer.uniqueId && layer.uniqueId === featureId) {
+                    RenderInfrastructure.markerLayer.removeLayer(layer);
                 }
             });
         }
         this.map.eachLayer(function (layer) {
-            if (layer.feature) {
-                if (Util.getNameFromGeoJsonFeature(layer.feature) == featureId) {
-                    RenderInfrastructure.map.removeLayer(layer);
-                    RenderInfrastructure.currentLayers.splice(RenderInfrastructure.currentLayers.indexOf(layer.feature.id), 1);
-                }
+            if (layer.feature && Util.getNameFromGeoJsonFeature(layer.feature) == featureId) {
+                RenderInfrastructure.map.removeLayer(layer);
+                RenderInfrastructure.currentLayers.splice(RenderInfrastructure.currentLayers.indexOf(layer.feature.id), 1);
             }
         });
         this.blacklist.push(featureId);
         return true;
     },
     removeAllFeaturesFromMap: function () {
-        console.log("?");
         this.markerLayer.eachLayer(function (layer) {
             RenderInfrastructure.markerLayer.removeLayer(layer);
         });
@@ -464,7 +461,6 @@ const Querier = {
         //RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(hit),true);
         let splitHits = [];
         for (let j = 0; j < hits.length; j++) {
-            console.log("hit\nhit");
             let stations = hits[j].stations;
             for (let i = 0; i < stations.length; i++) {
                 let feature = JSON.parse(JSON.stringify(hits[j].feature));
@@ -723,7 +719,7 @@ const Util = {
     },
     createDetailsFromGeoJsonFeature: function (feature, name) {
         let pTObj = this.getParamsAndTagsFromGeoJsonFeature(feature);
-        return this.createPopup(name,pTObj);
+        return this.createPopup(name, pTObj);
     },
     getParamsAndTagsFromGeoJsonFeature: function (feature) {
         let params;
@@ -856,20 +852,20 @@ const Util = {
         else {
             let tokens = RenderInfrastructure.data[id]['popup'].split(" ");
             tokens.forEach(token => {
-                if(token.substring(0,2) === "@@"){
+                if (token.substring(0, 2) === "@@") {
                     let to = token.substring(2).indexOf("@@"); //second @@
-                    let tokenMark = tagsObj[token.substring(2,to + 2)];
-                    if(tokenMark && tokenMark.length > 2){
+                    let tokenMark = tagsObj[token.substring(2, to + 2)];
+                    if (tokenMark && tokenMark.length > 2) {
                         tokenMark = this.capitalizeString(tokenMark.toLowerCase());
                     }
                     details += tokenMark + token.substring(to + 4);
                 }
-                else{
+                else {
                     details += token;
                 }
                 details += " ";
             });
-            details = details.substring(0,details.length - 1);
+            details = details.substring(0, details.length - 1);
         }
         return details;
     }
