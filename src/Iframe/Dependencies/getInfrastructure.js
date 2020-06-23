@@ -79,15 +79,16 @@ let RenderInfrastructure = {
      * @memberof RenderInfrastructure
      */
     update: function () {
-        if (this.map == null || this.queries.length == 0 || this.options.minRenderZoom < this.map.currentZoom) {
+        if (!this.map || this.queries.length == 0 || this.options.minRenderZoom < this.map.currentZoom) {
             Util.refreshInfoPopup();
             return;
         }
         let customQueryBounds = [];
         let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
         let usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
-        if (usefulQueries != null) {
+        if (usefulQueries) {
             usefulQueries.forEach(query => {
+                console.log(query.query);
                 Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
                 customQueryBounds.push(query.bounds);
             });
@@ -108,6 +109,7 @@ let RenderInfrastructure = {
             let url = Util.queryToQueryURL(query);
             if (url) {
                 bounds.forEach(bound => {
+                    //console.log(Querier.createCustomQueryURL(url, bound));
                     Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url, bound), bound, false, RenderInfrastructure.renderGeoJson);
                 });
             }
@@ -229,6 +231,7 @@ let RenderInfrastructure = {
         return true;
     },
     removeAllFeaturesFromMap: function () {
+        console.log("?");
         this.markerLayer.eachLayer(function (layer) {
             RenderInfrastructure.markerLayer.removeLayer(layer);
         });
@@ -271,6 +274,14 @@ let RenderInfrastructure = {
         return false;
     },
     cleanupMap: function () {
+        let iconsToRemove = [];
+        this.markerLayer.eachLayer(function (layer) {
+            let ltlng = layer._latlng;
+            if (!Util.pointIsWithinBounds(ltlng, Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds())))) {
+                iconsToRemove.push(layer);
+            }
+        });
+        this.markerLayer.removeLayers(iconsToRemove);
         this.map.eachLayer(function (layer) {
             if (layer.feature != null) {
                 let ltlng = RenderInfrastructure.map.getCenter;
@@ -285,14 +296,6 @@ let RenderInfrastructure = {
                 }
             }
         });
-        let iconsToRemove = [];
-        this.markerLayer.eachLayer(function (layer) {
-            let ltlng = layer._latlng;
-            if (!Util.pointIsWithinBounds(ltlng, Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds())))) {
-                iconsToRemove.push(layer);
-            }
-        });
-        this.markerLayer.removeLayers(iconsToRemove);
         this.currentBounds = [Util.Convert.leafletBoundsToNESWObject(this.map.getBounds())];
         return true;
     },
@@ -461,6 +464,7 @@ const Querier = {
         //RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(hit),true);
         let splitHits = [];
         for (let j = 0; j < hits.length; j++) {
+            console.log("hit\nhit");
             let stations = hits[j].stations;
             for (let i = 0; i < stations.length; i++) {
                 let feature = JSON.parse(JSON.stringify(hits[j].feature));
@@ -855,7 +859,7 @@ const Util = {
                 if(token.substring(0,2) === "@@"){
                     let to = token.substring(2).indexOf("@@"); //second @@
                     let tokenMark = tagsObj[token.substring(2,to + 2)];
-                    if(tokenMark.length > 2){
+                    if(tokenMark && tokenMark.length > 2){
                         tokenMark = this.capitalizeString(tokenMark.toLowerCase());
                     }
                     details += tokenMark + token.substring(to + 4);
