@@ -136,7 +136,7 @@ let RenderInfrastructure = {
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || RenderInfrastructure.data[name] == null) {
                     return false;
                 }
-                if (RenderInfrastructure.data[name]["preProcess"] && preProcessed !== true) {
+                if (RenderInfrastructure.data[name]["preProcess"] && !preProcessed) {
                     preProcess.push(feature);
                     return false;
                 }
@@ -464,6 +464,7 @@ const Querier = {
             let stations = hits[j].stations;
             for (let i = 0; i < stations.length; i++) {
                 let feature = JSON.parse(JSON.stringify(hits[j].feature));
+                //console.log(JSON.stringify(feature) + "--");
                 feature.properties.tags.streamflow = "streamflowData";
                 if (stations.length === 1) {
                     feature.station = stations[i];
