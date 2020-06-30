@@ -292,7 +292,7 @@ let RenderInfrastructure = {
                 }
             }
         });
-        this.currentBounds = [Util.Convert.leafletBoundsToNESWObject(this.map.getBounds())];
+        this.currentBounds = [Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(this.map.getBounds()))];
         return true;
     },
     getAttribute: function (tag, attribute) {
@@ -341,11 +341,11 @@ const Querier = {
                     break;
                 }
             }
-            if (RenderInfrastructure.currentLayers.length > 5000) {
+            if (RenderInfrastructure.currentLayers.length > RenderInfrastructure.options.maxElements) {
                 RenderInfrastructure.cleanupMap();
             }
-            else if (RenderInfrastructure.currentBounds.length > 10) {
-                RenderInfrastructure.currentBounds = [Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds())];
+            else if (RenderInfrastructure.currentBounds.length > RenderInfrastructure.options.maxLayers) {
+                RenderInfrastructure.currentBounds = [Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds()))];
             }
             if (isOsmData) {
                 RenderInfrastructure.currentBounds.push(bounds);
