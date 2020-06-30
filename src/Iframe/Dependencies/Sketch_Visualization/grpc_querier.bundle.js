@@ -2650,6 +2650,12 @@ grpc_querier = function() {
     return grpcQuerier;
 };
 
+try{
+    module.exports = {
+        grpc_querier: grpc_querier
+    }
+} catch(e) { }
+
 },{"./targeted_query_service_grpc_web_pb.js":7,"./targeted_query_service_pb.js":8}],7:[function(require,module,exports){
 /**
  * @fileoverview gRPC-Web generated client stub for 

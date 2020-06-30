@@ -22,7 +22,7 @@
     </div>
     <script>
         var buildingmap = new L.Map('map3');
-        buildingmap.setView(parent.view, 16, false);
+        buildingmap.setView(parent.view, 10, false);
 
         new L.TileLayer('https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w', {
           attribution: '© Map tiles <a href="https://mapbox.com">Mapbox</a>',
@@ -42,6 +42,9 @@
         buildingmap.on("zoomend", function () {
             parent.setGlobalPositionFORCE(buildingmap.getCenter(),MAPNUMBER);
         });
+        buildingmap.on("moveend", function () {
+            censusViz.updateViz(buildingmap);
+        });
         //----------------------------------------------------------------
     </script>
 
@@ -51,6 +54,7 @@
         if(view.lng < 0)
             view.lng += 360;
         buildingmap.setView(view, buildingmap.getZoom());
+        censusViz.updateViz(buildingmap);
     }
         parent.setterFunctions.push({
             setterFunc: thisMapsSetter,
