@@ -108,7 +108,6 @@ let RenderInfrastructure = {
             let url = Util.queryToQueryURL(query);
             if (url) {
                 bounds.forEach(bound => {
-                    //console.log(Querier.createCustomQueryURL(url, bound));
                     Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url, bound), bound, false, RenderInfrastructure.renderGeoJson);
                 });
             }
@@ -262,11 +261,9 @@ let RenderInfrastructure = {
                 this.currentQueries.forEach(e => {
                     e.bounds = { north: 0, south: 0, east: 0, west: 0 }
                 });
-                console.log(this.currentQueries);
                 this.blacklist.splice(this.blacklist.indexOf(featureId), 1);
                 this.queries.push(this.data[featureId]['query']);
                 this.update();
-                console.log(this.currentQueries);
                 return true;
             }
         }
@@ -466,7 +463,6 @@ const Querier = {
             let stations = hits[j].stations;
             for (let i = 0; i < stations.length; i++) {
                 let feature = JSON.parse(JSON.stringify(hits[j].feature));
-                //console.log(JSON.stringify(feature) + "--");
                 feature.properties.tags.streamflow = "streamflowData";
                 if (stations.length === 1) {
                     feature.station = stations[i];
@@ -487,7 +483,6 @@ const Querier = {
                 if (feature.geometry.type == 'Polygon') {
                     feature.geometry.coordinates.push(feature.geometry.coordinates[0]);
                 }
-                //console.log(feature.geometry.coordinates);
                 hits[j].feature.geometry.coordinates = newCoords;
                 feature.station = stations[i];
                 feature.properties.tags.strflowGeohash = stations[i].geohash;
@@ -837,7 +832,6 @@ const Util = {
             return;
         }
         for (x in RenderInfrastructure.data) {
-            //console.log(RenderInfrastructure.data[x]["query"]);
             if (RenderInfrastructure.data[x]["query"] && RenderInfrastructure.data[x]["query"] === query && RenderInfrastructure.data[x]["queryURL"]) {
                 return RenderInfrastructure.data[x]["queryURL"];
             }
