@@ -262,9 +262,11 @@ let RenderInfrastructure = {
                 this.currentQueries.forEach(e => {
                     e.bounds = { north: 0, south: 0, east: 0, west: 0 }
                 });
+                console.log(this.currentQueries);
                 this.blacklist.splice(this.blacklist.indexOf(featureId), 1);
                 this.queries.push(this.data[featureId]['query']);
                 this.update();
+                console.log(this.currentQueries);
                 return true;
             }
         }
