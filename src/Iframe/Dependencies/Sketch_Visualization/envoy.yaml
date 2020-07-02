@@ -41,10 +41,10 @@ static_resources:
     type: logical_dns
     http2_protocol_options: {}
     lb_policy: round_robin
-    hosts: [{ socket_address: { address: "lattice-186.cs.colostate.edu", port_value: 9091 }}]
+    hosts: [{ socket_address: { address: "lattice-1.cs.colostate.edu", port_value: 9091 }}]
   - name: TargetedQueryServiceCensus
     connect_timeout: 0.25s
     type: logical_dns
     http2_protocol_options: {}
     lb_policy: round_robin
-    hosts: [{ socket_address: { address: "lattice-200.cs.colostate.edu", port_value: 50051 }}]
+    hosts: [{ socket_address: { address: "lattice-0.cs.colostate.edu", port_value: 50051 }}]

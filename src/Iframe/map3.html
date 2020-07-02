@@ -10,6 +10,10 @@
     <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
     <script type="text/javascript" src="Dependencies/Census_Visualization/grpc_querier.bundle.js"></script>
     <script type="text/javascript" src="Dependencies/Census_Visualization/census_visualizer.js"></script>
+    <script src="Dependencies/leaflet-sidebar.js"></script>
+    <script src="Dependencies/getInfrastructure.js"></script>
+    <script src="Dependencies/selectGenerator.js"></script>
+    <link rel="stylesheet" type="text/css" href="Dependencies/leaflet-sidebar.css">
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
 </head>
 <body>
@@ -18,11 +22,42 @@
     <script src="Dependencies/mouseDown.js"></script>
     <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
     <!------------------------------------------>
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li>
+                    <a href="#home" role="tab">
+                        <img style="width:35px;height:35px;" src="../../images/hamburger-button.svg">
+                    </a>
+                </li>
+            </ul>
+
+        </div>
+
+        <!-- Tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="home">
+                <h1 class="sidebar-header">
+                    Census Data
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+                <div class="selectContainer" id="checkboxLocation">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="map" class="sidebar-map"></div>
+
     <div id='map3' class='map'>
     </div>
     <script>
         var buildingmap = new L.Map('map3');
         buildingmap.setView(parent.view, 10, false);
+
+        var sidebar = L.control.sidebar('sidebar', {
+            position: 'right'
+        }).addTo(buildingmap);
 
         new L.TileLayer('https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w', {
           attribution: '© Map tiles <a href="https://mapbox.com">Mapbox</a>',
@@ -34,6 +69,20 @@
 
         const censusViz = census_visualizer();
         censusViz.updateViz(buildingmap);
+
+        function changeChecked(element) {
+            if (element.checked) {
+                censusViz.setFeature(element.id);
+                censusViz.updateViz(buildingmap);
+            }
+            else {
+                censusViz.setFeature(element.id);
+            }
+        }
+
+        Generator.config({"Total Population": 0, "Avg. Household Income": 1,
+          "Population by Age": 2, "Median Age": 3, "Poverty?": 4, "Race?": 5},
+           document.getElementById("checkboxLocation"), true, changeChecked);
 
         //updates controller----------------------------------------------
         buildingmap.on("move", function () {

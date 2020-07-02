@@ -15,10 +15,42 @@ service Census {
   rpc GetPoverty (PovertyRequest) returns (PovertyResponse) {}
   rpc GetRace (RaceRequest) returns (RaceResponse) {}
 
+  rpc SpatialQuery(SpatialRequest) returns (SpatialResponse) {}
+
   // targeted queries - return geographical areas that satisfy a given value range of a census feature
   // Example 1: Retrieve all states where (population >= 1,000,000)
   // Example 2: Retrieve all counties where (median household income < $50,000/year)
   rpc ExecuteTargetedQuery(TargetedQueryRequest) returns (TargetedQueryResponse) {}
+}
+
+message SpatialRequest {
+  CensusResolution censusResolution = 1;
+  CensusFeature censusFeature = 2;
+  string requestGeoJson = 3;   // bounding polygon
+  SpatialOp spatialOp = 4;
+}
+
+message SpatialResponse {
+  repeated SingleSpatialResponse singleSpatialResponse = 1;
+}
+
+message SingleSpatialResponse {
+  string data = 1;
+  string responseGeoJson = 2;   // geoJson associated with 'data'
+}
+
+enum SpatialOp {
+  GeoWithin = 0;
+  GeoIntersects = 1;
+}
+
+enum CensusFeature {
+  TotalPopulation = 0;
+  MedianHouseholdIncome = 1;
+  PopulationByAge = 2;
+  MedianAge = 3;
+  Poverty = 4;
+  Race = 5;
 }
 
 message RaceRequest {

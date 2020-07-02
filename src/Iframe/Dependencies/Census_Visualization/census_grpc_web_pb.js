@@ -553,6 +553,86 @@ proto.census.CensusPromiseClient.prototype.getRace =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.census.SpatialRequest,
+ *   !proto.census.SpatialResponse>}
+ */
+const methodDescriptor_Census_SpatialQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/SpatialQuery',
+  grpc.web.MethodType.UNARY,
+  proto.census.SpatialRequest,
+  proto.census.SpatialResponse,
+  /**
+   * @param {!proto.census.SpatialRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.census.SpatialResponse.deserializeBinary
+);
+
+
+/**
+ * @const
+ * @type {!grpc.web.AbstractClientBase.MethodInfo<
+ *   !proto.census.SpatialRequest,
+ *   !proto.census.SpatialResponse>}
+ */
+const methodInfo_Census_SpatialQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.SpatialResponse,
+  /**
+   * @param {!proto.census.SpatialRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.census.SpatialResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.census.SpatialRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.Error, ?proto.census.SpatialResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.census.SpatialResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.census.CensusClient.prototype.spatialQuery =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/census.Census/SpatialQuery',
+      request,
+      metadata || {},
+      methodDescriptor_Census_SpatialQuery,
+      callback);
+};
+
+
+/**
+ * @param {!proto.census.SpatialRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.census.SpatialResponse>}
+ *     A native promise that resolves to the response
+ */
+proto.census.CensusPromiseClient.prototype.spatialQuery =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/census.Census/SpatialQuery',
+      request,
+      metadata || {},
+      methodDescriptor_Census_SpatialQuery);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.census.TargetedQueryRequest,
  *   !proto.census.TargetedQueryResponse>}
  */
