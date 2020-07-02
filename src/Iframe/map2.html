@@ -98,7 +98,7 @@
                 queryAlertText: document.getElementById('queryInfoText'),
                 overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter'
             });
-            Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox");
+            Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
             runQuery();
         });
 
