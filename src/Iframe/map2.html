@@ -13,6 +13,7 @@
     <link rel="stylesheet" type="text/css" href="Dependencies/leaflet-sidebar.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://unpkg.com/osmtogeojson@2.2.12/osmtogeojson.js"></script>
+    <script src="Dependencies/simplify.js"></script>
     <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.css">
     <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.Default.css">
     <script src="Dependencies/leaflet.markercluster.js"></script>
@@ -52,10 +53,10 @@
         <!-- Tab panes -->
         <div class="sidebar-content">
             <div class="sidebar-pane" id="home">
-                <h1 class="sidebar-header">
-                    Water Infrastructure
+                <h6 class="sidebar-header">
+                    Infrastructure & Natural Features
                     <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
-                </h1>
+                </h6>
                 <div class="selectContainer" id="checkboxLocation">
                 </div>
             </div>
@@ -81,6 +82,7 @@
             maxZoom: 18
         }).addTo(osmMap2);
 
+
         var sidebar = L.control.sidebar('sidebar', {
             position: 'right'
         }).addTo(map);
@@ -93,15 +95,20 @@
         });
         osmMap2.addLayer(markers);
 
-        $.getJSON("Dependencies/waterInfrastructure.json", function (data) {
-            RenderInfrastructure.config(osmMap2, markers, data, {
-                queryAlertText: document.getElementById('queryInfoText'),
-                overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter'
+        $.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
+            RenderInfrastructure.preProcessData = mdata;
+            $.getJSON("Dependencies/waterInfrastructure.json", function (data) {
+                RenderInfrastructure.config(osmMap2, markers, data, {
+                    queryAlertText: document.getElementById('queryInfoText'),
+                    overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
+                    maxElements: 10000,
+                    maxLayers:20,
+                    simplifyThreshold: 0.00005
+                });
+                Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
+                runQuery();
             });
-            Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
-            runQuery();
         });
-
 
         //selectedObjects.forEach(object => osmMap2.addLayer(object));
 

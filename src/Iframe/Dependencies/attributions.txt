@@ -3,3 +3,7 @@ reservoir/lake/basin: <div>Icon made from <a href="http://www.onlinewebfonts.com
 water tower: http://icons8.com
 wastewater plant: <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 dam:  http://www.iconsmind.com
+lanfill: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+hospital: Font Awesome by Dave Gandy - https://fortawesome.github.com/Font-Awesome / CC BY-SA (https://creativecommons.org/licenses/by-sa/3.0)
+urgent care: By Bridget Gahagan, noun project
+fire station: icons8.com
