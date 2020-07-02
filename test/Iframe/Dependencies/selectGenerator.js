@@ -14,7 +14,7 @@ describe('SelectGenerator', function () {
             selectGenerator.Generator.config(jsonData, null, true, notAFunction);
             assert.deepEqual(elem.innerHTML, '');
             selectGenerator.Generator.config(jsonData, elem, true, notAFunction);
-            assert.deepEqual(elem.childElementCount, 11);
+            assert.deepEqual(elem.childElementCount, 30);
             document.body.appendChild(elem);
             var coll = document.getElementsByClassName("collapsible");
             for (let i = 0; i < coll.length; i++) {
