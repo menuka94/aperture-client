@@ -15,14 +15,14 @@ let Generator = {
      * @param {Function} callFunc should elements with color attributes have colors near
      * their checkboxes?
      */
-    config: function(elementsJson,selectContainer,colorCode,callFunc){
+    config: function(elementsJson,selectContainer,colorCode,callFunc, type){
         if(selectContainer == null || elementsJson == null){
             return;
         }
         for(element in elementsJson){
             let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
             let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
-            selectContainer.innerHTML+='<div style="margin-top:3px;margin-bottom:3px"><input type="checkbox" id="' + element + '" onchange="' + callFunc.name + '(this)" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>'
+            selectContainer.innerHTML+='<div style="margin-top:3px;margin-bottom:3px"><input type="' + type + '" name="selector" id="' + element + '" onchange="' + callFunc.name + '(this)" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>'
         }
     }
 }

@@ -11,8 +11,8 @@ Census_Visualizer = {
           "Population by Age": 2, "Median Age": 3, "Poverty?": 4, "Race?": 5};
         this.propertyMap = {0: "2010_total_population", 1: "2010_median_household_income",
           2: "2010_population_by_age", 3: "2010_median_age", 4: "2010_poverty", 5: "2010_race"};
-        this.featureName = "Avg. Household Income"
-        this.feature = this.featureMap[this.featureName];
+        this.featureName = ""
+        this.feature = -1;
     },
 
     setFeature: function(f){
@@ -100,6 +100,8 @@ Census_Visualizer = {
                                 }
                               }.bind(this, map.getBounds());
 
+        if(this.featureName === "")
+          return;
         const query = this._grpcQuerier.getCensusData(2, map.getBounds()._southWest, map.getBounds()._northEast, callback, this.feature);
     },
 };

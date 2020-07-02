@@ -98,7 +98,7 @@
                 queryAlertText: document.getElementById('queryInfoText'),
                 overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter'
             });
-            Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked);
+            Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox");
             runQuery();
         });
 
@@ -135,13 +135,13 @@
         function runQuery() {
             updateOverPassLayer();
         }
-        
+
         osmMap2.on("move", function (e) {
             parent.setGlobalPosition(osmMap2.getCenter(), MAPNUMBER);
         });
         osmMap2.on("zoomend", function () {
             parent.setGlobalPositionFORCE(osmMap2.getCenter(), MAPNUMBER);
-        });  
+        });
     </script>
 
 
