@@ -11,10 +11,13 @@ function notAFunction() { }
 describe('SelectGenerator', function () {
     describe('config()', function () {
         it('should configurate the select box', function () {
-            selectGenerator.Generator.config(jsonData, null, true, notAFunction);
+            selectGenerator.Generator.config(jsonData, null, true, notAFunction,"checkbox");
             assert.deepEqual(elem.innerHTML, '');
-            selectGenerator.Generator.config(jsonData, elem, true, notAFunction);
+            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",true);
             assert.deepEqual(elem.childElementCount, 11);
+            elem.innerHTML = '';
+            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",false);
+            assert.deepEqual(elem.childElementCount, 30);
             document.body.appendChild(elem);
             var coll = document.getElementsByClassName("collapsible");
             for (let i = 0; i < coll.length; i++) {
