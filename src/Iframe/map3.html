@@ -10,8 +10,14 @@
     <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
     <script type="text/javascript" src="Dependencies/Census_Visualization/grpc_querier.bundle.js"></script>
     <script type="text/javascript" src="Dependencies/Census_Visualization/census_visualizer.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="Dependencies/leaflet-sidebar.js"></script>
     <script src="Dependencies/getInfrastructure.js"></script>
+    <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.css">
+    <link rel="stylesheet" type="text/css" href="Dependencies/MarkerCluster.Default.css">
+    <script src="https://unpkg.com/osmtogeojson@2.2.12/osmtogeojson.js"></script>
+    <script src="Dependencies/simplify.js"></script>
+    <script src="Dependencies/leaflet.markercluster.js"></script>
     <script src="Dependencies/selectGenerator.js"></script>
     <link rel="stylesheet" type="text/css" href="Dependencies/leaflet-sidebar.css">
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
@@ -39,7 +45,7 @@
         <div class="sidebar-content">
             <div class="sidebar-pane" id="home">
                 <h1 class="sidebar-header">
-                    Census Data
+                    Demographic & Risk Data
                     <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
                 </h1>
                 <div class="selectContainer" id="checkboxLocation">
@@ -70,19 +76,53 @@
         const censusViz = census_visualizer();
         censusViz.updateViz(buildingmap);
 
+        var markers = L.markerClusterGroup({
+            showCoverageOnHover: false,
+            spiderfyOnMaxZoom: false,
+            disableClusteringAtZoom: 17,
+            maxClusterRadius: 55
+        });
+        buildingmap.addLayer(markers);
+
+        $.getJSON("Dependencies/demographicsAndRisk.json", function (data) {
+          RenderInfrastructure.config(buildingmap, markers, data, {
+              queryAlertText: document.getElementById('queryInfoText'),
+              overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
+              maxElements: 10000,
+              maxLayers:20,
+              simplifyThreshold: 0.00005
+          });
+          Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
+          runQuery();
+        });
+
+        const g = {groupMem: "Census", query: 1};
+        const census = {"Total Population": g, "Avg. Household Income": g,
+          "Population by Age": g, "Median Age": g, "No. Below Poverty Line": g, "Demographics": g}
+
         function changeChecked(element) {
             if (element.checked) {
-                censusViz.setFeature(element.id);
-                censusViz.updateViz(buildingmap);
+                if(element.id in census){
+                  censusViz.setFeature(element.id);
+                  censusViz.updateViz(buildingmap);
+                } else {
+                  RenderInfrastructure.addFeatureToMap(element.id);
+                }
             }
             else {
-                censusViz.setFeature(element.id);
+                if(element.id in census)
+                  censusViz.setFeature(element.id);
+                else
+                  RenderInfrastructure.removeFeatureFromMap(element.id);
             }
         }
 
-        Generator.config({"Total Population": 0, "Avg. Household Income": 1,
-          "Population by Age": 2, "Median Age": 3, "No. Below Poverty Line": 4, "Demographics": 5},
-           document.getElementById("checkboxLocation"), true, changeChecked, "radio", false);
+        function runQuery() {
+            RenderInfrastructure.update();
+        }
+
+
+        Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, "radio", true);
 
         //updates controller----------------------------------------------
         buildingmap.on("move", function () {

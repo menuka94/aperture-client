@@ -1,0 +1,85 @@
+{
+    "flood_zones":{
+        "defaultRender":false,
+        "query": "custom=flood_zone",
+        "queryURL":"https://hazards.fema.gov/gis/nfhl/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/27/query?where=FLD_ZONE = 'AE' OR FLD_ZONE = 'A' OR FLD_ZONE = 'AH' OR FLD_ZONE = 'A0'&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
+        "refrences":["flood_zone_A","flood_zone_AE","flood_zone_AH","flood_zone_AO","floodway"],
+        "groupMem":"Flood Data"
+    },
+    "floodway":{
+        "color":"#D60BB1",
+        "identityField": "ZONE_SUBTY",
+        "identityKey": "FLOODWAY",
+        "noBorder":true,
+        "popup": "A channel of a river or other watercourse and the adjacent land areas that must be reserved in order to discharge the base flood without cumulatively increasing the water surface elevation more than a designated height."
+    },
+    "flood_zone_A":{
+        "color":"#880000",
+        "identityField": "FLD_ZONE",
+        "identityKey": "A",
+        "noBorder":true,
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
+    },
+    "flood_zone_AE":{
+        "color":"#880000",
+        "identityField": "FLD_ZONE",
+        "identityKey": "AE",
+        "noBorder":true,
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
+    },
+    "flood_zone_AH":{
+        "color":"#008080",
+        "identityField": "FLD_ZONE",
+        "identityKey": "AH",
+        "noBorder":true,
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of ponding with average depths between one and three feet."
+    },
+    "flood_zone_AO":{
+        "color":"#000080",
+        "identityField": "FLD_ZONE",
+        "identityKey": "AO",
+        "noBorder":true,
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of sheet flow with average depths between one and three feet."
+    },
+    "flood_zone_V":{
+        "color":"#000080",
+        "identityField": "FLD_ZONE",
+        "identityKey": "V",
+        "noBorder":true,
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
+    },
+    "flood_zone_VE":{
+        "color":"#000080",
+        "identityField": "FLD_ZONE",
+        "identityKey": "VE",
+        "noBorder":true,
+        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
+    },
+    "fire_station":{
+        "iconAddr": "../../../images/fire_station.png",
+        "defaultRender":false,
+        "query": "custom=fire_station",
+        "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Fire_Station/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
+        "identityField": "ISLANDMARK",
+        "groupMem":"Emergency & Medical",
+        "popup": "@@NAME@@, located in @@CITY@@, @@STATE@@."
+    },
+    "hospital":{
+        "iconAddr": "../../../images/hospital.png",
+        "defaultRender":false,
+        "query": "custom=hosptial",
+        "queryURL":"https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hospitals_1/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
+        "identityField": "BEDS",
+        "groupMem":"Emergency & Medical",
+        "popup": "@@NAME@@, a @@OWNER@@ hospital with @@BEDS@@ beds, located in @@CITY@@, @@STATE@@."
+    },
+    "urgent_care":{
+        "iconAddr": "../../../images/urgent_care.png",
+        "defaultRender":false,
+        "query": "custom=urgent_care",
+        "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
+        "identityField": "EMERGEXT",
+        "groupMem":"Emergency & Medical",
+        "popup": "@@NAME@@, an urgent care facility located in @@CITY@@, @@STATE@@."
+    }
+}
