@@ -105,7 +105,7 @@
                     maxLayers:20,
                     simplifyThreshold: 0.00005
                 });
-                Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked);
+                Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
                 runQuery();
             });
         });
@@ -148,7 +148,7 @@
         });
         osmMap2.on("zoomend", function () {
             parent.setGlobalPositionFORCE(osmMap2.getCenter(), MAPNUMBER);
-        });  
+        });
     </script>
 
 
