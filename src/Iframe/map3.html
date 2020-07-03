@@ -59,7 +59,8 @@
     </div>
     <script>
         var buildingmap = new L.Map('map3');
-        buildingmap.setView(parent.view, 10, false);
+        buildingmap.setView(buildingmap.wrapLatLng(parent.view), 10, false);
+        console.log(buildingmap.getCenter())
 
         var sidebar = L.control.sidebar('sidebar', {
             position: 'right'
@@ -140,9 +141,7 @@
     <!--You must add this map's setter function-->
     <script>
     var thisMapsSetter = function(view,zoom){
-        if(view.lng < 0)
-            view.lng += 360;
-        buildingmap.setView(view, buildingmap.getZoom());
+        buildingmap.setView(buildingmap.wrapLatLng(view), buildingmap.getZoom());
         censusViz.updateViz(buildingmap);
     }
         parent.setterFunctions.push({
