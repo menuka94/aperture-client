@@ -28,8 +28,7 @@ Sketch_Visualizer = {
     },
 
     _drawStrand: function(strand, ctx, map, epsilon) {
-        const lat_lng = decode_geohash(strand.getGeohash());
-        lat_lng.lon += 360;
+        const lat_lng = map.wrapLatLng(decode_geohash(strand.getGeohash()));
 
         const center = map.latLngToContainerPoint(lat_lng);
         ctx.fillStyle = this._rgbaToString(this._getColorForPercentage((strand.getMeanList()[0] - 250) / (330 - 250), 0.5));

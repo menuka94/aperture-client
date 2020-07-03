@@ -74,13 +74,14 @@ Census_Visualizer = {
     },
 
     updateViz: function(map) {
-        for(var i = 0; i < this.markers.length; i++){
-          map.removeLayer(this.markers[i]);
-        }
-        this.markers = [];
         const callback = function(bounds, err, response) {
                               if (err) {
                                 } else {
+                                  for(var i = 0; i < this.markers.length; i++){
+                                    map.removeLayer(this.markers[i]);
+                                  }
+                                  this.markers = [];
+                                  
                                   const responseList = response.getSinglespatialresponseList();
                                   const vals = this._getMinAndMax(responseList);
                                   const min = vals[1];
