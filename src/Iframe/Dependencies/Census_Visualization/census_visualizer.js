@@ -102,7 +102,8 @@ Census_Visualizer = {
 
         if(this.featureName === "")
           return;
-        const query = this._grpcQuerier.getCensusData(2, map.getBounds()._southWest, map.getBounds()._northEast, callback, this.feature);
+        const b = map.wrapLatLngBounds(map.getBounds());
+        const query = this._grpcQuerier.getCensusData(2, b._southWest, b._northEast, callback, this.feature);
     },
 };
 
