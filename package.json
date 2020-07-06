@@ -30,6 +30,7 @@
     "grpc": "^1.24.2",
     "grpc-web": "^1.0.7",
     "jquery": "^3.5.1",
+    "jsdoc": "^3.6.4",
     "jsdom-global": "^3.0.2",
     "leaflet-timedimension": "^1.1.1",
     "leaflet.markercluster": "^1.4.1",
