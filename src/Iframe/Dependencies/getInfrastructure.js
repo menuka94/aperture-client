@@ -103,6 +103,12 @@ let RenderInfrastructure = {
         }
         this.updateCustom(this.queries, customQueryBounds);
     },
+    /**
+     * Call this when the map should be updated with custom elements
+     * @memberof RenderInfrastructure
+     * @param {Array} queries list of queries id's, can be generated with Util.jsonToQueryList()
+     * @param {Array} bounds list of bounding boxes, they can be generated with Util.convert.leafletBoundsToNESWObject()
+     */
     updateCustom: function (queries, bounds) {
         queries.forEach(query => {
             let url = Util.queryToQueryURL(query);
@@ -113,6 +119,13 @@ let RenderInfrastructure = {
             }
         });
     },
+    /**
+     * Rendes geojson
+     * @memberof RenderInfrastructure
+     * @param {JSON} geoJsonData GeoJSON 
+     * @param {bool} preProcess does this need to be preprocessed before rendering? false if not related to streamflow stuff
+     * @returns {leaflet layer} layer that was added
+     */
     renderGeoJson: function (geoJsonData, preProcessed) {
         if (RenderInfrastructure.options.simplifyThreshold !== -1) {
             Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);

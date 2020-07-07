@@ -14,6 +14,8 @@ let Generator = {
      * @param {boolean} colorCode should elements with color attributes have colors near
      * @param {Function} callFunc should elements with color attributes have colors near
      * their checkboxes?
+     * @param {string} type checkbox style. ex: "checkbox" or "radio"
+     * @param {boolean} groupModules should modules have groups? this requires special JSON groups
      */
     config: function (elementsJson, selectContainer, colorCode, callFunc, type, groupModules) {
         if (selectContainer == null || elementsJson == null) {
@@ -45,6 +47,7 @@ let Generator = {
             selectContainer.innerHTML += this.makeList(Object.keys(elementsJson), elementsJson, type, colorCode, callFunc);
         }
     },
+    /** Helper for config */
     makeList: function (elements, elementsJson, type, colorCode, callFunc) {
         let retHTML = '';
         elements.forEach(element => {
@@ -54,12 +57,14 @@ let Generator = {
         });
         return retHTML;
     },
+    /** Unchecks every checklist element */
     clearChecks: function () {
         var features = document.getElementsByClassName("featureCheck");
         for (let i = 0; i < features.length; i++) {
             features[i].checked = false;
         }
     },
+    /** Helper for config */
     groupMods: function (json) {
         let groups = [];
         let groupElements = [];
