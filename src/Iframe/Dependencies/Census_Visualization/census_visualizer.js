@@ -1,4 +1,15 @@
+/**
+ * @file Responsible for querying census data and drawing it as polygons on a leaflet map
+ * @author Kevin Bruhwiler
+ */
+
 Census_Visualizer = {
+    
+    /**
+      * Initializes the Census_Visualizer object
+      *
+      * @function initialize
+      */
     initialize: function() {
         this._grpcQuerier = grpc_querier();
         this._percentageToColor = {
@@ -8,26 +19,66 @@ Census_Visualizer = {
         },
         this.markers = [];
         this.featureMap = {"Total Population": 0, "Avg. Household Income": 1,
-          "Population by Age": 2, "Median Age": 3, "Poverty?": 4, "Race?": 5};
+          "Population by Age": 2, "Median Age": 3, "No. Below Poverty Line": 4, "Demographics": 5};
         this.propertyMap = {0: "2010_total_population", 1: "2010_median_household_income",
           2: "2010_population_by_age", 3: "2010_median_age", 4: "2010_poverty", 5: "2010_race"};
         this.featureName = ""
         this.feature = -1;
     },
 
+    /**
+      * Sets the current census feature being displayed
+      *
+      * @function setFeature
+      * @param {string} f 
+      *        The name of the feature being displayed
+      */
     setFeature: function(f){
         this.feature = this.featureMap[f];
         this.featureName = f;
     },
 
+    /**
+      * Converts an array representing RGBA values into a string
+      *
+      * @function _rgbaToString
+      * @param {Array.<Number>} rgba 
+      *        A length four array in RGBA order
+      * @return {string} 
+      *         An rgba string in CSS format
+      */
     _rgbaToString: function(rgba){
         return "rgba("+rgba[0]+", "+rgba[1]+", "+rgba[2]+", "+rgba[3]+")";
     },
 
+    /**
+      * Gets an R, G, or B color value based on the current _percentageToColor object
+      *
+      * @function _getColorValue
+      * @param {Array.<Number>} bounds 
+      *        The lower and upper bounds for the color
+      * @param {Array.<Number>} pcts 
+      *        The lower and upper percentages for the color
+      * @param {Number} idx 
+      *        The index of the color being computed
+      * @return {Number} 
+      *         The value of the color
+      */
     _getColorValue: function(bounds, pcts, idx){
         return this._percentageToColor[bounds[0]][idx]*pcts[0] + this._percentageToColor[bounds[1]][idx]*pcts[1];
     },
 
+    /**
+      * Gets an RGBA CSS string for the given percentage and alpha value
+      *
+      * @function _getColorForPercentage
+      * @param {Number} pct 
+      *        The percentage value being converted into a color
+      * @param {Number} alpha 
+      *        The alpha value for the RGBA string
+      * @return {string} 
+      *         An rgba string in CSS format
+      */
     _getColorForPercentage: function(pct, alpha) {
         if(pct === 0) {
             pct += 0.00001;
@@ -45,6 +96,15 @@ Census_Visualizer = {
         return this._rgbaToString([r, g, b, alpha]);
     },
 
+    /**
+      * Converts a geojson polygon from lng/lat format to lat/lng format
+      *
+      * @function _reverseLatLngPolgon
+      * @param {Array.<Array.<Number>>} poly 
+      *        The polygon being converted
+      * @return {Array.<Array.<Number>>} 
+      *         The reformatted polygon
+      */
     _reverseLatLngPolgon: function(poly){
       const out = [];
       for (p in poly[0][0]){
@@ -53,6 +113,15 @@ Census_Visualizer = {
       return out;
     },
 
+    /**
+      * Gets the minimum and maximum values from the returned gRPC query
+      *
+      * @function _getMinAndMax
+      * @param {Array.<Object>} responseList 
+      *        The response returned by the gRPC query
+      * @return {Array.<Number>} 
+      *         An array of length two containing the minimum and maximum values in the response
+      */
     _getMinAndMax: function(responseList){
       let min = Number.MAX_VALUE;
       let max = 0;
@@ -69,10 +138,30 @@ Census_Visualizer = {
       return [min, max];
     },
 
+    /**
+      * Normalizes a value between the given minimum and maximum values
+      *
+      * @function _normalize
+      * @param {Number} val 
+      *        The value being normalized
+      * @param {Number} max 
+      *        The maximum value
+      * @param {Number} min 
+      *        The minimum value
+      * @return {Number} 
+      *         A value between 0 and 1
+      */
     _normalize: function(val, max, min){
       return (val - min) / (max - min);
     },
 
+    /**
+      * Updates the Census visualization with the current feature
+      *
+      * @function updateViz
+      * @param {Object} map 
+      *        The leaflet map being updated
+      */
     updateViz: function(map) {
         const callback = function(bounds, err, response) {
                               if (err) {
@@ -108,6 +197,13 @@ Census_Visualizer = {
     },
 };
 
+/**
+  * Returns a census_visualizer object
+  *
+  * @function census_visualizer
+  * @return {Object} 
+  *         A census_visualizer object
+  */
 census_visualizer = function() {
     const censusVisualizer = Census_Visualizer;
     censusVisualizer.initialize();
