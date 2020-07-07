@@ -50,7 +50,7 @@ let Generator = {
         elements.forEach(element => {
             let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
             let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
-            retHTML += '<div style="margin-top:3px;margin-bottom:3px"><input type="' + type + '" name="selector" id="' + element + '" onchange="' + callFunc.name + '(this)" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>';
+            retHTML += '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + type + '" name="selector" id="' + element + '" onchange="' + callFunc.name + '(this)" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>';
         });
         return retHTML;
     },
