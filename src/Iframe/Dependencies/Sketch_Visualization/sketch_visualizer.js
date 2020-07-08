@@ -1,6 +1,6 @@
 try{
     const fs = require('fs');
-    eval(fs.readFileSync('src/display.js')+'');
+    eval(fs.readFileSync('src/geohash_util.js')+'');
 } catch(e) { }
 
 
