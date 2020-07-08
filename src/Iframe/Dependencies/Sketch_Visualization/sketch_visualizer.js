@@ -1,19 +1,21 @@
-/**
- * @file Responsible for querying sketch data and drawing it as square regions on a leaflet map
- * @author Kevin Bruhwiler
- */
-
 try{
     const fs = require('fs');
     eval(fs.readFileSync('src/display.js')+'');
 } catch(e) { }
 
+
+/**
+ * @namespace Sketch_Visualizer
+ * @file Responsible for querying sketch data and drawing it as square regions on a leaflet map
+ * @author Kevin Bruhwiler
+ */
 Sketch_Visualizer = {
-    
+
     /**
       * Initializes the Sketch_Visualizer object
       *
-      * @function initialize
+      * @memberof Sketch_Visualizer
+      * @method initialize
       * @param {Object} percentageToColor 
       *        Declares what colors percentage values should be mapped to
       */
@@ -43,7 +45,8 @@ Sketch_Visualizer = {
     /**
       * Draws a sketch strand onto a canvas object as a rectangle of variable size
       *
-      * @function _drawStrand
+      * @memberof Sketch_Visualizer
+      * @method _drawStrand
       * @param {Object} strand 
       *        The sketch strand being rendered
       * @param {Object} ctx 
@@ -72,7 +75,8 @@ Sketch_Visualizer = {
     /**
       * Converts an array representing RGBA values into a string
       *
-      * @function _rgbaToString
+      * @memberof Sketch_Visualizer
+      * @method _rgbaToString
       * @param {Array.<Number>} rgba 
       *        A length four array in RGBA order
       * @return {string} 
@@ -85,7 +89,8 @@ Sketch_Visualizer = {
     /**
       * Gets an R, G, or B color value based on the current _percentageToColor object
       *
-      * @function _getColorValue
+      * @memberof Sketch_Visualizer
+      * @method _getColorValue
       * @param {Array.<Number>} bounds 
       *        The lower and upper bounds for the color
       * @param {Array.<Number>} pcts 
@@ -102,7 +107,8 @@ Sketch_Visualizer = {
     /**
       * Gets an RGBA CSS string for the given percentage and alpha value
       *
-      * @function _getColorForPercentage
+      * @memberof Sketch_Visualizer
+      * @method _getColorForPercentage
       * @param {Number} pct 
       *        The percentage value being converted into a color
       * @param {Number} alpha 
@@ -130,7 +136,8 @@ Sketch_Visualizer = {
     /**
       * Calculates the smallest geohash that contains the given bounds
       *
-      * @function _getBoundingGeohash
+      * @memberof Sketch_Visualizer
+      * @method _getBoundingGeohash
       * @param {Object} bounds 
       *        The northeast and southwest bounds of the region in question
       * @return {string} 
@@ -151,7 +158,8 @@ Sketch_Visualizer = {
     /**
       * Calculates all geohashes of the given precision which intersect the given bounds
       *
-      * @function _getBoundingGeohash
+      * @memberof Sketch_Visualizer
+      * @method _getBoundingGeohash
       * @param {Object} bounds 
       *        The northeast and southwest bounds of the region in question
       * @param {string} baseGeo 
@@ -181,7 +189,8 @@ Sketch_Visualizer = {
     /**
       * Checks whether the two given lat/lng bounds intersect each other.
       *
-      * @function _checkBoundIntersection
+      * @memberof Sketch_Visualizer
+      * @method _checkBoundIntersection
       * @param {Object} b1 
       *        The northeast/southwest bounds of the first region
       * @param {Object} b2 
@@ -199,7 +208,8 @@ Sketch_Visualizer = {
     /**
       * Standardizes the format of northeast/southwest bounding box objects
       *
-      * @function _standardizeBounds
+      * @memberof Sketch_Visualizer
+      * @method _standardizeBounds
       * @param {Object} b1 
       *        The lat/lng bounds of the first region
       * @param {Object} b2 
@@ -214,7 +224,8 @@ Sketch_Visualizer = {
     /**
       * Queries the sketch for the given time and draws the resulting strands onto the canvas and map provided
       *
-      * @function queryTime
+      * @memberof Sketch_Visualizer
+      * @method queryTime
       * @param {Number} startTime 
       *        The lower bound of the queried time, in epoch milliseconds
       * @param {Number} endTime 
@@ -253,11 +264,11 @@ Sketch_Visualizer = {
 };
 
 /**
-  * Returns a sketchVisualizer object
+  * Returns a Sketch_Visualizer object
   *
   * @function sketch_visualizer
-  * @return {Object} 
-  *         A sketchVisualizer object
+  * @return {Sketch_Visualizer} 
+  *         A Sketch_Visualizer object
   */
 sketch_visualizer = function(percentageToColor) {
     const sketchVisualizer = Sketch_Visualizer;

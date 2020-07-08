@@ -1,14 +1,15 @@
 /**
+ * @namespace Census_Visualizer
  * @file Responsible for querying census data and drawing it as polygons on a leaflet map
  * @author Kevin Bruhwiler
  */
-
 Census_Visualizer = {
-    
+
     /**
       * Initializes the Census_Visualizer object
       *
-      * @function initialize
+      * @memberof Census_Visualizer
+      * @method initialize
       */
     initialize: function() {
         this._grpcQuerier = grpc_querier();
@@ -29,7 +30,8 @@ Census_Visualizer = {
     /**
       * Sets the current census feature being displayed
       *
-      * @function setFeature
+      * @memberof Census_Visualizer
+      * @method setFeature
       * @param {string} f 
       *        The name of the feature being displayed
       */
@@ -41,7 +43,8 @@ Census_Visualizer = {
     /**
       * Converts an array representing RGBA values into a string
       *
-      * @function _rgbaToString
+      * @memberof Census_Visualizer
+      * @method _rgbaToString
       * @param {Array.<Number>} rgba 
       *        A length four array in RGBA order
       * @return {string} 
@@ -54,7 +57,8 @@ Census_Visualizer = {
     /**
       * Gets an R, G, or B color value based on the current _percentageToColor object
       *
-      * @function _getColorValue
+      * @memberof Census_Visualizer
+      * @method _getColorValue
       * @param {Array.<Number>} bounds 
       *        The lower and upper bounds for the color
       * @param {Array.<Number>} pcts 
@@ -71,7 +75,8 @@ Census_Visualizer = {
     /**
       * Gets an RGBA CSS string for the given percentage and alpha value
       *
-      * @function _getColorForPercentage
+      * @memberof Census_Visualizer
+      * @method _getColorForPercentage
       * @param {Number} pct 
       *        The percentage value being converted into a color
       * @param {Number} alpha 
@@ -99,7 +104,8 @@ Census_Visualizer = {
     /**
       * Converts a geojson polygon from lng/lat format to lat/lng format
       *
-      * @function _reverseLatLngPolgon
+      * @memberof Census_Visualizer
+      * @method _reverseLatLngPolgon
       * @param {Array.<Array.<Number>>} poly 
       *        The polygon being converted
       * @return {Array.<Array.<Number>>} 
@@ -116,7 +122,8 @@ Census_Visualizer = {
     /**
       * Gets the minimum and maximum values from the returned gRPC query
       *
-      * @function _getMinAndMax
+      * @memberof Census_Visualizer
+      * @method _getMinAndMax
       * @param {Array.<Object>} responseList 
       *        The response returned by the gRPC query
       * @return {Array.<Number>} 
@@ -141,7 +148,8 @@ Census_Visualizer = {
     /**
       * Normalizes a value between the given minimum and maximum values
       *
-      * @function _normalize
+      * @memberof Census_Visualizer
+      * @method _normalize
       * @param {Number} val 
       *        The value being normalized
       * @param {Number} max 
@@ -158,7 +166,8 @@ Census_Visualizer = {
     /**
       * Updates the Census visualization with the current feature
       *
-      * @function updateViz
+      * @memberof Census_Visualizer
+      * @method updateViz
       * @param {Object} map 
       *        The leaflet map being updated
       */
@@ -201,7 +210,7 @@ Census_Visualizer = {
   * Returns a census_visualizer object
   *
   * @function census_visualizer
-  * @return {Object} 
+  * @return {Census_Visualizer} 
   *         A census_visualizer object
   */
 census_visualizer = function() {

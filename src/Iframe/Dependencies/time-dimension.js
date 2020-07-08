@@ -1,16 +1,18 @@
+'use strict';
+
+
 /**
+ * @namespace CustomTimeDimension
  * @file An extension of the leaflet TimeDimension for displaying voluminous sketches.
  * @author Kevin Bruhwiler
  */
-
-'use strict';
-
 L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
 
     /**
       * Initialize the CustomTimeDimension object.
       *
-      * @function initialize
+      * @memberof CustomTimeDimension
+      * @method initialize
       * @param {Object} options 
       *        The options for the leaflet TimeDimension
       * @param {Object} dataloader
@@ -26,7 +28,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     /**
       * The function called when the CustomTimeDimension layer is added to a leaflet map
       *
-      * @function onAdd
+      * @memberof CustomTimeDimension
+      * @method onAdd
       * @param {Object} map 
       *        The leaflet map the layer is being added to
       */
@@ -49,7 +52,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     /**
       * Adds the layer to a leaflet map
       *
-      * @function addTo
+      * @memberof CustomTimeDimension
+      * @method addTo
       * @param {Object} map 
       *        The leaflet map the layer is being added to
       * @return {Object} 
@@ -74,7 +78,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     /**
       * Initializes the canvas that will be used to render data by the dataloader
       *
-      * @function _initCanvas
+      * @memberof CustomTimeDimension
+      * @method _initCanvas
       */
     _initCanvas: function () {
         const canvas = this._canvas = L.DomUtil.create('canvas', 'leaflet-time-dimension-layer leaflet-layer');
@@ -94,7 +99,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     /**
       * Updates the width, height, and bounding coordinates of the layer's map
       *
-      * @function _updateBounds
+      * @memberof CustomTimeDimension
+      * @method _updateBounds
       */
     _updateBounds: function() {
         const size = this._map.getSize();
@@ -108,7 +114,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     /**
       * Resizes the canvas to match the bounds of the current map
       *
-      * @function _reset
+      * @memberof CustomTimeDimension
+      * @method _reset
       */
     _reset: function () {
         const topLeft = this._map.latLngToLayerPoint(this._topLeft);
@@ -119,9 +126,10 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     },
 
     /**
-      * The function called when data for a new time is loaded
+      * The method called when data for a new time is loaded
       *
-      * @function _onNewTimeLoading
+      * @memberof CustomTimeDimension
+      * @method _onNewTimeLoading
       */
     _onNewTimeLoading: function(ev) {
 	this._getDataForTime(ev.time);
@@ -130,7 +138,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     /**
       * Checks whether the map is currently displaying a given time
       *
-      * @function isReady
+      * @memberof CustomTimeDimension
+      * @method isReady
       * @param {Number} time 
       *        The epoch time being checked
       * @return {boolean} 
@@ -143,7 +152,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     /**
       * The function called to load data for a certain time
       *
-      * @function _getDataForTime
+      * @memberof CustomTimeDimension
+      * @method _getDataForTime
       * @param {Number} time 
       *        The epoch time being loaded
       */
@@ -172,7 +182,7 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
 *        The options for the leaflet TimeDimension
 * @param {Object} dataloader
 *        The object responsible for loading the data that will be displayed
-* @return {Object} 
+* @return {CustomTimeDimension} 
 *         A CustomTimeDimension object
 */
 L.timeDimension.layer.CustomTimeDimension = function(options, dataLoader) {

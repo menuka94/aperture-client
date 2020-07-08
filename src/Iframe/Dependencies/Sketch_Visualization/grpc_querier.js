@@ -1,16 +1,17 @@
-/**
- * @file Object used for performing gRPC queries on Synopsis data sketches
- * @author Kevin Bruhwiler
- */
-
 const {TargetQueryRequest, Expression, Predicate} = require("./targeted_query_service_pb.js")
 const {TargetedQueryServiceClient} = require('./targeted_query_service_grpc_web_pb.js');
 
+/**
+ * @namespace Sketch_GRPCQuerier
+ * @file Object used for performing gRPC queries on Synopsis data sketches
+ * @author Kevin Bruhwiler
+ */
 GRPCQuerier = {
     /**
       * Initialized the GRPCQuerier object and service
       *
-      * @function initialize
+      * @memberof Sketch_GRPCQuerier
+      * @method initialize
       */
     initialize: function () {
         this.service = new TargetedQueryServiceClient("http://" + window.location.hostname + ":9092");
@@ -20,7 +21,8 @@ GRPCQuerier = {
     /**
       * Creates a temporal expression from the given start and end times
       *
-      * @function _getTemporalExpresion
+      * @memberof Sketch_GRPCQuerier
+      * @method _getTemporalExpresion
       * @param {Number} startEpochMilli 
       *        The start time for the temporal expression, in millisecond epoch time
       * @param {Number} endEpochMilli 
@@ -45,7 +47,8 @@ GRPCQuerier = {
     /**
       * Creates a spatial scope predicate from the given list of geohashes
       *
-      * @function _getTemporalExpresion
+      * @memberof Sketch_GRPCQuerier
+      * @method _getTemporalExpresion
       * @param {Array.<string>} geohashList 
       *        The list of geohashes being queried
       * @return {Object} 
@@ -64,7 +67,8 @@ GRPCQuerier = {
     /**
       * Creates a gRPC stream for the given query
       *
-      * @function getStreamForQuery
+      * @memberof Sketch_GRPCQuerier
+      * @method getStreamForQuery
       * @param {string} datasetName 
       *        The name of the dataset being queried
       * @param {Array.<string>} geohashList 
@@ -91,7 +95,7 @@ GRPCQuerier = {
   * returns a grpcQuerier object
   *
   * @function grpc_querier
-  * @return {Object} 
+  * @return {Sketch_GRPCQuerier} 
   *         The grpcQuerier object
   */
 grpc_querier = function() {
