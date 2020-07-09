@@ -56,7 +56,7 @@ let RenderInfrastructure = {
     /**
      * Sets up instance of renderer
      * @memberof RenderInfrastructure
-     * @alias RenderInfrastructure.config
+     * @method config
      * @param {L.Map} map - Leaflet map that will have things rendered to it
      * @param {L.markerClusterGroup} markerLayer - Marker cluster that will contain markers
      * @param {JSON} data - JSON that contains needed information for renderable things
@@ -77,6 +77,7 @@ let RenderInfrastructure = {
     /**
      * Call this when the map should be updated
      * @memberof RenderInfrastructure
+     * @method update
      */
     update: function () {
         if (!this.map || this.queries.length == 0 || this.options.minRenderZoom < this.map.currentZoom) {
@@ -103,6 +104,13 @@ let RenderInfrastructure = {
         }
         this.updateCustom(this.queries, customQueryBounds);
     },
+    /**
+     * Call this when the map should be updated with custom elements
+     * @memberof RenderInfrastructure
+     * @method updateCustom
+     * @param {Array} queries list of queries id's, can be generated with Util.jsonToQueryList()
+     * @param {Array} bounds list of bounding boxes, they can be generated with Util.convert.leafletBoundsToNESWObject()
+     */
     updateCustom: function (queries, bounds) {
         queries.forEach(query => {
             let url = Util.queryToQueryURL(query);
@@ -113,6 +121,14 @@ let RenderInfrastructure = {
             }
         });
     },
+    /**
+     * Rendes geojson
+     * @memberof RenderInfrastructure
+     * @method renderGeoJson
+     * @param {JSON} geoJsonData GeoJSON 
+     * @param {bool} preProcess does this need to be preprocessed before rendering? false if not related to streamflow stuff
+     * @returns {leaflet layer} layer that was added
+     */
     renderGeoJson: function (geoJsonData, preProcessed) {
         if (RenderInfrastructure.options.simplifyThreshold !== -1) {
             Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);
@@ -170,6 +186,14 @@ let RenderInfrastructure = {
         }
         return resultLayer;
     },
+    /**
+     * Adds icon to map
+     * @memberof RenderInfrastructure
+     * @method addIconToMap
+     * @param {string} iconName defines the bit of the JSON from this.data the icon will pull from
+     * @param {Array} latLng latlng array where the icon will be put
+     * @param {string} popUpContent the content that will display for this element when clicked, accepts HTML formatting
+     */
     addIconToMap: function (iconName, latLng, popUpContent) {
         let icon = RenderInfrastructure.getAttribute(iconName, ATTRIBUTE.icon)
         if (!icon || icon === "noicon") {
@@ -193,7 +217,7 @@ let RenderInfrastructure = {
     /**
      * Removes a feature id from the map
      * @memberof RenderInfrastructure
-     * @alias RenderInfrastructure.removeFeatureFromMap
+     * @method removeFeatureFromMap
      * @param {string} featureId id which should be removed from map, ex: 'dam' or 'weir'
      * @returns {boolean} true if feature was removed, false if not
      */
@@ -227,6 +251,12 @@ let RenderInfrastructure = {
         this.blacklist.push(featureId);
         return true;
     },
+    /**
+     * Removes all features from the map
+     * @memberof RenderInfrastructure
+     * @method removeAllFeaturesFromMap
+     * @returns {boolean} true if successful, there will be an error otherwise
+     */
     removeAllFeaturesFromMap: function () {
         this.markerLayer.eachLayer(function (layer) {
             RenderInfrastructure.markerLayer.removeLayer(layer);
@@ -269,6 +299,11 @@ let RenderInfrastructure = {
         }
         return false;
     },
+    /**
+     * Cleans up elements outside of the current viewportX2
+     * @memberof RenderInfrastructure
+     * @returns true if successful, false otherwise
+     */
     cleanupMap: function () {
         let iconsToRemove = [];
         this.markerLayer.eachLayer(function (layer) {
@@ -295,6 +330,14 @@ let RenderInfrastructure = {
         this.currentBounds = [Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(this.map.getBounds()))];
         return true;
     },
+    /**
+     * Cleans up elements outside of the current viewportX2
+     * @memberof RenderInfrastructure
+     * @method getAttribute
+     * @param {string} id to get from the data JSON
+     * @param {number} attribute options defined in the ATTRIBUTE enum
+     * @returns {string} either a address to an icon or a hex color string
+     */
     getAttribute: function (tag, attribute) {
         if (this.data) {
             if (this.data[tag]) {
@@ -326,7 +369,7 @@ const Querier = {
     /**
      * Queries geoJSON or OSM Xml from an endpoint and returns it as geoJSON
      * @memberof Querier
-     * @alias Querier.queryGeoJsonFromServer
+     * @method queryGeoJsonFromServer
      * @param {string} queryURL URL where geoJSON/Osm Xml is
      * @param {object} bounds (not necessary when using this function by itself) bounds object like: {north:?,east:?,south:?,west:?}
      * @param {boolean} isOsmData is the url going to return OSM Xml data? (such as overpass queries)
@@ -358,6 +401,12 @@ const Querier = {
         RenderInfrastructure.currentQueries.push({ query: query, bounds: bounds });
         if (isOsmData) Util.refreshInfoPopup();
     },
+    /**
+     * Removes queries that shouldnt be continued, for example if something was loading far away from the viewport,
+     * this would remove it
+     * @memberof Querier
+     * @method removeUnnecessaryQueries
+     */
     removeUnnecessaryQueries: function () {
         for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
             let bound = Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds());
@@ -369,6 +418,14 @@ const Querier = {
             }
         }
     },
+    /**
+     * Gives you a list of queries to run based on bounds that already exist
+     * @memberof Querier
+     * @method createOverpassQueryList
+     * @param {Array} queryList list of queries ie [waterway=river,waterway=stream]
+     * @param {Object} queryBounds bbox to query
+     * @returns {Array} of objects with queries and bounds
+     */
     createOverpassQueryList: function (queryList, queryBounds) {
         let boundsToQuery = [];
         if ((RenderInfrastructure.currentBounds.length == 0 && RenderInfrastructure.currentQueries.length == 0)) {
@@ -411,7 +468,7 @@ const Querier = {
     /**
      * Creates a overpass query URL 
      * @memberof Querier
-     * @alias Querier.createOverpassQueryURL
+     * @method createOverpassQueryURL
      * @param {Array<string>} queryList list of queries ex: ['waterway=dam','natural=lake']
      * @param {object} bounds bounds object in the form: {north:?,east:?,south:?,west:?}, which states WHERE to query
      * @param {number} node_way_relation binary choice for node,way,relation -- ex:111 = nodes, ways, AND relations -- 101 = nodes AND relations -- 100 = nodes only
@@ -438,6 +495,13 @@ const Querier = {
         }
         return RenderInfrastructure.options.overpassInterpreter + '?data=[out:json][timeout:' + RenderInfrastructure.options.timeout + '];(' + queryFString + ');out body geom;';
     },
+    /**
+     * Creates a overpass query URL 
+     * @memberof Querier
+     * @method preProcessQuery
+     * @param {Array} features features from GeoJSON that should be preprocessed. This is used for streams in this implementation
+     * @returns {string} a valid overpass URL
+     */
     preProcessQuery: function (features) {
         if (features.length == 0) {
             return;
@@ -492,13 +556,37 @@ const Querier = {
         RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(splitHits), true);
         RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(misses), true);
     },
+    /**
+     * Helper method for RenderInfrastructure.updateCustom
+     * @memberof Querier
+     * @method createCustomQueryURL
+     * @param {string} URL the url which will edited, probably from the data JSON
+     * @param {object} bounds NESW object, can be created with Util.Convert.leafletBoundsToNESWObject()
+     * @returns {string} a url with the bounds replaced with @param bounds 
+     */
     createCustomQueryURL: function (URL, bounds) {
         return URL.replace('{{BOUNDS}}', bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north);
     }
 }
 
+/**
+* Where utility functions are
+* @namespace Util
+*/
 const Util = {
+    /**
+     * Where conversion functions are
+     * @namespace Convert
+     * @memberof Util
+     */
     Convert: {
+        /**
+        * Converts leaflet bounds to NSEW
+        * @memberof Convert
+        * @method leafletBoundsToNESWObject
+        * @param {object} leafletBounds leaflet bounds object
+        * @returns {object} an object which has simple, readable north, south, east, and west attributes
+        */
         leafletBoundsToNESWObject: function (leafletBounds) {
             return {
                 north: leafletBounds.getNorth(),
@@ -507,22 +595,60 @@ const Util = {
                 west: leafletBounds.getWest()
             };
         },
+        /**
+        * Converts leaflet bounds to NSEW
+        * @memberof Convert
+        * @method createOverpassBoundsString
+        * @param {object} bounds NSEW bounds object
+        * @returns {object} an object which has simple, readable north, south, east, and west attributes
+        */
         createOverpassBoundsString: function (bounds) {
             return bounds.south + ',' + bounds.west + ',' + bounds.north + ',' + bounds.east;
         }
     },
+    /**
+     * Are bounds COMPLETELY within other bounds?
+     * @memberof Util
+     * @method boundsAreWithinBounds
+     * @param {object} boundsToCheck NSEW bounds object that will be checked to see if it is within @param boundsToCheckAgainst
+     * @param {object} boundsToCheckAgainst bounds NSEW object, will be checked against
+     * @returns {boolean} is it within (true) or not (false)
+     */
     boundsAreWithinBounds: function (boundsToCheck, boundsToCheckAgainst) {
         return boundsToCheckAgainst.north >= boundsToCheck.north && boundsToCheckAgainst.south <= boundsToCheck.south && boundsToCheckAgainst.west <= boundsToCheck.west && boundsToCheckAgainst.east >= boundsToCheck.east;
     },
+    /**
+     * Are bounds COMPLETELY outside other bounds?
+     * @memberof Util
+     * @method boundsAreOutsideOfBounds
+     * @param {object} boundsToCheck NSEW bounds object that will be checked to see if it is outside of @param boundsToCheckAgainst
+     * @param {object} boundsToCheckAgainst bounds NSEW object, will be checked against
+     * @returns {boolean} is it COMPLETELY outside (true) or not (false)
+     */
     boundsAreOutsideOfBounds: function (boundsToCheck, boundsToCheckAgainst) {
         return boundsToCheck.east < boundsToCheckAgainst.west || boundsToCheck.west > boundsToCheckAgainst.east || boundsToCheck.south > boundsToCheckAgainst.north || boundsToCheck.north < boundsToCheckAgainst.south;
     },
+    /**
+     * Is a point within a bounds?
+     * @memberof Util
+     * @method pointIsWithinBounds
+     * @param {object} latLngPoint lat lng point in {lat:y,lng:x} format, will be checked to see if within @param boundsToCheckAgainst
+     * @param {object} boundsToCheckAgainst bounds NSEW object, will be checked against
+     * @returns {boolean} is it COMPLETELY outside (true) or not (false)
+     */
     pointIsWithinBounds: function (latLngPoint, boundsToCheckAgainst) {
         if (latLngPoint == null) {
             return true;
         }
         return latLngPoint.lng > boundsToCheckAgainst.west && latLngPoint.lat > boundsToCheckAgainst.south && latLngPoint.lng < boundsToCheckAgainst.east && latLngPoint.lat < boundsToCheckAgainst.north;
     },
+    /**
+     * What is the best latLng point for a GeoJSON feature?
+     * @memberof Util
+     * @method getLatLngFromGeoJsonFeature
+     * @param {object} feature GeoJSON feature, a latlng point will be extracted. Can be a point, linestring, or polygon.
+     * @returns {object} Leaflet latLng object
+     */
     getLatLngFromGeoJsonFeature: function (feature) {
         let type = this.getFeatureType(feature);
         latlng = [];
@@ -544,6 +670,13 @@ const Util = {
         }
         return L.latLng(latlng[1], latlng[0]);
     },
+    /**
+     * What type is a GeoJSON feature?
+     * @memberof Util
+     * @method getFeatureType
+     * @param {object} feature GeoJSON feature, a latlng point will be extracted. Can be a point, linestring, or polygon.
+     * @returns {number} Enum from FEATURETYPE or -1 if not found
+     */
     getFeatureType: function (feature) {
         if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon")) {
             return FEATURETYPE.polygon;
@@ -558,6 +691,13 @@ const Util = {
             return -1;
         }
     },
+    /**
+     * Simplifies GeoJSON 
+     * @memberof Util
+     * @method simplifyGeoJSON
+     * @param {object} GeoJSON GeoJSON obj
+     * @param {number} threshold threshold to simplify by
+     */
     simplifyGeoJSON: function (geoJSON, threshold) {
         if (geoJSON.features) {
             geoJSON.features.forEach(feature => {
@@ -565,6 +705,13 @@ const Util = {
             });
         }
     },
+    /**
+     * Helper for simplify GeoJSON, simplifies a single feature
+     * @memberof Util
+     * @method simplifyFeatureCoords
+     * @param {object} feature feature to be simplified
+     * @param {number} threshold threshold to simplify by
+     */
     simplifyFeatureCoords: function (feature, threshold) {
         let type = this.getFeatureType(feature);
         if (type === -1 || type === FEATURETYPE.point) {
@@ -577,6 +724,14 @@ const Util = {
             feature.geometry.coordinates = simplify(feature.geometry.coordinates, threshold, false);
         }
     },
+    /**
+     * Removes bounds from another bounds
+     * @memberof Util
+     * @method subtractBounds
+     * @param {object} boundsToSlice bounds that will be edited
+     * @param {object} boundSlicer bounds that will be removed from @param boundsToSlice
+     * @returns {Array} array that contains bounds that dont include @param boundSlicer
+     */
     subtractBounds: function (boundsToSlice, boundSlicer) {
         if (this.boundsAreWithinBounds(boundsToSlice, boundSlicer)) {
             return []; //the bounds are within eachother
@@ -619,6 +774,14 @@ const Util = {
         }
         return returnList;
     },
+    /**
+     * Same thing as @method subtractBounds but for a list of bounds
+     * @memberof Util
+     * @method subtractBoundsFromList
+     * @param {Array} boundsListToEdit bounds that will be edited
+     * @param {object} boundSlicer bounds that will be removed from @param boundsListToEdit
+     * @returns {Array} array that contains bounds that dont include @param boundSlicer
+     */
     subtractBoundsFromList: function (boundsListToEdit, boundsToRemove) {
         let tempBoundsList = [];
         for (let k = 0; k < boundsListToEdit.length; k++) {
@@ -626,6 +789,14 @@ const Util = {
         }
         return tempBoundsList;
     },
+    /**
+     * Can simplify a bounds list to have less objects, with the approximate same geometry
+     * @memberof Util
+     * @method optimizeBoundsList
+     * @param {Array} boundsListToOptimize bounds that will be optimized
+     * @param {number} epsilon how approximate should the joins be
+     * @returns {Array} a (hopefully) shorter array than @param boundsListToOptimize
+     */
     optimizeBoundsList: function (boundsListToOptimize, epsilon) {
         for (let i = 0; i < boundsListToOptimize.length; i++) {
             if (boundsListToOptimize[i].east - boundsListToOptimize[i].west < epsilon || boundsListToOptimize[i].north - boundsListToOptimize[i].south < epsilon) {
@@ -657,6 +828,15 @@ const Util = {
         }
         return boundsListToOptimize;
     },
+    /**
+     * Concatenates bounds
+     * @memberof Util
+     * @method optimizeBoundsList
+     * @param {object} bounds1 NSEW obj
+     * @param {object} bounds2 NSEW obj
+     * @param {number} sharedAxis Enum from NSEW enums
+     * @returns {object} a object with b1 and b2 joined
+     */
     concatenateBounds: function (bounds1, bounds2, sharedAxis) {
         if (sharedAxis == NSEW.ns) {
             return {
@@ -675,6 +855,14 @@ const Util = {
             };
         }
     },
+    /**                                                                            XXX
+     * Expands a bounds to have 9X the area, bounds go from this -> X to this ->   XXX
+     *                                                                             XXX
+     * @memberof Util
+     * @method expandBounds
+     * @param {object} bounds
+     * @returns {object} expanded @param bounds
+     */
     expandBounds: function (bounds) {
         return {
             north: bounds.north + (bounds.north - bounds.south),
@@ -683,6 +871,13 @@ const Util = {
             west: bounds.west - (bounds.east - bounds.west)
         };
     },
+    /**                                                                            
+     * gets JSON data defined name for geojson feature
+     * @memberof Util
+     * @method getNameFromGeoJsonFeature
+     * @param {object} feature feature to get name of
+     * @returns {string} name/id of feature, "none" if not found
+     */
     getNameFromGeoJsonFeature: function (feature) {
         let pTObj = this.getParamsAndTagsFromGeoJsonFeature(feature);
         let params = pTObj.params;
@@ -715,10 +910,25 @@ const Util = {
         }
         return 'none';
     },
+    /**                                                                            
+     * creates popup based on the JSON data
+     * @memberof Util
+     * @method createDetailsFromGeoJsonFeature
+     * @param {object} feature
+     * @param {string} name
+     * @returns {string} html to put on popup
+     */
     createDetailsFromGeoJsonFeature: function (feature, name) {
         let pTObj = this.getParamsAndTagsFromGeoJsonFeature(feature);
         return this.createPopup(name, pTObj);
     },
+    /**                                                                            
+     * gets tags from GeoJSON feature
+     * @memberof Util
+     * @method getParamsAndTagsFromGeoJsonFeature
+     * @param {object} feature
+     * @returns {object} object with params and tags
+     */
     getParamsAndTagsFromGeoJsonFeature: function (feature) {
         let params;
         let tagsObj;
@@ -739,6 +949,13 @@ const Util = {
         }
         return { params: params, tagsObj: tagsObj };
     },
+    /**                                                                            
+     * Capitalizes First Letter In Every Word Unless The Word is 2 Chars or Less
+     * @memberof Util
+     * @method capitalizeString
+     * @param {string} str
+     * @returns {string} 
+     */
     capitalizeString: function (str) {
         if (str == null || str.length == 0) {
             return "";
@@ -752,6 +969,13 @@ const Util = {
         }
         return str.join(" ");
     },
+    /**                                                                            
+     * Converts_underscores -> to spaces.
+     * @memberof Util
+     * @method underScoreToSpace
+     * @param {string} str
+     * @returns {string} 
+     */
     underScoreToSpace: function (str) {
         if (str == null) {
             return "noname"
@@ -761,6 +985,13 @@ const Util = {
         }
         return str.replace(/_/gi, " ");
     },
+    /**                                                                            
+     * Creates a leaflet icon from an image address.
+     * @memberof Util
+     * @method makeIcon
+     * @param {string} address
+     * @returns {object} leaflet icon
+     */
     makeIcon: function (address) {
         icon = new L.Icon({
             iconUrl: address,
@@ -768,6 +999,11 @@ const Util = {
         });
         return icon;
     },
+    /**                                                                            
+     * Refreshes the popup on the bottom left of the map that tells you what is happening
+     * @memberof Util
+     * @method refreshInfoPopup
+     */
     refreshInfoPopup: function () {
         if (RenderInfrastructure.options.queryAlertText) {
             if (RenderInfrastructure.map.getZoom() >= RenderInfrastructure.options.minRenderZoom && RenderInfrastructure.currentQueries.length == 0) {
@@ -783,6 +1019,13 @@ const Util = {
             }
         }
     },
+    /**                                                                            
+     * Converts binary to an object with booleans
+     * @memberof Util
+     * @method binaryToBool
+     * @param {integer} bin binary int like 101 or 001 or 000 or 111 ... 
+     * @returns {object} that has node, way, relation set to true or false based on the input.
+     */
     binaryToBool: function (bin) {
         //not real binary, but it converts 110 to true, true, false and such 
         let nWR = {
@@ -805,6 +1048,13 @@ const Util = {
         }
         return nWR;
     },
+    /**                                                                            
+     * Creates query list based on json data
+     * @memberof Util
+     * @method binaryToBool
+     * @param {object} json 
+     * @returns {Array} with the queries to run
+     */
     jsonToQueryList: function (json) {
         let ret = [];
         for (e in json) {
@@ -814,6 +1064,13 @@ const Util = {
         }
         return ret;
     },
+    /**                                                                            
+     * Creates a full geojson object from a feature array
+     * @memberof Util
+     * @method createGeoJsonObj
+     * @param {Array} features
+     * @returns {object} full geojson
+     */
     createGeoJsonObj: function (features) {
         let geojson = {
             "type": "FeatureCollection",
@@ -824,9 +1081,24 @@ const Util = {
         });
         return geojson;
     },
+    /**                                                                            
+     * Gives non-square-rooted 2d distance, one input latlng is reversed
+     * @memberof Util
+     * @method dist2d
+     * @param {Array} p1
+     * @param {Array} p2
+     * @returns {number} distance
+     */
     dist2d: function (p1, p2) { //p2 latlng array is reversed
         return Math.pow(p1[0] - p2[1], 2) + Math.pow(p1[1] - p2[0], 2);
     },
+    /**                                                                            
+     * Gets query url from query
+     * @memberof Util
+     * @method queryToQueryURL
+     * @param {string} query
+     * @returns {string} queryURL
+     */
     queryToQueryURL: function (query) {
         if (!RenderInfrastructure.data) {
             return;
@@ -837,6 +1109,14 @@ const Util = {
             }
         }
     },
+    /**                                                                            
+     * Gets query url from query
+     * @memberof Util
+     * @method createPopup
+     * @param {string} id JSON data id
+     * @param {object} pTObj params and tags object created with @method getParamsAndTagsFromGeoJsonFeature
+     * @returns {string} html to put in popup
+     */
     createPopup: function (id, pTObj) {
         let params = pTObj.params;
         let tagsObj = pTObj.tagsObj;
