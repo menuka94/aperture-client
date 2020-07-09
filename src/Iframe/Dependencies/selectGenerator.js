@@ -2,12 +2,16 @@
 //Purpose: Add selectable checkboxes to html for getInfrastructure.js
 //Dependencies: getInfrastructure.js
 
-
+/** 
+* @namespace Generator
+*/
 let Generator = {
     elementsJson: null,
     selectContainer: null,
     colorCode: null,
     /** Configurates the select container
+     * @memberof Generator
+     * @method config
      * @param {JSON} elementsJson Json containing the info like colors and icons
      * from getInfrastructure
      * @param {HTMLElement} selectContainer Where to add the checkboxes
@@ -47,7 +51,16 @@ let Generator = {
             selectContainer.innerHTML += this.makeList(Object.keys(elementsJson), elementsJson, type, colorCode, callFunc);
         }
     },
-    /** Helper for config */
+    /** Helper for config 
+     * @memberof config
+     * @method makeList
+     * @param {Array} elements
+     * @param {object} elementsJson
+     * @param {string} type
+     * @param {boolean} colorCode
+     * @param {Function} callFunc
+     * @returns {string}
+    */
     makeList: function (elements, elementsJson, type, colorCode, callFunc) {
         let retHTML = '';
         elements.forEach(element => {
@@ -57,14 +70,21 @@ let Generator = {
         });
         return retHTML;
     },
-    /** Unchecks every checklist element */
+    /** Unchecks every checklist element
+     * @memberof Generator
+     * @method clearChecks
+     */
     clearChecks: function () {
         var features = document.getElementsByClassName("featureCheck");
         for (let i = 0; i < features.length; i++) {
             features[i].checked = false;
         }
     },
-    /** Helper for config */
+    /** Helper for config
+     * @memberof Generator
+     * @method groupMods
+     * @param {string} json
+     */
     groupMods: function (json) {
         let groups = [];
         let groupElements = [];
