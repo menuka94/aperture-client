@@ -1,3 +1,8 @@
+/**
+ * @file Contains utilities for encoding/decoding and finding neighboring geohashes
+ * @author Kevin Bruhwiler
+ */
+
 let Geohash = {};
 Geohash.base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 
@@ -5,6 +10,15 @@ function getGeohashBase() {
     return Geohash.base32;
 }
 
+/**
+  * Decode a geohash into a lat/lng object.
+  *
+  * @function decode_geohash
+  * @param {String} geohash 
+  *        A geohash string of any precision.
+  * @return {{lat: Number, lon: Number}} 
+  *         The latitude and longitude at the center of the geohash
+  */
 function decode_geohash(geohash) {
 
     var bounds = geohash_bounds(geohash); // <-- the hard work
@@ -24,6 +38,19 @@ function decode_geohash(geohash) {
     return { lat: Number(lat), lon: Number(lon) };
 }
 
+/**
+  * Encode a lat/lng object into a geohash.
+  *
+  * @function encode_geohash
+  * @param {Number} latitude 
+  *        The latitude of the location being encoded.
+  * @param {Number} longitude 
+  *        The longitude of the location being encoded.
+  * @param {Integer} precision 
+  *        The desired length of the returned geohash
+  * @return {String} 
+  *         A geohash string for length precision representing the latitude and longitiude
+  */
 function encode_geohash(lat, lon, precision) {
     // infer precision?
     if (typeof precision == 'undefined') {
@@ -85,6 +112,15 @@ function encode_geohash(lat, lon, precision) {
     return geohash;
 }
 
+/**
+  * Get the south-west and north-east bounds of a geohash
+  *
+  * @function geohash_bounds
+  * @param {String} geohash 
+  *        A geohash string of any precision.
+  * @return {sw: {lat: Number, lon: Number}, ne: {lat: Number, lon: Number}} 
+  *         The latitude and longitude of the southwest and northeast corners of the geohash
+  */
 function geohash_bounds(geohash) {
     if (geohash.length === 0) throw new Error('Invalid geohash');
 
@@ -128,6 +164,17 @@ function geohash_bounds(geohash) {
     };
 }
 
+/**
+  * Get the south-west and north-east bounds of a geohash
+  *
+  * @function geohash_adjacent
+  * @param {String} geohash 
+  *        A geohash string of any precision.
+  * @param {String} direction 
+  *        The direction of the desired neighbor, one of: n,s,e,w.
+  * @return {String} geohash 
+  *         The neighboring geohash
+  */
 function geohash_adjacent(geohash, direction) {
     // based on github.com/davetroy/geohash-js
 
