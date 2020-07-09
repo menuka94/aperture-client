@@ -67,7 +67,8 @@ L.TimeDimension.Layer.CustomTimeDimension = L.TimeDimension.Layer.extend({
     /**
       * Adds a control object to the CustomTimeDimension layer
       *
-      * @function addControlReference
+      * @memberof CustomTimeDimension
+      * @method addControlReference
       * @param {Object} ctrl 
       *        The control object being added
       */
