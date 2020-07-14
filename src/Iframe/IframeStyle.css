@@ -51,4 +51,7 @@ body{
     text-align: left;
     outline: none;
 }
+.attribution{
+    font-size: 10px;
+}
 .leaflet-fade-anim .leaflet-tile,.leaflet-zoom-anim .leaflet-zoom-animated { will-change:auto !important; }

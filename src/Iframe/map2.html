@@ -105,7 +105,16 @@
                     maxLayers:20,
                     simplifyThreshold: 0.00005
                 });
-                Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
+                Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
+                '<ul style="padding-inline-start:20px;">' +
+                    '<li>Reservoir/Lake/Basin/Pond:Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
+                    '<li>Wastewater Plant: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></li>' +
+                    '<li>Dam: http://www.iconsmind.com</li>' +
+                    '<li>Hospital: Font Awesome by Dave Gandy - https://fortawesome.github.com/Font-Awesome / CC BY-SA (https://creativecommons.org/licenses/by-sa/3.0)</li>' +
+                    '<li>Urgent Care: By Bridget Gahagan, noun project</li>' + 
+                    '<li>Fire Station: icons8.com</li>' +
+                '</ul>'
+                );
                 runQuery();
             });
         });
