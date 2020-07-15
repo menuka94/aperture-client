@@ -111,7 +111,11 @@ let Generator = {
      * @param {string} html
      */
     attribution: function(html,htmlElement){
-        htmlElement.innerHTML += '<div class="attribution">' + html + '</div>';
+        htmlElement.innerHTML += '<div class="attributionContainer"><img class="attributionInfoImg" onclick="Generator.showAttribution(this);" src="../../../images/info.png" width="25" height="25"><div class="attribution">' + html + '</div></div>';
+    },
+    showAttribution: function(htmlElement){
+        let newDisplay = $(htmlElement).next().css("display") === "none" ? "block" : "none";
+        $(htmlElement).next().css({"display": newDisplay}); 
     }
 }
 
