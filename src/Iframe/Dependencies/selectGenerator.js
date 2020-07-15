@@ -32,7 +32,10 @@ let Generator = {
                 let innerHTML = this.makeList(groupInfo.elements[i], elementsJson, type, colorCode, callFunc);
                 selectContainer.innerHTML += "<div class='content' style='display:none;'>" + innerHTML + "</div>";
             }
-            selectContainer.innerHTML += "<button id='clearFeatures' onClick='RenderInfrastructure.removeAllFeaturesFromMap(); Generator.clearChecks();' style='color: white;background-color: red;border: none;border-radius: 3px;padding: 4px;margin-top: 5px;'>Clear All Features</button>";
+            selectContainer.innerHTML += "<button id='clearFeatures' onClick='RenderInfrastructure.removeAllFeaturesFromMap(); Generator.clearChecks();'>Clear All Features</button>";
+            if(attribution){
+                this.attribution(attribution,selectContainer);
+            }
             var coll = document.getElementsByClassName("collapsible");
             for (let i = 0; i < coll.length; i++) {
                 coll[i].addEventListener("click", function () {
@@ -48,10 +51,10 @@ let Generator = {
             }
         }
         else {
+            if(attribution){
+                this.attribution(attribution,selectContainer);
+            }
             selectContainer.innerHTML += this.makeList(Object.keys(elementsJson), elementsJson, type, colorCode, callFunc);
-        }
-        if(attribution){
-            this.attribution(attribution,selectContainer);
         }
     },
     /** Helper for config 
@@ -111,11 +114,10 @@ let Generator = {
      * @param {string} html
      */
     attribution: function(html,htmlElement){
-        htmlElement.innerHTML += '<div class="attributionContainer"><img class="attributionInfoImg" onclick="Generator.showAttribution(this);" src="../../../images/info.png" width="25" height="25"><div class="attribution">' + html + '</div></div>';
+        htmlElement.innerHTML += '<button class="attributionContainer" onclick="Generator.showAttribution(attrText)"><div class="clickableAttr">Icon Attributions</div><div id="attrText" class="attribution">' + html + '</div></button>';
     },
     showAttribution: function(htmlElement){
-        let newDisplay = $(htmlElement).next().css("display") === "none" ? "block" : "none";
-        $(htmlElement).next().css({"display": newDisplay}); 
+        $(htmlElement).last().css({"display": $(htmlElement).last().css("display") === "none" ? "block" : "none"}); 
     }
 }
 
