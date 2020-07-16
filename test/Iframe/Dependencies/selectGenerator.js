@@ -13,11 +13,11 @@ describe('SelectGenerator', function () {
         it('should configurate the select box', function () {
             selectGenerator.Generator.config(jsonData, null, true, notAFunction,"checkbox");
             assert.deepEqual(elem.innerHTML, '');
-            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",true);
-            assert.deepEqual(elem.childElementCount, 11);
+            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",true,"<br><b>Very important attribution</b>");
+            assert.deepEqual(elem.childElementCount, 12);
             elem.innerHTML = '';
-            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",false);
-            assert.deepEqual(elem.childElementCount, 30);
+            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",false,"<br><b>Very important attribution</b>");
+            assert.deepEqual(elem.childElementCount, 31);
             document.body.appendChild(elem);
             var coll = document.getElementsByClassName("collapsible");
             for (let i = 0; i < coll.length; i++) {
@@ -37,6 +37,16 @@ describe('SelectGenerator', function () {
                 }
             }
             assert.deepEqual(checked, false);
+        });
+    });
+
+    describe('showAttribution()', function () {
+        it('it should show/hide the last object in the container passed to it', function () {
+            $(elem).last().css({"display": "block"});
+            selectGenerator.Generator.showAttribution(elem);
+            assert.deepEqual($(elem).last().css("display"),"none");
+            selectGenerator.Generator.showAttribution(elem);
+            assert.deepEqual($(elem).last().css("display"),"block");
         });
     });
 });
