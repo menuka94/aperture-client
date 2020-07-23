@@ -2815,7 +2815,10 @@ module.exports = proto;
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global = Function('return this')();
+//var global = Function('return this')();  commented by Sanket M on 15/7/2020 for CSP unsafe-eval warning
+var global = (function () {
+  return this;
+});
 
 goog.exportSymbol('proto.Expression', null, global);
 goog.exportSymbol('proto.Expression.CombineOperator', null, global);
