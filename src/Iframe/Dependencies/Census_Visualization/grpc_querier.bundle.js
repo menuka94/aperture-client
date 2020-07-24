@@ -3329,7 +3329,8 @@ module.exports = proto.census;
 var jspb = require('google-protobuf');
 var goog = jspb;
 //var global = Function('return this')();  commented by Sanket M on 15/7/2020 for CSP unsafe-eval warning
-var global = (function () {return this;});
+// var global = (function () {return this;});
+var global = (typeof self == "undefined" ? typeof global == "undefined"? this : global : self);
 
 
 goog.exportSymbol('proto.census.AgeCategories', null, global);
