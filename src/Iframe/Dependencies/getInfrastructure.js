@@ -52,6 +52,7 @@ let RenderInfrastructure = {
     currentLayers: [],
     currentQueries: [],
     blacklist: [],
+    grpcQuerier: null,
     options: JSON.parse(JSON.stringify(DEFAULTOPTIONS)),
     /**
      * Sets up instance of renderer
@@ -73,6 +74,7 @@ let RenderInfrastructure = {
         this.currentQueries = [];
         this.blacklist = [];
         this.queries = Util.jsonToQueryList(this.data);
+        this.grpcQuerier = grpc_querier();
     },
     /**
      * Call this when the map should be updated
@@ -118,6 +120,14 @@ let RenderInfrastructure = {
                 bounds.forEach(bound => {
                     Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url, bound), bound, false, RenderInfrastructure.renderGeoJson);
                 });
+                return;
+            }
+            let grpc = Util.queryToGRPCDetails(query);
+            if (grpc) {
+                bounds.forEach(bound => {
+                    Querier.queryGRPC(grpc.func, grpc.datasets, bound);
+                });
+                return;
             }
         });
     },
@@ -178,7 +188,6 @@ let RenderInfrastructure = {
             }
 
         }).addTo(RenderInfrastructure.map);
-
         Util.refreshInfoPopup();
         //RenderInfrastructure.markerLayer.refreshClusters();
         if (!preProcessed) {
@@ -566,6 +575,36 @@ const Querier = {
      */
     createCustomQueryURL: function (URL, bounds) {
         return URL.replace('{{BOUNDS}}', bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north);
+    },
+    queryGRPC: function (func, datasets, bounds, filter) {
+        if (func === "DatasetRequest") {
+            datasets.forEach(dataset => {
+                let stream = RenderInfrastructure.grpcQuerier.getDatasetData(dataset, Util.Convert.createGeoJSONPoly(bounds));
+                stream.on('data', function (response) {
+                    RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
+                });
+                stream.on('status', function (status) {
+                    //console.log(status.code, status.details, status.metadata);
+                });
+                stream.on('end', function (end) {
+                });
+            });
+        }
+        else if(func === "OSMRequest"){
+            datasets.forEach(dataset => {
+                let stream = RenderInfrastructure.grpcQuerier.getOSMData(dataset, Util.Convert.createGeoJSONPoly(bounds));
+                stream.on('data', function (response) {
+                    RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
+                });
+                stream.on('status', function (status) {
+                    //console.log(status.code, status.details, status.metadata);
+                });
+                stream.on('end', function (end) {
+                });
+            });
+        }
+        //let stream = RenderInfrastructure.grpcQuerier.getDatasetData(1,RenderInfrastructure.map.getBounds().getSouthWest(),RenderInfrastructure.map.getBounds().getNorthEast());
+        // let stream = RenderInfrastructure.grpcQuerier.getDatasetData(1, RenderInfrastructure.map.getBounds().getSouthWest(), RenderInfrastructure.map.getBounds().getNorthEast());
     }
 }
 
@@ -582,7 +621,7 @@ const Util = {
     Convert: {
         /**
         * Converts leaflet bounds to NSEW
-        * @memberof Convert
+        * @memberof Util
         * @method leafletBoundsToNESWObject
         * @param {object} leafletBounds leaflet bounds object
         * @returns {object} an object which has simple, readable north, south, east, and west attributes
@@ -597,13 +636,35 @@ const Util = {
         },
         /**
         * Converts leaflet bounds to NSEW
-        * @memberof Convert
+        * @memberof Util
         * @method createOverpassBoundsString
         * @param {object} bounds NSEW bounds object
         * @returns {object} an object which has simple, readable north, south, east, and west attributes
         */
         createOverpassBoundsString: function (bounds) {
             return bounds.south + ',' + bounds.west + ',' + bounds.north + ',' + bounds.east;
+        },
+        /**
+        * Converts bounds obj to GeoJSON polygon used for queries
+        * @memberof Util
+        * @method createOverpassBoundsString
+        * @param {object} bounds NSEW bounds object
+        * @returns {object} GeoJSON polygon
+        */
+        createGeoJSONPoly: function (bounds) {
+            let geo = {
+                type: "Feature",
+                properties: {},
+                geometry: {
+                    type: "polygon", coordinates: [[
+                        [bounds.west, bounds.south],
+                        [bounds.west, bounds.north],
+                        [bounds.east, bounds.north],
+                        [bounds.east, bounds.south],
+                        [bounds.west, bounds.south]]]
+                }
+            };
+            return JSON.stringify(geo);
         }
     },
     /**
@@ -1100,12 +1161,28 @@ const Util = {
      * @returns {string} queryURL
      */
     queryToQueryURL: function (query) {
-        if (!RenderInfrastructure.data) {
-            return;
-        }
+        if (!RenderInfrastructure.data) return;
         for (x in RenderInfrastructure.data) {
             if (RenderInfrastructure.data[x]["query"] && RenderInfrastructure.data[x]["query"] === query && RenderInfrastructure.data[x]["queryURL"]) {
                 return RenderInfrastructure.data[x]["queryURL"];
+            }
+        }
+    },
+    /**                                                                            
+     * Gets query url from query
+     * @memberof Util
+     * @method queryToGRPCDetails
+     * @param {string} query
+     * @returns {object} details
+     */
+    queryToGRPCDetails: function (query) {
+        if (!RenderInfrastructure.data) return;
+        for (x in RenderInfrastructure.data) {
+            if (RenderInfrastructure.data[x]["query"] && RenderInfrastructure.data[x]["query"] === query && RenderInfrastructure.data[x]["grpc"] && RenderInfrastructure.data[x]["grpcDatasets"]) {
+                return {
+                    func: RenderInfrastructure.data[x]["grpc"],
+                    datasets: RenderInfrastructure.data[x]["grpcDatasets"]
+                };
             }
         }
     },
