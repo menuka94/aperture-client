@@ -10087,7 +10087,7 @@ const {CensusClient} = require('./census_grpc_web_pb.js');
 
 GRPCQuerier = {
     initialize: function () {
-        this.service = new CensusClient("http://" + window.location.hostname + ":9092", "census");
+        this.service = new CensusClient("http://lattice-2.cs.colostate.edu:9092", "census");
     },
 
     _makeGeoJson: function (southwest, northeast) {
