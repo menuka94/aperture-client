@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
         integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
-        crossorigin=""/>
+        crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
         integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
         crossorigin=""></script>
@@ -22,12 +23,8 @@
     <link rel="stylesheet" type="text/css" href="Dependencies/leaflet-sidebar.css">
     <link rel="stylesheet" type="text/css" href="IframeStyle.css">
 </head>
+
 <body>
-    <!--Required for this map to be controlled-->
-    <script>const MAPNUMBER = 3; //refers to whatever map in the grid this refers to</script>
-    <script src="Dependencies/mouseDown.js"></script>
-    <script>thisMapNumber=MAPNUMBER; //changes a variable in the mouseDown.js script</script>
-    <!------------------------------------------>
     <div id="sidebar" class="sidebar collapsed">
         <!-- Nav tabs -->
         <div class="sidebar-tabs">
@@ -55,98 +52,9 @@
     </div>
     <div id="map" class="sidebar-map"></div>
 
-    <div id='map3' class='map'>
-    </div>
-    <script>
-        var buildingmap = new L.Map('map3');
-        buildingmap.setView(buildingmap.wrapLatLng(parent.view), 10, false);
-        console.log(buildingmap.getCenter())
-
-        var sidebar = L.control.sidebar('sidebar', {
-            position: 'right'
-        }).addTo(buildingmap);
-
-        new L.TileLayer('https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w', {
-          attribution: '© Map tiles <a href="https://mapbox.com">Mapbox</a>',
-          maxZoom: 18,
-          maxNativeZoom: 20
-        }).addTo(buildingmap);
-
-        var osmb = new OSMBuildings(buildingmap).load('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
-
-        const censusViz = census_visualizer();
-        censusViz.updateViz(buildingmap);
-
-        var markers = L.markerClusterGroup({
-            showCoverageOnHover: false,
-            spiderfyOnMaxZoom: false,
-            disableClusteringAtZoom: 17,
-            maxClusterRadius: 55
-        });
-        buildingmap.addLayer(markers);
-
-        $.getJSON("Dependencies/demographicsAndRisk.json", function (data) {
-          RenderInfrastructure.config(buildingmap, markers, data, {
-              queryAlertText: document.getElementById('queryInfoText'),
-              overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
-              maxElements: 10000,
-              maxLayers:20,
-              simplifyThreshold: 0.00005
-          });
-          Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
-          runQuery();
-        });
-
-        const g = {groupMem: "Census", query: 1};
-        const census = {"Total Population": g, "Avg. Household Income": g,
-          "Population by Age": g, "Median Age": g, "No. Below Poverty Line": g, "Demographics": g}
-
-        function changeChecked(element) {
-            if (element.checked) {
-                if(element.id in census){
-                  censusViz.setFeature(element.id);
-                  censusViz.updateViz(buildingmap);
-                } else {
-                  RenderInfrastructure.addFeatureToMap(element.id);
-                }
-            }
-            else {
-                if(element.id in census)
-                  censusViz.setFeature(element.id);
-                else
-                  RenderInfrastructure.removeFeatureFromMap(element.id);
-            }
-        }
-
-        function runQuery() {
-            RenderInfrastructure.update();
-        }
-
-
-        Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, "radio", true);
-
-        //updates controller----------------------------------------------
-        buildingmap.on("move", function () {
-            parent.setGlobalPosition(buildingmap.getCenter(),MAPNUMBER);
-        });
-        buildingmap.on("zoomend", function () {
-            parent.setGlobalPositionFORCE(buildingmap.getCenter(),MAPNUMBER);
-        });
-        buildingmap.on("moveend", function () {
-            censusViz.updateViz(buildingmap);
-        });
-        //----------------------------------------------------------------
-    </script>
-
-    <!--You must add this map's setter function-->
-    <script>
-    var thisMapsSetter = function(view,zoom){
-        buildingmap.setView(buildingmap.wrapLatLng(view), buildingmap.getZoom());
-        censusViz.updateViz(buildingmap);
-    }
-        parent.setterFunctions.push({
-            setterFunc: thisMapsSetter,
-            mapNum: MAPNUMBER
-        });
-    </script>
+    <div id='map3' class='map'></div>
+    <!--Required for this map to be controlled-->
+    <script src="Dependencies/MapJS/map3.js"></script>
+    <script src="Dependencies/mouseDown.js"></script>
+    <!------------------------------------------>
 </body>
