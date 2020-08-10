@@ -1,7 +1,6 @@
 //Author: Daniel Reynolds
 //Purpose: Get osm nodes, ways, and relations, and then translate them onto a leaflet map
 //Dependencies: Leaflet, osmtogeojson, jquery, Leaflet.markerCluster
-
 const FLYTOOPTIONS = { //for clicking on icons
     easeLinearity: 0.4,
     duration: 0.25,
@@ -26,7 +25,7 @@ const DEFAULTOPTIONS = {
     maxElements: 5000,
     maxLayers: 10,
     minRenderZoom: 10,
-    commonTagNames: ["streamflow", "waterway", "man_made", "landuse", "water", "amenity", "natural"],
+    commonTagNames: ["streamflow", "waterway", "man_made", "landuse", "amenity", "natural", "water"],
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
     iconSize: [25, 25],
@@ -72,7 +71,7 @@ let RenderInfrastructure = {
         this.currentBounds = [];
         this.currentLayers = [];
         this.currentQueries = [];
-        this.blacklist = [];
+        this.blacklist = Util.jsonToQueryList(this.data, true);
         this.queries = Util.jsonToQueryList(this.data);
         this.grpcQuerier = grpc_querier();
     },
@@ -87,21 +86,23 @@ let RenderInfrastructure = {
             return;
         }
         let customQueryBounds = [];
+        // let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
+        // let usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
+        // if (usefulQueries) {
+        //     usefulQueries.forEach(query => {
+        //         Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
+        //         customQueryBounds.push(query.bounds);
+        //     });
+        // }
+        // //pan loading bit
         let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
-        let usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
-        if (usefulQueries) {
-            usefulQueries.forEach(query => {
-                Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
-                customQueryBounds.push(query.bounds);
-            });
-        }
-        //pan loading bit
         bounds = Util.expandBounds(bounds);
-        usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
-        if (usefulQueries) {
-            usefulQueries.forEach(query => {
-                Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
-                customQueryBounds.push(query.bounds);
+        usefulBounds = Querier.createBoundsList(bounds);
+        if (usefulBounds) {
+            usefulBounds.forEach(bound => {
+                //Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
+                Querier.queryGRPC("OSMRequest", null, bound, Util.makeOSMFilter());
+                customQueryBounds.push(bound);
             });
         }
         this.updateCustom(this.queries, customQueryBounds);
@@ -126,7 +127,7 @@ let RenderInfrastructure = {
             if (grpc) {
                 //console.log(query);
                 bounds.forEach(bound => {
-                    let go = grpc.func != "OSMRequest" ? Querier.queryGRPC(grpc.func, grpc.datasets, bound) : Querier.queryGRPC(grpc.func, grpc.datasets, bound, {key:query.split("=")[0],value:query.split("=")[1]});
+                    Querier.queryGRPC("DatasetRequest", grpc.dataset, bound);
                 });
                 return;
             }
@@ -158,6 +159,7 @@ let RenderInfrastructure = {
                 return { color: RenderInfrastructure.getAttribute(name, ATTRIBUTE.color), weight: weight, fillOpacity: fillOpacity };
             },
             filter: function (feature) {
+                if(!feature.id && feature._id.$oid) feature.id = feature._id.$oid; //osm data was kinda messy so had to hard code this
                 let name = Util.getNameFromGeoJsonFeature(feature);
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || RenderInfrastructure.data[name] == null) {
                     return false;
@@ -422,7 +424,7 @@ const Querier = {
             let bound = Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds());
             bound = Util.expandBounds(bound);
             if (Util.boundsAreOutsideOfBounds(RenderInfrastructure.currentQueries[i].bounds, bound)) {
-                RenderInfrastructure.currentQueries[i].query.abort();
+                //RenderInfrastructure.currentQueries[i].query.abort();
                 RenderInfrastructure.currentQueries.splice(i, 1);
                 i--;
             }
@@ -431,14 +433,13 @@ const Querier = {
     /**
      * Gives you a list of queries to run based on bounds that already exist
      * @memberof Querier
-     * @method createOverpassQueryList
-     * @param {Array} queryList list of queries ie [waterway=river,waterway=stream]
+     * @method createBoundsList
      * @param {Object} queryBounds bbox to query
-     * @returns {Array} of objects with queries and bounds
+     * @returns {Array} of bounds that dont intersect existing bounds
      */
-    createOverpassQueryList: function (queryList, queryBounds) {
+    createBoundsList: function (queryBounds) {
         let boundsToQuery = [];
-        if ((RenderInfrastructure.currentBounds.length == 0 && RenderInfrastructure.currentQueries.length == 0)) {
+        if ((RenderInfrastructure.currentBounds.length === 0 && RenderInfrastructure.currentQueries.length == 0)) {
             boundsToQuery = [queryBounds];
         }
         else {
@@ -466,14 +467,7 @@ const Querier = {
         if (boundsToQuery.length == 0) return null;
         boundsToQuery = Util.optimizeBoundsList(boundsToQuery, RenderInfrastructure.options.simplifyThreshold);
         if (boundsToQuery.length == 0) return null;
-        let queries = [];
-        for (let i = 0; i < boundsToQuery.length; i++) {
-            queries.push({
-                query: this.createOverpassQueryURL(queryList, boundsToQuery[i], 111),
-                bounds: boundsToQuery[i]
-            });
-        }
-        return queries;
+        return boundsToQuery;
     },
     /**
      * Creates a overpass query URL 
@@ -577,37 +571,31 @@ const Querier = {
     createCustomQueryURL: function (URL, bounds) {
         return URL.replace('{{BOUNDS}}', bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north);
     },
-    queryGRPC: function (func, datasets, bounds, filter) {
+    queryGRPC: function (func, dataset, bounds, filter) {
+        let stream;
         if (func === "DatasetRequest") {
-            datasets.forEach(dataset => {
-                let stream = RenderInfrastructure.grpcQuerier.getDatasetData(dataset, Util.Convert.createGeoJSONPoly(bounds));
-                stream.on('data', function (response) {
-                    //console.log("data");
-                    RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
-                });
-                stream.on('status', function (status) {
-                    //console.log(status.code, status.details, status.metadata);
-                });
-                stream.on('end', function (end) {
-                });
-            });
+            stream = RenderInfrastructure.grpcQuerier.getDatasetData(dataset, Util.Convert.createGeoJSONPoly(bounds));
         }
-        else if(func === "OSMRequest"){
-            datasets.forEach(dataset => {
-                let stream = RenderInfrastructure.grpcQuerier.getOSMData(dataset, Util.Convert.createGeoJSONPoly(bounds), filter);
-                stream.on('data', function (response) {
-                    console.log(response);
-                    RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
-                });
-                stream.on('status', function (status) {
-                    //console.log(status.code, status.details, status.metadata);
-                });
-                stream.on('end', function (end) {
-                });
-            });
+        else if (func === "OSMRequest" && filter) {
+            stream = RenderInfrastructure.grpcQuerier.getOSMData(Util.Convert.createGeoJSONPoly(bounds), filter);
         }
-        //let stream = RenderInfrastructure.grpcQuerier.getDatasetData(1,RenderInfrastructure.map.getBounds().getSouthWest(),RenderInfrastructure.map.getBounds().getNorthEast());
-        // let stream = RenderInfrastructure.grpcQuerier.getDatasetData(1, RenderInfrastructure.map.getBounds().getSouthWest(), RenderInfrastructure.map.getBounds().getNorthEast());
+        stream.on('data', function (response) {
+            //console.log(JSON.parse(response.array[0]));
+            RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
+        });
+        stream.on('status', function (status) {
+            //console.log(status.code, status.details, status.metadata);
+        });
+        stream.on('end', function (end) {
+            for(let i = 0; i < RenderInfrastructure.currentQueries.length; i++){
+                if(RenderInfrastructure.currentQueries[i].query === stream){
+                    RenderInfrastructure.currentQueries.splice(i,1);
+                    break;
+                }
+            }
+            Util.refreshInfoPopup();
+        });
+        RenderInfrastructure.currentQueries.push({query:stream,bounds:bounds});
     }
 }
 
@@ -948,7 +936,7 @@ const Util = {
         let tagsObj = pTObj.tagsObj;
         for (let j = 0; j < RenderInfrastructure.options.commonTagNames.length; j++) {
             for (let i = 0; i < params.length; i++) {
-                if (RenderInfrastructure.options.commonTagNames[j] == params[i]) {
+                if (RenderInfrastructure.options.commonTagNames[j] === params[i]) {
                     if (!RenderInfrastructure.options.blacklistedTagValues.includes(tagsObj[params[i]])) {
                         return tagsObj[params[i]];
                     }
@@ -958,9 +946,9 @@ const Util = {
         for (element in RenderInfrastructure.data) {
             if (RenderInfrastructure.data[element]["identityField"]) {
                 for (let i = 0; i < params.length; i++) {
-                    if (params[i] == RenderInfrastructure.data[element]["identityField"]) {
+                    if (params[i] === RenderInfrastructure.data[element]["identityField"]) {
                         if (RenderInfrastructure.data[element]["identityKey"]) {
-                            if (tagsObj[params[i]] == RenderInfrastructure.data[element]["identityKey"]) {
+                            if (tagsObj[params[i]] === RenderInfrastructure.data[element]["identityKey"]) {
                                 return element;
                             }
                         }
@@ -1113,17 +1101,21 @@ const Util = {
         return nWR;
     },
     /**                                                                            
-     * Creates query list based on json data
+     * Creates query list based on json data, can also make a blacklist for query id's that shouldnt be on by default
      * @memberof Util
      * @method binaryToBool
      * @param {object} json 
+     * @param {boolean} blacklist true if a list of inf that shouldnt be queried should be returned
      * @returns {Array} with the queries to run
      */
-    jsonToQueryList: function (json) {
+    jsonToQueryList: function (json, blacklist) {
         let ret = [];
         for (e in json) {
-            if (json[e]['defaultRender'] && json[e]['query']) {
+            if (json[e]['defaultRender'] && json[e]['query'] && !blacklist) {
                 ret.push(json[e]['query']);
+            }
+            else if(!json[e]['defaultRender'] && json[e]['query'] && blacklist){
+                ret.push(json[e]['query'].split("=")[1]);
             }
         }
         return ret;
@@ -1181,16 +1173,34 @@ const Util = {
     queryToGRPCDetails: function (query) {
         if (!RenderInfrastructure.data) return;
         for (x in RenderInfrastructure.data) {
-            if (RenderInfrastructure.data[x]["query"] && RenderInfrastructure.data[x]["query"] === query && RenderInfrastructure.data[x]["grpc"] && RenderInfrastructure.data[x]["grpcDatasets"]) {
+            if (RenderInfrastructure.data[x]["query"] && RenderInfrastructure.data[x]["query"] === query && RenderInfrastructure.data[x]["grpc"] && RenderInfrastructure.data[x]["grpc"] != "OSMRequest") {
                 return {
                     func: RenderInfrastructure.data[x]["grpc"],
-                    datasets: RenderInfrastructure.data[x]["grpcDatasets"]
+                    dataset: RenderInfrastructure.data[x]["grpcDataset"]
                 };
             }
         }
     },
     /**                                                                            
-     * Gets query url from query
+     * Makes an osm filter ready for grpc calls
+     * @memberof Util
+     * @method makeOSMFilter
+     * @returns {Array} filter
+     */
+    makeOSMFilter: function () {
+        let ret = [];
+        for (inf in RenderInfrastructure.data) {
+            if (RenderInfrastructure.data[inf]["query"] && RenderInfrastructure.data[inf]["grpc"] && RenderInfrastructure.data[inf]["grpc"] === "OSMRequest") {
+                ret.push({
+                    key: RenderInfrastructure.data[inf]["query"].split("=")[0],
+                    value: RenderInfrastructure.data[inf]["query"].split("=")[1]
+                });
+            }
+        }
+        return ret;
+    },
+    /**                                                                            
+     * Makes popup text
      * @memberof Util
      * @method createPopup
      * @param {string} id JSON data id

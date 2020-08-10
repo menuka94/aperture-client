@@ -4,27 +4,31 @@
         "color": "black",
         "defaultRender": true,
         "query":"man_made=water_works",
-        "groupMem":"Water (Man Made)"
+        "groupMem":"Water (Man Made)",
+        "grpc":"OSMRequest"
     },
     "wastewater_plant": {
         "iconAddr": "../../../images/sewage.png",
         "color": "#FF00FF",
         "defaultRender": true,
         "query":"man_made=wastewater_plant",
-        "groupMem":"Water (Man Made)"
+        "groupMem":"Water (Man Made)",
+        "grpc":"OSMRequest"
     },
     "canal": {
         "color": "teal",
         "defaultRender": true,
         "query":"waterway=canal",
         "preProcess":true,
-        "groupMem":"Water (Man Made)"
+        "groupMem":"Water (Man Made)",
+        "grpc":"OSMRequest"
     },
     "river": {
         "color": "#00008B",
         "defaultRender": true,
         "query":"waterway=river",
         "preProcess":true,
+        "grpc":"OSMRequest",
         "groupMem":"Water (Natural)"
     },
     "stream": {
@@ -32,42 +36,53 @@
         "defaultRender": false,
         "query":"waterway=stream",
         "preProcess":true,
-        "groupMem":"Water (Natural)"
+        "groupMem":"Water (Natural)",
+        "grpc":"OSMRequest"
     },
     "ditch": {
         "color": "#0000BB",
         "defaultRender": false,
         "query":"waterway=ditch",
         "preProcess":true,
-        "groupMem":"Water (Man Made)"
+        "groupMem":"Water (Man Made)",
+        "grpc":"OSMRequest"
     },
     "lock_gate": {
         "iconAddr": "../../../images/lock_gate.png",
         "color": "#FF0000",
         "defaultRender": true,
         "query":"waterway=lock_gate",
-        "groupMem":"Water (Man Made)"
+        "groupMem":"Water (Man Made)",
+        "grpc":"OSMRequest"
     },
     "weir": {
         "iconAddr": "../../../images/weir.png",
         "color": "#FF0000",
         "defaultRender": true,
         "query":"waterway=weir",
-        "groupMem":"Water (Man Made)"
+        "groupMem":"Water (Man Made)",
+        "grpc":"OSMRequest"
     },
     "tidal_channel": {
         "color": "#0080FF",
         "defaultRender": true,
         "query":"waterway=tidal_channel",
-        "groupMem":"Water (Natural)"
+        "groupMem":"Water (Natural)",
+        "grpc":"OSMRequest"
+    },
+    "water": {
+        "iconAddr": "../../../images/reservoir-lake.png",
+        "color": "#00FFFF",
+        "defaultRender": true,
+        "query":"natural=water",
+        "groupMem":"Water (Man Made)",
+        "grpc":"OSMRequest"
     },
     "reservoir": {
         "iconAddr": "../../../images/reservoir-lake.png",
         "color": "#00FFFF",
         "defaultRender": true,
         "query":"water=reservoir",
-        "grpc":"OSMRequest",
-        "grpcDatasets":[0,1,2,3], 
         "groupMem":"Water (Man Made)"
     },
     "basin": {
@@ -96,7 +111,7 @@
         "defaultRender": true,
         "query":"custom=Natural_Gas_Pipeline",
         "grpc":"DatasetRequest",
-        "grpcDatasets":[4], 
+        "grpcDataset":4, 
         "identityField": "TYPEPIPE",
         "groupMem":"Energy",
         "popup": "A(n) @@TYPEPIPE@@ natural gas pipeline operated by @@Operator@@."
@@ -106,7 +121,7 @@
         "defaultRender": true,
         "query": "custom=substation",
         "grpc":"DatasetRequest",
-        "grpcDatasets":[2], 
+        "grpcDataset":2, 
         "identityField": "TYPE",
         "identityKey": "SUBSTATION",
         "groupMem":"Energy",
@@ -117,7 +132,7 @@
         "defaultRender": true,
         "query": "custom=power_transmission_line",
         "grpc":"DatasetRequest",
-        "grpcDatasets":[3], 
+        "grpcDataset":3, 
         "identityField": "TYPE",
         "identityKey": "AC",
         "groupMem":"Energy",
@@ -186,7 +201,7 @@
         "query":"custom=dam",
         "groupMem":"Water (Man Made)",
         "grpc":"DatasetRequest",
-        "grpcDatasets":[1], 
+        "grpcDataset":1, 
         "identityField": "DAM_HEIGHT",
         "popup": "@@NAME@@ dam, located along the @@RIVER@@, standing @@DAM_HEIGHT@@ feet high, located in @@COUNTY@@ county, @@STATE@@. This dam primarily affects @@CITYAFFECT@@, @@NIDSTATE@@."
     },
@@ -195,7 +210,7 @@
         "defaultRender":false,
         "query": "custom=power_plant",
         "grpc":"DatasetRequest",
-        "grpcDatasets":[5], 
+        "grpcDataset":5, 
         "identityField": "ENERGY_SRC_DESC1",
         "groupMem":"Energy"
     },
@@ -213,7 +228,7 @@
         "defaultRender":true,
         "query": "custom=hosptial",
         "grpc":"DatasetRequest",
-        "grpcDatasets":[0], 
+        "grpcDataset":0, 
         "identityField": "BEDS",
         "groupMem":"Emergency & Medical",
         "popup": "@@NAME@@, a @@OWNER@@ hospital with @@BEDS@@ beds, located in @@CITY@@, @@STATE@@."
