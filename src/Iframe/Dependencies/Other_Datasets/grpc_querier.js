@@ -1,4 +1,4 @@
-const { TargetedQueryRequest, CensusResolution, Predicate, Decade, SpatialTemporalInfo, SpatialRequest, OsmRequest, DatasetRequest } = require("./census_pb.js")
+const { OsmRequest, DatasetRequest } = require("./census_pb.js")
 const { CensusClient } = require('./census_grpc_web_pb.js');
 
 /**
@@ -18,14 +18,20 @@ GRPCQuerier = {
     this.service = new CensusClient("http://" + window.location.hostname + ":9092", "census");
   },
 
-  getOSMData: function (dataset, geojson, filter) {
+  getOSMData: function (geojson, filters) {
     const request = new OsmRequest();
-    request.setDataset(dataset);
+    request.setDataset(5); //all
     request.setSpatialop(1); //intersection
     request.setRequestgeojson(geojson);
-    request.clearRequestparamsMap();
-    let params = request.getRequestparamsMap();
-    params.set('properties.' + filter.key, filter.value);
+    let reqParams = [];
+    filters.forEach(filter => {
+        const params = new OsmRequest.OsmRequestParam();
+        params.setKey('properties.' + filter.key);
+        params.setValue(filter.value);
+        reqParams.push(params);
+    });
+    request.setRequestparamsList(reqParams);
+    //params.set('properties.' + filter.key, filter.value);
     return this.service.osmQuery(request, {});
   },
 
