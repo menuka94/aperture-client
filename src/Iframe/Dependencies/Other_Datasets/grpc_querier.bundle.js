@@ -5007,8 +5007,8 @@ GRPCQuerier = {
     request.setSpatialop(1); //intersection
     request.setRequestgeojson(geojson);
     request.clearRequestparamsMap();
-    //let params = request.getRequestparamsMap();
-    //params.set('properties.highway', 'primary');
+    let params = request.getRequestparamsMap();
+    params.set('properties.' + filter.key, filter.value);
     return this.service.osmQuery(request, {});
   },
 

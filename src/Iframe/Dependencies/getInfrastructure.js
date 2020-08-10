@@ -124,8 +124,9 @@ let RenderInfrastructure = {
             }
             let grpc = Util.queryToGRPCDetails(query);
             if (grpc) {
+                //console.log(query);
                 bounds.forEach(bound => {
-                    Querier.queryGRPC(grpc.func, grpc.datasets, bound);
+                    let go = grpc.func != "OSMRequest" ? Querier.queryGRPC(grpc.func, grpc.datasets, bound) : Querier.queryGRPC(grpc.func, grpc.datasets, bound, {key:query.split("=")[0],value:query.split("=")[1]});
                 });
                 return;
             }
@@ -488,7 +489,7 @@ const Querier = {
         let boundsString = Util.Convert.createOverpassBoundsString(bounds);
         let nWR = Util.binaryToBool(node_way_relation);
         for (let i = 0; i < queryList.length; i++) {
-            if (queryList[i].split('=')[0] === 'custom' || RenderInfrastructure.blacklist.includes(queryList[i].split('=')[1])) {
+            if (queryList[i].split('=')[0] === 'custom' || RenderInfrastructure.blacklist.includes(queryList[i].split('=')[1]) || RenderInfrastructure.data[queryList[i].split('=')[1]]["grpc"]) {
                 continue; //skip if its a custom query and not a osm query, or if blacklisted
             }
             query = queryList[i].replace(/ /g, ''); //remove whitespace
@@ -543,7 +544,7 @@ const Querier = {
                     splitHits.push(feature);
                     break;
                 }
-                let minDist = 99999.99999;
+                let minDist = Infinity;
                 let indx = 0;
                 for (let k = 0; k < feature.geometry.coordinates.length; k++) {
                     let d = Util.dist2d(stations[i].latlng, feature.geometry.coordinates[k]);
@@ -581,6 +582,7 @@ const Querier = {
             datasets.forEach(dataset => {
                 let stream = RenderInfrastructure.grpcQuerier.getDatasetData(dataset, Util.Convert.createGeoJSONPoly(bounds));
                 stream.on('data', function (response) {
+                    //console.log("data");
                     RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
                 });
                 stream.on('status', function (status) {
@@ -592,8 +594,9 @@ const Querier = {
         }
         else if(func === "OSMRequest"){
             datasets.forEach(dataset => {
-                let stream = RenderInfrastructure.grpcQuerier.getOSMData(dataset, Util.Convert.createGeoJSONPoly(bounds));
+                let stream = RenderInfrastructure.grpcQuerier.getOSMData(dataset, Util.Convert.createGeoJSONPoly(bounds), filter);
                 stream.on('data', function (response) {
+                    console.log(response);
                     RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
                 });
                 stream.on('status', function (status) {

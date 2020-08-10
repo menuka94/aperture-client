@@ -66,6 +66,8 @@
         "color": "#00FFFF",
         "defaultRender": true,
         "query":"water=reservoir",
+        "grpc":"OSMRequest",
+        "grpcDatasets":[0,1,2,3], 
         "groupMem":"Water (Man Made)"
     },
     "basin": {
