@@ -2605,7 +2605,7 @@ const {TargetedQueryServiceClient} = require('./targeted_query_service_grpc_web_
 
 GRPCQuerier = {
     initialize: function () {
-        this.service = new TargetedQueryServiceClient("http://" + window.location.hostname + ":9092");
+        this.service = new TargetedQueryServiceClient("http://lattice-2.cs.colostate.edu:9092");
         return this;
     },
 

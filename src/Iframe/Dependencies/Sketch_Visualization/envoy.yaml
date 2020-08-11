@@ -35,6 +35,10 @@ static_resources:
           - name: envoy.grpc_web
           - name: envoy.cors
           - name: envoy.router
+          access_log:
+            - name: envoy.file_access_log
+              config:
+                path: "/dev/stdout"
   clusters:
   - name: TargetedQueryService
     connect_timeout: 0.25s
