@@ -527,13 +527,15 @@ const Querier = {
             let stations = hits[j].stations;
             for (let i = 0; i < stations.length; i++) {
                 let feature = JSON.parse(JSON.stringify(hits[j].feature));
-                feature.properties.tags.streamflow = "streamflowData";
-                if (stations.length === 1) {
-                    feature.station = stations[i];
-                    feature.properties.tags.strflowGeohash = stations[i].geohash;
-                    splitHits.push(feature);
-                    break;
-                }
+				if (feature.properties.tags) { 
+	                feature.properties.tags.streamflow = "streamflowData";
+	                if (stations.length === 1) {
+	                    feature.station = stations[i];
+	                    feature.properties.tags.strflowGeohash = stations[i].geohash;
+	                    splitHits.push(feature);
+	                    break;
+	                }
+				}
                 let minDist = 99999.99999;
                 let indx = 0;
                 for (let k = 0; k < feature.geometry.coordinates.length; k++) {
@@ -549,7 +551,9 @@ const Querier = {
                 }
                 hits[j].feature.geometry.coordinates = newCoords;
                 feature.station = stations[i];
-                feature.properties.tags.strflowGeohash = stations[i].geohash;
+                if (feature.properties.tags) { 
+					feature.properties.tags.strflowGeohash = stations[i].geohash;
+				}
                 splitHits.push(feature);
             }
         }
