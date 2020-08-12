@@ -24,10 +24,8 @@ static_resources:
                           route: { cluster: TargetedQueryServiceCensus }
                         - match: { prefix: "/" }
                           route: { cluster: TargetedQueryService }
-                        - match: { prefix: "/census_service" }
-                          route: { cluster: census_service
-                                   max_grpc_timeout: 0s
-                                 }
+                        - match: { prefix: "/for-dataset-explorer" }
+                          route: { cluster: gRPCServiceForDatasetExplorer }
                       cors:
                         allow_origin_string_match:
                           - prefix: "*"
@@ -56,9 +54,9 @@ static_resources:
       http2_protocol_options: {}
       lb_policy: round_robin
       hosts: [{ socket_address: { address: "lattice-0.cs.colostate.edu", port_value: 50051 }}]
-    - name: census_service
+    - name: gRPCServiceForDatasetExplorer
       connect_timeout: 0.25s
       type: logical_dns
       http2_protocol_options: {}
       lb_policy: round_robin
-      hosts: [{ socket_address: { address: 'lattice-0.cs.colostate.edu', port_value: 50051 }}]
+      hosts: [{ socket_address: { address: "lattice-1.cs.colostate.edu", port_value: 50051 }}]
