@@ -1,4 +1,4 @@
-var thisMapNumber = -1; //set from the MAPNUMBER const in the iframe
+var thisMapNumber = MAPNUMBER; //set from the MAPNUMBER const in the iframe
 document.addEventListener('mousedown', function(event) { 
     parent.mouseDown(thisMapNumber); //gives this map permission to move
 });
