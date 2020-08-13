@@ -86,22 +86,28 @@ let RenderInfrastructure = {
             return;
         }
         let customQueryBounds = [];
-        // let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
-        // let usefulQueries = Querier.createOverpassQueryList(this.queries, bounds);
-        // if (usefulQueries) {
-        //     usefulQueries.forEach(query => {
-        //         Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
-        //         customQueryBounds.push(query.bounds);
-        //     });
-        // }
-        // //pan loading bit
         let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
+        usefulBounds = Querier.createBoundsList(bounds);
+        if (usefulBounds) {
+            console.log(JSON.stringify(usefulBounds));
+            usefulBounds.forEach(bound => {
+                let filter = Util.makeOSMFilter();
+                if (filter.length > 0) {
+                    Querier.queryGRPC("OSMRequest", null, bound, filter);
+                }
+                customQueryBounds.push(bound);
+            });
+        }
+        // //pan loading bit
+        bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
         bounds = Util.expandBounds(bounds);
         usefulBounds = Querier.createBoundsList(bounds);
         if (usefulBounds) {
             usefulBounds.forEach(bound => {
-                //Querier.queryGeoJsonFromServer(query.query, query.bounds, true, RenderInfrastructure.renderGeoJson);
-                Querier.queryGRPC("OSMRequest", null, bound, Util.makeOSMFilter());
+                let filter = Util.makeOSMFilter();
+                if (filter.length > 0) {
+                    Querier.queryGRPC("OSMRequest", null, bound, filter);
+                }
                 customQueryBounds.push(bound);
             });
         }
@@ -159,7 +165,7 @@ let RenderInfrastructure = {
                 return { color: RenderInfrastructure.getAttribute(name, ATTRIBUTE.color), weight: weight, fillOpacity: fillOpacity };
             },
             filter: function (feature) {
-                if(!feature.id && feature._id.$oid) feature.id = feature._id.$oid; //osm data was kinda messy so had to hard code this
+                if (!feature.id && feature._id.$oid) feature.id = feature._id.$oid; //osm data was kinda messy so had to hard code this
                 let name = Util.getNameFromGeoJsonFeature(feature);
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || RenderInfrastructure.data[name] == null) {
                     return false;
@@ -282,6 +288,7 @@ let RenderInfrastructure = {
         this.queries = [];
         this.currentBounds = [];
         this.currentLayers = [];
+        this.currentQueries = [];
         for (x in RenderInfrastructure.data) {
             if (RenderInfrastructure.data[x]['query']) {
                 this.blacklist.push(x);
@@ -587,15 +594,18 @@ const Querier = {
             //console.log(status.code, status.details, status.metadata);
         });
         stream.on('end', function (end) {
-            for(let i = 0; i < RenderInfrastructure.currentQueries.length; i++){
-                if(RenderInfrastructure.currentQueries[i].query === stream){
-                    RenderInfrastructure.currentQueries.splice(i,1);
+            for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
+                if (RenderInfrastructure.currentQueries[i].query === stream) {
+                    if(!RenderInfrastructure.currentBounds.includes(RenderInfrastructure.currentQueries[i].bounds)){
+                        RenderInfrastructure.currentBounds.push(RenderInfrastructure.currentQueries[i].bounds);
+                    }
+                    RenderInfrastructure.currentQueries.splice(i, 1);
                     break;
                 }
             }
             Util.refreshInfoPopup();
         });
-        RenderInfrastructure.currentQueries.push({query:stream,bounds:bounds});
+        RenderInfrastructure.currentQueries.push({ query: stream, bounds: bounds });
     }
 }
 
@@ -1114,7 +1124,7 @@ const Util = {
             if (json[e]['defaultRender'] && json[e]['query'] && !blacklist) {
                 ret.push(json[e]['query']);
             }
-            else if(!json[e]['defaultRender'] && json[e]['query'] && blacklist){
+            else if (!json[e]['defaultRender'] && json[e]['query'] && blacklist) {
                 ret.push(json[e]['query'].split("=")[1]);
             }
         }
@@ -1190,7 +1200,7 @@ const Util = {
     makeOSMFilter: function () {
         let ret = [];
         for (inf in RenderInfrastructure.data) {
-            if (RenderInfrastructure.data[inf]["query"] && RenderInfrastructure.data[inf]["grpc"] && RenderInfrastructure.data[inf]["grpc"] === "OSMRequest") {
+            if (RenderInfrastructure.data[inf]["query"] && RenderInfrastructure.data[inf]["grpc"] && RenderInfrastructure.data[inf]["grpc"] === "OSMRequest" && !RenderInfrastructure.blacklist.includes(inf)) {
                 ret.push({
                     key: RenderInfrastructure.data[inf]["query"].split("=")[0],
                     value: RenderInfrastructure.data[inf]["query"].split("=")[1]
