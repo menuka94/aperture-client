@@ -116,6 +116,7 @@ let Generator = {
      */
     attribution: function(html,htmlElement){
         htmlElement.innerHTML += '<button class="attributionContainer" id="attributionClickable"><div class="clickableAttr">Icon Attributions</div><div id="attrText" class="attribution">' + html + '</div></button>';
+        console.log(document.getElementById);
         document.getElementById("attributionClickable").onclick = function(){Generator.showAttribution(document.getElementById("attrText"))};
     },
     showAttribution: function(htmlElement){
