@@ -1,5 +1,6 @@
 //Author: Daniel Reynolds
 //Purpose: Get osm nodes, ways, and relations, and then translate them onto a leaflet map
+
 //Dependencies: Leaflet, osmtogeojson, jquery, Leaflet.markerCluster
 const FLYTOOPTIONS = { //for clicking on icons
     easeLinearity: 0.4,
@@ -151,6 +152,7 @@ let RenderInfrastructure = {
         if (RenderInfrastructure.options.simplifyThreshold !== -1) {
             Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);
         }
+        Util.fixGeoJSONID(geoJsonData);
         let preProcess = [];
         let resultLayer = L.geoJson(geoJsonData, {
             style: function (feature) {
@@ -1208,6 +1210,36 @@ const Util = {
             }
         }
         return ret;
+    },
+    /**                                                                            
+     * Changed linestring to polygon if it is misidentified
+     * @memberof Util
+     * @method fixGeoJSONID
+     * @param geoJSON object or collection
+     * @returns {Object} geoJSON, object or full group
+     */
+    fixGeoJSONID: function (geoJSON) {
+        if(geoJSON.features){
+            geoJSON.features.forEach(feature => {
+                this.fixFeatureID(feature);
+            });
+        }
+        else{
+            this.fixFeatureID(geoJSON);
+        }
+    },
+    /**                                                                            
+     * Changed linestring to polygon if it is misidentified
+     * @memberof Util
+     * @method fixFeatureID
+     * @param {Object} feature geojson feature
+     */
+    fixFeatureID: function (feature) {
+        if(this.getFeatureType(feature) === FEATURETYPE.lineString && JSON.stringify(feature.geometry.coordinates[0]) === JSON.stringify(feature.geometry.coordinates[feature.geometry.coordinates.length - 1])){
+            //console.log(feature.geometry);
+            feature.geometry.type = "Polygon";
+            console.log(feature.geometry);
+        }
     },
     /**                                                                            
      * Makes popup text
