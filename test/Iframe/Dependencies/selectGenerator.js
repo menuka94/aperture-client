@@ -5,6 +5,8 @@ var jsdom = require('jsdom-global');
 let jsonData = require("../../../src/Iframe/Dependencies/waterInfrastructure.json");
 global.elem = document.createElement('div');
 elem.id = 'area';
+global.elem2 = document.createElement('div');
+elem2.id = 'attributionClickable';
 
 function notAFunction() { }
 
