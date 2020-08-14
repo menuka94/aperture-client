@@ -75,6 +75,7 @@ function changeChecked(element) {
         RenderInfrastructure.addFeatureToMap(element.id);
     }
     else {
+        console.log(element.id);
         RenderInfrastructure.removeFeatureFromMap(element.id);
     }
 }
