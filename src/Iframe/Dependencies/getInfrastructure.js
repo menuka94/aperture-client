@@ -90,7 +90,6 @@ let RenderInfrastructure = {
         let bounds = Util.Convert.leafletBoundsToNESWObject(this.map.getBounds());
         usefulBounds = Querier.createBoundsList(bounds);
         if (usefulBounds) {
-            console.log(JSON.stringify(usefulBounds));
             usefulBounds.forEach(bound => {
                 let filter = Util.makeOSMFilter();
                 if (filter.length > 0) {
