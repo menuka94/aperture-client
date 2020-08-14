@@ -1236,9 +1236,8 @@ const Util = {
      */
     fixFeatureID: function (feature) {
         if(this.getFeatureType(feature) === FEATURETYPE.lineString && JSON.stringify(feature.geometry.coordinates[0]) === JSON.stringify(feature.geometry.coordinates[feature.geometry.coordinates.length - 1])){
-            //console.log(feature.geometry);
             feature.geometry.type = "Polygon";
-            console.log(feature.geometry);
+            feature.geometry.coordinates = [feature.geometry.coordinates];
         }
     },
     /**                                                                            
