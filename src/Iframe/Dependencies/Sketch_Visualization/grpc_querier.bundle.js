@@ -2605,7 +2605,7 @@ const {TargetedQueryServiceClient} = require('./targeted_query_service_grpc_web_
 
 GRPCQuerier = {
     initialize: function () {
-        this.service = new TargetedQueryServiceClient("http://" + window.location.hostname + ":9092");
+        this.service = new TargetedQueryServiceClient("http://lattice-2.cs.colostate.edu:9092");
         return this;
     },
 
@@ -2815,7 +2815,9 @@ module.exports = proto;
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global = Function('return this')();
+//var global = Function('return this')();
+var global = (typeof self == "undefined" ? typeof global == "undefined"? this : global : self);
+
 
 goog.exportSymbol('proto.Expression', null, global);
 goog.exportSymbol('proto.Expression.CombineOperator', null, global);
