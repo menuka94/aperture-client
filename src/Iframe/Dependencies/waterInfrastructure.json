@@ -81,29 +81,21 @@
     "reservoir": {
         "iconAddr": "../../../images/reservoir-lake.png",
         "color": "#00FFFF",
-        "defaultRender": true,
-        "query":"water=reservoir",
         "groupMem":"Water (Man Made)"
     },
     "basin": {
         "iconAddr": "../../../images/reservoir-lake.png",
         "color": "#00FFFF",
-        "defaultRender": true,
-        "query":"landuse=basin",
         "groupMem":"Water (Natural)"
     },
     "pond":{
         "color": "#00FFFF",
         "iconAddr": "../../../images/reservoir-lake.png",
-        "defaultRender": true,
-        "query": "water=pond",
         "groupMem":"Water (Natural)"
     },
     "lake":{
         "color": "#00FFFF",
         "iconAddr": "../../../images/reservoir-lake.png",
-        "defaultRender": true,
-        "query": "water=lake",
         "groupMem":"Water (Natural)"
     },
     "Natural_Gas_Pipeline": {
