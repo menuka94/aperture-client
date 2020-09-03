@@ -21,7 +21,7 @@ let Generator = {
      * @param {string} type checkbox style. ex: "checkbox" or "radio"
      * @param {boolean} groupModules should modules have groups? this requires special JSON groups
      */
-    config: function (elementsJson, selectContainer, colorCode, callFunc, type, groupModules, attribution) {
+    config: function (elementsJson, selectContainer, colorCode, callFunc, type, groupModules, attribution, clearFunc) {
         if (selectContainer == null || elementsJson == null) {
             return;
         }
@@ -32,7 +32,9 @@ let Generator = {
                 let innerHTML = this.makeList(groupInfo.elements[i], elementsJson, type, colorCode, callFunc);
                 selectContainer.innerHTML += "<div class='content' style='display:none;'>" + innerHTML + "</div>";
             }
-            selectContainer.innerHTML += "<button id='clearFeatures' onClick='RenderInfrastructure.removeAllFeaturesFromMap(); Generator.clearChecks();'>Clear All Features</button>";
+            if(clearFunc){
+                selectContainer.innerHTML += "<button id='clearFeatures' onClick='RenderInfrastructure.removeAllFeaturesFromMap(); Generator.clearChecks();'>Clear All Features</button>";
+            }
             if(attribution){
                 this.attribution(attribution,selectContainer);
             }
