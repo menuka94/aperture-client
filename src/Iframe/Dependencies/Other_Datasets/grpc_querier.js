@@ -1,5 +1,5 @@
 const { OsmRequest, DatasetRequest, CensusRequest } = require("./sustain_pb.js")
-const { SustainClient } = require('./sustain_grpc_web_pb.js');
+const { CensusClient } = require('./sustain_grpc_web_pb.js');
 
 /**
  * @namespace Census_GRPCQuerier
@@ -15,7 +15,7 @@ GRPCQuerier = {
     * @method initialize
     */
   initialize: function () {
-    this.service = new SustainClient("http://lattice-2.cs.colostate.edu:9092", "for-dataset-explorer");
+    this.service = new CensusClient("http://lattice-2.cs.colostate.edu:9092", "census.Census/SpatialQuery");
   },
 
   getOSMData: function (geojson, filters) {

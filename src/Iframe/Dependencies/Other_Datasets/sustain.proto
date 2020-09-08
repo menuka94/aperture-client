@@ -1,13 +1,15 @@
 syntax = "proto3";
 
+//import "google/api/http.proto";
+
 option java_multiple_files = true;
-option java_package = "org.sustain";
-option java_outer_classname = "SustainQueryService";
+option java_package = "org.sustain.census";
+option java_outer_classname = "SustainCensus";
 
-package sustain;
+package census;
 
-service Sustain{
-  // census query with MongoDB support
+service Census {
+  // spatial query with MongoDB support
   rpc CensusQuery (CensusRequest) returns (stream CensusResponse) {}
 
   // Query Open Street Map Data
@@ -118,6 +120,7 @@ enum CensusResolution {
   State = 0;
   County = 1;
   Tract = 2;
+  Block = 3;
 }
 
 enum Decade {
@@ -140,3 +143,4 @@ message Predicate {
   ComparisonOperator comparisonOp = 3;
   double comparisonValue = 4;
 }
+

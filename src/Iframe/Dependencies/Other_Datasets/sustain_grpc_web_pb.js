@@ -1,5 +1,5 @@
 /**
- * @fileoverview gRPC-Web generated client stub for sustain
+ * @fileoverview gRPC-Web generated client stub for census
  * @enhanceable
  * @public
  */
@@ -16,7 +16,7 @@ const grpc = {};
 grpc.web = require('grpc-web');
 
 const proto = {};
-proto.sustain = require('./sustain_pb.js');
+proto.census = require('./sustain_pb.js');
 
 /**
  * @param {string} hostname
@@ -26,7 +26,7 @@ proto.sustain = require('./sustain_pb.js');
  * @struct
  * @final
  */
-proto.sustain.SustainClient =
+proto.census.CensusClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
   options['format'] = 'text';
@@ -52,7 +52,7 @@ proto.sustain.SustainClient =
  * @struct
  * @final
  */
-proto.sustain.SustainPromiseClient =
+proto.census.CensusPromiseClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
   options['format'] = 'text';
@@ -73,302 +73,302 @@ proto.sustain.SustainPromiseClient =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.sustain.CensusRequest,
- *   !proto.sustain.CensusResponse>}
+ *   !proto.census.CensusRequest,
+ *   !proto.census.CensusResponse>}
  */
-const methodDescriptor_Sustain_CensusQuery = new grpc.web.MethodDescriptor(
-  '/sustain.Sustain/CensusQuery',
+const methodDescriptor_Census_CensusQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/CensusQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.sustain.CensusRequest,
-  proto.sustain.CensusResponse,
+  proto.census.CensusRequest,
+  proto.census.CensusResponse,
   /**
-   * @param {!proto.sustain.CensusRequest} request
+   * @param {!proto.census.CensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.CensusResponse.deserializeBinary
+  proto.census.CensusResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.sustain.CensusRequest,
- *   !proto.sustain.CensusResponse>}
+ *   !proto.census.CensusRequest,
+ *   !proto.census.CensusResponse>}
  */
-const methodInfo_Sustain_CensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.sustain.CensusResponse,
+const methodInfo_Census_CensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.CensusResponse,
   /**
-   * @param {!proto.sustain.CensusRequest} request
+   * @param {!proto.census.CensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.CensusResponse.deserializeBinary
+  proto.census.CensusResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.sustain.CensusRequest} request The request proto
+ * @param {!proto.census.CensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.CensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.CensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainClient.prototype.censusQuery =
+proto.census.CensusClient.prototype.censusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/CensusQuery',
+      '/census.Census/CensusQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_CensusQuery);
+      methodDescriptor_Census_CensusQuery);
 };
 
 
 /**
- * @param {!proto.sustain.CensusRequest} request The request proto
+ * @param {!proto.census.CensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.CensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.CensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainPromiseClient.prototype.censusQuery =
+proto.census.CensusPromiseClient.prototype.censusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/CensusQuery',
+      '/census.Census/CensusQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_CensusQuery);
+      methodDescriptor_Census_CensusQuery);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.sustain.OsmRequest,
- *   !proto.sustain.OsmResponse>}
+ *   !proto.census.OsmRequest,
+ *   !proto.census.OsmResponse>}
  */
-const methodDescriptor_Sustain_OsmQuery = new grpc.web.MethodDescriptor(
-  '/sustain.Sustain/OsmQuery',
+const methodDescriptor_Census_OsmQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/OsmQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.sustain.OsmRequest,
-  proto.sustain.OsmResponse,
+  proto.census.OsmRequest,
+  proto.census.OsmResponse,
   /**
-   * @param {!proto.sustain.OsmRequest} request
+   * @param {!proto.census.OsmRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.OsmResponse.deserializeBinary
+  proto.census.OsmResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.sustain.OsmRequest,
- *   !proto.sustain.OsmResponse>}
+ *   !proto.census.OsmRequest,
+ *   !proto.census.OsmResponse>}
  */
-const methodInfo_Sustain_OsmQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.sustain.OsmResponse,
+const methodInfo_Census_OsmQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.OsmResponse,
   /**
-   * @param {!proto.sustain.OsmRequest} request
+   * @param {!proto.census.OsmRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.OsmResponse.deserializeBinary
+  proto.census.OsmResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.sustain.OsmRequest} request The request proto
+ * @param {!proto.census.OsmRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.OsmResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.OsmResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainClient.prototype.osmQuery =
+proto.census.CensusClient.prototype.osmQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/OsmQuery',
+      '/census.Census/OsmQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_OsmQuery);
+      methodDescriptor_Census_OsmQuery);
 };
 
 
 /**
- * @param {!proto.sustain.OsmRequest} request The request proto
+ * @param {!proto.census.OsmRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.OsmResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.OsmResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainPromiseClient.prototype.osmQuery =
+proto.census.CensusPromiseClient.prototype.osmQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/OsmQuery',
+      '/census.Census/OsmQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_OsmQuery);
+      methodDescriptor_Census_OsmQuery);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.sustain.DatasetRequest,
- *   !proto.sustain.DatasetResponse>}
+ *   !proto.census.DatasetRequest,
+ *   !proto.census.DatasetResponse>}
  */
-const methodDescriptor_Sustain_DatasetQuery = new grpc.web.MethodDescriptor(
-  '/sustain.Sustain/DatasetQuery',
+const methodDescriptor_Census_DatasetQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/DatasetQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.sustain.DatasetRequest,
-  proto.sustain.DatasetResponse,
+  proto.census.DatasetRequest,
+  proto.census.DatasetResponse,
   /**
-   * @param {!proto.sustain.DatasetRequest} request
+   * @param {!proto.census.DatasetRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.DatasetResponse.deserializeBinary
+  proto.census.DatasetResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.sustain.DatasetRequest,
- *   !proto.sustain.DatasetResponse>}
+ *   !proto.census.DatasetRequest,
+ *   !proto.census.DatasetResponse>}
  */
-const methodInfo_Sustain_DatasetQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.sustain.DatasetResponse,
+const methodInfo_Census_DatasetQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.DatasetResponse,
   /**
-   * @param {!proto.sustain.DatasetRequest} request
+   * @param {!proto.census.DatasetRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.DatasetResponse.deserializeBinary
+  proto.census.DatasetResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.sustain.DatasetRequest} request The request proto
+ * @param {!proto.census.DatasetRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.DatasetResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.DatasetResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainClient.prototype.datasetQuery =
+proto.census.CensusClient.prototype.datasetQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/DatasetQuery',
+      '/census.Census/DatasetQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_DatasetQuery);
+      methodDescriptor_Census_DatasetQuery);
 };
 
 
 /**
- * @param {!proto.sustain.DatasetRequest} request The request proto
+ * @param {!proto.census.DatasetRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.DatasetResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.DatasetResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainPromiseClient.prototype.datasetQuery =
+proto.census.CensusPromiseClient.prototype.datasetQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/DatasetQuery',
+      '/census.Census/DatasetQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_DatasetQuery);
+      methodDescriptor_Census_DatasetQuery);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.sustain.TargetedCensusRequest,
- *   !proto.sustain.TargetedCensusResponse>}
+ *   !proto.census.TargetedCensusRequest,
+ *   !proto.census.TargetedCensusResponse>}
  */
-const methodDescriptor_Sustain_ExecuteTargetedCensusQuery = new grpc.web.MethodDescriptor(
-  '/sustain.Sustain/ExecuteTargetedCensusQuery',
+const methodDescriptor_Census_ExecuteTargetedCensusQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/ExecuteTargetedCensusQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.sustain.TargetedCensusRequest,
-  proto.sustain.TargetedCensusResponse,
+  proto.census.TargetedCensusRequest,
+  proto.census.TargetedCensusResponse,
   /**
-   * @param {!proto.sustain.TargetedCensusRequest} request
+   * @param {!proto.census.TargetedCensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.TargetedCensusResponse.deserializeBinary
+  proto.census.TargetedCensusResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.sustain.TargetedCensusRequest,
- *   !proto.sustain.TargetedCensusResponse>}
+ *   !proto.census.TargetedCensusRequest,
+ *   !proto.census.TargetedCensusResponse>}
  */
-const methodInfo_Sustain_ExecuteTargetedCensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.sustain.TargetedCensusResponse,
+const methodInfo_Census_ExecuteTargetedCensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.TargetedCensusResponse,
   /**
-   * @param {!proto.sustain.TargetedCensusRequest} request
+   * @param {!proto.census.TargetedCensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.TargetedCensusResponse.deserializeBinary
+  proto.census.TargetedCensusResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.sustain.TargetedCensusRequest} request The request proto
+ * @param {!proto.census.TargetedCensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.TargetedCensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.TargetedCensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainClient.prototype.executeTargetedCensusQuery =
+proto.census.CensusClient.prototype.executeTargetedCensusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/ExecuteTargetedCensusQuery',
+      '/census.Census/ExecuteTargetedCensusQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_ExecuteTargetedCensusQuery);
+      methodDescriptor_Census_ExecuteTargetedCensusQuery);
 };
 
 
 /**
- * @param {!proto.sustain.TargetedCensusRequest} request The request proto
+ * @param {!proto.census.TargetedCensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.TargetedCensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.TargetedCensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainPromiseClient.prototype.executeTargetedCensusQuery =
+proto.census.CensusPromiseClient.prototype.executeTargetedCensusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/ExecuteTargetedCensusQuery',
+      '/census.Census/ExecuteTargetedCensusQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_ExecuteTargetedCensusQuery);
+      methodDescriptor_Census_ExecuteTargetedCensusQuery);
 };
 
 
-module.exports = proto.sustain;
+module.exports = proto.census;
 

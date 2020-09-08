@@ -2601,7 +2601,7 @@ W.MethodType={UNARY:"unary",SERVER_STREAMING:"server_streaming"};
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],6:[function(require,module,exports){
 const { OsmRequest, DatasetRequest, CensusRequest } = require("./sustain_pb.js")
-const { SustainClient } = require('./sustain_grpc_web_pb.js');
+const { CensusClient } = require('./sustain_grpc_web_pb.js');
 
 /**
  * @namespace Census_GRPCQuerier
@@ -2617,7 +2617,7 @@ GRPCQuerier = {
     * @method initialize
     */
   initialize: function () {
-    this.service = new SustainClient("http://lattice-2.cs.colostate.edu:9092", "for-dataset-explorer");
+    this.service = new CensusClient("http://lattice-2.cs.colostate.edu:9092", "census.Census/SpatialQuery");
   },
 
   getOSMData: function (geojson, filters) {
@@ -2721,7 +2721,7 @@ try {
 
 },{"./sustain_grpc_web_pb.js":7,"./sustain_pb.js":8}],7:[function(require,module,exports){
 /**
- * @fileoverview gRPC-Web generated client stub for sustain
+ * @fileoverview gRPC-Web generated client stub for census
  * @enhanceable
  * @public
  */
@@ -2738,7 +2738,7 @@ const grpc = {};
 grpc.web = require('grpc-web');
 
 const proto = {};
-proto.sustain = require('./sustain_pb.js');
+proto.census = require('./sustain_pb.js');
 
 /**
  * @param {string} hostname
@@ -2748,7 +2748,7 @@ proto.sustain = require('./sustain_pb.js');
  * @struct
  * @final
  */
-proto.sustain.SustainClient =
+proto.census.CensusClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
   options['format'] = 'text';
@@ -2774,7 +2774,7 @@ proto.sustain.SustainClient =
  * @struct
  * @final
  */
-proto.sustain.SustainPromiseClient =
+proto.census.CensusPromiseClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
   options['format'] = 'text';
@@ -2795,304 +2795,304 @@ proto.sustain.SustainPromiseClient =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.sustain.CensusRequest,
- *   !proto.sustain.CensusResponse>}
+ *   !proto.census.CensusRequest,
+ *   !proto.census.CensusResponse>}
  */
-const methodDescriptor_Sustain_CensusQuery = new grpc.web.MethodDescriptor(
-  '/sustain.Sustain/CensusQuery',
+const methodDescriptor_Census_CensusQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/CensusQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.sustain.CensusRequest,
-  proto.sustain.CensusResponse,
+  proto.census.CensusRequest,
+  proto.census.CensusResponse,
   /**
-   * @param {!proto.sustain.CensusRequest} request
+   * @param {!proto.census.CensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.CensusResponse.deserializeBinary
+  proto.census.CensusResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.sustain.CensusRequest,
- *   !proto.sustain.CensusResponse>}
+ *   !proto.census.CensusRequest,
+ *   !proto.census.CensusResponse>}
  */
-const methodInfo_Sustain_CensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.sustain.CensusResponse,
+const methodInfo_Census_CensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.CensusResponse,
   /**
-   * @param {!proto.sustain.CensusRequest} request
+   * @param {!proto.census.CensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.CensusResponse.deserializeBinary
+  proto.census.CensusResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.sustain.CensusRequest} request The request proto
+ * @param {!proto.census.CensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.CensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.CensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainClient.prototype.censusQuery =
+proto.census.CensusClient.prototype.censusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/CensusQuery',
+      '/census.Census/CensusQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_CensusQuery);
+      methodDescriptor_Census_CensusQuery);
 };
 
 
 /**
- * @param {!proto.sustain.CensusRequest} request The request proto
+ * @param {!proto.census.CensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.CensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.CensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainPromiseClient.prototype.censusQuery =
+proto.census.CensusPromiseClient.prototype.censusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/CensusQuery',
+      '/census.Census/CensusQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_CensusQuery);
+      methodDescriptor_Census_CensusQuery);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.sustain.OsmRequest,
- *   !proto.sustain.OsmResponse>}
+ *   !proto.census.OsmRequest,
+ *   !proto.census.OsmResponse>}
  */
-const methodDescriptor_Sustain_OsmQuery = new grpc.web.MethodDescriptor(
-  '/sustain.Sustain/OsmQuery',
+const methodDescriptor_Census_OsmQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/OsmQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.sustain.OsmRequest,
-  proto.sustain.OsmResponse,
+  proto.census.OsmRequest,
+  proto.census.OsmResponse,
   /**
-   * @param {!proto.sustain.OsmRequest} request
+   * @param {!proto.census.OsmRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.OsmResponse.deserializeBinary
+  proto.census.OsmResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.sustain.OsmRequest,
- *   !proto.sustain.OsmResponse>}
+ *   !proto.census.OsmRequest,
+ *   !proto.census.OsmResponse>}
  */
-const methodInfo_Sustain_OsmQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.sustain.OsmResponse,
+const methodInfo_Census_OsmQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.OsmResponse,
   /**
-   * @param {!proto.sustain.OsmRequest} request
+   * @param {!proto.census.OsmRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.OsmResponse.deserializeBinary
+  proto.census.OsmResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.sustain.OsmRequest} request The request proto
+ * @param {!proto.census.OsmRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.OsmResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.OsmResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainClient.prototype.osmQuery =
+proto.census.CensusClient.prototype.osmQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/OsmQuery',
+      '/census.Census/OsmQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_OsmQuery);
+      methodDescriptor_Census_OsmQuery);
 };
 
 
 /**
- * @param {!proto.sustain.OsmRequest} request The request proto
+ * @param {!proto.census.OsmRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.OsmResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.OsmResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainPromiseClient.prototype.osmQuery =
+proto.census.CensusPromiseClient.prototype.osmQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/OsmQuery',
+      '/census.Census/OsmQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_OsmQuery);
+      methodDescriptor_Census_OsmQuery);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.sustain.DatasetRequest,
- *   !proto.sustain.DatasetResponse>}
+ *   !proto.census.DatasetRequest,
+ *   !proto.census.DatasetResponse>}
  */
-const methodDescriptor_Sustain_DatasetQuery = new grpc.web.MethodDescriptor(
-  '/sustain.Sustain/DatasetQuery',
+const methodDescriptor_Census_DatasetQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/DatasetQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.sustain.DatasetRequest,
-  proto.sustain.DatasetResponse,
+  proto.census.DatasetRequest,
+  proto.census.DatasetResponse,
   /**
-   * @param {!proto.sustain.DatasetRequest} request
+   * @param {!proto.census.DatasetRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.DatasetResponse.deserializeBinary
+  proto.census.DatasetResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.sustain.DatasetRequest,
- *   !proto.sustain.DatasetResponse>}
+ *   !proto.census.DatasetRequest,
+ *   !proto.census.DatasetResponse>}
  */
-const methodInfo_Sustain_DatasetQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.sustain.DatasetResponse,
+const methodInfo_Census_DatasetQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.DatasetResponse,
   /**
-   * @param {!proto.sustain.DatasetRequest} request
+   * @param {!proto.census.DatasetRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.DatasetResponse.deserializeBinary
+  proto.census.DatasetResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.sustain.DatasetRequest} request The request proto
+ * @param {!proto.census.DatasetRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.DatasetResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.DatasetResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainClient.prototype.datasetQuery =
+proto.census.CensusClient.prototype.datasetQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/DatasetQuery',
+      '/census.Census/DatasetQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_DatasetQuery);
+      methodDescriptor_Census_DatasetQuery);
 };
 
 
 /**
- * @param {!proto.sustain.DatasetRequest} request The request proto
+ * @param {!proto.census.DatasetRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.DatasetResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.DatasetResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainPromiseClient.prototype.datasetQuery =
+proto.census.CensusPromiseClient.prototype.datasetQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/DatasetQuery',
+      '/census.Census/DatasetQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_DatasetQuery);
+      methodDescriptor_Census_DatasetQuery);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.sustain.TargetedCensusRequest,
- *   !proto.sustain.TargetedCensusResponse>}
+ *   !proto.census.TargetedCensusRequest,
+ *   !proto.census.TargetedCensusResponse>}
  */
-const methodDescriptor_Sustain_ExecuteTargetedCensusQuery = new grpc.web.MethodDescriptor(
-  '/sustain.Sustain/ExecuteTargetedCensusQuery',
+const methodDescriptor_Census_ExecuteTargetedCensusQuery = new grpc.web.MethodDescriptor(
+  '/census.Census/ExecuteTargetedCensusQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.sustain.TargetedCensusRequest,
-  proto.sustain.TargetedCensusResponse,
+  proto.census.TargetedCensusRequest,
+  proto.census.TargetedCensusResponse,
   /**
-   * @param {!proto.sustain.TargetedCensusRequest} request
+   * @param {!proto.census.TargetedCensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.TargetedCensusResponse.deserializeBinary
+  proto.census.TargetedCensusResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.sustain.TargetedCensusRequest,
- *   !proto.sustain.TargetedCensusResponse>}
+ *   !proto.census.TargetedCensusRequest,
+ *   !proto.census.TargetedCensusResponse>}
  */
-const methodInfo_Sustain_ExecuteTargetedCensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.sustain.TargetedCensusResponse,
+const methodInfo_Census_ExecuteTargetedCensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.census.TargetedCensusResponse,
   /**
-   * @param {!proto.sustain.TargetedCensusRequest} request
+   * @param {!proto.census.TargetedCensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.sustain.TargetedCensusResponse.deserializeBinary
+  proto.census.TargetedCensusResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.sustain.TargetedCensusRequest} request The request proto
+ * @param {!proto.census.TargetedCensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.TargetedCensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.TargetedCensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainClient.prototype.executeTargetedCensusQuery =
+proto.census.CensusClient.prototype.executeTargetedCensusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/ExecuteTargetedCensusQuery',
+      '/census.Census/ExecuteTargetedCensusQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_ExecuteTargetedCensusQuery);
+      methodDescriptor_Census_ExecuteTargetedCensusQuery);
 };
 
 
 /**
- * @param {!proto.sustain.TargetedCensusRequest} request The request proto
+ * @param {!proto.census.TargetedCensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.sustain.TargetedCensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.census.TargetedCensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.sustain.SustainPromiseClient.prototype.executeTargetedCensusQuery =
+proto.census.CensusPromiseClient.prototype.executeTargetedCensusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/sustain.Sustain/ExecuteTargetedCensusQuery',
+      '/census.Census/ExecuteTargetedCensusQuery',
       request,
       metadata || {},
-      methodDescriptor_Sustain_ExecuteTargetedCensusQuery);
+      methodDescriptor_Census_ExecuteTargetedCensusQuery);
 };
 
 
-module.exports = proto.sustain;
+module.exports = proto.census;
 
 
 },{"./sustain_pb.js":8,"grpc-web":5}],8:[function(require,module,exports){
@@ -3109,25 +3109,25 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-goog.exportSymbol('proto.sustain.CensusFeature', null, global);
-goog.exportSymbol('proto.sustain.CensusRequest', null, global);
-goog.exportSymbol('proto.sustain.CensusResolution', null, global);
-goog.exportSymbol('proto.sustain.CensusResponse', null, global);
-goog.exportSymbol('proto.sustain.DatasetEntry', null, global);
-goog.exportSymbol('proto.sustain.DatasetRequest', null, global);
-goog.exportSymbol('proto.sustain.DatasetRequest.Dataset', null, global);
-goog.exportSymbol('proto.sustain.DatasetResponse', null, global);
-goog.exportSymbol('proto.sustain.Decade', null, global);
-goog.exportSymbol('proto.sustain.IntraDatasetOp', null, global);
-goog.exportSymbol('proto.sustain.OsmRequest', null, global);
-goog.exportSymbol('proto.sustain.OsmRequest.Dataset', null, global);
-goog.exportSymbol('proto.sustain.OsmRequest.OsmRequestParam', null, global);
-goog.exportSymbol('proto.sustain.OsmResponse', null, global);
-goog.exportSymbol('proto.sustain.Predicate', null, global);
-goog.exportSymbol('proto.sustain.Predicate.ComparisonOperator', null, global);
-goog.exportSymbol('proto.sustain.SpatialOp', null, global);
-goog.exportSymbol('proto.sustain.TargetedCensusRequest', null, global);
-goog.exportSymbol('proto.sustain.TargetedCensusResponse', null, global);
+goog.exportSymbol('proto.census.CensusFeature', null, global);
+goog.exportSymbol('proto.census.CensusRequest', null, global);
+goog.exportSymbol('proto.census.CensusResolution', null, global);
+goog.exportSymbol('proto.census.CensusResponse', null, global);
+goog.exportSymbol('proto.census.DatasetEntry', null, global);
+goog.exportSymbol('proto.census.DatasetRequest', null, global);
+goog.exportSymbol('proto.census.DatasetRequest.Dataset', null, global);
+goog.exportSymbol('proto.census.DatasetResponse', null, global);
+goog.exportSymbol('proto.census.Decade', null, global);
+goog.exportSymbol('proto.census.IntraDatasetOp', null, global);
+goog.exportSymbol('proto.census.OsmRequest', null, global);
+goog.exportSymbol('proto.census.OsmRequest.Dataset', null, global);
+goog.exportSymbol('proto.census.OsmRequest.OsmRequestParam', null, global);
+goog.exportSymbol('proto.census.OsmResponse', null, global);
+goog.exportSymbol('proto.census.Predicate', null, global);
+goog.exportSymbol('proto.census.Predicate.ComparisonOperator', null, global);
+goog.exportSymbol('proto.census.SpatialOp', null, global);
+goog.exportSymbol('proto.census.TargetedCensusRequest', null, global);
+goog.exportSymbol('proto.census.TargetedCensusResponse', null, global);
 
 /**
  * Generated by JsPbCodeGenerator.
@@ -3139,12 +3139,12 @@ goog.exportSymbol('proto.sustain.TargetedCensusResponse', null, global);
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.DatasetRequest = function(opt_data) {
+proto.census.DatasetRequest = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.DatasetRequest, jspb.Message);
+goog.inherits(proto.census.DatasetRequest, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.DatasetRequest.displayName = 'proto.sustain.DatasetRequest';
+  proto.census.DatasetRequest.displayName = 'proto.census.DatasetRequest';
 }
 
 
@@ -3159,8 +3159,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.DatasetRequest.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.DatasetRequest.toObject(opt_includeInstance, this);
+proto.census.DatasetRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.DatasetRequest.toObject(opt_includeInstance, this);
 };
 
 
@@ -3169,11 +3169,11 @@ proto.sustain.DatasetRequest.prototype.toObject = function(opt_includeInstance) 
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.DatasetRequest} msg The msg instance to transform.
+ * @param {!proto.census.DatasetRequest} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.DatasetRequest.toObject = function(includeInstance, msg) {
+proto.census.DatasetRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     dataset: jspb.Message.getFieldWithDefault(msg, 1, 0),
     requestgeojson: jspb.Message.getFieldWithDefault(msg, 2, ""),
@@ -3192,23 +3192,23 @@ proto.sustain.DatasetRequest.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.DatasetRequest}
+ * @return {!proto.census.DatasetRequest}
  */
-proto.sustain.DatasetRequest.deserializeBinary = function(bytes) {
+proto.census.DatasetRequest.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.DatasetRequest;
-  return proto.sustain.DatasetRequest.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.DatasetRequest;
+  return proto.census.DatasetRequest.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.DatasetRequest} msg The message object to deserialize into.
+ * @param {!proto.census.DatasetRequest} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.DatasetRequest}
+ * @return {!proto.census.DatasetRequest}
  */
-proto.sustain.DatasetRequest.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.DatasetRequest.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -3216,7 +3216,7 @@ proto.sustain.DatasetRequest.deserializeBinaryFromReader = function(msg, reader)
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!proto.sustain.DatasetRequest.Dataset} */ (reader.readEnum());
+      var value = /** @type {!proto.census.DatasetRequest.Dataset} */ (reader.readEnum());
       msg.setDataset(value);
       break;
     case 2:
@@ -3224,7 +3224,7 @@ proto.sustain.DatasetRequest.deserializeBinaryFromReader = function(msg, reader)
       msg.setRequestgeojson(value);
       break;
     case 3:
-      var value = /** @type {!proto.sustain.SpatialOp} */ (reader.readEnum());
+      var value = /** @type {!proto.census.SpatialOp} */ (reader.readEnum());
       msg.setSpatialop(value);
       break;
     case 4:
@@ -3246,9 +3246,9 @@ proto.sustain.DatasetRequest.deserializeBinaryFromReader = function(msg, reader)
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.DatasetRequest.prototype.serializeBinary = function() {
+proto.census.DatasetRequest.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.DatasetRequest.serializeBinaryToWriter(this, writer);
+  proto.census.DatasetRequest.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -3256,11 +3256,11 @@ proto.sustain.DatasetRequest.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.DatasetRequest} message
+ * @param {!proto.census.DatasetRequest} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.DatasetRequest.serializeBinaryToWriter = function(message, writer) {
+proto.census.DatasetRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getDataset();
   if (f !== 0.0) {
@@ -3293,7 +3293,7 @@ proto.sustain.DatasetRequest.serializeBinaryToWriter = function(message, writer)
 /**
  * @enum {number}
  */
-proto.sustain.DatasetRequest.Dataset = {
+proto.census.DatasetRequest.Dataset = {
   HOSPITALS: 0,
   DAMS: 1,
   ELECTRICAL_SUBSTATIONS: 2,
@@ -3306,15 +3306,15 @@ proto.sustain.DatasetRequest.Dataset = {
 
 /**
  * optional Dataset dataset = 1;
- * @return {!proto.sustain.DatasetRequest.Dataset}
+ * @return {!proto.census.DatasetRequest.Dataset}
  */
-proto.sustain.DatasetRequest.prototype.getDataset = function() {
-  return /** @type {!proto.sustain.DatasetRequest.Dataset} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+proto.census.DatasetRequest.prototype.getDataset = function() {
+  return /** @type {!proto.census.DatasetRequest.Dataset} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
-/** @param {!proto.sustain.DatasetRequest.Dataset} value */
-proto.sustain.DatasetRequest.prototype.setDataset = function(value) {
+/** @param {!proto.census.DatasetRequest.Dataset} value */
+proto.census.DatasetRequest.prototype.setDataset = function(value) {
   jspb.Message.setProto3EnumField(this, 1, value);
 };
 
@@ -3323,28 +3323,28 @@ proto.sustain.DatasetRequest.prototype.setDataset = function(value) {
  * optional string requestGeoJson = 2;
  * @return {string}
  */
-proto.sustain.DatasetRequest.prototype.getRequestgeojson = function() {
+proto.census.DatasetRequest.prototype.getRequestgeojson = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.DatasetRequest.prototype.setRequestgeojson = function(value) {
+proto.census.DatasetRequest.prototype.setRequestgeojson = function(value) {
   jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
 /**
  * optional SpatialOp spatialOp = 3;
- * @return {!proto.sustain.SpatialOp}
+ * @return {!proto.census.SpatialOp}
  */
-proto.sustain.DatasetRequest.prototype.getSpatialop = function() {
-  return /** @type {!proto.sustain.SpatialOp} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+proto.census.DatasetRequest.prototype.getSpatialop = function() {
+  return /** @type {!proto.census.SpatialOp} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
-/** @param {!proto.sustain.SpatialOp} value */
-proto.sustain.DatasetRequest.prototype.setSpatialop = function(value) {
+/** @param {!proto.census.SpatialOp} value */
+proto.census.DatasetRequest.prototype.setSpatialop = function(value) {
   jspb.Message.setProto3EnumField(this, 3, value);
 };
 
@@ -3355,14 +3355,14 @@ proto.sustain.DatasetRequest.prototype.setSpatialop = function(value) {
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
-proto.sustain.DatasetRequest.prototype.getRequestparamsMap = function(opt_noLazyCreate) {
+proto.census.DatasetRequest.prototype.getRequestparamsMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
       jspb.Message.getMapField(this, 4, opt_noLazyCreate,
       null));
 };
 
 
-proto.sustain.DatasetRequest.prototype.clearRequestparamsMap = function() {
+proto.census.DatasetRequest.prototype.clearRequestparamsMap = function() {
   this.getRequestparamsMap().clear();
 };
 
@@ -3378,12 +3378,12 @@ proto.sustain.DatasetRequest.prototype.clearRequestparamsMap = function() {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.DatasetResponse = function(opt_data) {
+proto.census.DatasetResponse = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.DatasetResponse, jspb.Message);
+goog.inherits(proto.census.DatasetResponse, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.DatasetResponse.displayName = 'proto.sustain.DatasetResponse';
+  proto.census.DatasetResponse.displayName = 'proto.census.DatasetResponse';
 }
 
 
@@ -3398,8 +3398,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.DatasetResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.DatasetResponse.toObject(opt_includeInstance, this);
+proto.census.DatasetResponse.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.DatasetResponse.toObject(opt_includeInstance, this);
 };
 
 
@@ -3408,11 +3408,11 @@ proto.sustain.DatasetResponse.prototype.toObject = function(opt_includeInstance)
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.DatasetResponse} msg The msg instance to transform.
+ * @param {!proto.census.DatasetResponse} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.DatasetResponse.toObject = function(includeInstance, msg) {
+proto.census.DatasetResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     response: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
@@ -3428,23 +3428,23 @@ proto.sustain.DatasetResponse.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.DatasetResponse}
+ * @return {!proto.census.DatasetResponse}
  */
-proto.sustain.DatasetResponse.deserializeBinary = function(bytes) {
+proto.census.DatasetResponse.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.DatasetResponse;
-  return proto.sustain.DatasetResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.DatasetResponse;
+  return proto.census.DatasetResponse.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.DatasetResponse} msg The message object to deserialize into.
+ * @param {!proto.census.DatasetResponse} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.DatasetResponse}
+ * @return {!proto.census.DatasetResponse}
  */
-proto.sustain.DatasetResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.DatasetResponse.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -3468,9 +3468,9 @@ proto.sustain.DatasetResponse.deserializeBinaryFromReader = function(msg, reader
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.DatasetResponse.prototype.serializeBinary = function() {
+proto.census.DatasetResponse.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.DatasetResponse.serializeBinaryToWriter(this, writer);
+  proto.census.DatasetResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -3478,11 +3478,11 @@ proto.sustain.DatasetResponse.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.DatasetResponse} message
+ * @param {!proto.census.DatasetResponse} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.DatasetResponse.serializeBinaryToWriter = function(message, writer) {
+proto.census.DatasetResponse.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getResponse();
   if (f.length > 0) {
@@ -3498,13 +3498,13 @@ proto.sustain.DatasetResponse.serializeBinaryToWriter = function(message, writer
  * optional string response = 1;
  * @return {string}
  */
-proto.sustain.DatasetResponse.prototype.getResponse = function() {
+proto.census.DatasetResponse.prototype.getResponse = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.DatasetResponse.prototype.setResponse = function(value) {
+proto.census.DatasetResponse.prototype.setResponse = function(value) {
   jspb.Message.setProto3StringField(this, 1, value);
 };
 
@@ -3520,19 +3520,19 @@ proto.sustain.DatasetResponse.prototype.setResponse = function(value) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.OsmRequest = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.sustain.OsmRequest.repeatedFields_, null);
+proto.census.OsmRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.census.OsmRequest.repeatedFields_, null);
 };
-goog.inherits(proto.sustain.OsmRequest, jspb.Message);
+goog.inherits(proto.census.OsmRequest, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.OsmRequest.displayName = 'proto.sustain.OsmRequest';
+  proto.census.OsmRequest.displayName = 'proto.census.OsmRequest';
 }
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
  * @const
  */
-proto.sustain.OsmRequest.repeatedFields_ = [4];
+proto.census.OsmRequest.repeatedFields_ = [4];
 
 
 
@@ -3547,8 +3547,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.OsmRequest.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.OsmRequest.toObject(opt_includeInstance, this);
+proto.census.OsmRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.OsmRequest.toObject(opt_includeInstance, this);
 };
 
 
@@ -3557,17 +3557,17 @@ proto.sustain.OsmRequest.prototype.toObject = function(opt_includeInstance) {
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.OsmRequest} msg The msg instance to transform.
+ * @param {!proto.census.OsmRequest} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.OsmRequest.toObject = function(includeInstance, msg) {
+proto.census.OsmRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     dataset: jspb.Message.getFieldWithDefault(msg, 1, 0),
     requestgeojson: jspb.Message.getFieldWithDefault(msg, 2, ""),
     spatialop: jspb.Message.getFieldWithDefault(msg, 3, 0),
     requestparamsList: jspb.Message.toObjectList(msg.getRequestparamsList(),
-    proto.sustain.OsmRequest.OsmRequestParam.toObject, includeInstance)
+    proto.census.OsmRequest.OsmRequestParam.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -3581,23 +3581,23 @@ proto.sustain.OsmRequest.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.OsmRequest}
+ * @return {!proto.census.OsmRequest}
  */
-proto.sustain.OsmRequest.deserializeBinary = function(bytes) {
+proto.census.OsmRequest.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.OsmRequest;
-  return proto.sustain.OsmRequest.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.OsmRequest;
+  return proto.census.OsmRequest.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.OsmRequest} msg The message object to deserialize into.
+ * @param {!proto.census.OsmRequest} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.OsmRequest}
+ * @return {!proto.census.OsmRequest}
  */
-proto.sustain.OsmRequest.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.OsmRequest.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -3605,7 +3605,7 @@ proto.sustain.OsmRequest.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!proto.sustain.OsmRequest.Dataset} */ (reader.readEnum());
+      var value = /** @type {!proto.census.OsmRequest.Dataset} */ (reader.readEnum());
       msg.setDataset(value);
       break;
     case 2:
@@ -3613,12 +3613,12 @@ proto.sustain.OsmRequest.deserializeBinaryFromReader = function(msg, reader) {
       msg.setRequestgeojson(value);
       break;
     case 3:
-      var value = /** @type {!proto.sustain.SpatialOp} */ (reader.readEnum());
+      var value = /** @type {!proto.census.SpatialOp} */ (reader.readEnum());
       msg.setSpatialop(value);
       break;
     case 4:
-      var value = new proto.sustain.OsmRequest.OsmRequestParam;
-      reader.readMessage(value,proto.sustain.OsmRequest.OsmRequestParam.deserializeBinaryFromReader);
+      var value = new proto.census.OsmRequest.OsmRequestParam;
+      reader.readMessage(value,proto.census.OsmRequest.OsmRequestParam.deserializeBinaryFromReader);
       msg.addRequestparams(value);
       break;
     default:
@@ -3634,9 +3634,9 @@ proto.sustain.OsmRequest.deserializeBinaryFromReader = function(msg, reader) {
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.OsmRequest.prototype.serializeBinary = function() {
+proto.census.OsmRequest.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.OsmRequest.serializeBinaryToWriter(this, writer);
+  proto.census.OsmRequest.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -3644,11 +3644,11 @@ proto.sustain.OsmRequest.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.OsmRequest} message
+ * @param {!proto.census.OsmRequest} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.OsmRequest.serializeBinaryToWriter = function(message, writer) {
+proto.census.OsmRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getDataset();
   if (f !== 0.0) {
@@ -3676,7 +3676,7 @@ proto.sustain.OsmRequest.serializeBinaryToWriter = function(message, writer) {
     writer.writeRepeatedMessage(
       4,
       f,
-      proto.sustain.OsmRequest.OsmRequestParam.serializeBinaryToWriter
+      proto.census.OsmRequest.OsmRequestParam.serializeBinaryToWriter
     );
   }
 };
@@ -3685,7 +3685,7 @@ proto.sustain.OsmRequest.serializeBinaryToWriter = function(message, writer) {
 /**
  * @enum {number}
  */
-proto.sustain.OsmRequest.Dataset = {
+proto.census.OsmRequest.Dataset = {
   POINTS: 0,
   LINES: 1,
   MULTI_LINES: 2,
@@ -3705,12 +3705,12 @@ proto.sustain.OsmRequest.Dataset = {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.OsmRequest.OsmRequestParam = function(opt_data) {
+proto.census.OsmRequest.OsmRequestParam = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.OsmRequest.OsmRequestParam, jspb.Message);
+goog.inherits(proto.census.OsmRequest.OsmRequestParam, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.OsmRequest.OsmRequestParam.displayName = 'proto.sustain.OsmRequest.OsmRequestParam';
+  proto.census.OsmRequest.OsmRequestParam.displayName = 'proto.census.OsmRequest.OsmRequestParam';
 }
 
 
@@ -3725,8 +3725,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.OsmRequest.OsmRequestParam.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.OsmRequest.OsmRequestParam.toObject(opt_includeInstance, this);
+proto.census.OsmRequest.OsmRequestParam.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.OsmRequest.OsmRequestParam.toObject(opt_includeInstance, this);
 };
 
 
@@ -3735,11 +3735,11 @@ proto.sustain.OsmRequest.OsmRequestParam.prototype.toObject = function(opt_inclu
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.OsmRequest.OsmRequestParam} msg The msg instance to transform.
+ * @param {!proto.census.OsmRequest.OsmRequestParam} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.OsmRequest.OsmRequestParam.toObject = function(includeInstance, msg) {
+proto.census.OsmRequest.OsmRequestParam.toObject = function(includeInstance, msg) {
   var f, obj = {
     key: jspb.Message.getFieldWithDefault(msg, 1, ""),
     value: jspb.Message.getFieldWithDefault(msg, 2, "")
@@ -3756,23 +3756,23 @@ proto.sustain.OsmRequest.OsmRequestParam.toObject = function(includeInstance, ms
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.OsmRequest.OsmRequestParam}
+ * @return {!proto.census.OsmRequest.OsmRequestParam}
  */
-proto.sustain.OsmRequest.OsmRequestParam.deserializeBinary = function(bytes) {
+proto.census.OsmRequest.OsmRequestParam.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.OsmRequest.OsmRequestParam;
-  return proto.sustain.OsmRequest.OsmRequestParam.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.OsmRequest.OsmRequestParam;
+  return proto.census.OsmRequest.OsmRequestParam.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.OsmRequest.OsmRequestParam} msg The message object to deserialize into.
+ * @param {!proto.census.OsmRequest.OsmRequestParam} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.OsmRequest.OsmRequestParam}
+ * @return {!proto.census.OsmRequest.OsmRequestParam}
  */
-proto.sustain.OsmRequest.OsmRequestParam.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.OsmRequest.OsmRequestParam.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -3800,9 +3800,9 @@ proto.sustain.OsmRequest.OsmRequestParam.deserializeBinaryFromReader = function(
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.OsmRequest.OsmRequestParam.prototype.serializeBinary = function() {
+proto.census.OsmRequest.OsmRequestParam.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.OsmRequest.OsmRequestParam.serializeBinaryToWriter(this, writer);
+  proto.census.OsmRequest.OsmRequestParam.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -3810,11 +3810,11 @@ proto.sustain.OsmRequest.OsmRequestParam.prototype.serializeBinary = function() 
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.OsmRequest.OsmRequestParam} message
+ * @param {!proto.census.OsmRequest.OsmRequestParam} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.OsmRequest.OsmRequestParam.serializeBinaryToWriter = function(message, writer) {
+proto.census.OsmRequest.OsmRequestParam.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getKey();
   if (f.length > 0) {
@@ -3837,13 +3837,13 @@ proto.sustain.OsmRequest.OsmRequestParam.serializeBinaryToWriter = function(mess
  * optional string key = 1;
  * @return {string}
  */
-proto.sustain.OsmRequest.OsmRequestParam.prototype.getKey = function() {
+proto.census.OsmRequest.OsmRequestParam.prototype.getKey = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.OsmRequest.OsmRequestParam.prototype.setKey = function(value) {
+proto.census.OsmRequest.OsmRequestParam.prototype.setKey = function(value) {
   jspb.Message.setProto3StringField(this, 1, value);
 };
 
@@ -3852,28 +3852,28 @@ proto.sustain.OsmRequest.OsmRequestParam.prototype.setKey = function(value) {
  * optional string value = 2;
  * @return {string}
  */
-proto.sustain.OsmRequest.OsmRequestParam.prototype.getValue = function() {
+proto.census.OsmRequest.OsmRequestParam.prototype.getValue = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.OsmRequest.OsmRequestParam.prototype.setValue = function(value) {
+proto.census.OsmRequest.OsmRequestParam.prototype.setValue = function(value) {
   jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
 /**
  * optional Dataset dataset = 1;
- * @return {!proto.sustain.OsmRequest.Dataset}
+ * @return {!proto.census.OsmRequest.Dataset}
  */
-proto.sustain.OsmRequest.prototype.getDataset = function() {
-  return /** @type {!proto.sustain.OsmRequest.Dataset} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+proto.census.OsmRequest.prototype.getDataset = function() {
+  return /** @type {!proto.census.OsmRequest.Dataset} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
-/** @param {!proto.sustain.OsmRequest.Dataset} value */
-proto.sustain.OsmRequest.prototype.setDataset = function(value) {
+/** @param {!proto.census.OsmRequest.Dataset} value */
+proto.census.OsmRequest.prototype.setDataset = function(value) {
   jspb.Message.setProto3EnumField(this, 1, value);
 };
 
@@ -3882,59 +3882,59 @@ proto.sustain.OsmRequest.prototype.setDataset = function(value) {
  * optional string requestGeoJson = 2;
  * @return {string}
  */
-proto.sustain.OsmRequest.prototype.getRequestgeojson = function() {
+proto.census.OsmRequest.prototype.getRequestgeojson = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.OsmRequest.prototype.setRequestgeojson = function(value) {
+proto.census.OsmRequest.prototype.setRequestgeojson = function(value) {
   jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
 /**
  * optional SpatialOp spatialOp = 3;
- * @return {!proto.sustain.SpatialOp}
+ * @return {!proto.census.SpatialOp}
  */
-proto.sustain.OsmRequest.prototype.getSpatialop = function() {
-  return /** @type {!proto.sustain.SpatialOp} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+proto.census.OsmRequest.prototype.getSpatialop = function() {
+  return /** @type {!proto.census.SpatialOp} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
-/** @param {!proto.sustain.SpatialOp} value */
-proto.sustain.OsmRequest.prototype.setSpatialop = function(value) {
+/** @param {!proto.census.SpatialOp} value */
+proto.census.OsmRequest.prototype.setSpatialop = function(value) {
   jspb.Message.setProto3EnumField(this, 3, value);
 };
 
 
 /**
  * repeated OsmRequestParam requestParams = 4;
- * @return {!Array<!proto.sustain.OsmRequest.OsmRequestParam>}
+ * @return {!Array<!proto.census.OsmRequest.OsmRequestParam>}
  */
-proto.sustain.OsmRequest.prototype.getRequestparamsList = function() {
-  return /** @type{!Array<!proto.sustain.OsmRequest.OsmRequestParam>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.sustain.OsmRequest.OsmRequestParam, 4));
+proto.census.OsmRequest.prototype.getRequestparamsList = function() {
+  return /** @type{!Array<!proto.census.OsmRequest.OsmRequestParam>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.census.OsmRequest.OsmRequestParam, 4));
 };
 
 
-/** @param {!Array<!proto.sustain.OsmRequest.OsmRequestParam>} value */
-proto.sustain.OsmRequest.prototype.setRequestparamsList = function(value) {
+/** @param {!Array<!proto.census.OsmRequest.OsmRequestParam>} value */
+proto.census.OsmRequest.prototype.setRequestparamsList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 4, value);
 };
 
 
 /**
- * @param {!proto.sustain.OsmRequest.OsmRequestParam=} opt_value
+ * @param {!proto.census.OsmRequest.OsmRequestParam=} opt_value
  * @param {number=} opt_index
- * @return {!proto.sustain.OsmRequest.OsmRequestParam}
+ * @return {!proto.census.OsmRequest.OsmRequestParam}
  */
-proto.sustain.OsmRequest.prototype.addRequestparams = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.sustain.OsmRequest.OsmRequestParam, opt_index);
+proto.census.OsmRequest.prototype.addRequestparams = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.census.OsmRequest.OsmRequestParam, opt_index);
 };
 
 
-proto.sustain.OsmRequest.prototype.clearRequestparamsList = function() {
+proto.census.OsmRequest.prototype.clearRequestparamsList = function() {
   this.setRequestparamsList([]);
 };
 
@@ -3950,12 +3950,12 @@ proto.sustain.OsmRequest.prototype.clearRequestparamsList = function() {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.OsmResponse = function(opt_data) {
+proto.census.OsmResponse = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.OsmResponse, jspb.Message);
+goog.inherits(proto.census.OsmResponse, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.OsmResponse.displayName = 'proto.sustain.OsmResponse';
+  proto.census.OsmResponse.displayName = 'proto.census.OsmResponse';
 }
 
 
@@ -3970,8 +3970,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.OsmResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.OsmResponse.toObject(opt_includeInstance, this);
+proto.census.OsmResponse.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.OsmResponse.toObject(opt_includeInstance, this);
 };
 
 
@@ -3980,11 +3980,11 @@ proto.sustain.OsmResponse.prototype.toObject = function(opt_includeInstance) {
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.OsmResponse} msg The msg instance to transform.
+ * @param {!proto.census.OsmResponse} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.OsmResponse.toObject = function(includeInstance, msg) {
+proto.census.OsmResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     response: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
@@ -4000,23 +4000,23 @@ proto.sustain.OsmResponse.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.OsmResponse}
+ * @return {!proto.census.OsmResponse}
  */
-proto.sustain.OsmResponse.deserializeBinary = function(bytes) {
+proto.census.OsmResponse.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.OsmResponse;
-  return proto.sustain.OsmResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.OsmResponse;
+  return proto.census.OsmResponse.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.OsmResponse} msg The message object to deserialize into.
+ * @param {!proto.census.OsmResponse} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.OsmResponse}
+ * @return {!proto.census.OsmResponse}
  */
-proto.sustain.OsmResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.OsmResponse.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -4040,9 +4040,9 @@ proto.sustain.OsmResponse.deserializeBinaryFromReader = function(msg, reader) {
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.OsmResponse.prototype.serializeBinary = function() {
+proto.census.OsmResponse.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.OsmResponse.serializeBinaryToWriter(this, writer);
+  proto.census.OsmResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -4050,11 +4050,11 @@ proto.sustain.OsmResponse.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.OsmResponse} message
+ * @param {!proto.census.OsmResponse} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.OsmResponse.serializeBinaryToWriter = function(message, writer) {
+proto.census.OsmResponse.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getResponse();
   if (f.length > 0) {
@@ -4070,13 +4070,13 @@ proto.sustain.OsmResponse.serializeBinaryToWriter = function(message, writer) {
  * optional string response = 1;
  * @return {string}
  */
-proto.sustain.OsmResponse.prototype.getResponse = function() {
+proto.census.OsmResponse.prototype.getResponse = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.OsmResponse.prototype.setResponse = function(value) {
+proto.census.OsmResponse.prototype.setResponse = function(value) {
   jspb.Message.setProto3StringField(this, 1, value);
 };
 
@@ -4092,12 +4092,12 @@ proto.sustain.OsmResponse.prototype.setResponse = function(value) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.CensusRequest = function(opt_data) {
+proto.census.CensusRequest = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.CensusRequest, jspb.Message);
+goog.inherits(proto.census.CensusRequest, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.CensusRequest.displayName = 'proto.sustain.CensusRequest';
+  proto.census.CensusRequest.displayName = 'proto.census.CensusRequest';
 }
 
 
@@ -4112,8 +4112,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.CensusRequest.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.CensusRequest.toObject(opt_includeInstance, this);
+proto.census.CensusRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.CensusRequest.toObject(opt_includeInstance, this);
 };
 
 
@@ -4122,11 +4122,11 @@ proto.sustain.CensusRequest.prototype.toObject = function(opt_includeInstance) {
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.CensusRequest} msg The msg instance to transform.
+ * @param {!proto.census.CensusRequest} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.CensusRequest.toObject = function(includeInstance, msg) {
+proto.census.CensusRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     censusresolution: jspb.Message.getFieldWithDefault(msg, 1, 0),
     censusfeature: jspb.Message.getFieldWithDefault(msg, 2, 0),
@@ -4145,23 +4145,23 @@ proto.sustain.CensusRequest.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.CensusRequest}
+ * @return {!proto.census.CensusRequest}
  */
-proto.sustain.CensusRequest.deserializeBinary = function(bytes) {
+proto.census.CensusRequest.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.CensusRequest;
-  return proto.sustain.CensusRequest.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.CensusRequest;
+  return proto.census.CensusRequest.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.CensusRequest} msg The message object to deserialize into.
+ * @param {!proto.census.CensusRequest} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.CensusRequest}
+ * @return {!proto.census.CensusRequest}
  */
-proto.sustain.CensusRequest.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.CensusRequest.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -4169,11 +4169,11 @@ proto.sustain.CensusRequest.deserializeBinaryFromReader = function(msg, reader) 
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!proto.sustain.CensusResolution} */ (reader.readEnum());
+      var value = /** @type {!proto.census.CensusResolution} */ (reader.readEnum());
       msg.setCensusresolution(value);
       break;
     case 2:
-      var value = /** @type {!proto.sustain.CensusFeature} */ (reader.readEnum());
+      var value = /** @type {!proto.census.CensusFeature} */ (reader.readEnum());
       msg.setCensusfeature(value);
       break;
     case 3:
@@ -4181,7 +4181,7 @@ proto.sustain.CensusRequest.deserializeBinaryFromReader = function(msg, reader) 
       msg.setRequestgeojson(value);
       break;
     case 4:
-      var value = /** @type {!proto.sustain.SpatialOp} */ (reader.readEnum());
+      var value = /** @type {!proto.census.SpatialOp} */ (reader.readEnum());
       msg.setSpatialop(value);
       break;
     default:
@@ -4197,9 +4197,9 @@ proto.sustain.CensusRequest.deserializeBinaryFromReader = function(msg, reader) 
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.CensusRequest.prototype.serializeBinary = function() {
+proto.census.CensusRequest.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.CensusRequest.serializeBinaryToWriter(this, writer);
+  proto.census.CensusRequest.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -4207,11 +4207,11 @@ proto.sustain.CensusRequest.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.CensusRequest} message
+ * @param {!proto.census.CensusRequest} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.CensusRequest.serializeBinaryToWriter = function(message, writer) {
+proto.census.CensusRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getCensusresolution();
   if (f !== 0.0) {
@@ -4246,30 +4246,30 @@ proto.sustain.CensusRequest.serializeBinaryToWriter = function(message, writer) 
 
 /**
  * optional CensusResolution censusResolution = 1;
- * @return {!proto.sustain.CensusResolution}
+ * @return {!proto.census.CensusResolution}
  */
-proto.sustain.CensusRequest.prototype.getCensusresolution = function() {
-  return /** @type {!proto.sustain.CensusResolution} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+proto.census.CensusRequest.prototype.getCensusresolution = function() {
+  return /** @type {!proto.census.CensusResolution} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
-/** @param {!proto.sustain.CensusResolution} value */
-proto.sustain.CensusRequest.prototype.setCensusresolution = function(value) {
+/** @param {!proto.census.CensusResolution} value */
+proto.census.CensusRequest.prototype.setCensusresolution = function(value) {
   jspb.Message.setProto3EnumField(this, 1, value);
 };
 
 
 /**
  * optional CensusFeature censusFeature = 2;
- * @return {!proto.sustain.CensusFeature}
+ * @return {!proto.census.CensusFeature}
  */
-proto.sustain.CensusRequest.prototype.getCensusfeature = function() {
-  return /** @type {!proto.sustain.CensusFeature} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+proto.census.CensusRequest.prototype.getCensusfeature = function() {
+  return /** @type {!proto.census.CensusFeature} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
 };
 
 
-/** @param {!proto.sustain.CensusFeature} value */
-proto.sustain.CensusRequest.prototype.setCensusfeature = function(value) {
+/** @param {!proto.census.CensusFeature} value */
+proto.census.CensusRequest.prototype.setCensusfeature = function(value) {
   jspb.Message.setProto3EnumField(this, 2, value);
 };
 
@@ -4278,28 +4278,28 @@ proto.sustain.CensusRequest.prototype.setCensusfeature = function(value) {
  * optional string requestGeoJson = 3;
  * @return {string}
  */
-proto.sustain.CensusRequest.prototype.getRequestgeojson = function() {
+proto.census.CensusRequest.prototype.getRequestgeojson = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.CensusRequest.prototype.setRequestgeojson = function(value) {
+proto.census.CensusRequest.prototype.setRequestgeojson = function(value) {
   jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
 /**
  * optional SpatialOp spatialOp = 4;
- * @return {!proto.sustain.SpatialOp}
+ * @return {!proto.census.SpatialOp}
  */
-proto.sustain.CensusRequest.prototype.getSpatialop = function() {
-  return /** @type {!proto.sustain.SpatialOp} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+proto.census.CensusRequest.prototype.getSpatialop = function() {
+  return /** @type {!proto.census.SpatialOp} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
-/** @param {!proto.sustain.SpatialOp} value */
-proto.sustain.CensusRequest.prototype.setSpatialop = function(value) {
+/** @param {!proto.census.SpatialOp} value */
+proto.census.CensusRequest.prototype.setSpatialop = function(value) {
   jspb.Message.setProto3EnumField(this, 4, value);
 };
 
@@ -4315,12 +4315,12 @@ proto.sustain.CensusRequest.prototype.setSpatialop = function(value) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.CensusResponse = function(opt_data) {
+proto.census.CensusResponse = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.CensusResponse, jspb.Message);
+goog.inherits(proto.census.CensusResponse, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.CensusResponse.displayName = 'proto.sustain.CensusResponse';
+  proto.census.CensusResponse.displayName = 'proto.census.CensusResponse';
 }
 
 
@@ -4335,8 +4335,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.CensusResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.CensusResponse.toObject(opt_includeInstance, this);
+proto.census.CensusResponse.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.CensusResponse.toObject(opt_includeInstance, this);
 };
 
 
@@ -4345,11 +4345,11 @@ proto.sustain.CensusResponse.prototype.toObject = function(opt_includeInstance) 
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.CensusResponse} msg The msg instance to transform.
+ * @param {!proto.census.CensusResponse} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.CensusResponse.toObject = function(includeInstance, msg) {
+proto.census.CensusResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     data: jspb.Message.getFieldWithDefault(msg, 1, ""),
     responsegeojson: jspb.Message.getFieldWithDefault(msg, 2, "")
@@ -4366,23 +4366,23 @@ proto.sustain.CensusResponse.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.CensusResponse}
+ * @return {!proto.census.CensusResponse}
  */
-proto.sustain.CensusResponse.deserializeBinary = function(bytes) {
+proto.census.CensusResponse.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.CensusResponse;
-  return proto.sustain.CensusResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.CensusResponse;
+  return proto.census.CensusResponse.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.CensusResponse} msg The message object to deserialize into.
+ * @param {!proto.census.CensusResponse} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.CensusResponse}
+ * @return {!proto.census.CensusResponse}
  */
-proto.sustain.CensusResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.CensusResponse.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -4410,9 +4410,9 @@ proto.sustain.CensusResponse.deserializeBinaryFromReader = function(msg, reader)
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.CensusResponse.prototype.serializeBinary = function() {
+proto.census.CensusResponse.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.CensusResponse.serializeBinaryToWriter(this, writer);
+  proto.census.CensusResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -4420,11 +4420,11 @@ proto.sustain.CensusResponse.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.CensusResponse} message
+ * @param {!proto.census.CensusResponse} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.CensusResponse.serializeBinaryToWriter = function(message, writer) {
+proto.census.CensusResponse.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getData();
   if (f.length > 0) {
@@ -4447,13 +4447,13 @@ proto.sustain.CensusResponse.serializeBinaryToWriter = function(message, writer)
  * optional string data = 1;
  * @return {string}
  */
-proto.sustain.CensusResponse.prototype.getData = function() {
+proto.census.CensusResponse.prototype.getData = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.CensusResponse.prototype.setData = function(value) {
+proto.census.CensusResponse.prototype.setData = function(value) {
   jspb.Message.setProto3StringField(this, 1, value);
 };
 
@@ -4462,13 +4462,13 @@ proto.sustain.CensusResponse.prototype.setData = function(value) {
  * optional string responseGeoJson = 2;
  * @return {string}
  */
-proto.sustain.CensusResponse.prototype.getResponsegeojson = function() {
+proto.census.CensusResponse.prototype.getResponsegeojson = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.CensusResponse.prototype.setResponsegeojson = function(value) {
+proto.census.CensusResponse.prototype.setResponsegeojson = function(value) {
   jspb.Message.setProto3StringField(this, 2, value);
 };
 
@@ -4484,12 +4484,12 @@ proto.sustain.CensusResponse.prototype.setResponsegeojson = function(value) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.DatasetEntry = function(opt_data) {
+proto.census.DatasetEntry = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.DatasetEntry, jspb.Message);
+goog.inherits(proto.census.DatasetEntry, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.DatasetEntry.displayName = 'proto.sustain.DatasetEntry';
+  proto.census.DatasetEntry.displayName = 'proto.census.DatasetEntry';
 }
 
 
@@ -4504,8 +4504,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.DatasetEntry.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.DatasetEntry.toObject(opt_includeInstance, this);
+proto.census.DatasetEntry.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.DatasetEntry.toObject(opt_includeInstance, this);
 };
 
 
@@ -4514,11 +4514,11 @@ proto.sustain.DatasetEntry.prototype.toObject = function(opt_includeInstance) {
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.DatasetEntry} msg The msg instance to transform.
+ * @param {!proto.census.DatasetEntry} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.DatasetEntry.toObject = function(includeInstance, msg) {
+proto.census.DatasetEntry.toObject = function(includeInstance, msg) {
   var f, obj = {
     entry: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
@@ -4534,23 +4534,23 @@ proto.sustain.DatasetEntry.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.DatasetEntry}
+ * @return {!proto.census.DatasetEntry}
  */
-proto.sustain.DatasetEntry.deserializeBinary = function(bytes) {
+proto.census.DatasetEntry.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.DatasetEntry;
-  return proto.sustain.DatasetEntry.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.DatasetEntry;
+  return proto.census.DatasetEntry.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.DatasetEntry} msg The message object to deserialize into.
+ * @param {!proto.census.DatasetEntry} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.DatasetEntry}
+ * @return {!proto.census.DatasetEntry}
  */
-proto.sustain.DatasetEntry.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.DatasetEntry.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -4574,9 +4574,9 @@ proto.sustain.DatasetEntry.deserializeBinaryFromReader = function(msg, reader) {
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.DatasetEntry.prototype.serializeBinary = function() {
+proto.census.DatasetEntry.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.DatasetEntry.serializeBinaryToWriter(this, writer);
+  proto.census.DatasetEntry.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -4584,11 +4584,11 @@ proto.sustain.DatasetEntry.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.DatasetEntry} message
+ * @param {!proto.census.DatasetEntry} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.DatasetEntry.serializeBinaryToWriter = function(message, writer) {
+proto.census.DatasetEntry.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getEntry();
   if (f.length > 0) {
@@ -4604,13 +4604,13 @@ proto.sustain.DatasetEntry.serializeBinaryToWriter = function(message, writer) {
  * optional string entry = 1;
  * @return {string}
  */
-proto.sustain.DatasetEntry.prototype.getEntry = function() {
+proto.census.DatasetEntry.prototype.getEntry = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.DatasetEntry.prototype.setEntry = function(value) {
+proto.census.DatasetEntry.prototype.setEntry = function(value) {
   jspb.Message.setProto3StringField(this, 1, value);
 };
 
@@ -4626,12 +4626,12 @@ proto.sustain.DatasetEntry.prototype.setEntry = function(value) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.TargetedCensusRequest = function(opt_data) {
+proto.census.TargetedCensusRequest = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.TargetedCensusRequest, jspb.Message);
+goog.inherits(proto.census.TargetedCensusRequest, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.TargetedCensusRequest.displayName = 'proto.sustain.TargetedCensusRequest';
+  proto.census.TargetedCensusRequest.displayName = 'proto.census.TargetedCensusRequest';
 }
 
 
@@ -4646,8 +4646,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.TargetedCensusRequest.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.TargetedCensusRequest.toObject(opt_includeInstance, this);
+proto.census.TargetedCensusRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.TargetedCensusRequest.toObject(opt_includeInstance, this);
 };
 
 
@@ -4656,14 +4656,14 @@ proto.sustain.TargetedCensusRequest.prototype.toObject = function(opt_includeIns
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.TargetedCensusRequest} msg The msg instance to transform.
+ * @param {!proto.census.TargetedCensusRequest} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.TargetedCensusRequest.toObject = function(includeInstance, msg) {
+proto.census.TargetedCensusRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     resolution: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    predicate: (f = msg.getPredicate()) && proto.sustain.Predicate.toObject(includeInstance, f),
+    predicate: (f = msg.getPredicate()) && proto.census.Predicate.toObject(includeInstance, f),
     spatialop: jspb.Message.getFieldWithDefault(msg, 3, 0),
     requestgeojson: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
@@ -4679,23 +4679,23 @@ proto.sustain.TargetedCensusRequest.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.TargetedCensusRequest}
+ * @return {!proto.census.TargetedCensusRequest}
  */
-proto.sustain.TargetedCensusRequest.deserializeBinary = function(bytes) {
+proto.census.TargetedCensusRequest.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.TargetedCensusRequest;
-  return proto.sustain.TargetedCensusRequest.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.TargetedCensusRequest;
+  return proto.census.TargetedCensusRequest.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.TargetedCensusRequest} msg The message object to deserialize into.
+ * @param {!proto.census.TargetedCensusRequest} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.TargetedCensusRequest}
+ * @return {!proto.census.TargetedCensusRequest}
  */
-proto.sustain.TargetedCensusRequest.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.TargetedCensusRequest.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -4703,16 +4703,16 @@ proto.sustain.TargetedCensusRequest.deserializeBinaryFromReader = function(msg, 
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!proto.sustain.CensusResolution} */ (reader.readEnum());
+      var value = /** @type {!proto.census.CensusResolution} */ (reader.readEnum());
       msg.setResolution(value);
       break;
     case 2:
-      var value = new proto.sustain.Predicate;
-      reader.readMessage(value,proto.sustain.Predicate.deserializeBinaryFromReader);
+      var value = new proto.census.Predicate;
+      reader.readMessage(value,proto.census.Predicate.deserializeBinaryFromReader);
       msg.setPredicate(value);
       break;
     case 3:
-      var value = /** @type {!proto.sustain.SpatialOp} */ (reader.readEnum());
+      var value = /** @type {!proto.census.SpatialOp} */ (reader.readEnum());
       msg.setSpatialop(value);
       break;
     case 4:
@@ -4732,9 +4732,9 @@ proto.sustain.TargetedCensusRequest.deserializeBinaryFromReader = function(msg, 
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.TargetedCensusRequest.prototype.serializeBinary = function() {
+proto.census.TargetedCensusRequest.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.TargetedCensusRequest.serializeBinaryToWriter(this, writer);
+  proto.census.TargetedCensusRequest.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -4742,11 +4742,11 @@ proto.sustain.TargetedCensusRequest.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.TargetedCensusRequest} message
+ * @param {!proto.census.TargetedCensusRequest} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.TargetedCensusRequest.serializeBinaryToWriter = function(message, writer) {
+proto.census.TargetedCensusRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getResolution();
   if (f !== 0.0) {
@@ -4760,7 +4760,7 @@ proto.sustain.TargetedCensusRequest.serializeBinaryToWriter = function(message, 
     writer.writeMessage(
       2,
       f,
-      proto.sustain.Predicate.serializeBinaryToWriter
+      proto.census.Predicate.serializeBinaryToWriter
     );
   }
   f = message.getSpatialop();
@@ -4782,36 +4782,36 @@ proto.sustain.TargetedCensusRequest.serializeBinaryToWriter = function(message, 
 
 /**
  * optional CensusResolution resolution = 1;
- * @return {!proto.sustain.CensusResolution}
+ * @return {!proto.census.CensusResolution}
  */
-proto.sustain.TargetedCensusRequest.prototype.getResolution = function() {
-  return /** @type {!proto.sustain.CensusResolution} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+proto.census.TargetedCensusRequest.prototype.getResolution = function() {
+  return /** @type {!proto.census.CensusResolution} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
-/** @param {!proto.sustain.CensusResolution} value */
-proto.sustain.TargetedCensusRequest.prototype.setResolution = function(value) {
+/** @param {!proto.census.CensusResolution} value */
+proto.census.TargetedCensusRequest.prototype.setResolution = function(value) {
   jspb.Message.setProto3EnumField(this, 1, value);
 };
 
 
 /**
  * optional Predicate predicate = 2;
- * @return {?proto.sustain.Predicate}
+ * @return {?proto.census.Predicate}
  */
-proto.sustain.TargetedCensusRequest.prototype.getPredicate = function() {
-  return /** @type{?proto.sustain.Predicate} */ (
-    jspb.Message.getWrapperField(this, proto.sustain.Predicate, 2));
+proto.census.TargetedCensusRequest.prototype.getPredicate = function() {
+  return /** @type{?proto.census.Predicate} */ (
+    jspb.Message.getWrapperField(this, proto.census.Predicate, 2));
 };
 
 
-/** @param {?proto.sustain.Predicate|undefined} value */
-proto.sustain.TargetedCensusRequest.prototype.setPredicate = function(value) {
+/** @param {?proto.census.Predicate|undefined} value */
+proto.census.TargetedCensusRequest.prototype.setPredicate = function(value) {
   jspb.Message.setWrapperField(this, 2, value);
 };
 
 
-proto.sustain.TargetedCensusRequest.prototype.clearPredicate = function() {
+proto.census.TargetedCensusRequest.prototype.clearPredicate = function() {
   this.setPredicate(undefined);
 };
 
@@ -4820,22 +4820,22 @@ proto.sustain.TargetedCensusRequest.prototype.clearPredicate = function() {
  * Returns whether this field is set.
  * @return {!boolean}
  */
-proto.sustain.TargetedCensusRequest.prototype.hasPredicate = function() {
+proto.census.TargetedCensusRequest.prototype.hasPredicate = function() {
   return jspb.Message.getField(this, 2) != null;
 };
 
 
 /**
  * optional SpatialOp spatialOp = 3;
- * @return {!proto.sustain.SpatialOp}
+ * @return {!proto.census.SpatialOp}
  */
-proto.sustain.TargetedCensusRequest.prototype.getSpatialop = function() {
-  return /** @type {!proto.sustain.SpatialOp} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+proto.census.TargetedCensusRequest.prototype.getSpatialop = function() {
+  return /** @type {!proto.census.SpatialOp} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
-/** @param {!proto.sustain.SpatialOp} value */
-proto.sustain.TargetedCensusRequest.prototype.setSpatialop = function(value) {
+/** @param {!proto.census.SpatialOp} value */
+proto.census.TargetedCensusRequest.prototype.setSpatialop = function(value) {
   jspb.Message.setProto3EnumField(this, 3, value);
 };
 
@@ -4844,13 +4844,13 @@ proto.sustain.TargetedCensusRequest.prototype.setSpatialop = function(value) {
  * optional string requestGeoJson = 4;
  * @return {string}
  */
-proto.sustain.TargetedCensusRequest.prototype.getRequestgeojson = function() {
+proto.census.TargetedCensusRequest.prototype.getRequestgeojson = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
 
 
 /** @param {string} value */
-proto.sustain.TargetedCensusRequest.prototype.setRequestgeojson = function(value) {
+proto.census.TargetedCensusRequest.prototype.setRequestgeojson = function(value) {
   jspb.Message.setProto3StringField(this, 4, value);
 };
 
@@ -4866,12 +4866,12 @@ proto.sustain.TargetedCensusRequest.prototype.setRequestgeojson = function(value
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.TargetedCensusResponse = function(opt_data) {
+proto.census.TargetedCensusResponse = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.TargetedCensusResponse, jspb.Message);
+goog.inherits(proto.census.TargetedCensusResponse, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.TargetedCensusResponse.displayName = 'proto.sustain.TargetedCensusResponse';
+  proto.census.TargetedCensusResponse.displayName = 'proto.census.TargetedCensusResponse';
 }
 
 
@@ -4886,8 +4886,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.TargetedCensusResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.TargetedCensusResponse.toObject(opt_includeInstance, this);
+proto.census.TargetedCensusResponse.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.TargetedCensusResponse.toObject(opt_includeInstance, this);
 };
 
 
@@ -4896,13 +4896,13 @@ proto.sustain.TargetedCensusResponse.prototype.toObject = function(opt_includeIn
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.TargetedCensusResponse} msg The msg instance to transform.
+ * @param {!proto.census.TargetedCensusResponse} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.TargetedCensusResponse.toObject = function(includeInstance, msg) {
+proto.census.TargetedCensusResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    censusresponse: (f = msg.getCensusresponse()) && proto.sustain.CensusResponse.toObject(includeInstance, f)
+    censusresponse: (f = msg.getCensusresponse()) && proto.census.CensusResponse.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4916,23 +4916,23 @@ proto.sustain.TargetedCensusResponse.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.TargetedCensusResponse}
+ * @return {!proto.census.TargetedCensusResponse}
  */
-proto.sustain.TargetedCensusResponse.deserializeBinary = function(bytes) {
+proto.census.TargetedCensusResponse.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.TargetedCensusResponse;
-  return proto.sustain.TargetedCensusResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.TargetedCensusResponse;
+  return proto.census.TargetedCensusResponse.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.TargetedCensusResponse} msg The message object to deserialize into.
+ * @param {!proto.census.TargetedCensusResponse} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.TargetedCensusResponse}
+ * @return {!proto.census.TargetedCensusResponse}
  */
-proto.sustain.TargetedCensusResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.TargetedCensusResponse.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -4940,8 +4940,8 @@ proto.sustain.TargetedCensusResponse.deserializeBinaryFromReader = function(msg,
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new proto.sustain.CensusResponse;
-      reader.readMessage(value,proto.sustain.CensusResponse.deserializeBinaryFromReader);
+      var value = new proto.census.CensusResponse;
+      reader.readMessage(value,proto.census.CensusResponse.deserializeBinaryFromReader);
       msg.setCensusresponse(value);
       break;
     default:
@@ -4957,9 +4957,9 @@ proto.sustain.TargetedCensusResponse.deserializeBinaryFromReader = function(msg,
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.TargetedCensusResponse.prototype.serializeBinary = function() {
+proto.census.TargetedCensusResponse.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.TargetedCensusResponse.serializeBinaryToWriter(this, writer);
+  proto.census.TargetedCensusResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -4967,18 +4967,18 @@ proto.sustain.TargetedCensusResponse.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.TargetedCensusResponse} message
+ * @param {!proto.census.TargetedCensusResponse} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.TargetedCensusResponse.serializeBinaryToWriter = function(message, writer) {
+proto.census.TargetedCensusResponse.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getCensusresponse();
   if (f != null) {
     writer.writeMessage(
       1,
       f,
-      proto.sustain.CensusResponse.serializeBinaryToWriter
+      proto.census.CensusResponse.serializeBinaryToWriter
     );
   }
 };
@@ -4986,21 +4986,21 @@ proto.sustain.TargetedCensusResponse.serializeBinaryToWriter = function(message,
 
 /**
  * optional CensusResponse censusResponse = 1;
- * @return {?proto.sustain.CensusResponse}
+ * @return {?proto.census.CensusResponse}
  */
-proto.sustain.TargetedCensusResponse.prototype.getCensusresponse = function() {
-  return /** @type{?proto.sustain.CensusResponse} */ (
-    jspb.Message.getWrapperField(this, proto.sustain.CensusResponse, 1));
+proto.census.TargetedCensusResponse.prototype.getCensusresponse = function() {
+  return /** @type{?proto.census.CensusResponse} */ (
+    jspb.Message.getWrapperField(this, proto.census.CensusResponse, 1));
 };
 
 
-/** @param {?proto.sustain.CensusResponse|undefined} value */
-proto.sustain.TargetedCensusResponse.prototype.setCensusresponse = function(value) {
+/** @param {?proto.census.CensusResponse|undefined} value */
+proto.census.TargetedCensusResponse.prototype.setCensusresponse = function(value) {
   jspb.Message.setWrapperField(this, 1, value);
 };
 
 
-proto.sustain.TargetedCensusResponse.prototype.clearCensusresponse = function() {
+proto.census.TargetedCensusResponse.prototype.clearCensusresponse = function() {
   this.setCensusresponse(undefined);
 };
 
@@ -5009,7 +5009,7 @@ proto.sustain.TargetedCensusResponse.prototype.clearCensusresponse = function() 
  * Returns whether this field is set.
  * @return {!boolean}
  */
-proto.sustain.TargetedCensusResponse.prototype.hasCensusresponse = function() {
+proto.census.TargetedCensusResponse.prototype.hasCensusresponse = function() {
   return jspb.Message.getField(this, 1) != null;
 };
 
@@ -5025,12 +5025,12 @@ proto.sustain.TargetedCensusResponse.prototype.hasCensusresponse = function() {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.sustain.Predicate = function(opt_data) {
+proto.census.Predicate = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.sustain.Predicate, jspb.Message);
+goog.inherits(proto.census.Predicate, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.sustain.Predicate.displayName = 'proto.sustain.Predicate';
+  proto.census.Predicate.displayName = 'proto.census.Predicate';
 }
 
 
@@ -5045,8 +5045,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.sustain.Predicate.prototype.toObject = function(opt_includeInstance) {
-  return proto.sustain.Predicate.toObject(opt_includeInstance, this);
+proto.census.Predicate.prototype.toObject = function(opt_includeInstance) {
+  return proto.census.Predicate.toObject(opt_includeInstance, this);
 };
 
 
@@ -5055,11 +5055,11 @@ proto.sustain.Predicate.prototype.toObject = function(opt_includeInstance) {
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.sustain.Predicate} msg The msg instance to transform.
+ * @param {!proto.census.Predicate} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.Predicate.toObject = function(includeInstance, msg) {
+proto.census.Predicate.toObject = function(includeInstance, msg) {
   var f, obj = {
     censusfeature: jspb.Message.getFieldWithDefault(msg, 1, 0),
     decade: jspb.Message.getFieldWithDefault(msg, 2, 0),
@@ -5078,23 +5078,23 @@ proto.sustain.Predicate.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.sustain.Predicate}
+ * @return {!proto.census.Predicate}
  */
-proto.sustain.Predicate.deserializeBinary = function(bytes) {
+proto.census.Predicate.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.sustain.Predicate;
-  return proto.sustain.Predicate.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.census.Predicate;
+  return proto.census.Predicate.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.sustain.Predicate} msg The message object to deserialize into.
+ * @param {!proto.census.Predicate} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.sustain.Predicate}
+ * @return {!proto.census.Predicate}
  */
-proto.sustain.Predicate.deserializeBinaryFromReader = function(msg, reader) {
+proto.census.Predicate.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -5102,15 +5102,15 @@ proto.sustain.Predicate.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!proto.sustain.CensusFeature} */ (reader.readEnum());
+      var value = /** @type {!proto.census.CensusFeature} */ (reader.readEnum());
       msg.setCensusfeature(value);
       break;
     case 2:
-      var value = /** @type {!proto.sustain.Decade} */ (reader.readEnum());
+      var value = /** @type {!proto.census.Decade} */ (reader.readEnum());
       msg.setDecade(value);
       break;
     case 3:
-      var value = /** @type {!proto.sustain.Predicate.ComparisonOperator} */ (reader.readEnum());
+      var value = /** @type {!proto.census.Predicate.ComparisonOperator} */ (reader.readEnum());
       msg.setComparisonop(value);
       break;
     case 4:
@@ -5130,9 +5130,9 @@ proto.sustain.Predicate.deserializeBinaryFromReader = function(msg, reader) {
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.sustain.Predicate.prototype.serializeBinary = function() {
+proto.census.Predicate.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.sustain.Predicate.serializeBinaryToWriter(this, writer);
+  proto.census.Predicate.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -5140,11 +5140,11 @@ proto.sustain.Predicate.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.sustain.Predicate} message
+ * @param {!proto.census.Predicate} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.sustain.Predicate.serializeBinaryToWriter = function(message, writer) {
+proto.census.Predicate.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getCensusfeature();
   if (f !== 0.0) {
@@ -5180,7 +5180,7 @@ proto.sustain.Predicate.serializeBinaryToWriter = function(message, writer) {
 /**
  * @enum {number}
  */
-proto.sustain.Predicate.ComparisonOperator = {
+proto.census.Predicate.ComparisonOperator = {
   EQUAL: 0,
   GREATER_THAN: 1,
   LESS_THAN: 2,
@@ -5190,45 +5190,45 @@ proto.sustain.Predicate.ComparisonOperator = {
 
 /**
  * optional CensusFeature censusFeature = 1;
- * @return {!proto.sustain.CensusFeature}
+ * @return {!proto.census.CensusFeature}
  */
-proto.sustain.Predicate.prototype.getCensusfeature = function() {
-  return /** @type {!proto.sustain.CensusFeature} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+proto.census.Predicate.prototype.getCensusfeature = function() {
+  return /** @type {!proto.census.CensusFeature} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
-/** @param {!proto.sustain.CensusFeature} value */
-proto.sustain.Predicate.prototype.setCensusfeature = function(value) {
+/** @param {!proto.census.CensusFeature} value */
+proto.census.Predicate.prototype.setCensusfeature = function(value) {
   jspb.Message.setProto3EnumField(this, 1, value);
 };
 
 
 /**
  * optional Decade decade = 2;
- * @return {!proto.sustain.Decade}
+ * @return {!proto.census.Decade}
  */
-proto.sustain.Predicate.prototype.getDecade = function() {
-  return /** @type {!proto.sustain.Decade} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+proto.census.Predicate.prototype.getDecade = function() {
+  return /** @type {!proto.census.Decade} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
 };
 
 
-/** @param {!proto.sustain.Decade} value */
-proto.sustain.Predicate.prototype.setDecade = function(value) {
+/** @param {!proto.census.Decade} value */
+proto.census.Predicate.prototype.setDecade = function(value) {
   jspb.Message.setProto3EnumField(this, 2, value);
 };
 
 
 /**
  * optional ComparisonOperator comparisonOp = 3;
- * @return {!proto.sustain.Predicate.ComparisonOperator}
+ * @return {!proto.census.Predicate.ComparisonOperator}
  */
-proto.sustain.Predicate.prototype.getComparisonop = function() {
-  return /** @type {!proto.sustain.Predicate.ComparisonOperator} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+proto.census.Predicate.prototype.getComparisonop = function() {
+  return /** @type {!proto.census.Predicate.ComparisonOperator} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
-/** @param {!proto.sustain.Predicate.ComparisonOperator} value */
-proto.sustain.Predicate.prototype.setComparisonop = function(value) {
+/** @param {!proto.census.Predicate.ComparisonOperator} value */
+proto.census.Predicate.prototype.setComparisonop = function(value) {
   jspb.Message.setProto3EnumField(this, 3, value);
 };
 
@@ -5237,13 +5237,13 @@ proto.sustain.Predicate.prototype.setComparisonop = function(value) {
  * optional double comparisonValue = 4;
  * @return {number}
  */
-proto.sustain.Predicate.prototype.getComparisonvalue = function() {
+proto.census.Predicate.prototype.getComparisonvalue = function() {
   return /** @type {number} */ (+jspb.Message.getFieldWithDefault(this, 4, 0.0));
 };
 
 
 /** @param {number} value */
-proto.sustain.Predicate.prototype.setComparisonvalue = function(value) {
+proto.census.Predicate.prototype.setComparisonvalue = function(value) {
   jspb.Message.setProto3FloatField(this, 4, value);
 };
 
@@ -5251,7 +5251,7 @@ proto.sustain.Predicate.prototype.setComparisonvalue = function(value) {
 /**
  * @enum {number}
  */
-proto.sustain.SpatialOp = {
+proto.census.SpatialOp = {
   GEOWITHIN: 0,
   GEOINTERSECTS: 1
 };
@@ -5259,7 +5259,7 @@ proto.sustain.SpatialOp = {
 /**
  * @enum {number}
  */
-proto.sustain.CensusFeature = {
+proto.census.CensusFeature = {
   TOTALPOPULATION: 0,
   MEDIANHOUSEHOLDINCOME: 1,
   POPULATIONBYAGE: 2,
@@ -5271,7 +5271,7 @@ proto.sustain.CensusFeature = {
 /**
  * @enum {number}
  */
-proto.sustain.IntraDatasetOp = {
+proto.census.IntraDatasetOp = {
   INTERSECTION: 0,
   UNION: 1,
   OVERLAP: 2
@@ -5280,22 +5280,23 @@ proto.sustain.IntraDatasetOp = {
 /**
  * @enum {number}
  */
-proto.sustain.CensusResolution = {
+proto.census.CensusResolution = {
   STATE: 0,
   COUNTY: 1,
-  TRACT: 2
+  TRACT: 2,
+  BLOCK: 3
 };
 
 /**
  * @enum {number}
  */
-proto.sustain.Decade = {
+proto.census.Decade = {
   _2010: 0,
   _2000: 1,
   _1990: 2,
   _1980: 3
 };
 
-goog.object.extend(exports, proto.sustain);
+goog.object.extend(exports, proto.census);
 
 },{"google-protobuf":4}]},{},[6]);
