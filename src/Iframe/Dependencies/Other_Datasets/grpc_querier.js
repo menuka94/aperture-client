@@ -1,5 +1,5 @@
-const { OsmRequest, DatasetRequest, SpatialRequest } = require("./census_pb.js")
-const { CensusClient } = require('./census_grpc_web_pb.js');
+const { OsmRequest, DatasetRequest, CensusRequest } = require("./sustain_pb.js")
+const { SustainClient } = require('./sustain_grpc_web_pb.js');
 
 /**
  * @namespace Census_GRPCQuerier
@@ -15,7 +15,7 @@ GRPCQuerier = {
     * @method initialize
     */
   initialize: function () {
-    this.service = new CensusClient("http://lattice-2.cs.colostate.edu:9092", "census");
+    this.service = new SustainClient("http://lattice-2.cs.colostate.edu:9092", "for-dataset-explorer");
   },
 
   getOSMData: function (geojson, filters) {
@@ -89,12 +89,12 @@ GRPCQuerier = {
     *         A geojson string representing the bounding polygon
     */
   getCensusData: function (resolution, southwest, northeast, feature) {
-    const request = new SpatialRequest();
+    const request = new CensusRequest();
     request.setCensusresolution(resolution); //tract
     request.setCensusfeature(feature); //median household income
     request.setSpatialop(1); //intersection
     request.setRequestgeojson(this._makeGeoJson(southwest, northeast));
-    return this.service.spatialQuery(request, {})
+    return this.service.censusQuery(request, {})
   }
 };
 

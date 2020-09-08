@@ -3,14 +3,14 @@ syntax = "proto3";
 //import "google/api/http.proto";
 
 option java_multiple_files = true;
-option java_package = "org.sustain.census";
-option java_outer_classname = "SustainCensus";
+option java_package = "org.sustain";
+option java_outer_classname = "SustainQueryService";
 
-package census;
+package sustain;
 
-service Census {
-  // spatial query with MongoDB support
-  rpc SpatialQuery (SpatialRequest) returns (stream SpatialResponse) {}
+service Sustain{
+  // census query with MongoDB support
+  rpc CensusQuery (CensusRequest) returns (stream CensusResponse) {}
 
   // Query Open Street Map Data
   rpc OsmQuery (OsmRequest) returns (stream OsmResponse) {}
@@ -32,6 +32,8 @@ message DatasetRequest {
     TRANSMISSION_LINES = 3;
     NATURAL_GAS_PIPELINES = 4;
     POWER_PLANTS = 5;
+    FIRE_STATIONS = 6;
+    FLOOD_ZONES = 7;
   }
   Dataset dataset = 1;
   string requestGeoJson = 2;
@@ -67,14 +69,14 @@ message OsmResponse {
   string response = 1;
 }
 
-message SpatialRequest {
+message CensusRequest {
   CensusResolution censusResolution = 1;
   CensusFeature censusFeature = 2;
   string requestGeoJson = 3; // bounding polygon
   SpatialOp spatialOp = 4;
 }
 
-message SpatialResponse {
+message CensusResponse {
   string data = 1;
   string responseGeoJson = 2; // geoJson associated with 'data'
 }
@@ -111,7 +113,7 @@ message TargetedCensusRequest {
 }
 
 message TargetedCensusResponse {
-  SpatialResponse spatialResponse = 1;
+  CensusResponse censusResponse = 1;
 }
 
 enum CensusResolution {
@@ -140,4 +142,3 @@ message Predicate {
   ComparisonOperator comparisonOp = 3;
   double comparisonValue = 4;
 }
-
