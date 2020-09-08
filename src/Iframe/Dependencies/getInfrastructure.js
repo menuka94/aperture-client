@@ -592,7 +592,7 @@ const Querier = {
             RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
         });
         stream.on('status', function (status) {
-            //console.log(status.code, status.details, status.metadata);
+            console.log(status.code, status.details, status.metadata);
         });
         stream.on('end', function (end) {
             for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
