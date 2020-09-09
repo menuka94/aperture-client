@@ -2617,7 +2617,7 @@ GRPCQuerier = {
     * @method initialize
     */
   initialize: function () {
-    this.service = new CensusClient("http://lattice-2.cs.colostate.edu:9092", "census.Census/SpatialQuery");
+    this.service = new CensusClient("http://" + window.location.hostname + ":9092", "census");
   },
 
   getOSMData: function (geojson, filters) {
