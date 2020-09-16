@@ -1,6 +1,5 @@
 //Author: Daniel Reynolds
 //Purpose: Get osm nodes, ways, and relations, and then translate them onto a leaflet map
-
 //Dependencies: Leaflet, osmtogeojson, jquery, Leaflet.markerCluster
 const FLYTOOPTIONS = { //for clicking on icons
     easeLinearity: 0.4,
@@ -54,6 +53,7 @@ let RenderInfrastructure = {
     blacklist: [],
     grpcQuerier: null,
     options: JSON.parse(JSON.stringify(DEFAULTOPTIONS)),
+    idCounter: 0,
     /**
      * Sets up instance of renderer
      * @memberof RenderInfrastructure
@@ -75,6 +75,7 @@ let RenderInfrastructure = {
         this.blacklist = Util.jsonToQueryList(this.data, true);
         this.queries = Util.jsonToQueryList(this.data);
         this.grpcQuerier = grpc_querier();
+        this.idCounter = 0;
     },
     /**
      * Call this when the map should be updated
@@ -140,38 +141,40 @@ let RenderInfrastructure = {
         });
     },
     /**
-     * Rendes geojson
+     * Renders geojson
      * @memberof RenderInfrastructure
      * @method renderGeoJson
      * @param {JSON} geoJsonData GeoJSON 
-     * @param {bool} preProcess does this need to be preprocessed before rendering? false if not related to streamflow stuff
-     * @returns {leaflet layer} layer that was added
+     * @param {bool} preProcess (optional) does this need to be preprocessed before rendering? false if not related to streamflow stuff
+     * @param {JSON} indexData (optional) custom JSON data (if you don't want to use Renderinfrastructure.data as your indexing file)
+     * @returns {Array<int>} array of integers which contain the id of added layers
      */
-    renderGeoJson: function (geoJsonData, preProcessed) {
+    renderGeoJson: function (geoJsonData, preProcessed, indexData) {
         if (RenderInfrastructure.options.simplifyThreshold !== -1) {
             Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);
         }
         Util.fixGeoJSONID(geoJsonData);
+        const datasource = indexData ? indexData : RenderInfrastructure.data;
         let preProcess = [];
-        let resultLayer = L.geoJson(geoJsonData, {
+        let layers = [];
+        L.geoJson(geoJsonData, {
             style: function (feature) {
-                let type = Util.getFeatureType(feature);
                 let weight = 3;
                 let fillOpacity = 0.2;
-                let name = Util.getNameFromGeoJsonFeature(feature);
-                if (RenderInfrastructure.data[name] && RenderInfrastructure.data[name]["noBorder"]) {
+                let name = Util.getNameFromGeoJsonFeature(feature,indexData);
+                if (datasource[name] && datasource[name]["noBorder"]) {
                     weight = 0;
                     fillOpacity = 0.75;
                 }
-                return { color: RenderInfrastructure.getAttribute(name, ATTRIBUTE.color), weight: weight, fillOpacity: fillOpacity };
+                return { color: datasource[name]["color"], weight: weight, fillOpacity: fillOpacity };
             },
             filter: function (feature) {
                 if (!feature.id && feature._id.$oid) feature.id = feature._id.$oid; //osm data was kinda messy so had to hard code this
-                let name = Util.getNameFromGeoJsonFeature(feature);
-                if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || RenderInfrastructure.data[name] == null) {
+                let name = Util.getNameFromGeoJsonFeature(feature,indexData);
+                if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || datasource[name] == null) {
                     return false;
                 }
-                if (RenderInfrastructure.data[name]["preProcess"] && !preProcessed) {
+                if (datasource[name]["preProcess"] && preProcessed) {
                     preProcess.push(feature);
                     return false;
                 }
@@ -183,13 +186,15 @@ let RenderInfrastructure = {
                 if (latlng === -1) {
                     return;
                 }
-                let iconName = Util.getNameFromGeoJsonFeature(feature);
-                let iconDetails = Util.createDetailsFromGeoJsonFeature(feature, iconName);
+                let iconName = Util.getNameFromGeoJsonFeature(feature,indexData);
+                let iconDetails = Util.createDetailsFromGeoJsonFeature(feature, iconName, indexData);
                 RenderInfrastructure.addIconToMap(iconName, latlng, iconDetails);
                 layer.bindPopup(iconDetails);
                 layer.on('click', function (e) {
                     RenderInfrastructure.map.flyToBounds(layer.getBounds(), FLYTOOPTIONS);
                 });
+                layer.specifiedId = RenderInfrastructure.idCounter++;
+                layers.push(layer.specifiedId);
             },
             pointToLayer: function () {
                 return L.marker([0, 0], {
@@ -203,7 +208,7 @@ let RenderInfrastructure = {
         if (!preProcessed) {
             Querier.preProcessQuery(preProcess);
         }
-        return resultLayer;
+        return layers;
     },
     /**
      * Adds icon to map
@@ -268,6 +273,22 @@ let RenderInfrastructure = {
             }
         });
         this.blacklist.push(featureId);
+        return true;
+    },
+    /**
+     * Removes a feature id from the map
+     * @memberof RenderInfrastructure
+     * @method removeFeatureFromMap
+     * @param {Array<int>} specifiedIds id which should be removed from map, ex: 'dam' or 'weir'
+     * @returns {boolean} true if ids were removed
+     */
+    removeSpecifiedLayersFromMap: function (specifiedIds) {
+        this.map.eachLayer(function (layer) {
+            if (layer.feature && specifiedIds.includes(layer.specifiedId)) {
+                RenderInfrastructure.currentLayers.splice(RenderInfrastructure.currentLayers.indexOf(layer.feature.id), 1);
+                RenderInfrastructure.map.removeLayer(layer);
+            }
+        });
         return true;
     },
     /**
@@ -518,8 +539,8 @@ const Querier = {
         if (features.length == 0) {
             return;
         }
-        if (!RenderInfrastructure.preProcessData) {
-            RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(features), true);
+        if (!RenderInfrastructure.preProcessData || true) { //disabling this entire function for now
+            RenderInfrastructure.renderGeoJson(Util.createGeoJsonObj(features));
             return;
         }
         let hits = [];
@@ -589,10 +610,10 @@ const Querier = {
         }
         stream.on('data', function (response) {
             //console.log(JSON.parse(response.array[0]));
-            RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]), false);
+            RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]));
         });
         stream.on('status', function (status) {
-            console.log(status.code, status.details, status.metadata);
+            //console.log(status.code, status.details, status.metadata);
         });
         stream.on('end', function (end) {
             for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
@@ -939,12 +960,14 @@ const Util = {
      * @memberof Util
      * @method getNameFromGeoJsonFeature
      * @param {object} feature feature to get name of
+     * @param {JSON} indexData (optional) custom JSON data (if you don't want to use Renderinfrastructure.data as your indexing file)
      * @returns {string} name/id of feature, "none" if not found
      */
-    getNameFromGeoJsonFeature: function (feature) {
+    getNameFromGeoJsonFeature: function (feature, indexData) {
         let pTObj = this.getParamsAndTagsFromGeoJsonFeature(feature);
         let params = pTObj.params;
         let tagsObj = pTObj.tagsObj;
+        const datasource = indexData ? indexData : RenderInfrastructure.data;
         for (let j = 0; j < RenderInfrastructure.options.commonTagNames.length; j++) {
             for (let i = 0; i < params.length; i++) {
                 if (RenderInfrastructure.options.commonTagNames[j] === params[i]) {
@@ -954,12 +977,12 @@ const Util = {
                 }
             }
         }
-        for (element in RenderInfrastructure.data) {
-            if (RenderInfrastructure.data[element]["identityField"]) {
+        for (element in datasource) {
+            if (datasource[element]["identityField"]) {
                 for (let i = 0; i < params.length; i++) {
-                    if (params[i] === RenderInfrastructure.data[element]["identityField"]) {
-                        if (RenderInfrastructure.data[element]["identityKey"]) {
-                            if (tagsObj[params[i]] === RenderInfrastructure.data[element]["identityKey"]) {
+                    if (params[i] === datasource[element]["identityField"]) {
+                        if (datasource[element]["identityKey"]) {
+                            if (tagsObj[params[i]] === datasource[element]["identityKey"]) {
                                 return element;
                             }
                         }
@@ -979,11 +1002,12 @@ const Util = {
      * @method createDetailsFromGeoJsonFeature
      * @param {object} feature
      * @param {string} name
+     * @param {JSON} indexData (optional) custom JSON data (if you don't want to use Renderinfrastructure.data as your indexing file)
      * @returns {string} html to put on popup
      */
-    createDetailsFromGeoJsonFeature: function (feature, name) {
+    createDetailsFromGeoJsonFeature: function (feature, name, indexData) {
         let pTObj = this.getParamsAndTagsFromGeoJsonFeature(feature);
-        return this.createPopup(name, pTObj);
+        return this.createPopup(name, pTObj, indexData);
     },
     /**                                                                            
      * gets tags from GeoJSON feature
@@ -1245,19 +1269,21 @@ const Util = {
      * @method createPopup
      * @param {string} id JSON data id
      * @param {object} pTObj params and tags object created with @method getParamsAndTagsFromGeoJsonFeature
+     * @param {JSON} indexData (optional) custom JSON data (if you don't want to use Renderinfrastructure.data as your indexing file)
      * @returns {string} html to put in popup
      */
-    createPopup: function (id, pTObj) {
+    createPopup: function (id, pTObj, indexData) {
         let params = pTObj.params;
         let tagsObj = pTObj.tagsObj;
         let details = "<b>" + this.capitalizeString(this.underScoreToSpace(id)) + "</b><br>";
-        if (!RenderInfrastructure.data[id]['popup']) {
+        const datasource = indexData ? indexData : RenderInfrastructure.data;
+        if (!datasource[id]['popup']) {
             details += "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
             params.forEach(param => details += "<li>" + this.capitalizeString(this.underScoreToSpace(param)) + ": " + this.capitalizeString(this.underScoreToSpace(tagsObj[param])) + "</li>");
             details += "</ul>";
         }
         else {
-            let tokens = RenderInfrastructure.data[id]['popup'].split(" ");
+            let tokens = datasource[id]['popup'].split(" ");
             tokens.forEach(token => {
                 if (token.substring(0, 2) === "@@") {
                     let to = token.substring(2).indexOf("@@"); //second @@

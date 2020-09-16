@@ -1,9 +1,10 @@
+
 /**
  * @namespace Census_Visualizer
  * @file Responsible for querying census data and drawing it as polygons on a leaflet map
  * @author Kevin Bruhwiler
  */
-Census_Visualizer = {
+const Census_Visualizer = {
 
   /**
     * Initializes the Census_Visualizer object
@@ -17,8 +18,8 @@ Census_Visualizer = {
       0.0: [0, 0, 255],
       0.5: [0, 255, 0],
       1.0: [255, 0, 0]
-    },
-      this.markers = [];
+    };
+    this.markers = [];
     this.featureMap = {
       "Total Population": 0, "Avg. Household Income": 1,
       "Population by Age": 2, "Median Age": 3, "No. Below Poverty Line": 4, "Demographics": 5
@@ -27,8 +28,9 @@ Census_Visualizer = {
       0: "2010_total_population", 1: "2010_median_household_income",
       2: "2010_population_by_age", 3: "2010_median_age", 4: "2010_poverty", 5: "2010_race"
     };
-    this.featureName = ""
+    this.featureName = "";
     this.feature = -1;
+    this.layers = [];
   },
 
   /**
@@ -42,6 +44,7 @@ Census_Visualizer = {
   setFeature: function (f) {
     this.feature = this.featureMap[f];
     this.featureName = f;
+    RenderInfrastructure.removeSpecifiedLayersFromMap(this.layers);
   },
 
   /**
@@ -176,47 +179,44 @@ Census_Visualizer = {
     *        The leaflet map being updated
     */
   updateViz: function (map) {
-    const callback = function (bounds, err, response) {
-      if (err) {
-      } else {
-        for (var i = 0; i < this.markers.length; i++) {
-          map.removeLayer(this.markers[i]);
+    const draw = function (response) {
+      let geo = JSON.parse(response.getResponsegeojson());
+      const data = JSON.parse(response.getData());
+      geo.properties = data;
+      let newLayers = RenderInfrastructure.renderGeoJson(geo,false,{
+        "census":{
+          "color": "red",
+          "identityField": "GISJOIN"
         }
-        this.markers = [];
-
-        const responseList = response.getSinglespatialresponseList();
-        const vals = this._getMinAndMax(responseList);
-        const min = vals[1];
-        const max = vals[0];
-        for (r in responseList) {
-          try {
-            const geo = JSON.parse(responseList[r].getResponsegeojson());
-            const data = JSON.parse(responseList[r].getData());
-            var polygon = L.polygon(this._reverseLatLngPolgon(geo.geometry.coordinates), {
-              color:
-                this._getColorForPercentage(this._normalize(data[this.propertyMap[this.feature]], min, max), 0.5)
-            }).addTo(map);
-            polygon.bindTooltip("2010 " + this.featureName + " of: " + data[this.propertyMap[this.feature]]);
-            this.markers.push(polygon);
-          } catch (err) {
-            console.log(err)
-          }
-        }
-      }
-    }.bind(this, map.getBounds());
-
+      });
+      Census_Visualizer.layers = Census_Visualizer.layers.concat(newLayers);
+      // // const responseList = response.getSinglespatialresponseList();
+      // // console.log(responseList);
+      // // const vals = this._getMinAndMax(responseList);
+      // // const min = vals[1];
+      // // const max = vals[0];
+      // var polygon = L.polygon(Census_Visualizer._reverseLatLngPolgon(geo.geometry.coordinates), {
+      //   color: "red"
+      //     //this._getColorForPercentage(this._normalize(data[this.propertyMap[this.feature]], min, max), 0.5)
+      // }).addTo(map);
+      // polygon.bindTooltip("2010 " +  Census_Visualizer.featureName + " of: " + data[Census_Visualizer.propertyMap[Census_Visualizer.feature]]);
+      // polygon.GISJOIN = data.GISJOIN;
+      // Census_Visualizer.markers.push(polygon);
+    }
+    
     if (this.featureName === "")
       return;
     const b = map.wrapLatLngBounds(map.getBounds());
     const stream = this._grpcQuerier.getCensusData(2, b._southWest, b._northEast, this.feature);
-    stream.on('data', function (response) {
-      console.log(response);
+    stream.on('data', function (r) {
+      //console.log(JSON.stringify(response));
+      draw(r);
     });
     stream.on('status', function (status) {
       console.log(status.code, status.details, status.metadata);
     });
     stream.on('end', function (end) {
-      
+
     });
   },
 };
