@@ -2,8 +2,9 @@
 /**
  * @namespace Census_Visualizer
  * @file Responsible for querying census data and drawing it as polygons on a leaflet map
- * @author Kevin Bruhwiler
+ * @author Kevin Bruhwiler, edited by Daniel Reynolds
  */
+
 const Census_Visualizer = {
 
   /**
@@ -185,7 +186,7 @@ const Census_Visualizer = {
       geo.properties = data;
       let newLayers = RenderInfrastructure.renderGeoJson(geo,false,{
         "census":{
-          "color": "red",
+          "color": Census_Visualizer._getColorForPercentage(Census_Visualizer._normalize(data[Census_Visualizer.propertyMap[Census_Visualizer.feature]], 0, 100000), 0.5),
           "identityField": "GISJOIN"
         }
       });
