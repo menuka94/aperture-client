@@ -1018,7 +1018,7 @@ const Util = {
         }
         str = str.split(" ");
         for (var i = 0, x = str.length; i < x; i++) {
-            if (str[i] == null || str[i].length <= 1) {
+            if (str[i] == null || str[i].length <= 2) {
                 continue;
             }
             str[i] = str[i][0].toUpperCase() + str[i].substr(1);
