@@ -5,12 +5,19 @@ var jsdom = require('jsdom-global');
 let jsonData = require("../../../src/Iframe/Dependencies/infrastructure.json");
 global.elem = document.createElement('div');
 elem.id = 'area';
+let elem2 = document.createElement('div');
+elem2.id = 'attributionClickable';
+let elem3 = document.createElement('div');
+elem3.id = 'clearFeatures';
+
 
 function notAFunction() { }
 
 describe('SelectGenerator', function () {
     describe('config()', function () {
         it('should configurate the select box', function () {
+            //let save = JSON.parse(JSON.stringify(document.getElementById));
+            global.document.getElementById = function(){return {a:"n"}};
             selectGenerator.Generator.config(jsonData, null, true, notAFunction,"checkbox");
             assert.deepEqual(elem.innerHTML, '');
             selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",true,"<br><b>Very important attribution</b>");
@@ -23,6 +30,7 @@ describe('SelectGenerator', function () {
             for (let i = 0; i < coll.length; i++) {
                 coll[i].click();
             }
+            global.document.getElementById = null;
         });
     });
 

@@ -54,6 +54,11 @@ let Generator = {
             }
             selectContainer.innerHTML += this.makeList(Object.keys(elementsJson), elementsJson, type, colorCode, callFunc);
         }
+        let featureChecks = document.getElementsByClassName("featureCheck")
+        for(let i = 0; i < featureChecks.length; i++){
+            featureChecks[i].onchange = function(){callFunc(featureChecks[i]);};
+        }
+        document.getElementById("clearFeatures").onclick = function(){RenderInfrastructure.removeAllFeaturesFromMap(); Generator.clearChecks();};
     },
     /** Helper for config 
      * @memberof config
@@ -70,7 +75,7 @@ let Generator = {
         elements.forEach(element => {
             let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
             let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
-            retHTML += '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + type + '" name="selector" id="' + element + '" onchange="' + callFunc.name + '(this)" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>';
+            retHTML += '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + type + '" name="selector" id="' + element + '" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>';
         });
         return retHTML;
     },
@@ -112,7 +117,9 @@ let Generator = {
      * @param {string} html
      */
     attribution: function(html,htmlElement){
-        htmlElement.innerHTML += '<button class="attributionContainer" onclick="Generator.showAttribution(attrText)"><div class="clickableAttr">Icon Attributions</div><div id="attrText" class="attribution">' + html + '</div></button>';
+        htmlElement.innerHTML += '<button class="attributionContainer" id="attributionClickable"><div class="clickableAttr">Icon Attributions</div><div id="attrText" class="attribution">' + html + '</div></button>';
+        console.log(document.getElementById);
+        document.getElementById("attributionClickable").onclick = function(){Generator.showAttribution(document.getElementById("attrText"))};
     },
     showAttribution: function(htmlElement){
         $(htmlElement).last().css({"display": $(htmlElement).last().css("display") === "none" ? "block" : "none"}); 
