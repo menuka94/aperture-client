@@ -30,7 +30,7 @@ const Census_Visualizer = {
       2: "2010_population_by_age", 3: "2010_median_age", 4: "2010_poverty", 5: "2010_race"
     };
     this.ranges = { //this is temporary until we can get the dataset catalog queried
-      0: [0,10000],
+      0: [1,10000],
       1: [10000, 200000],
       2: [0,0], //this data doesnt work so no range yet
       3: [0,0], //this data doesnt work so no range yet
@@ -85,7 +85,6 @@ const Census_Visualizer = {
     *         The value of the color
     */
   _getColorValue: function (bounds, pcts, idx) {
-    if(!bounds[0]) return 0; //workaround for errors caused by null values being passed in
     return this._percentageToColor[bounds[0]][idx] * pcts[0] + this._percentageToColor[bounds[1]][idx] * pcts[1];
   },
 
