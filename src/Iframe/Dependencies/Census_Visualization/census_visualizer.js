@@ -29,6 +29,14 @@ const Census_Visualizer = {
       0: "2010_total_population", 1: "2010_median_household_income",
       2: "2010_population_by_age", 3: "2010_median_age", 4: "2010_poverty", 5: "2010_race"
     };
+    this.ranges = { //this is temporary until we can get the dataset catalog queried
+      0: [0,10000],
+      1: [10000, 200000],
+      2: [0,0], //this data doesnt work so no range yet
+      3: [0,0], //this data doesnt work so no range yet
+      4: [0,0], //this data doesnt work so no range yet
+      5: [1,10] //not sure how to use a range on this data
+    }
     this.featureName = "";
     this.feature = -1;
     this.layers = [];
@@ -77,6 +85,7 @@ const Census_Visualizer = {
     *         The value of the color
     */
   _getColorValue: function (bounds, pcts, idx) {
+    if(!bounds[0]) return 0; //workaround for errors caused by null values being passed in
     return this._percentageToColor[bounds[0]][idx] * pcts[0] + this._percentageToColor[bounds[1]][idx] * pcts[1];
   },
 
@@ -186,7 +195,7 @@ const Census_Visualizer = {
       geo.properties = data;
       let newLayers = RenderInfrastructure.renderGeoJson(geo,false,{
         "census":{
-          "color": Census_Visualizer._getColorForPercentage(Census_Visualizer._normalize(data[Census_Visualizer.propertyMap[Census_Visualizer.feature]], 0, 100000), 0.5),
+          "color": Census_Visualizer._getColorForPercentage(Census_Visualizer._normalize(data[Census_Visualizer.propertyMap[Census_Visualizer.feature]], Census_Visualizer.ranges[Census_Visualizer.feature][0], Census_Visualizer.ranges[Census_Visualizer.feature][1]), 0.5),
           "identityField": "GISJOIN"
         }
       });
@@ -214,7 +223,7 @@ const Census_Visualizer = {
       draw(r);
     });
     stream.on('status', function (status) {
-      console.log(status.code, status.details, status.metadata);
+      //console.log(status.code, status.details, status.metadata);
     });
     stream.on('end', function (end) {
 
