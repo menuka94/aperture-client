@@ -171,9 +171,6 @@ let RenderInfrastructure = {
             filter: function (feature) {
                 if (!feature.id && feature._id.$oid) feature.id = feature._id.$oid; //osm data was kinda messy so had to hard code this
                 let name = Util.getNameFromGeoJsonFeature(feature,indexData);
-                if(name == "power_plant"){
-                    console.log(geoJsonData);
-                }
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || datasource[name] == null) {
                     return false;
                 }
@@ -501,37 +498,7 @@ const Querier = {
         return boundsToQuery;
     },
     /**
-     * Creates a overpass query URL 
-     * @memberof Querier
-     * @method createOverpassQueryURL
-     * @param {Array<string>} queryList list of queries ex: ['waterway=dam','natural=lake']
-     * @param {object} bounds bounds object in the form: {north:?,east:?,south:?,west:?}, which states WHERE to query
-     * @param {number} node_way_relation binary choice for node,way,relation -- ex:111 = nodes, ways, AND relations -- 101 = nodes AND relations -- 100 = nodes only
-     * @returns {string} a valid overpass URL
-     */
-    createOverpassQueryURL: function (queryList, bounds, node_way_relation) {
-        let queryFString = '';
-        let boundsString = Util.Convert.createOverpassBoundsString(bounds);
-        let nWR = Util.binaryToBool(node_way_relation);
-        for (let i = 0; i < queryList.length; i++) {
-            if (queryList[i].split('=')[0] === 'custom' || RenderInfrastructure.blacklist.includes(queryList[i].split('=')[1]) || RenderInfrastructure.data[queryList[i].split('=')[1]]["grpc"]) {
-                continue; //skip if its a custom query and not a osm query, or if blacklisted
-            }
-            query = queryList[i].replace(/ /g, ''); //remove whitespace
-            if (nWR.node) {
-                queryFString += 'node[' + query + '](' + boundsString + ');';
-            }
-            if (nWR.way) {
-                queryFString += 'way[' + query + '](' + boundsString + ');';
-            }
-            if (nWR.relation) {
-                queryFString += 'relation[' + query + '](' + boundsString + ');';
-            }
-        }
-        return RenderInfrastructure.options.overpassInterpreter + '?data=[out:json][timeout:' + RenderInfrastructure.options.timeout + '];(' + queryFString + ');out body geom;';
-    },
-    /**
-     * Creates a overpass query URL 
+     * Pre-processes a query
      * @memberof Querier
      * @method preProcessQuery
      * @param {Array} features features from GeoJSON that should be preprocessed. This is used for streams in this implementation
