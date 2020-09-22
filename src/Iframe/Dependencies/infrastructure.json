@@ -114,7 +114,7 @@
         "query": "custom=substation",
         "grpc":"DatasetRequest",
         "grpcDataset":2, 
-        "identityField": "TYPE",
+        "identityField": "TYPE", 
         "identityKey": "SUBSTATION",
         "groupMem":"Energy",
         "popup": "@@NAME@@ substation. An @@STATUS@@ substation in @@COUNTY@@ county with a max voltage of @@MAX_VOLT@@. Sourced from @@SOURCE@@."
@@ -200,12 +200,12 @@
     },
     "power_plant":{
         "iconAddr": "../../../images/power_plant.png",
-        "defaultRender":false,
+        "defaultRender":true,
         "query": "custom=power_plant",
-        "grpc":"DatasetRequest",
-        "grpcDataset":5, 
+        "queryURL":"https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_PowerPlants/MapServer/12/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
         "identityField": "ENERGY_SRC_DESC1",
-        "groupMem":"Energy"
+        "groupMem":"Energy",
+        "popup": "@@PLANT_NAME@@ power plant, which produces energy through @@ENERGY_SRC_DESC1@@"
     },
     "fire_station":{
         "iconAddr": "../../../images/fire_station.png",

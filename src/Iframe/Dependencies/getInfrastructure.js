@@ -126,7 +126,7 @@ let RenderInfrastructure = {
             let url = Util.queryToQueryURL(query);
             if (url) {
                 bounds.forEach(bound => {
-                    Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url, bound), bound, false, RenderInfrastructure.renderGeoJson);
+                    Querier.queryGeoJsonFromServer(Querier.createCustomQueryURL(url, bound), bound, RenderInfrastructure.renderGeoJson);
                 });
                 return;
             }
@@ -171,6 +171,9 @@ let RenderInfrastructure = {
             filter: function (feature) {
                 if (!feature.id && feature._id.$oid) feature.id = feature._id.$oid; //osm data was kinda messy so had to hard code this
                 let name = Util.getNameFromGeoJsonFeature(feature,indexData);
+                if(name == "power_plant"){
+                    console.log(geoJsonData);
+                }
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || datasource[name] == null) {
                     return false;
                 }
@@ -229,6 +232,9 @@ let RenderInfrastructure = {
         });
         marker.uniqueId = iconName;
         RenderInfrastructure.markerLayer.addLayer(marker.on('click', function (e) {
+            if(e.target.__parent._group._spiderfied){
+                return;
+            }
             if (RenderInfrastructure.map.getZoom() < 16) {
                 RenderInfrastructure.map.flyTo(e.latlng, 16, FLYTOOPTIONS);
             }
@@ -413,10 +419,9 @@ const Querier = {
      * @method queryGeoJsonFromServer
      * @param {string} queryURL URL where geoJSON/Osm Xml is
      * @param {object} bounds (not necessary when using this function by itself) bounds object like: {north:?,east:?,south:?,west:?}
-     * @param {boolean} isOsmData is the url going to return OSM Xml data? (such as overpass queries)
      * @param {Function} callbackFn where the geoJSON will be sent on return, should be a 1-parameter function
      */
-    queryGeoJsonFromServer: async function (queryURL, bounds, isOsmData, callbackFn) {
+    queryGeoJsonFromServer: async function (queryURL, bounds, callbackFn) {
         this.removeUnnecessaryQueries();
         let query = $.getJSON(queryURL, function (dataAsJson) {
             for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
@@ -431,16 +436,13 @@ const Querier = {
             else if (RenderInfrastructure.currentBounds.length > RenderInfrastructure.options.maxLayers) {
                 RenderInfrastructure.currentBounds = [Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds()))];
             }
-            if (isOsmData) {
-                RenderInfrastructure.currentBounds.push(bounds);
-                callbackFn(osmtogeojson(dataAsJson));
-            }
-            else {
-                callbackFn(dataAsJson);
-            }
+            let relevantBounds = Querier.createBoundsList(bounds);
+            if(relevantBounds)
+                RenderInfrastructure.currentBounds = RenderInfrastructure.currentBounds.concat(relevantBounds /*This is a weird use of this function but it works*/); 
+            callbackFn(dataAsJson);
         });
         RenderInfrastructure.currentQueries.push({ query: query, bounds: bounds });
-        if (isOsmData) Util.refreshInfoPopup();
+        Util.refreshInfoPopup();
     },
     /**
      * Removes queries that shouldnt be continued, for example if something was loading far away from the viewport,

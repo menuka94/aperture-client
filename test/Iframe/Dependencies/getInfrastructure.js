@@ -16,13 +16,12 @@ window.HTMLCanvasElement.prototype.getContext = function (a) {
     return ctx;
 }
 global.osmtogeojson = require('osmtogeojson');
-
 const elem = document.createElement('div');
 elem.style.cssText = 'width: "100%", height: "800px" ';
 elem.id = 'testMap';
 document.body.appendChild(elem);
 
-let jsonData = require("../../../src/Iframe/Dependencies/waterInfrastructure.json");
+let jsonData = require("../../../src/Iframe/Dependencies/infrastructure.json");
 let streamflowData = require("../../../src/Iframe/Dependencies/streamflowMetadata.json");
 let sampleQuery = require("./sampleRes.json");
 

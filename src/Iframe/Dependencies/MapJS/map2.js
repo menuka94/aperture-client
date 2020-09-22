@@ -24,9 +24,9 @@ var sidebar = L.control.sidebar('sidebar', {
 
 var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
-    spiderfyOnMaxZoom: false,
-    disableClusteringAtZoom: 17,
-    maxClusterRadius: 55
+    spiderfyOnMaxZoom: true,
+    maxClusterRadius: 55,
+    animate: false
 });
 osmMap2.addLayer(markers);
 

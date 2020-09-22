@@ -2,7 +2,7 @@ const assert = require('assert');
 var selectGenerator = require('../../../src/Iframe/Dependencies/selectGenerator');
 global.Util = require('../../../src/Iframe/Dependencies/getInfrastructure.js').Util;
 var jsdom = require('jsdom-global');
-let jsonData = require("../../../src/Iframe/Dependencies/waterInfrastructure.json");
+let jsonData = require("../../../src/Iframe/Dependencies/infrastructure.json");
 global.elem = document.createElement('div');
 elem.id = 'area';
 
