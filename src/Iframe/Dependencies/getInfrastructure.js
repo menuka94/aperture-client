@@ -569,7 +569,18 @@ const Querier = {
     createCustomQueryURL: function (URL, bounds) {
         return URL.replace('{{BOUNDS}}', bounds.west + '%2C' + bounds.south + '%2C' + bounds.east + '%2C' + bounds.north);
     },
-    queryGRPC: function (func, dataset, bounds, filter) {
+    /**
+     * Queries from the grpc server
+     * @memberof Querier
+     * @method queryGRPC
+     * @param {string} func which type of request? "DatasetRequest" or "OSMRequest"
+     * @param {int} dataset int from sustain.proto datasets list
+     * @param {object} bounds NESW object, can be created with @method Util.Convert.leafletBoundsToNESWObject()
+     * @param {array<object>} filter can be made with @method Util.makeOSMFilter() or can be supplied like [{key:"natural",value:"water"}, ...]
+     * @param {function} callback (optional) function to stream geoJSON features into
+     */
+    queryGRPC: function (func, dataset, bounds, filter, callback) {
+        const callbackFunc = callback ? callback : RenderInfrastructure.renderGeoJson;
         let stream;
         if (func === "DatasetRequest") {
             stream = RenderInfrastructure.grpcQuerier.getDatasetData(dataset, Util.Convert.createGeoJSONPoly(bounds));
@@ -578,8 +589,7 @@ const Querier = {
             stream = RenderInfrastructure.grpcQuerier.getOSMData(Util.Convert.createGeoJSONPoly(bounds), filter);
         }
         stream.on('data', function (response) {
-            //console.log(JSON.parse(response.array[0]));
-            RenderInfrastructure.renderGeoJson(JSON.parse(response.array[0]));
+            callbackFunc(JSON.parse(response.array[0]));
         });
         stream.on('status', function (status) {
             //console.log(status.code, status.details, status.metadata);
