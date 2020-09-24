@@ -14,7 +14,7 @@ SustainQuerier = {
       * @method initialize
       */
     initialize: function () {
-        this.service = new SustainClient("http://lattice-46:50055");
+        this.service = new SustainClient("http://lattice-46.cs.colostate.edu:50055");
         return this;
     },
 
@@ -42,7 +42,7 @@ SustainQuerier = {
         q.setCollection(collection);
         q.setQuery(query);
         request.setFirstQuery(q);
-        return this.service.query(request, {});
+        return this.service.CompoundQuery(request, {});
     },
 };
 
