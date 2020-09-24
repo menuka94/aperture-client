@@ -2672,7 +2672,7 @@ SustainQuerier = {
         q.setCollection(collection);
         q.setQuery(query);
         request.setFirstQuery(q);
-        return this.service.CompoundQuery(request, {});
+        return this.service.compoundQuery(request, {});
     },
 };
 
