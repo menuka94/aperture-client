@@ -2,15 +2,15 @@ const {Query, CompoundRequest} = require("./sustain_pb.js")
 const {SustainClient} = require('./sustain_grpc_web_pb.js');
 
 /**
- * @namespace GRPCQuerier
+ * @namespace SustainQuerier
  * @file Object used for performing gRPC queries
  * @author Kevin Bruhwiler
  */
-GRPCQuerier = {
+SustainQuerier = {
     /**
-      * Initialize the GRPCQuerier object and service
+      * Initialize the SustainQuerier object and service
       *
-      * @memberof GRPCQuerier
+      * @memberof SustainQuerier
       * @method initialize
       */
     initialize: function () {
@@ -21,7 +21,7 @@ GRPCQuerier = {
     /**
       * Creates a gRPC stream for the given query
       *
-      * @memberof GRPCQuerier
+      * @memberof SustainQuerier
       * @method getStreamForQuery
       * @param {string} host
       *        The name of the machine hosting the queried dataset
@@ -47,20 +47,20 @@ GRPCQuerier = {
 };
 
 /**
-  * returns a grpcQuerier object
+  * returns a sustainQuerier object
   *
-  * @function grpc_querier
-  * @return {GRPCQuerier} 
-  *         The grpcQuerier object
+  * @function sustain_querier
+  * @return {SustainQuerier} 
+  *         The sustainQuerier object
   */
-grpc_querier = function() {
-    const grpcQuerier = GRPCQuerier;
-    grpcQuerier.initialize();
-    return grpcQuerier;
+sustain_querier = function() {
+    const sustainQuerier = SustainQuerier;
+    sustainQuerier.initialize();
+    return sustainQuerier;
 };
 
 try{
     module.exports = {
-        grpc_querier: grpc_querier
+        sustain_querier: sustain_querier
     }
 } catch(e) { }
