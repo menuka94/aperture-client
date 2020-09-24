@@ -2644,7 +2644,7 @@ SustainQuerier = {
       * @method initialize
       */
     initialize: function () {
-        this.service = new SustainClient("http://lattice-2.cs.colostate.edu:9092", null, null);
+        this.service = new SustainClient("http://lattice-2.cs.colostate.edu:9092/Sustain", null, null);
         return this;
     },
 
