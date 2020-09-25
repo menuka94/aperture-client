@@ -15,6 +15,7 @@ const Census_Visualizer = {
     */
   initialize: function () {
     this._grpcQuerier = grpc_querier();
+    this._sustainQuerier = sustain_querier();
     this._percentageToColor = {
       0.0: [0, 0, 255],
       0.5: [0, 255, 0],
@@ -177,6 +178,27 @@ const Census_Visualizer = {
     */
   _normalize: function (val, max, min) {
     return (val - min) / (max - min);
+  },
+
+  updateFutureHeat: function() {
+      const q = [{"CDF.9": {"$exists": true}},  {"$lookup":{
+                    from: "county_geo",
+                    localField: "GIS_JOIN",
+                    foreignField: "properties.GISJOIN",
+                    as: "region"
+                 }
+      }];
+      const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "future_heat", JSON.stringify(q));
+      
+      stream.on('data', function (r) {
+          console.log(JSON.stringify(response));
+      });
+        stream.on('status', function (status) {
+          console.log(status.code, status.details, status.metadata);
+      });
+        stream.on('end', function (end) {
+        console.log("ended")
+      });
   },
 
   /**

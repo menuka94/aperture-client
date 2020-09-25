@@ -57,6 +57,7 @@ $.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
 //map 3 merge stuff
 const censusViz = census_visualizer();
 censusViz.updateViz(osmMap2);
+censusViz.updateFutureHeat();
 
 const g = { groupMem: "Census", query: 1 };
 const census = {
