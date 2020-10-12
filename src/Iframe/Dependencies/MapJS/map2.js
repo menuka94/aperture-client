@@ -68,12 +68,14 @@ const future_climate = {
 }
 
 Generator.config(future_climate, document.getElementById("checkboxLocation"), true, changeChecked, ["checkbox", '"range" min="88" max="110" name="Temperature" value="110"', 
-                                                                                                    '"range" min="1" max="200" name="Length (Days)" value="110"'], true);
+                                                                                                    '"range" min="1" max="200" name="Length (Days)" value="110"',
+                                                                                                    '"text" name="Start Year" value="2006"', '"text" name="End Year" value="2010"'], true);
 
 //map 3 merge stuff
 const censusViz = census_visualizer();
 censusViz.updateViz(osmMap2);
-censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, document.getElementById("Heat Waves").checked);
+censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, 
+                           document.getElementById("Heat_Waves_3").value, document.getElementById("Heat_Waves_4").value, document.getElementById("Heat Waves").checked);
 
 function updateOverPassLayer() {
     RenderInfrastructure.update();
@@ -93,7 +95,8 @@ function changeChecked(element) {
             censusViz.setFeature(element.id);
             censusViz.updateViz(osmMap2);
         } else if (Util.underScoreToSpace(element.id) in future_climate) {
-            censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, document.getElementById("Heat Waves").checked);
+            censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, 
+                           document.getElementById("Heat_Waves_3").value, document.getElementById("Heat_Waves_4").value, document.getElementById("Heat Waves").checked);
         } else {
             RenderInfrastructure.addFeatureToMap(element.id);
         }
@@ -111,7 +114,9 @@ function changeChecked(element) {
 parent.addEventListener('updateMaps', function () {
     runQuery();
     censusViz.updateViz(osmMap2);
-    censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, !document.getElementById("Heat Waves").checked);
+    console.log(document.getElementById("Heat Waves").checked)
+    censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, 
+                           document.getElementById("Heat_Waves_3").value, document.getElementById("Heat_Waves_4").value, document.getElementById("Heat Waves").checked);
 });
 
 function runQuery() {

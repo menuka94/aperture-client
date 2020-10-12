@@ -192,7 +192,7 @@ const Census_Visualizer = {
     return (val - min) / (max - min);
   },
 
-  updateFutureHeat: function(map, length, temp, checked) {
+  updateFutureHeat: function(map, length, temp, start_year, end_year, checked) {
       if (!checked)
         return
       this.clearHeat();
@@ -212,6 +212,10 @@ const Census_Visualizer = {
       const secondQuery = {};
       secondQuery[secondMatch] = {"$gte": Number(temp)};
 
+      const thirdMatch = "data.year"
+      const thirdQuery = {};
+      thirdQuery[thirdMatch] = {"$gte": Number(start_year), "$lt": Number(end_year)};
+
       const q = [{"$match": {geometry: {"$geoIntersects": {"$geometry": {type: "Polygon", coordinates: [barray]}}}}},
                   {"$lookup":{
                     from: "future_heat",
@@ -220,7 +224,8 @@ const Census_Visualizer = {
                     as: "data"
                  }},
                  {"$match": firstQuery},
-                 {"$match": secondQuery}
+                 {"$match": secondQuery},
+                 {"$match": thirdQuery}
                 ];
 
       const stream = this._sustainQuerier.getStreamForQuery("lattice-0", 27017, "county_geo", JSON.stringify(q));

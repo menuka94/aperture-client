@@ -81,7 +81,7 @@ let Generator = {
                     let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
                     let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
                     retHTML += '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + t + '" name="selector" id="' + element + '" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>';
-                } else if (t.startsWith('"range"')){
+                } else if (t.startsWith('"range"') || t.startsWith('"text"')){
                     const e = Util.spaceToUnderScore(element)+"_"+i;
                     console.log()
                     retHTML += '<div style="margin-top:3px;margin-bottom:3px"><form><output type="text" id="' + e + '_display">'+ t.match(/name="(.*?)"/)[1] + " : " + t.match(/value="(.*?)"/)[1] + '</output>';
