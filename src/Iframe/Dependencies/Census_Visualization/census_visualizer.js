@@ -195,7 +195,7 @@ const Census_Visualizer = {
   updateFutureHeat: function(map, length, temp, start_year, end_year, checked) {
       if (!checked)
         return
-      this.clearHeat();
+      //this.clearHeat();
       if (this.stream !== null)
           this.stream.cancel();
 	  
@@ -231,9 +231,11 @@ const Census_Visualizer = {
       const stream = this._sustainQuerier.getStreamForQuery("lattice-0", 27017, "county_geo", JSON.stringify(q));
 
       this.stream = stream;
+
+      const properties = {"Heat Wave Length": length, "Heat Wave Lower Bound": temp}
       
       stream.on('data', function (r) {
-          this.generalizedDraw(r);
+          this.generalizedDraw(r, properties);
       }.bind(this));
         stream.on('status', function (status) {
           console.log(status.code, status.details, status.metadata);
@@ -243,8 +245,12 @@ const Census_Visualizer = {
       });
   },
 
-  generalizedDraw: function (r) {
+  generalizedDraw: function (r, properties) {
     const data = JSON.parse(r.getData());
+    if (properties !== null)
+        data["properties"] = {...data["properties"], ...properties};
+    if(!document.getElementById("Heat Waves").checked)
+        return;
     let newLayers = RenderInfrastructure.renderGeoJson(data,false,{
       "census":{
         "color": "#FF0000",

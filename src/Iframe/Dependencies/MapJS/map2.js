@@ -114,7 +114,6 @@ function changeChecked(element) {
 parent.addEventListener('updateMaps', function () {
     runQuery();
     censusViz.updateViz(osmMap2);
-    console.log(document.getElementById("Heat Waves").checked)
     censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, 
                            document.getElementById("Heat_Waves_3").value, document.getElementById("Heat_Waves_4").value, document.getElementById("Heat Waves").checked);
 });
