@@ -1,7 +1,10 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
+option java_package = "org.sustain";
 option java_outer_classname = "SustainQueryService";
+
+package sustain;
 
 service Sustain{
   // census query with MongoDB support

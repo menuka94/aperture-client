@@ -41,6 +41,8 @@ const Census_Visualizer = {
     this.featureName = "";
     this.feature = -1;
     this.layers = [];
+    this.heat_layers = [];
+    this.stream = null;
   },
 
   /**
@@ -55,6 +57,16 @@ const Census_Visualizer = {
     this.feature = this.featureMap[f];
     this.featureName = f;
     RenderInfrastructure.removeSpecifiedLayersFromMap(this.layers);
+  },
+
+  /**
+    * Clears all census layers from the map
+    *
+    * @memberof Census_Visualizer
+    * @method clearMap
+    */
+  clearHeat: function () {
+    RenderInfrastructure.removeSpecifiedLayersFromMap(this.heat_layers);
   },
 
   /**
@@ -180,25 +192,61 @@ const Census_Visualizer = {
     return (val - min) / (max - min);
   },
 
-  updateFutureHeat: function() {
-      const q = [{"CDF.9": {"$exists": true}},  {"$lookup":{
-                    from: "county_geo",
-                    localField: "GIS_JOIN",
-                    foreignField: "properties.GISJOIN",
-                    as: "region"
-                 }
-      }];
-      const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "future_heat", JSON.stringify(q));
+  updateFutureHeat: function(map, length, temp, checked) {
+      if (!checked)
+        return
+      this.clearHeat();
+      if (this.stream !== null)
+          this.stream.cancel();
+	  
+      const b = map.wrapLatLngBounds(map.getBounds());
+      const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
+                      [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
+                      [b._southWest.lng, b._southWest.lat]];
+
+      const firstMatch = "data.CDF." + length
+      const firstQuery = {};
+      firstQuery[firstMatch] = {"$exists": true};
+
+      const secondMatch = "data.temp"
+      const secondQuery = {};
+      secondQuery[secondMatch] = {"$gte": Number(temp)};
+
+      const q = [{"$match": {geometry: {"$geoIntersects": {"$geometry": {type: "Polygon", coordinates: [barray]}}}}},
+                  {"$lookup":{
+                    from: "future_heat",
+                    localField: "properties.GISJOIN",
+                    foreignField: "GIS_JOIN",
+                    as: "data"
+                 }},
+                 {"$match": firstQuery},
+                 {"$match": secondQuery}
+                ];
+
+      const stream = this._sustainQuerier.getStreamForQuery("lattice-0", 27017, "county_geo", JSON.stringify(q));
+
+      this.stream = stream;
       
       stream.on('data', function (r) {
-          console.log(JSON.stringify(response));
-      });
+          this.generalizedDraw(r);
+      }.bind(this));
         stream.on('status', function (status) {
           console.log(status.code, status.details, status.metadata);
       });
         stream.on('end', function (end) {
         console.log("ended")
       });
+  },
+
+  generalizedDraw: function (r) {
+    const data = JSON.parse(r.getData());
+    let newLayers = RenderInfrastructure.renderGeoJson(data,false,{
+      "census":{
+        "color": "#FF0000",
+        "identityField": "GISJOIN"
+      }
+    });
+    Census_Visualizer.heat_layers = Census_Visualizer.heat_layers.concat(newLayers);
   },
 
   /**

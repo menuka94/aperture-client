@@ -8,7 +8,7 @@ osmMap2 = L.map('map2', {
     fullscreenControl: true,
     inertia: false,
     timeDimension: false,
-    minZoom: 11
+    //minZoom: 11
 });
 
 osmMap2.setView(osmMap2.wrapLatLng(parent.view), 11);
@@ -40,7 +40,7 @@ $.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
             maxLayers:20,
             simplifyThreshold: 0.00005
         });
-        Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
+        Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, ["checkbox"], true,
         '<ul style="padding-inline-start:20px;">' +
             '<li><b>Reservoir/Lake/Basin/Pond</b>: Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
             '<li><b>Wastewater Plant</b>: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></li>' +
@@ -54,18 +54,26 @@ $.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
     });
 });
 
-//map 3 merge stuff
-const censusViz = census_visualizer();
-censusViz.updateViz(osmMap2);
-censusViz.updateFutureHeat();
-
 const g = { groupMem: "Census", query: 1 };
 const census = {
     "Total Population": g, "Avg. Household Income": g,
     "Population by Age": g, "Median Age": g, "No. Below Poverty Line": g, "Demographics": g
 }
 
-Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, "radio", true);
+Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, ["radio"], true);
+
+const fc = { groupMem: "Future Climate", query: 1 };
+const future_climate = {
+    "Heat Waves": fc
+}
+
+Generator.config(future_climate, document.getElementById("checkboxLocation"), true, changeChecked, ["checkbox", '"range" min="88" max="110" name="Temperature" value="110"', 
+                                                                                                    '"range" min="1" max="200" name="Length (Days)" value="110"'], true);
+
+//map 3 merge stuff
+const censusViz = census_visualizer();
+censusViz.updateViz(osmMap2);
+censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, document.getElementById("Heat Waves").checked);
 
 function updateOverPassLayer() {
     RenderInfrastructure.update();
@@ -84,6 +92,8 @@ function changeChecked(element) {
         if (element.id in census) {
             censusViz.setFeature(element.id);
             censusViz.updateViz(osmMap2);
+        } else if (Util.underScoreToSpace(element.id) in future_climate) {
+            censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, document.getElementById("Heat Waves").checked);
         } else {
             RenderInfrastructure.addFeatureToMap(element.id);
         }
@@ -91,6 +101,8 @@ function changeChecked(element) {
     else {
         if (element.id in census)
             censusViz.setFeature(element.id);
+        else if (element.id in future_climate)
+            censusViz.clearHeat();
         else
             RenderInfrastructure.removeFeatureFromMap(element.id);
     }
@@ -99,6 +111,7 @@ function changeChecked(element) {
 parent.addEventListener('updateMaps', function () {
     runQuery();
     censusViz.updateViz(osmMap2);
+    censusViz.updateFutureHeat(osmMap2, document.getElementById("Heat_Waves_2").value, document.getElementById("Heat_Waves_1").value, !document.getElementById("Heat Waves").checked);
 });
 
 function runQuery() {

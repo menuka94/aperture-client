@@ -1,5 +1,5 @@
 /**
- * @fileoverview gRPC-Web generated client stub for 
+ * @fileoverview gRPC-Web generated client stub for sustain
  * @enhanceable
  * @public
  */
@@ -11,7 +11,8 @@
 const grpc = {};
 grpc.web = require('grpc-web');
 
-const proto = require('./sustain_pb.js');
+const proto = {};
+proto.sustain = require('./sustain_pb.js');
 
 /**
  * @param {string} hostname
@@ -21,7 +22,7 @@ const proto = require('./sustain_pb.js');
  * @struct
  * @final
  */
-proto.SustainClient =
+proto.sustain.SustainClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
   options['format'] = 'text';
@@ -47,7 +48,7 @@ proto.SustainClient =
  * @struct
  * @final
  */
-proto.SustainPromiseClient =
+proto.sustain.SustainPromiseClient =
     function(hostname, credentials, options) {
   if (!options) options = {};
   options['format'] = 'text';
@@ -68,55 +69,55 @@ proto.SustainPromiseClient =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.CensusRequest,
- *   !proto.CensusResponse>}
+ *   !proto.sustain.CensusRequest,
+ *   !proto.sustain.CensusResponse>}
  */
 const methodDescriptor_Sustain_CensusQuery = new grpc.web.MethodDescriptor(
-  '/Sustain/CensusQuery',
+  '/sustain.Sustain/CensusQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.CensusRequest,
-  proto.CensusResponse,
+  proto.sustain.CensusRequest,
+  proto.sustain.CensusResponse,
   /**
-   * @param {!proto.CensusRequest} request
+   * @param {!proto.sustain.CensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.CensusResponse.deserializeBinary
+  proto.sustain.CensusResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.CensusRequest,
- *   !proto.CensusResponse>}
+ *   !proto.sustain.CensusRequest,
+ *   !proto.sustain.CensusResponse>}
  */
 const methodInfo_Sustain_CensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.CensusResponse,
+  proto.sustain.CensusResponse,
   /**
-   * @param {!proto.CensusRequest} request
+   * @param {!proto.sustain.CensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.CensusResponse.deserializeBinary
+  proto.sustain.CensusResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.CensusRequest} request The request proto
+ * @param {!proto.sustain.CensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.CensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.CensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainClient.prototype.censusQuery =
+proto.sustain.SustainClient.prototype.censusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/CensusQuery',
+      '/sustain.Sustain/CensusQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_CensusQuery);
@@ -124,16 +125,16 @@ proto.SustainClient.prototype.censusQuery =
 
 
 /**
- * @param {!proto.CensusRequest} request The request proto
+ * @param {!proto.sustain.CensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.CensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.CensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainPromiseClient.prototype.censusQuery =
+proto.sustain.SustainPromiseClient.prototype.censusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/CensusQuery',
+      '/sustain.Sustain/CensusQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_CensusQuery);
@@ -143,55 +144,55 @@ proto.SustainPromiseClient.prototype.censusQuery =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.OsmRequest,
- *   !proto.OsmResponse>}
+ *   !proto.sustain.OsmRequest,
+ *   !proto.sustain.OsmResponse>}
  */
 const methodDescriptor_Sustain_OsmQuery = new grpc.web.MethodDescriptor(
-  '/Sustain/OsmQuery',
+  '/sustain.Sustain/OsmQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.OsmRequest,
-  proto.OsmResponse,
+  proto.sustain.OsmRequest,
+  proto.sustain.OsmResponse,
   /**
-   * @param {!proto.OsmRequest} request
+   * @param {!proto.sustain.OsmRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.OsmResponse.deserializeBinary
+  proto.sustain.OsmResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.OsmRequest,
- *   !proto.OsmResponse>}
+ *   !proto.sustain.OsmRequest,
+ *   !proto.sustain.OsmResponse>}
  */
 const methodInfo_Sustain_OsmQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.OsmResponse,
+  proto.sustain.OsmResponse,
   /**
-   * @param {!proto.OsmRequest} request
+   * @param {!proto.sustain.OsmRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.OsmResponse.deserializeBinary
+  proto.sustain.OsmResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.OsmRequest} request The request proto
+ * @param {!proto.sustain.OsmRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.OsmResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.OsmResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainClient.prototype.osmQuery =
+proto.sustain.SustainClient.prototype.osmQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/OsmQuery',
+      '/sustain.Sustain/OsmQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_OsmQuery);
@@ -199,16 +200,16 @@ proto.SustainClient.prototype.osmQuery =
 
 
 /**
- * @param {!proto.OsmRequest} request The request proto
+ * @param {!proto.sustain.OsmRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.OsmResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.OsmResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainPromiseClient.prototype.osmQuery =
+proto.sustain.SustainPromiseClient.prototype.osmQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/OsmQuery',
+      '/sustain.Sustain/OsmQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_OsmQuery);
@@ -218,55 +219,55 @@ proto.SustainPromiseClient.prototype.osmQuery =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.DatasetRequest,
- *   !proto.DatasetResponse>}
+ *   !proto.sustain.DatasetRequest,
+ *   !proto.sustain.DatasetResponse>}
  */
 const methodDescriptor_Sustain_DatasetQuery = new grpc.web.MethodDescriptor(
-  '/Sustain/DatasetQuery',
+  '/sustain.Sustain/DatasetQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.DatasetRequest,
-  proto.DatasetResponse,
+  proto.sustain.DatasetRequest,
+  proto.sustain.DatasetResponse,
   /**
-   * @param {!proto.DatasetRequest} request
+   * @param {!proto.sustain.DatasetRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.DatasetResponse.deserializeBinary
+  proto.sustain.DatasetResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.DatasetRequest,
- *   !proto.DatasetResponse>}
+ *   !proto.sustain.DatasetRequest,
+ *   !proto.sustain.DatasetResponse>}
  */
 const methodInfo_Sustain_DatasetQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.DatasetResponse,
+  proto.sustain.DatasetResponse,
   /**
-   * @param {!proto.DatasetRequest} request
+   * @param {!proto.sustain.DatasetRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.DatasetResponse.deserializeBinary
+  proto.sustain.DatasetResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.DatasetRequest} request The request proto
+ * @param {!proto.sustain.DatasetRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.DatasetResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.DatasetResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainClient.prototype.datasetQuery =
+proto.sustain.SustainClient.prototype.datasetQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/DatasetQuery',
+      '/sustain.Sustain/DatasetQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_DatasetQuery);
@@ -274,16 +275,16 @@ proto.SustainClient.prototype.datasetQuery =
 
 
 /**
- * @param {!proto.DatasetRequest} request The request proto
+ * @param {!proto.sustain.DatasetRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.DatasetResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.DatasetResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainPromiseClient.prototype.datasetQuery =
+proto.sustain.SustainPromiseClient.prototype.datasetQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/DatasetQuery',
+      '/sustain.Sustain/DatasetQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_DatasetQuery);
@@ -293,55 +294,55 @@ proto.SustainPromiseClient.prototype.datasetQuery =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.SVIRequest,
- *   !proto.SVIResponse>}
+ *   !proto.sustain.SVIRequest,
+ *   !proto.sustain.SVIResponse>}
  */
 const methodDescriptor_Sustain_SVIQuery = new grpc.web.MethodDescriptor(
-  '/Sustain/SVIQuery',
+  '/sustain.Sustain/SVIQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.SVIRequest,
-  proto.SVIResponse,
+  proto.sustain.SVIRequest,
+  proto.sustain.SVIResponse,
   /**
-   * @param {!proto.SVIRequest} request
+   * @param {!proto.sustain.SVIRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.SVIResponse.deserializeBinary
+  proto.sustain.SVIResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.SVIRequest,
- *   !proto.SVIResponse>}
+ *   !proto.sustain.SVIRequest,
+ *   !proto.sustain.SVIResponse>}
  */
 const methodInfo_Sustain_SVIQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.SVIResponse,
+  proto.sustain.SVIResponse,
   /**
-   * @param {!proto.SVIRequest} request
+   * @param {!proto.sustain.SVIRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.SVIResponse.deserializeBinary
+  proto.sustain.SVIResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.SVIRequest} request The request proto
+ * @param {!proto.sustain.SVIRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.SVIResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.SVIResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainClient.prototype.sVIQuery =
+proto.sustain.SustainClient.prototype.sVIQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/SVIQuery',
+      '/sustain.Sustain/SVIQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_SVIQuery);
@@ -349,16 +350,16 @@ proto.SustainClient.prototype.sVIQuery =
 
 
 /**
- * @param {!proto.SVIRequest} request The request proto
+ * @param {!proto.sustain.SVIRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.SVIResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.SVIResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainPromiseClient.prototype.sVIQuery =
+proto.sustain.SustainPromiseClient.prototype.sVIQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/SVIQuery',
+      '/sustain.Sustain/SVIQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_SVIQuery);
@@ -368,55 +369,55 @@ proto.SustainPromiseClient.prototype.sVIQuery =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.TargetedCensusRequest,
- *   !proto.TargetedCensusResponse>}
+ *   !proto.sustain.TargetedCensusRequest,
+ *   !proto.sustain.TargetedCensusResponse>}
  */
 const methodDescriptor_Sustain_ExecuteTargetedCensusQuery = new grpc.web.MethodDescriptor(
-  '/Sustain/ExecuteTargetedCensusQuery',
+  '/sustain.Sustain/ExecuteTargetedCensusQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.TargetedCensusRequest,
-  proto.TargetedCensusResponse,
+  proto.sustain.TargetedCensusRequest,
+  proto.sustain.TargetedCensusResponse,
   /**
-   * @param {!proto.TargetedCensusRequest} request
+   * @param {!proto.sustain.TargetedCensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.TargetedCensusResponse.deserializeBinary
+  proto.sustain.TargetedCensusResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.TargetedCensusRequest,
- *   !proto.TargetedCensusResponse>}
+ *   !proto.sustain.TargetedCensusRequest,
+ *   !proto.sustain.TargetedCensusResponse>}
  */
 const methodInfo_Sustain_ExecuteTargetedCensusQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.TargetedCensusResponse,
+  proto.sustain.TargetedCensusResponse,
   /**
-   * @param {!proto.TargetedCensusRequest} request
+   * @param {!proto.sustain.TargetedCensusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.TargetedCensusResponse.deserializeBinary
+  proto.sustain.TargetedCensusResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.TargetedCensusRequest} request The request proto
+ * @param {!proto.sustain.TargetedCensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.TargetedCensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.TargetedCensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainClient.prototype.executeTargetedCensusQuery =
+proto.sustain.SustainClient.prototype.executeTargetedCensusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/ExecuteTargetedCensusQuery',
+      '/sustain.Sustain/ExecuteTargetedCensusQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_ExecuteTargetedCensusQuery);
@@ -424,16 +425,16 @@ proto.SustainClient.prototype.executeTargetedCensusQuery =
 
 
 /**
- * @param {!proto.TargetedCensusRequest} request The request proto
+ * @param {!proto.sustain.TargetedCensusRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.TargetedCensusResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.TargetedCensusResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainPromiseClient.prototype.executeTargetedCensusQuery =
+proto.sustain.SustainPromiseClient.prototype.executeTargetedCensusQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/ExecuteTargetedCensusQuery',
+      '/sustain.Sustain/ExecuteTargetedCensusQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_ExecuteTargetedCensusQuery);
@@ -443,55 +444,55 @@ proto.SustainPromiseClient.prototype.executeTargetedCensusQuery =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.CompoundRequest,
- *   !proto.CompoundResponse>}
+ *   !proto.sustain.CompoundRequest,
+ *   !proto.sustain.CompoundResponse>}
  */
 const methodDescriptor_Sustain_CompoundQuery = new grpc.web.MethodDescriptor(
-  '/Sustain/CompoundQuery',
+  '/sustain.Sustain/CompoundQuery',
   grpc.web.MethodType.SERVER_STREAMING,
-  proto.CompoundRequest,
-  proto.CompoundResponse,
+  proto.sustain.CompoundRequest,
+  proto.sustain.CompoundResponse,
   /**
-   * @param {!proto.CompoundRequest} request
+   * @param {!proto.sustain.CompoundRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.CompoundResponse.deserializeBinary
+  proto.sustain.CompoundResponse.deserializeBinary
 );
 
 
 /**
  * @const
  * @type {!grpc.web.AbstractClientBase.MethodInfo<
- *   !proto.CompoundRequest,
- *   !proto.CompoundResponse>}
+ *   !proto.sustain.CompoundRequest,
+ *   !proto.sustain.CompoundResponse>}
  */
 const methodInfo_Sustain_CompoundQuery = new grpc.web.AbstractClientBase.MethodInfo(
-  proto.CompoundResponse,
+  proto.sustain.CompoundResponse,
   /**
-   * @param {!proto.CompoundRequest} request
+   * @param {!proto.sustain.CompoundRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.CompoundResponse.deserializeBinary
+  proto.sustain.CompoundResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.CompoundRequest} request The request proto
+ * @param {!proto.sustain.CompoundRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.CompoundResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.CompoundResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainClient.prototype.compoundQuery =
+proto.sustain.SustainClient.prototype.compoundQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/CompoundQuery',
+      '/sustain.Sustain/CompoundQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_CompoundQuery);
@@ -499,21 +500,21 @@ proto.SustainClient.prototype.compoundQuery =
 
 
 /**
- * @param {!proto.CompoundRequest} request The request proto
+ * @param {!proto.sustain.CompoundRequest} request The request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.CompoundResponse>}
+ * @return {!grpc.web.ClientReadableStream<!proto.sustain.CompoundResponse>}
  *     The XHR Node Readable Stream
  */
-proto.SustainPromiseClient.prototype.compoundQuery =
+proto.sustain.SustainPromiseClient.prototype.compoundQuery =
     function(request, metadata) {
   return this.client_.serverStreaming(this.hostname_ +
-      '/Sustain/CompoundQuery',
+      '/sustain.Sustain/CompoundQuery',
       request,
       metadata || {},
       methodDescriptor_Sustain_CompoundQuery);
 };
 
 
-module.exports = proto;
+module.exports = proto.sustain;
 
