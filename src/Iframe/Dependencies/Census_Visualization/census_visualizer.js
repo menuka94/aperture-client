@@ -255,12 +255,6 @@ const Census_Visualizer = {
       stream.on('data', function (r) {
           this.generalizedDraw({...JSON.parse(r.getData()), ...poly});
       }.bind(this));
-        stream.on('status', function (status) {
-          console.log(status.code, status.details, status.metadata);
-      });
-        stream.on('end', function (end) {
-        console.log("ended")
-      });
   },
 
   generalizedDraw: function (data, properties) {

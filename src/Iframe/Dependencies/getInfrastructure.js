@@ -1060,9 +1060,6 @@ const Util = {
      * @returns {string} 
      */
     spaceToUnderScore: function (str) {
-        if (str == null) {
-            return "noname"
-        }
         if (typeof str !== 'string') {
             str = str.toString();
         }
