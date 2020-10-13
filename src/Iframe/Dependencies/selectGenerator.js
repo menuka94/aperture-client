@@ -75,9 +75,20 @@ let Generator = {
     makeList: function (elements, elementsJson, type, colorCode, callFunc) {
         let retHTML = '';
         elements.forEach(element => {
-            let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
-            let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
-            retHTML += '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + type + '" name="selector" id="' + element + '" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>';
+            let i = 0;
+            type.forEach(t => {
+                if (t === "radio" || t === "checkbox"){
+                    let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
+                    let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
+                    retHTML += '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + t + '" name="selector" id="' + element + '" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>';
+                } else if (t.startsWith('"range"') || t.startsWith('"text"')){
+                    const e = Util.spaceToUnderScore(element)+"_"+i;
+                    console.log()
+                    retHTML += '<div style="margin-top:3px;margin-bottom:3px"><form><output type="text" id="' + e + '_display">'+ t.match(/name="(.*?)"/)[1] + " : " + t.match(/value="(.*?)"/)[1] + '</output>';
+                    retHTML += '<input class="featureRange" type=' + t + ' id="' + e + '" oninput="' + e + '_display.value = ' + e + '.name + \' : \' + ' + e + '.value"></form></div>'
+				}
+                i += 1;
+            })
         });
         return retHTML;
     },

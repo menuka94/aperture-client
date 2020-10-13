@@ -24,7 +24,7 @@ const DEFAULTOPTIONS = {
     timeout: 30,
     maxElements: 5000,
     maxLayers: 10,
-    minRenderZoom: 10,
+    minRenderZoom: 0,
     commonTagNames: ["streamflow", "waterway", "man_made", "landuse", "amenity", "natural", "water"],
     blacklistedTagValues: ["yes", "amenity"],
     queryAlertText: null,
@@ -1050,6 +1050,20 @@ const Util = {
             str = str.toString();
         }
         return str.replace(/_/gi, " ");
+    },
+
+    /**                                                                            
+     * Converts_spaces -> to underscores.
+     * @memberof Util
+     * @method underScoreToSpace
+     * @param {string} str
+     * @returns {string} 
+     */
+    spaceToUnderScore: function (str) {
+        if (typeof str !== 'string') {
+            str = str.toString();
+        }
+        return str.replace(/ /gi, "_");
     },
     /**                                                                            
      * Creates a leaflet icon from an image address.

@@ -61,7 +61,6 @@ describe('RenderInfrastructure', function () {
             getInfrastructure.RenderInfrastructure.preProcessData = streamflowData;
             assert.deepEqual(getInfrastructure.RenderInfrastructure.map, testMap);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.options.timeout, 15);
-            assert.deepEqual(getInfrastructure.RenderInfrastructure.options.minRenderZoom, 10);
         });
     });
     describe('update()', function () {
