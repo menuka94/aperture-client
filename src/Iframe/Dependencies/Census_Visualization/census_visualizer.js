@@ -228,18 +228,19 @@ const Census_Visualizer = {
       const firstQuery = {};
       firstQuery[firstMatch] = {"$eq": poly.properties.GISJOIN};
 
-      const secondMatch = "CDF." + document.getElementById("Heat_Waves_2").value
+      const secondMatch = "CDF." + Number(document.getElementById("Heat_Waves_length").noUiSlider.get())
       const secondQuery = {};
       secondQuery[secondMatch] = {"$exists": true};
 
       const thirdMatch = "temp"
       const thirdQuery = {};
-      thirdQuery[thirdMatch] = {"$gte": Number(document.getElementById("Heat_Waves_1").value)};
+      thirdQuery[thirdMatch] = {"$gte": Number(document.getElementById("Heat_Waves_temperature").noUiSlider.get())};
+
 
       const fourthMatch = "year"
       const fourthQuery = {};
-      fourthQuery[fourthMatch] = {"$gte": Number(document.getElementById("Heat_Waves_3").value), "$lt": Number(document.getElementById("Heat_Waves_4").value)};
-
+      fourthQuery[fourthMatch] = {"$gte": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[0]), "$lt": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[1])};
+      
       const q = [{"$match": firstQuery},
                  {"$match": secondQuery},
                  {"$match": thirdQuery},
@@ -250,7 +251,7 @@ const Census_Visualizer = {
 
       this.streams.push(stream);
 
-      const properties = {"Heat Wave Length": document.getElementById("Heat_Waves_2").value, "Heat Wave Lower Bound": document.getElementById("Heat_Waves_1").value}
+      const properties = {"Heat Wave Length": document.getElementById("Heat_Waves_length").noUiSlider.get(), "Heat Wave Lower Bound": document.getElementById("Heat_Waves_temperature").noUiSlider.get()}
       
       stream.on('data', function (r) {
           this.generalizedDraw({...JSON.parse(r.getData()), ...poly});

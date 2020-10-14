@@ -1,6 +1,6 @@
 //Author: Daniel Reynolds
 //Purpose: Add selectable checkboxes to html for getInfrastructure.js
-//Dependencies: getInfrastructure.js
+//Dependencies: getInfrastructure.js, nouislider.js, nouislider.css
 
 /** 
 * @namespace Generator
@@ -25,34 +25,57 @@ let Generator = {
         if (selectContainer == null || elementsJson == null) {
             return;
         }
+        // let slider = document.createElement("div");
+        // noUiSlider.create(slider, {
+        //     start: [0],
+            
+        //     step: 1, //default 1,
+
+        //     range: {
+        //         'min': 0,
+        //         'max': 100
+        //     },
+
+        //     connect: true
+        // });
+        
+        // selectContainer.appendChild(slider);
         if (groupModules) {
             let groupInfo = this.groupMods(elementsJson);
             for (let i = 0; i < groupInfo.groups.length; i++) {
-                selectContainer.innerHTML += "<button type='button' class='collapsible'>" + groupInfo.groups[i] + "</button>"
-                let innerHTML = this.makeList(groupInfo.elements[i], elementsJson, type, colorCode, callFunc);
-                selectContainer.innerHTML += "<div class='content' style='display:none;'>" + innerHTML + "</div>";
-            }
-            if (clearFunc) {
-                selectContainer.innerHTML += "<button id='clearFeatures' onClick='RenderInfrastructure.removeAllFeaturesFromMap(); Generator.clearChecks();'>Clear All Features</button>";
-            }
-            if (attribution) {
-                this.attribution(attribution, selectContainer);
-            }
-            var coll = document.getElementsByClassName("collapsible");
-            for (let i = 0; i < coll.length; i++) {
-                coll[i].addEventListener("click", function () {
+                //selectContainer.insertAdjacentHTML('beforeend', "<button type='button' class='collapsible'>" + groupInfo.groups[i] + "</button>");
+                let collapsibleButton = document.createElement("button");
+                collapsibleButton.type = "button";
+                collapsibleButton.className = "collapsible";
+                collapsibleButton.innerHTML = groupInfo.groups[i];
+                selectContainer.appendChild(collapsibleButton);
+
+                let content = document.createElement("div");
+                content.className = "content";
+                content.style.display = "none";
+                //selectContainer.insertAdjacentHTML('beforeend', "<div class='content' style='display:none;'></div>");
+                this.makeList(groupInfo.elements[i], elementsJson, type, colorCode, content);
+                selectContainer.appendChild(content);
+
+                collapsibleButton.addEventListener("click", function () {
                     this.classList.toggle("active");
                     var content = this.nextElementSibling;
                     if (content.style.display === "block") content.style.display = "none";
                     else content.style.display = "block";
                 });
             }
+            if (clearFunc) {
+                selectContainer.insertAdjacentHTML('beforeend', "<button id='clearFeatures' onClick='RenderInfrastructure.removeAllFeaturesFromMap(); Generator.clearChecks();'>Clear All Features</button>");
+            }
+            if (attribution) {
+                this.attribution(attribution, selectContainer);
+            }
         }
         else {
             if (attribution) {
                 this.attribution(attribution, selectContainer);
             }
-            selectContainer.innerHTML += this.makeList(Object.keys(elementsJson), elementsJson, type, colorCode, callFunc);
+            selectContainer.insertAdjacentHTML('beforeend', this.makeList(Object.keys(elementsJson), elementsJson, type, colorCode, callFunc));
         }
         let featureChecks = document.getElementsByClassName("featureCheck")
         for (let i = 0; i < featureChecks.length; i++) {
@@ -72,25 +95,49 @@ let Generator = {
      * @param {Function} callFunc
      * @returns {string}
     */
-    makeList: function (elements, elementsJson, type, colorCode, callFunc) {
-        let retHTML = '';
+    makeList: function (elements, elementsJson, type, colorCode, container) {
         elements.forEach(element => {
-            let i = 0;
-            type.forEach(t => {
-                if (t === "radio" || t === "checkbox"){
-                    let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
-                    let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
-                    retHTML += '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + t + '" name="selector" id="' + element + '" ' + checked + '><label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>';
-                } else if (t.startsWith('"range"') || t.startsWith('"text"')){
-                    const e = Util.spaceToUnderScore(element)+"_"+i;
-                    console.log()
-                    retHTML += '<div style="margin-top:3px;margin-bottom:3px"><form><output type="text" id="' + e + '_display">'+ t.match(/name="(.*?)"/)[1] + " : " + t.match(/value="(.*?)"/)[1] + '</output>';
-                    retHTML += '<input class="featureRange" type=' + t + ' id="' + e + '" oninput="' + e + '_display.value = ' + e + '.name + \' : \' + ' + e + '.value"></form></div>'
-				}
-                i += 1;
-            })
+            if (type === "radio" || type === "checkbox") {
+                let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
+                let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
+                container.insertAdjacentHTML('beforeend', '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + type + '" name="selector" id="' + element + '" ' + checked + '>' +
+                    '<label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>');
+
+                
+                for (constraint in elementsJson[element]['constraints']) {
+                    let slider = document.createElement("div");
+                    let sliderLabel = document.createElement("div");
+                    container.appendChild(sliderLabel);
+                    
+                    slider.style.marginBottom = '15px';
+                    slider.id = Util.spaceToUnderScore(element) + "_" + Util.spaceToUnderScore(constraint);
+
+                    noUiSlider.create(slider, {
+                        start: elementsJson[element]['constraints'][constraint]['default'] ? elementsJson[element]['constraints'][constraint]['default'] : [elementsJson[element]['constraints'][constraint]['range'][0]], //default is minimum
+                        
+                        step: elementsJson[element]['constraints'][constraint]['step'] ? elementsJson[element]['constraints'][constraint]['step'] : 1, //default 1,
+
+                        range: {
+                            'min': elementsJson[element]['constraints'][constraint]['range'][0],
+                            'max': elementsJson[element]['constraints'][constraint]['range'][1]
+                        },
+
+                        connect: true,
+                    });
+                    const name = Util.capitalizeString(Util.underScoreToSpace(elementsJson[element]['constraints'][constraint]["label"] ? elementsJson[element]['constraints'][constraint]["label"] : constraint));
+                    const step = elementsJson[element]['constraints'][constraint]['step'] ? elementsJson[element]['constraints'][constraint]['step'] : 1;
+                    slider.noUiSlider.on('update', function (values) {
+                        sliderLabel.innerHTML = name + ": " + (step < 1 ? values[0] : Math.floor(values[0]));
+                        for(let i = 1; i < values.length; i++){
+                            sliderLabel.innerHTML += " - " + (step < 1 ? values[i] : Math.floor(values[i]));
+                        }
+                    });
+                
+                    container.appendChild(slider);
+                }
+
+            }
         });
-        return retHTML;
     },
     /** Unchecks every checklist element
      * @memberof Generator
@@ -130,8 +177,7 @@ let Generator = {
      * @param {string} html
      */
     attribution: function (html, htmlElement) {
-        htmlElement.innerHTML += '<button class="attributionContainer" id="attributionClickable"><div class="clickableAttr">Icon Attributions</div><div id="attrText" class="attribution">' + html + '</div></button>';
-        console.log(document.getElementById);
+        htmlElement.insertAdjacentHTML('beforeend', '<button class="attributionContainer" id="attributionClickable"><div class="clickableAttr">Icon Attributions</div><div id="attrText" class="attribution">' + html + '</div></button>');
         document.getElementById("attributionClickable").onclick = function () { Generator.showAttribution(document.getElementById("attrText")) };
     },
     showAttribution: function (htmlElement) {
