@@ -211,22 +211,29 @@ const Census_Visualizer = {
       const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "county_geo", JSON.stringify(q));
 
       this.streams.push(stream);
+
+      const GISJOINS = [];
+      const polys = {};
       
       stream.on('data', function (r) {
-          this._queryMatchingValues(JSON.parse(r.getData()));
+          const data = JSON.parse(r.getData());
+          GISJOINS.push(data.properties.GISJOIN);
+          polys[data.properties.GISJOIN] = data;
+          if(GISJOINS.length > 20){
+              this._queryMatchingValues(GISJOINS, polys);
+              GISJOINS.length = 0;
+		  }
       }.bind(this));
-        stream.on('status', function (status) {
-          console.log(status.code, status.details, status.metadata);
-      });
-        stream.on('end', function (end) {
-        console.log("ended")
+
+      stream.on('end', function (end) {
+        this._queryMatchingValues(GISJOINS, polys);
       }.bind(this));
   },
 
-  _queryMatchingValues: function(poly) {
+  _queryMatchingValues: function(GISJOINS, polys) {
       const firstMatch = "GISJOIN"
       const firstQuery = {};
-      firstQuery[firstMatch] = {"$eq": poly.properties.GISJOIN};
+      firstQuery[firstMatch] = {"$in": GISJOINS};
 
       const secondMatch = "CDF." + Number(document.getElementById("Heat_Waves_length").noUiSlider.get())
       const secondQuery = {};
@@ -254,7 +261,9 @@ const Census_Visualizer = {
       const properties = {"Heat Wave Length": document.getElementById("Heat_Waves_length").noUiSlider.get(), "Heat Wave Lower Bound": document.getElementById("Heat_Waves_temperature").noUiSlider.get()}
       
       stream.on('data', function (r) {
-          this.generalizedDraw({...JSON.parse(r.getData()), ...poly});
+          const data = JSON.parse(r.getData());
+          const poly = polys[data.GISJOIN];
+          this.generalizedDraw({...data, ...poly});
       }.bind(this));
   },
 
