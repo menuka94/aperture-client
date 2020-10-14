@@ -25,21 +25,6 @@ let Generator = {
         if (selectContainer == null || elementsJson == null) {
             return;
         }
-        // let slider = document.createElement("div");
-        // noUiSlider.create(slider, {
-        //     start: [0],
-            
-        //     step: 1, //default 1,
-
-        //     range: {
-        //         'min': 0,
-        //         'max': 100
-        //     },
-
-        //     connect: true
-        // });
-        
-        // selectContainer.appendChild(slider);
         if (groupModules) {
             let groupInfo = this.groupMods(elementsJson);
             for (let i = 0; i < groupInfo.groups.length; i++) {

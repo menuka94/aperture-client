@@ -17,19 +17,16 @@ describe('SelectGenerator', function () {
     describe('config()', function () {
         it('should configurate the select box', function () {
             //let save = JSON.parse(JSON.stringify(document.getElementById));
+            
             global.document.getElementById = function(){return {a:"n"}};
-            selectGenerator.Generator.config(jsonData, null, true, notAFunction,["checkbox"]);
+            selectGenerator.Generator.config(jsonData, null, true, notAFunction,"checkbox");
             assert.deepEqual(elem.innerHTML, '');
-            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,["checkbox"],true,"<br><b>Very important attribution</b>");
+            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",true,"<br><b>Very important attribution</b>");
             assert.deepEqual(elem.childElementCount, 11);
             elem.innerHTML = '';
-            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,["checkbox"],false,"<br><b>Very important attribution</b>");
+            selectGenerator.Generator.config(jsonData, elem, true, notAFunction,"checkbox",false,"<br><b>Very important attribution</b>");
             assert.deepEqual(elem.childElementCount, 32);
             document.body.appendChild(elem);
-            var coll = document.getElementsByClassName("collapsible");
-            for (let i = 0; i < coll.length; i++) {
-                coll[i].click();
-            }
             global.document.getElementById = null;
         });
     });
