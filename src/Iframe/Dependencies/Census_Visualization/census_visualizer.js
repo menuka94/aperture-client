@@ -2,7 +2,7 @@
 /**
  * @namespace Census_Visualizer
  * @file Responsible for querying census data and drawing it as polygons on a leaflet map
- * @author Kevin Bruhwiler, edited by Daniel Reynolds
+ * @author Kevin Bruhwiler, Daniel Reynolds
  */
 
 const Census_Visualizer = {
@@ -192,14 +192,16 @@ const Census_Visualizer = {
     return (val - min) / (max - min);
   },
 
-  updateFutureHeat: function (map){
-      if (!document.getElementById("Heat Waves").checked)
+  updateFutureHeat: function (map, constraintsUpdated){
+      if (!document.getElementById("Heat_Waves").checked)
         return;
 
       this.streams.forEach(s => s.cancel());
 
-      if (this.heat_layers.length > 0)
+      if (this.heat_layers.length > 0 && constraintsUpdated){
           this.clearHeat();
+          this.heat_layers = [];
+      }
 
       const b = map.wrapLatLngBounds(map.getBounds());
       const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
@@ -262,7 +264,7 @@ const Census_Visualizer = {
     if (properties !== null)
         data["properties"] = {...data["properties"], ...properties};
 
-    if (!document.getElementById("Heat Waves").checked)
+    if (!document.getElementById("Heat_Waves").checked)
         return;
 
     let newLayers = RenderInfrastructure.renderGeoJson(data,false,{

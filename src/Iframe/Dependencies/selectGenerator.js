@@ -85,7 +85,7 @@ let Generator = {
             if (type === "radio" || type === "checkbox") {
                 let checked = elementsJson[element]['defaultRender'] ? 'checked' : '';
                 let color = colorCode && elementsJson[element]['color'] ? 'style="border-bottom:3px solid ' + elementsJson[element]['color'] + ';"' : '';
-                container.insertAdjacentHTML('beforeend', '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + type + '" name="selector" id="' + element + '" ' + checked + '>' +
+                container.insertAdjacentHTML('beforeend', '<div style="margin-top:3px;margin-bottom:3px"><input class="featureCheck" type="' + type + '" name="selector" id="' + Util.spaceToUnderScore(element) + '" ' + checked + '>' +
                     '<label for="' + element + '" ' + color + '>' + Util.capitalizeString(Util.underScoreToSpace(element)) + '</label></div>');
 
                 
@@ -116,6 +116,10 @@ let Generator = {
                         for(let i = 1; i < values.length; i++){
                             sliderLabel.innerHTML += " - " + (step < 1 ? values[i] : Math.floor(values[i]));
                         }
+                    });
+                    slider.noUiSlider.on('change', function (values) {
+                        if(elementsJson[element]['onConstraintChange'])
+                            eval(elementsJson[element]['onConstraintChange']);
                     });
                 
                     container.appendChild(slider);

@@ -446,7 +446,6 @@ const Querier = {
                 RenderInfrastructure.currentBounds = RenderInfrastructure.currentBounds.concat(relevantBounds /*This is a weird use of this function but it works*/); 
             callbackFn(dataAsJson);
         });
-        console.log("pushing");
         RenderInfrastructure.currentQueries.push({ query: query, bounds: bounds });
         Util.refreshInfoPopup();
     },

@@ -83,7 +83,8 @@ const fc = {
             "default":[2006,2010],
             "step":1
         }
-    }
+    },
+    onConstraintChange: "censusViz.updateFutureHeat(RenderInfrastructure.map, true)"
 };
 const future_climate = {
     "Heat Waves": fc
@@ -133,7 +134,7 @@ function changeChecked(element) {
 parent.addEventListener('updateMaps', function () {
     runQuery();
     censusViz.updateViz(osmMap2);
-    censusViz.updateFutureHeat(osmMap2);
+    censusViz.updateFutureHeat(osmMap2, false);
 });
 
 function runQuery() {
