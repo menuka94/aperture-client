@@ -193,8 +193,9 @@ const Census_Visualizer = {
   },
 
   updateFutureHeat: function (map, constraintsUpdated){
-      if (!document.getElementById("Heat_Waves").checked)
+      if (!document.getElementById("Heat_Waves").checked){
         return;
+      }
 
       this.streams.forEach(s => s.cancel());
 

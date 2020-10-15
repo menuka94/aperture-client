@@ -87,7 +87,7 @@ const fc = {
     onConstraintChange: "censusViz.updateFutureHeat(RenderInfrastructure.map, true)"
 };
 const future_climate = {
-    "Heat Waves": fc
+    "Heat_Waves": fc
 }
 
 Generator.config(future_climate, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
@@ -116,7 +116,7 @@ function changeChecked(element) {
             censusViz.setFeature(element.id);
             censusViz.updateViz(osmMap2);
         } else if (element.id in future_climate) {
-            censusViz.updateFutureHeat(osmMap2);
+            censusViz.updateFutureHeat(osmMap2, true);
         } else {
             RenderInfrastructure.addFeatureToMap(element.id);
         }
