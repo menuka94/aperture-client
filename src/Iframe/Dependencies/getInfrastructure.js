@@ -309,6 +309,14 @@ let RenderInfrastructure = {
                 RenderInfrastructure.map.removeLayer(layer);
             }
         });
+        this.currentQueries.forEach(cq => {
+            try{
+                cq.query.cancel();
+            }
+            catch{
+                cq.query.abort();
+            }
+        });
         this.blacklist = [];
         this.queries = [];
         this.currentBounds = [];
@@ -452,7 +460,12 @@ const Querier = {
             let bound = Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds());
             bound = Util.expandBounds(bound);
             if (Util.boundsAreOutsideOfBounds(RenderInfrastructure.currentQueries[i].bounds, bound)) {
-                //RenderInfrastructure.currentQueries[i].query.abort();
+                try{
+                    RenderInfrastructure.currentQueries[i].query.cancel();
+                }
+                catch{
+                    RenderInfrastructure.currentQueries[i].query.abort();
+                }
                 RenderInfrastructure.currentQueries.splice(i, 1);
                 i--;
             }

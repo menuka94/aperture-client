@@ -2,7 +2,7 @@
     "water_works": {
         "iconAddr": "../../../images/water_works.png",
         "color": "black",
-        "defaultRender": false,
+        "defaultRender": true,
         "query":"man_made=water_works",
         "groupMem":"Water (Man Made)",
         "grpc":"OSMRequest"
@@ -50,7 +50,7 @@
     "lock_gate": {
         "iconAddr": "../../../images/lock_gate.png",
         "color": "#FF0000",
-        "defaultRender":false,
+        "defaultRender":true,
         "query":"waterway=lock_gate",
         "groupMem":"Water (Man Made)",
         "grpc":"OSMRequest"
@@ -100,7 +100,7 @@
     },
     "Natural_Gas_Pipeline": {
         "color": "#8A2BE2",
-        "defaultRender":false,
+        "defaultRender":true,
         "query":"custom=Natural_Gas_Pipeline",
         "grpc":"DatasetRequest",
         "grpcDataset":4, 

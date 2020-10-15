@@ -2,7 +2,7 @@
 /**
  * @namespace Census_Visualizer
  * @file Responsible for querying census data and drawing it as polygons on a leaflet map
- * @author Kevin Bruhwiler, edited by Daniel Reynolds
+ * @author Kevin Bruhwiler, Daniel Reynolds
  */
 
 const Census_Visualizer = {
@@ -192,14 +192,17 @@ const Census_Visualizer = {
     return (val - min) / (max - min);
   },
 
-  updateFutureHeat: function (map){
-      if (!document.getElementById("Heat Waves").checked)
+  updateFutureHeat: function (map, constraintsUpdated){
+      if (!document.getElementById("Heat_Waves").checked){
         return;
+      }
 
       this.streams.forEach(s => s.cancel());
 
-      if (this.heat_layers.length > 0)
+      if (this.heat_layers.length > 0 && constraintsUpdated){
           this.clearHeat();
+          this.heat_layers = [];
+      }
 
       const b = map.wrapLatLngBounds(map.getBounds());
       const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
@@ -211,35 +214,43 @@ const Census_Visualizer = {
       const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "county_geo", JSON.stringify(q));
 
       this.streams.push(stream);
+
+      const GISJOINS = [];
+      const polys = {};
       
       stream.on('data', function (r) {
-          this._queryMatchingValues(JSON.parse(r.getData()));
+          const data = JSON.parse(r.getData());
+          GISJOINS.push(data.properties.GISJOIN);
+          polys[data.properties.GISJOIN] = data;
+          if(GISJOINS.length > 20){
+              this._queryMatchingValues(GISJOINS, polys);
+              GISJOINS.length = 0;
+		  }
       }.bind(this));
-        stream.on('status', function (status) {
-          console.log(status.code, status.details, status.metadata);
-      });
-        stream.on('end', function (end) {
-        console.log("ended")
+
+      stream.on('end', function (end) {
+        this._queryMatchingValues(GISJOINS, polys);
       }.bind(this));
   },
 
-  _queryMatchingValues: function(poly) {
+  _queryMatchingValues: function(GISJOINS, polys) {
       const firstMatch = "GISJOIN"
       const firstQuery = {};
-      firstQuery[firstMatch] = {"$eq": poly.properties.GISJOIN};
+      firstQuery[firstMatch] = {"$in": GISJOINS};
 
-      const secondMatch = "CDF." + document.getElementById("Heat_Waves_2").value
+      const secondMatch = "CDF." + Number(document.getElementById("Heat_Waves_length").noUiSlider.get())
       const secondQuery = {};
       secondQuery[secondMatch] = {"$exists": true};
 
       const thirdMatch = "temp"
       const thirdQuery = {};
-      thirdQuery[thirdMatch] = {"$gte": Number(document.getElementById("Heat_Waves_1").value)};
+      thirdQuery[thirdMatch] = {"$gte": Number(document.getElementById("Heat_Waves_temperature").noUiSlider.get())};
+
 
       const fourthMatch = "year"
       const fourthQuery = {};
-      fourthQuery[fourthMatch] = {"$gte": Number(document.getElementById("Heat_Waves_3").value), "$lt": Number(document.getElementById("Heat_Waves_4").value)};
-
+      fourthQuery[fourthMatch] = {"$gte": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[0]), "$lt": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[1])};
+      
       const q = [{"$match": firstQuery},
                  {"$match": secondQuery},
                  {"$match": thirdQuery},
@@ -250,10 +261,12 @@ const Census_Visualizer = {
 
       this.streams.push(stream);
 
-      const properties = {"Heat Wave Length": document.getElementById("Heat_Waves_2").value, "Heat Wave Lower Bound": document.getElementById("Heat_Waves_1").value}
+      const properties = {"Heat Wave Length": document.getElementById("Heat_Waves_length").noUiSlider.get(), "Heat Wave Lower Bound": document.getElementById("Heat_Waves_temperature").noUiSlider.get()}
       
       stream.on('data', function (r) {
-          this.generalizedDraw({...JSON.parse(r.getData()), ...poly});
+          const data = JSON.parse(r.getData());
+          const poly = polys[data.GISJOIN];
+          this.generalizedDraw({...data, ...poly});
       }.bind(this));
   },
 
@@ -261,7 +274,7 @@ const Census_Visualizer = {
     if (properties !== null)
         data["properties"] = {...data["properties"], ...properties};
 
-    if (!document.getElementById("Heat Waves").checked)
+    if (!document.getElementById("Heat_Waves").checked)
         return;
 
     let newLayers = RenderInfrastructure.renderGeoJson(data,false,{

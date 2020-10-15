@@ -22,7 +22,7 @@ elem.style.cssText = 'width: "100%", height: "800px" ';
 elem.id = 'testMap';
 document.body.appendChild(elem);
 
-let jsonData = require("../../../src/Iframe/Dependencies/infrastructure.json");
+let jsonData = require("./infrastructure.json");
 let streamflowData = require("../../../src/Iframe/Dependencies/streamflowMetadata.json");
 let sampleQuery = require("./sampleRes.json");
 
@@ -65,7 +65,7 @@ describe('RenderInfrastructure', function () {
     });
     describe('update()', function () {
         it('should attempt to call the renderer for the current map bounds', function () {
-            getInfrastructure.RenderInfrastructure.update(["waterway=dam", "custom=Natural_Gas_Pipeline"]);
+            getInfrastructure.RenderInfrastructure.update();
             assert.deepEqual(getInfrastructure.RenderInfrastructure.currentQueries[0].bounds,
                 {
                     north: 40.54654802898779,
@@ -82,7 +82,7 @@ describe('RenderInfrastructure', function () {
     });
     describe('renderGeoJson()', function () {
         it('should render geojson onto map', function () {
-            assert.deepEqual(getInfrastructure.RenderInfrastructure.renderGeoJson(sampleQuery).length, 29);
+            assert.deepEqual(getInfrastructure.RenderInfrastructure.renderGeoJson(sampleQuery).length, 19);
         });
     });
     describe('removeFeatureFromMap()', function () {
@@ -90,7 +90,7 @@ describe('RenderInfrastructure', function () {
             let toRemove = 'dam';
             getInfrastructure.RenderInfrastructure.removeFeatureFromMap(toRemove);
             assert.deepEqual(getInfrastructure.RenderInfrastructure.blacklist.includes(toRemove), true);
-            assert.deepEqual(Object.keys(getInfrastructure.RenderInfrastructure.map._layers).length, 35);
+            assert.deepEqual(Object.keys(getInfrastructure.RenderInfrastructure.map._layers).length, 21);
         });
     });
     describe('cleanupMap()', function () {
@@ -99,7 +99,7 @@ describe('RenderInfrastructure', function () {
             getInfrastructure.RenderInfrastructure.renderGeoJson(sampleQuery);
             testMap.setView(L.latLng(48.494351, -105.295029), 22);
             getInfrastructure.RenderInfrastructure.cleanupMap();
-            assert.deepEqual(Object.keys(getInfrastructure.RenderInfrastructure.map._layers).length, 24);
+            assert.deepEqual(Object.keys(getInfrastructure.RenderInfrastructure.map._layers).length, 22);
         });
     });
     describe('getAttribute()', function () {
@@ -142,6 +142,7 @@ describe('RenderInfrastructure', function () {
     describe('removeAllFeaturesFromMap()', function () {
         it('removes all features from map', function () {
             //getInfrastructure.RenderInfrastructure.renderGeoJson(sampleQuery);
+            getInfrastructure.RenderInfrastructure.currentQueries = [{query:{cancel:function(){}}},{query:{abort:function(){}}}];
             getInfrastructure.RenderInfrastructure.removeAllFeaturesFromMap();
             assert.deepEqual(Object.keys(getInfrastructure.RenderInfrastructure.map._layers).length, 0);
         });

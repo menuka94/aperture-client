@@ -37,19 +37,19 @@ $.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
             queryAlertText: document.getElementById('queryInfoText'),
             overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
             maxElements: 10000,
-            maxLayers:20,
+            maxLayers: 20,
             simplifyThreshold: 0.00005
         });
-        Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, ["checkbox"], true,
-        '<ul style="padding-inline-start:20px;">' +
+        Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
+            '<ul style="padding-inline-start:20px;">' +
             '<li><b>Reservoir/Lake/Basin/Pond</b>: Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
             '<li><b>Wastewater Plant</b>: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></li>' +
             '<li><b>Dam</b>: Icon from <a href="http://www.iconsmind.com">iconsmind.com</a></li>' +
             '<li><b>Hospital</b>: Icons from Font Awesome by Dave Gandy - <a href="https://fortawesome.github.com/Font-Awesome">fortawesome.github.com/Font-Awesome</a> / CC BY-SA (<a href="https://creativecommons.org/licenses/by-sa/3.0">creativecommons.org/licenses/by-sa/3.0</a>)</li>' +
-            '<li><b>Urgent Care</b>: Icon By Bridget Gahagan, <a href="https://thenounproject.com/">noun project</a></li>' + 
+            '<li><b>Urgent Care</b>: Icon By Bridget Gahagan, <a href="https://thenounproject.com/">noun project</a></li>' +
             '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
-        '</ul>',
-        true);
+            '</ul>',
+            true);
         runQuery();
     });
 });
@@ -60,16 +60,37 @@ const census = {
     "Population by Age": g, "Median Age": g, "No. Below Poverty Line": g, "Demographics": g
 }
 
-Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, ["radio"], true);
+Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, "radio", true);
 
-const fc = { groupMem: "Future Climate", query: 1 };
+const fc = {
+    groupMem: "Future Climate", 
+    query: 1, 
+    constraints: {
+        "temperature":{
+            "range":[88,110],
+            "default": [88],
+            "step":1
+        },
+        "length":{
+            "label":"Length (Days)",
+            "range":[1,200],
+            "default":[1],
+            "step":1
+        },
+        "years":{
+            "label":"Yearly Range",
+            "range":[2006,2010],
+            "default":[2006,2010],
+            "step":1
+        }
+    },
+    onConstraintChange: "censusViz.updateFutureHeat(RenderInfrastructure.map, true)"
+};
 const future_climate = {
-    "Heat Waves": fc
+    "Heat_Waves": fc
 }
 
-Generator.config(future_climate, document.getElementById("checkboxLocation"), true, changeChecked, ["checkbox", '"range" min="88" max="110" name="Temperature" value="88"', 
-                                                                                                    '"range" min="1" max="200" name="Length (Days)" value="1"',
-                                                                                                    '"text" name="Start Year" value="2006"', '"text" name="End Year" value="2010"'], true);
+Generator.config(future_climate, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
 
 //map 3 merge stuff
 const censusViz = census_visualizer();
@@ -88,13 +109,14 @@ function removeOverpassLayer(map, removeLayer) {
     });
 }
 
+
 function changeChecked(element) {
     if (element.checked) {
         if (element.id in census) {
             censusViz.setFeature(element.id);
             censusViz.updateViz(osmMap2);
         } else if (element.id in future_climate) {
-            censusViz.updateFutureHeat(osmMap2);
+            censusViz.updateFutureHeat(osmMap2, true);
         } else {
             RenderInfrastructure.addFeatureToMap(element.id);
         }
@@ -112,7 +134,7 @@ function changeChecked(element) {
 parent.addEventListener('updateMaps', function () {
     runQuery();
     censusViz.updateViz(osmMap2);
-    censusViz.updateFutureHeat(osmMap2);
+    censusViz.updateFutureHeat(osmMap2, false);
 });
 
 function runQuery() {
