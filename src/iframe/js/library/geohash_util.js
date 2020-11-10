@@ -217,6 +217,7 @@ try {
         encode_geohash: encode_geohash,
         geohash_bounds: geohash_bounds,
         geohash_adjacent: geohash_adjacent,
+        getGeohashBase: getGeohashBase,
         Geohash: Geohash
     };
 } catch(e) { }

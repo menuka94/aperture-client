@@ -1,6 +1,6 @@
 const assert = require('assert');
-const grpcQuerier = require('../../../../src/Iframe/Dependencies/Sketch_Visualization/grpc_querier');
-const {TargetedQueryServiceClient} = require('../../../../src/Iframe/Dependencies/Sketch_Visualization/targeted_query_service_grpc_web_pb.js');
+const grpcQuerier = require('../../../../src/iframe/js/grpc/Sketch_Visualization/grpc_querier');
+const {TargetedQueryServiceClient} = require('../../../../src/iframe/js/grpc/Sketch_Visualization/targeted_query_service_grpc_web_pb.js');
 
 describe('grpc_querier()', function() {
     it('should initialize the grpc_querier with a targeted query service', function() {

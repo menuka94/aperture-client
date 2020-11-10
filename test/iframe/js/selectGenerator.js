@@ -1,6 +1,6 @@
 const assert = require('assert');
-var selectGenerator = require('../../../src/Iframe/Dependencies/selectGenerator');
-global.Util = require('../../../src/Iframe/Dependencies/getInfrastructure.js').Util;
+var selectGenerator = require('../../../src/iframe/js/ui/selectGenerator');
+global.Util = require('../../../src/iframe/js/library/getInfrastructure').Util;
 var jsdom = require('jsdom-global');
 let jsonData = require("./infrastructure.json");
 global.elem = document.createElement('div');

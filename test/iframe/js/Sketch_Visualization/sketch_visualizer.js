@@ -1,5 +1,8 @@
 const assert = require('assert');
-const {sketch_visualizer} = require('../../../../src/Iframe/Dependencies/Sketch_Visualization/sketch_visualizer');
+const {sketch_visualizer} = require('../../../../src/iframe/js/grpc/Sketch_Visualization/sketch_visualizer');
+global.encode_geohash = require('../../../../src/iframe/js/library/geohash_util.js').encode_geohash;
+global.geohash_bounds = require('../../../../src/iframe/js/library/geohash_util.js').geohash_bounds;
+global.getGeohashBase = require('../../../../src/iframe/js/library/geohash_util.js').getGeohashBase;
 
 const ptc = {
     0.0: [0, 0, 255],
