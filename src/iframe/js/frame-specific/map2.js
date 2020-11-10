@@ -30,9 +30,9 @@ var markers = L.markerClusterGroup({
 });
 osmMap2.addLayer(markers);
 
-$.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
+$.getJSON("json/streamflowMetadata.json", function (mdata) {
     RenderInfrastructure.preProcessData = mdata;
-    $.getJSON("Dependencies/infrastructure.json", function (data) {
+    $.getJSON("json/infrastructure.json", function (data) {
         RenderInfrastructure.config(osmMap2, markers, data, {
             queryAlertText: document.getElementById('queryInfoText'),
             overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
@@ -40,7 +40,6 @@ $.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
             maxLayers: 20,
             simplifyThreshold: 0.00005
         });
-        /*
         Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
             '<ul style="padding-inline-start:20px;">' +
             '<li><b>Reservoir/Lake/Basin/Pond</b>: Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
@@ -50,7 +49,7 @@ $.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
             '<li><b>Urgent Care</b>: Icon By Bridget Gahagan, <a href="https://thenounproject.com/">noun project</a></li>' +
             '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
             '</ul>',
-            true);*/
+            true);
         runQuery();
     });
 });
@@ -148,25 +147,6 @@ osmMap2.on("move", function (e) {
 osmMap2.on("zoomend", function () {
     parent.setGlobalPositionFORCE(osmMap2.getCenter(), MAPNUMBER);
 });
-
-
-
-
-
-let objs = {
-    water:{
-        group: "OSM",
-        subGroup: "Water (Natural)",
-        color: "#0000FF"
-    },
-    power_lines:{
-        group: "Infrastructure",
-        subGroup: "Energy"
-    }
-}
-
-MenuGenerator.generate(objs,document.getElementById("checkboxLocation"),{colorCode:false});
-
 
 
 

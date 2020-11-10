@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" />
+    <script src="../../node_modules/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/IframeStyle.css">
+    <script src="js/third-party/leaflet-sidebar.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/third-party/leaflet-sidebar.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="js/third-party/nouislider.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/third-party/nouislider.min.css">
+    <script src="../../node_modules/osmtogeojson/osmtogeojson.js"></script>
+    <script src="js/third-party/simplify.js"></script>
+    <script type="text/javascript" src="js/library/census_visualizer.js"></script>
+    <script src="js/grpc/Other_Datasets/grpc_querier.bundle.js"></script>
+    <script src="js/grpc/GRPC_Querier/grpc_querier.bundle.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/third-party/MarkerCluster.css">
+    <link rel="stylesheet" type="text/css" href="css/third-party/MarkerCluster.Default.css">
+    <script src="js/third-party/leaflet.markercluster.js"></script>
+
+    <script src="js/library/getInfrastructure.js"></script>
+    <script src="js/ui/selectGenerator.js"></script>
+</head>
+
+<body>
+    <div class="leaflet-bottom leaflet-left">
+        <div class='queryInfo'>
+            <div id='queryInfoText'>
+
+            </div>
+        </div>
+    </div>
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li>
+                    <a href="#home" role="tab">
+                        <img style="width:35px;height:35px;" src="../../images/hamburger-button.svg">
+                    </a>
+                </li>
+            </ul>
+
+        </div>
+
+        <!-- Tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="home">
+                <h6 class="sidebar-header">
+                    Menu
+                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h6>
+                <div class="selectContainer" id="checkboxLocation">
+                    <!--The react container-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="map" class="sidebar-map"></div>
+    <!------------------------------------------>
+    <div id='map2' class='map'></div>
+
+    <!--Required for this map to be controlled-->
+    <script src="js/frame-specific/map2.js"></script>
+    <script src="js/control/mouseDown.js"></script>
+    <!------------------------------------------>
+</body>
