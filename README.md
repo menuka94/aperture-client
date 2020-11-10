@@ -21,6 +21,7 @@ Aperture's client
     /src
         /iframe           # Where the frame code is, read this directories' README for a full description
         /dependencies     # index.html's dependencies
+    /test         # where mocha test code lives
 
 # How to Generate Documentation <a name="docs"></a>
 Run the following command from the root directory: \
