@@ -1,8 +1,8 @@
 const assert = require('assert');
-var selectGenerator = require('../../../src/iframe/js/ui/selectGenerator');
-global.Util = require('../../../src/iframe/js/library/getInfrastructure').Util;
+var selectGenerator = require('../../../../src/iframe/js/ui/selectGenerator');
+global.Util = require('../../../../src/iframe/js/library/getInfrastructure').Util;
 var jsdom = require('jsdom-global');
-let jsonData = require("./infrastructure.json");
+let jsonData = require("../infrastructure.json");
 global.elem = document.createElement('div');
 elem.id = 'area';
 let elem2 = document.createElement('div');

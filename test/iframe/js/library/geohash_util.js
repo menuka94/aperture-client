@@ -1,7 +1,7 @@
 var assert = require('assert');
 var jsdom = require('jsdom-global')();
 
-var display = require('../src/iframe/js/library/geohash_util')
+var display = require('../../../../src/iframe/js/library/geohash_util')
 
 
 describe('decode_geohash()', function() {
