@@ -3,7 +3,7 @@ Aperture's client
 # Table of Contents
 - [Documenation](https://github.com/Project-Sustain/aperture-client/wiki)
 - [How to run](#how_to_run)
-- [How to run](#project_structure)
+- [Project Structure](#project_structure)
 - [How to Generate Documentation](#docs)
 
 
