@@ -1,12 +1,12 @@
 const assert = require('assert');
-var getInfrastructure = require('../../../src/Iframe/Dependencies/getInfrastructure');
+var getInfrastructure = require('../../../../src/iframe/js/library/getInfrastructure');
 var jsdom = require('jsdom-global');
 const { createCanvas, loadImage } = require('canvas');
 const canvas = createCanvas(200, 200);
 const ctx = canvas.getContext('2d');
 global.$ = require('jquery');
 global.L = require('leaflet');
-global.simplify = require('../../../src/Iframe/Dependencies/simplify.js');
+global.simplify = require('../../../../src/iframe/js/third-party/simplify.js');
 
 L.Map.prototype.setSize = function (width, height) {
     this._size = new L.Point(width, height);
@@ -22,8 +22,8 @@ elem.style.cssText = 'width: "100%", height: "800px" ';
 elem.id = 'testMap';
 document.body.appendChild(elem);
 
-let jsonData = require("./infrastructure.json");
-let streamflowData = require("../../../src/Iframe/Dependencies/streamflowMetadata.json");
+let jsonData = require("../infrastructure.json");
+let streamflowData = require("../../../../src/iframe/json/streamflowMetadata.json");
 let sampleQuery = require("./sampleRes.json");
 
 const elem2 = document.createElement('div');

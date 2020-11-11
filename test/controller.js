@@ -1,7 +1,7 @@
 var assert = require('assert');
 var jsdom = require('jsdom-global')();
 
-var controller = require('../src/controller')
+var controller = require('../src/dependencies/controller')
 
 
 describe('verifyCorrectMap()', function() {

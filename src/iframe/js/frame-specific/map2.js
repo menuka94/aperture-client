@@ -30,9 +30,9 @@ var markers = L.markerClusterGroup({
 });
 osmMap2.addLayer(markers);
 
-$.getJSON("Dependencies/streamflowMetadata.json", function (mdata) {
+$.getJSON("json/streamflowMetadata.json", function (mdata) {
     RenderInfrastructure.preProcessData = mdata;
-    $.getJSON("Dependencies/infrastructure.json", function (data) {
+    $.getJSON("json/infrastructure.json", function (data) {
         RenderInfrastructure.config(osmMap2, markers, data, {
             queryAlertText: document.getElementById('queryInfoText'),
             overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
@@ -147,6 +147,10 @@ osmMap2.on("move", function (e) {
 osmMap2.on("zoomend", function () {
     parent.setGlobalPositionFORCE(osmMap2.getCenter(), MAPNUMBER);
 });
+
+
+
+
 //-----------
 var thisMapsSetter = function (view, zoom) {
     osmMap2.setView(osmMap2.wrapLatLng(parent.view), osmMap2.getZoom());
