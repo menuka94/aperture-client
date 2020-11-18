@@ -84,7 +84,7 @@ const fc = {
             "step":1
         }
     },
-    onConstraintChange: "censusViz.updateFutureHeatNew(RenderInfrastructure.map, true)"
+    onConstraintChange: "censusViz.updateFutureHeat(RenderInfrastructure.map, true)"
 };
 const future_climate = {
     "Heat_Waves": fc
@@ -116,7 +116,7 @@ function changeChecked(element) {
             censusViz.setFeature(element.id);
             censusViz.updateViz(osmMap2);
         } else if (element.id in future_climate) {
-            censusViz.updateFutureHeatNew(osmMap2, true);
+            censusViz.updateFutureHeat(osmMap2, true);
         } else {
             RenderInfrastructure.addFeatureToMap(element.id);
         }
@@ -134,7 +134,7 @@ function changeChecked(element) {
 parent.addEventListener('updateMaps', function () {
     runQuery();
     censusViz.updateViz(osmMap2);
-    censusViz.updateFutureHeatNew(osmMap2, false);
+    censusViz.updateFutureHeat(osmMap2, false);
 });
 
 function runQuery() {

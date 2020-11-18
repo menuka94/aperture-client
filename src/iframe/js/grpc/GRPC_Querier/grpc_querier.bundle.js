@@ -3278,7 +3278,7 @@ module.exports = proto.sustain;
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global = Function('return this')();
+var global = (typeof self == "undefined" ? typeof global == "undefined"? this : global : self);
 
 goog.exportSymbol('proto.sustain.CensusFeature', null, global);
 goog.exportSymbol('proto.sustain.CensusRequest', null, global);
