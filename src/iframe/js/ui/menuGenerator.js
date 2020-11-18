@@ -286,5 +286,9 @@ const MenuGenerator = {
             context = context[namespaces[i]];
         }
         return context[func].apply(context, args);
+    },
+
+    updateConstraint: function(){
+
     }
 }

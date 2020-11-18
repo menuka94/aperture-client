@@ -320,12 +320,11 @@ const data = {
                 "options": ["Total Population", "Avg. Household Income", "Population by Age"]
             }
         },
-        "onConstraintChange": function(layer){
-            censusViz.setFeature(layer);
-            censusViz.updateViz(osmMap2);
+        "onConstraintChange": function(layer, constraintName, value){
+            console.log("layer:" + layer + " \nContraint: " + constraintName + " \n Value: " + value);
+            censusViz.setFeature(value);
         },
-        "onChange": function(layer, constraintName, constraintValue){
-            censusViz.setFeature(layer);
+        "onChange": function(layer){
             censusViz.updateViz(osmMap2);
         }
     },
@@ -370,7 +369,7 @@ const data = {
                 "step": 1
             }
         },
-        "onConstraintChange": function(layer){
+        "onConstraintChange": function(layer, constraintName, value){
             Census_Visualizer.updateFutureHeat(layer);
         },
         "onChange": function(layer){
