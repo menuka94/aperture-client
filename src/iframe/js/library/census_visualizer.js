@@ -280,8 +280,8 @@ const Census_Visualizer = {
       
       stream.on('data', function (r) {
           const data = JSON.parse(r.getData());
-          GISJOINS.push(data.properties.GISJOIN);
-          polys[data.properties.GISJOIN] = data;
+          GISJOINS.push(data.GISJOIN);
+          polys[data.GISJOIN] = data;
           if(GISJOINS.length > 20){
               this._queryMatchingValues(GISJOINS, polys);
               GISJOINS.length = 0;
