@@ -44,6 +44,82 @@ SustainQuerier = {
         request.setFirstQuery(q);
         return this.service.compoundQuery(request, {});
     },
+
+    /**
+      * Creates a gRPC query on a single collection
+      *
+      * @memberof SustainQuerier
+      * @method makeQuery
+      * @param {string} host
+      *        The name of the machine hosting the queried dataset
+      * @param {Number} port
+      *        The port of the machine hosting the queried dataset
+      * @param {string} collection
+      *        The name of the collection being queried
+      * @param {string} query
+      *        A stringified mongodb query, in JSON format
+      * @return {Object}
+      *         The gRPC query object
+      */
+    makeQuery: function (host, port, collection, query) {
+        const q = new Query();
+        q.setHost(host);
+        q.setPort(port);
+        q.setCollection(collection);
+        q.setQuery(query);
+        return q;
+    },
+
+    /**
+     * Creates a compound query out of two queries - only one "first" and one "second" query can be defined
+     * If both are defined, will default to using only the basic queries
+     *
+     * @memberof SustainQuerier
+     * @method makeCompoundQuery
+     * @param {Object} firstQuery
+     *        The first query object, if present
+     * @param {Object} firstCompoundRequest
+     *        The first compound request object, if present
+     * @param {Object} secondQuery
+     *        The second query object, if present
+     * @param {Object} secondCompoundRequest
+     *        The second compound request object, if present
+     * @param {Number} join
+     *        The type of join being used (number corresponding the proto definition)
+     * @return {Object}
+     *         The compound request object
+     */
+    makeCompoundQuery: function (firstQuery, firstCompoundRequest, secondQuery, secondCompoundRequest, join=0){
+        const request = new CompoundRequest();
+
+        if(firstQuery != null)
+            request.setFirstQuery(firstQuery);
+        else
+            request.setFirstCompoundRequest(firstCompoundRequest);
+
+        request.setJoin(join);
+
+        if(secondQuery != null)
+            request.setSecondQuery(secondQuery);
+        else
+            request.setSecondCompoundRequest(firstSecondRequest);
+
+        return request;
+	},
+
+    /**
+     * Executes a compound request - returns the stream of results
+     *
+     * @memberof SustainQuerier
+     * @method makeCompoundQuery
+     * @param {Object} request
+     *         The compound request
+     * @return {Object}
+     *         The gRPC query object
+     */
+    executeCompoundQuery: function (request) {
+        return this.service.compoundQuery(request, {});
+	},
 };
 
 /**
