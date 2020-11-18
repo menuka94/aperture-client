@@ -99,6 +99,18 @@ body {
     padding: 10px;
 }
 
+.radioContainer{
+    background-color: white;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.dropdown{
+    height: 18px;
+    width: 18px;
+    float: right;
+    margin-right: 7px;
+}
 
 .collapsible, .attributionContainer, #clearFeatures {
     background-color: #DDD;

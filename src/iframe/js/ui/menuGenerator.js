@@ -103,7 +103,7 @@ const MenuGenerator = {
         for (obj in nested_json_map) {
             const newColumn = document.createElement("div"); //create blank element
             newColumn.className = "menuColumn";
-            newColumn.id = "group_" + Util.spaceToUnderScore(obj);
+            newColumn.id = Util.spaceToUnderScore(obj);
             container.appendChild(newColumn);
 
             const columnTitle = document.createElement("div");
@@ -122,14 +122,14 @@ const MenuGenerator = {
     addContentToColumns(nested_json_map) {
         for (obj in nested_json_map) {
             for (header in nested_json_map[obj]) {
-                const column = document.getElementById("group_" + Util.spaceToUnderScore(obj));
+                const column = document.getElementById(Util.spaceToUnderScore(obj));
                 if (!column) {
-                    console.error("Error in column generation, could not find column!: " + "group_" + ob);
+                    console.error("Error in column generation, could not find column!: " + ob);
                     return 1;
                 }
                 const subGroup = document.createElement("div");
                 subGroup.className = "menuHeader";
-                subGroup.id = "group_" + Util.spaceToUnderScore(obj) + "_subgroup_" + Util.spaceToUnderScore(header);
+                subGroup.id = Util.spaceToUnderScore(obj) + Util.spaceToUnderScore(header);
 
                 const subGroupHeader = document.createElement("div");
                 subGroupHeader.className = "menuHeaderLabel";
@@ -144,7 +144,7 @@ const MenuGenerator = {
                 for (layer in nested_json_map[obj][header]) {
                     const layerContainer = document.createElement("div");
                     layerContainer.className = "layerContainer";
-                    layerContainer.id = subGroup.id + "_layer_" + Util.spaceToUnderScore(layer);
+                    layerContainer.id = Util.spaceToUnderScore(layer) + "_layer";
 
                     const layerSelector = document.createElement("div");
                     layerSelector.className = "layerSelector";
@@ -161,6 +161,12 @@ const MenuGenerator = {
                     layerSelector.appendChild(selector);
                     layerContainer.appendChild(layerSelector);
 
+                    const onChange = nested_json_map[obj][header][layer]["onChange"];
+                    if (onChange) {
+                        selector.onchange = function () {
+                            eval(onChange);
+                        }
+                    }
 
                     //logic for constraints
                     if (nested_json_map[obj][header][layer]["constraints"]) {
@@ -196,33 +202,70 @@ const MenuGenerator = {
                                         sliderLabel.innerHTML += " - " + (step < 1 ? values[i] : Math.floor(values[i]));
                                     }
                                 });
-                                slider.noUiSlider.on('change', function (values) {
-                                    if (nested_json_map[obj][header][layer]['onConstraintChange'])
-                                        eval(nested_json_map[obj][header][layer]['onConstraintChange']);
-                                });
+                                const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
+                                if (onConstraintChange) {
+                                    slider.noUiSlider.on('change', function (values) {
+                                        eval(onConstraintChange);
+                                    });
+                                }
 
                                 layerConstraints.appendChild(sliderLabel);
                                 layerConstraints.appendChild(slider);
                             }
-                            else if (nested_json_map[obj][header][layer]["constraints"][constraint] === "selector") {
+                            else if (nested_json_map[obj][header][layer]["constraints"][constraint]["type"] === "selector") {
+                                const radioContainer = document.createElement("div");
+                                radioContainer.className = "radioContainer";
 
+                                let isFirstRadio = true;
+                                nested_json_map[obj][header][layer]["constraints"][constraint]["options"].forEach(option => {
+                                    const radioSelectorContainer = document.createElement("div");
+                                    const radioSelector = document.createElement("input");
+                                    radioSelector.type = "radio";
+                                    radioSelector.name = constraint;
+                                    radioSelector.id = Util.spaceToUnderScore(option);
+                                    radioSelector.checked = isFirstRadio;
+                                    isFirstRadio = false;
+                                    const labelForRadioSelector = document.createElement("label");
+                                    labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
+
+                                    radioSelectorContainer.appendChild(labelForRadioSelector);
+                                    radioSelectorContainer.appendChild(radioSelector);
+
+                                    const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
+                                    if (onConstraintChange) {
+                                        radioSelectorContainer.onchange = function () {
+                                            eval(onConstraintChange);
+                                        };
+                                    }
+
+                                    radioContainer.appendChild(radioSelectorContainer);
+                                });
+
+
+
+                                layerConstraints.appendChild(radioContainer);
                             }
                         }
                         layerContainer.appendChild(layerConstraints);
-                        layerSelector.style.cursor = "pointer";
 
-                        layerSelector.onclick = function(){
+                        const dropdown = document.createElement("img");
+                        dropdown.src = "../../images/dropdown.png";
+                        dropdown.className = "dropdown";
+                        dropdown.style.cursor = "pointer";
+                        dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
+                        dropdown.onclick = function () {
                             layerConstraints.style.display = layerConstraints.style.display === "none" ? "block" : "none";
+                            dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
                         }
+                        layerSelector.appendChild(dropdown);
                     }
 
                     subGroupContainer.appendChild(layerContainer);
                 }
-                subGroupHeader.onclick = function(){
+                subGroupHeader.onclick = function () {
                     subGroupContainer.style.display = subGroupContainer.style.display === "none" ? "block" : "none";
                 }
-                subGroupContainer.style.display = "none";
-                
+
 
                 column.appendChild(subGroup);
             }

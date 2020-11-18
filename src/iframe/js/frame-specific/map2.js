@@ -55,44 +55,6 @@ $.getJSON("json/streamflowMetadata.json", function (mdata) {
     });
 });
 
-const g = { groupMem: "Census", query: 1 };
-const census = {
-    "Total Population": g, "Avg. Household Income": g,
-    "Population by Age": g, "Median Age": g, "No. Below Poverty Line": g, "Demographics": g
-}
-
-//Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, "radio", true);
-
-const fc = {
-    groupMem: "Future Climate", 
-    query: 1, 
-    constraints: {
-        "temperature":{
-            "range":[88,110],
-            "default": [88],
-            "step":1
-        },
-        "length":{
-            "label":"Length (Days)",
-            "range":[1,200],
-            "default":[1],
-            "step":1
-        },
-        "years":{
-            "label":"Yearly Range",
-            "range":[2006,2010],
-            "default":[2006,2010],
-            "step":1
-        }
-    },
-    onConstraintChange: "censusViz.updateFutureHeat(RenderInfrastructure.map, true)"
-};
-const future_climate = {
-    "Heat_Waves": fc
-}
-
-//Generator.config(future_climate, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
-
 //map 3 merge stuff
 const censusViz = census_visualizer();
 censusViz.updateViz(osmMap2);
