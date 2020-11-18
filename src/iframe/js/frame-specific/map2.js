@@ -40,16 +40,17 @@ $.getJSON("json/streamflowMetadata.json", function (mdata) {
             maxLayers: 20,
             simplifyThreshold: 0.00005
         });
-        Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
-            '<ul style="padding-inline-start:20px;">' +
-            '<li><b>Reservoir/Lake/Basin/Pond</b>: Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
-            '<li><b>Wastewater Plant</b>: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></li>' +
-            '<li><b>Dam</b>: Icon from <a href="http://www.iconsmind.com">iconsmind.com</a></li>' +
-            '<li><b>Hospital</b>: Icons from Font Awesome by Dave Gandy - <a href="https://fortawesome.github.com/Font-Awesome">fortawesome.github.com/Font-Awesome</a> / CC BY-SA (<a href="https://creativecommons.org/licenses/by-sa/3.0">creativecommons.org/licenses/by-sa/3.0</a>)</li>' +
-            '<li><b>Urgent Care</b>: Icon By Bridget Gahagan, <a href="https://thenounproject.com/">noun project</a></li>' +
-            '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
-            '</ul>',
-            true);
+        // //Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
+        //     '<ul style="padding-inline-start:20px;">' +
+        //     '<li><b>Reservoir/Lake/Basin/Pond</b>: Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
+        //     '<li><b>Wastewater Plant</b>: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></li>' +
+        //     '<li><b>Dam</b>: Icon from <a href="http://www.iconsmind.com">iconsmind.com</a></li>' +
+        //     '<li><b>Hospital</b>: Icons from Font Awesome by Dave Gandy - <a href="https://fortawesome.github.com/Font-Awesome">fortawesome.github.com/Font-Awesome</a> / CC BY-SA (<a href="https://creativecommons.org/licenses/by-sa/3.0">creativecommons.org/licenses/by-sa/3.0</a>)</li>' +
+        //     '<li><b>Urgent Care</b>: Icon By Bridget Gahagan, <a href="https://thenounproject.com/">noun project</a></li>' +
+        //     '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
+        //     '</ul>',
+        //     true);
+        MenuGenerator.generate(data, document.getElementById("checkboxLocation"));
         runQuery();
     });
 });
@@ -60,7 +61,7 @@ const census = {
     "Population by Age": g, "Median Age": g, "No. Below Poverty Line": g, "Demographics": g
 }
 
-Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, "radio", true);
+//Generator.config(census, document.getElementById("checkboxLocation"), true, changeChecked, "radio", true);
 
 const fc = {
     groupMem: "Future Climate", 
@@ -90,7 +91,7 @@ const future_climate = {
     "Heat_Waves": fc
 }
 
-Generator.config(future_climate, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
+//Generator.config(future_climate, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true);
 
 //map 3 merge stuff
 const censusViz = census_visualizer();

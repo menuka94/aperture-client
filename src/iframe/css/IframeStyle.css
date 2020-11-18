@@ -56,6 +56,50 @@ body {
     font-size: 18px;
 }
 
+.menuHeader{
+    margin: 10px;
+    margin-bottom: 15px;
+    padding: 0;
+    border-radius: 3px;
+    background-color: white;
+}
+
+.menuHeaderLabel{
+    padding: 5px;
+    border-radius: 3px;
+    background-color: #0074d9;
+    text-align: center;
+    color:white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.menuHeaderContainer{
+    padding: 5px;
+}
+
+.layerContainer{
+    background-color: #DDD;
+    margin: 5px;
+    margin-bottom: 10px;
+    padding: 0;
+    border-radius: 3px;
+    cursor: default;
+}
+
+.layerSelector{
+    font-weight: bold;
+    color:white;
+    background-color: #42b33e;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.layerConstraints{
+    padding: 10px;
+}
+
+
 .collapsible, .attributionContainer, #clearFeatures {
     background-color: #DDD;
     cursor: pointer;
