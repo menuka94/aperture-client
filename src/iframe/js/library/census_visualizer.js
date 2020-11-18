@@ -247,7 +247,6 @@ const Census_Visualizer = {
       
       stream.on('data', function (r) {
           const data = JSON.parse(r.getData());
-          console.log(data)
           //const poly = polys[data.GISJOIN];
           this.generalizedDraw({...data});
       }.bind(this));
