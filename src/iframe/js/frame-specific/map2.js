@@ -28,7 +28,10 @@ var markers = L.markerClusterGroup({
     maxClusterRadius: 55,
     animate: false
 });
-osmMap2.addLayer(markers);
+osmMap2.addLayer(markers); 
+
+//map 3 merge stuff
+const censusViz = census_visualizer();
 
 const data = {
     "water_works": {
@@ -318,10 +321,12 @@ const data = {
             }
         },
         "onConstraintChange": function(layer){
-            Census_Visualizer.setFeature(layer);
+            censusViz.setFeature(layer);
+            censusViz.updateViz(osmMap2);
         },
-        "onChange": function(layer){
-            Census_Visualizer.setFeature(layer);
+        "onChange": function(layer, constraintName, constraintValue){
+            censusViz.setFeature(layer);
+            censusViz.updateViz(osmMap2);
         }
     },
     "Heat_Waves": {
@@ -374,6 +379,7 @@ const data = {
     }
 }
 
+
 $.getJSON("json/streamflowMetadata.json", function (mdata) {
     RenderInfrastructure.preProcessData = mdata;
         RenderInfrastructure.config(osmMap2, markers, data, {
@@ -393,12 +399,11 @@ $.getJSON("json/streamflowMetadata.json", function (mdata) {
         //     '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
         //     '</ul>',
         //     true);
+        console.log("here");
         MenuGenerator.generate(data, document.getElementById("checkboxLocation"));
         runQuery();
 });
 
-//map 3 merge stuff
-const censusViz = census_visualizer();
 censusViz.updateViz(osmMap2);
 censusViz.updateFutureHeat(osmMap2);
 

@@ -175,6 +175,8 @@ const MenuGenerator = {
 
 
                         for (constraint in nested_json_map[obj][header][layer]["constraints"]) {
+                            const constraintName = constraint;
+
                             if (nested_json_map[obj][header][layer]["constraints"][constraint]["type"] === "slider") {
                                 const slider = document.createElement("div");
                                 const sliderLabel = document.createElement("div");
@@ -205,7 +207,7 @@ const MenuGenerator = {
                                 const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
                                 if (onConstraintChange) {
                                     slider.noUiSlider.on('change', function (values) {
-                                        eval(onConstraintChange);
+                                        onConstraintChange(layerName, constraintName, values);
                                     });
                                 }
 
@@ -232,9 +234,12 @@ const MenuGenerator = {
                                     radioSelectorContainer.appendChild(radioSelector);
 
                                     const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
+                                    const optionName = option;
                                     if (onConstraintChange) {
                                         radioSelectorContainer.onchange = function () {
-                                            onConstraintChange(layerName);
+                                            if(radioSelector.checked){
+                                                onConstraintChange(layerName, constraintName, optionName);
+                                            }
                                         };
                                     }
 
