@@ -416,13 +416,9 @@ $.getJSON("json/streamflowMetadata.json", function (mdata) {
         //     '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
         //     '</ul>',
         //     true);
-        console.log("here");
         MenuGenerator.generate(data, document.getElementById("checkboxLocation"));
         runQuery();
 });
-
-censusViz.updateViz(osmMap2);
-censusViz.updateFutureHeat(osmMap2);
 
 function updateOverPassLayer() {
     RenderInfrastructure.update();
@@ -458,10 +454,12 @@ function changeChecked(element) {
     }
 }
 
+console.log("r");
 parent.addEventListener('updateMaps', function () {
+    console.log("hereeee");
     runQuery();
-    censusViz.updateViz(osmMap2);
-    censusViz.updateFutureHeat(osmMap2, false);
+    console.log("here");
+    updateLayers();
 });
 
 function runQuery() {

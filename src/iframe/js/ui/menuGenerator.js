@@ -24,6 +24,16 @@ const DEFAULT_OBJECT = {
     }
 }
 
+let updateQueue = {};
+function updateLayers(){
+    console.log("e");
+console.log(updateQueue);
+    for(layerUpdate in updateQueue){
+        console.log(layerUpdate);
+        updateQueue[layerUpdate](layerUpdate);
+    }
+}
+
 const MenuGenerator = {
     /** Generates the menu within a container
      * @memberof Generator
@@ -171,12 +181,15 @@ const MenuGenerator = {
                     selector.onchange = function () {
                         if (selector.checked){
                             onAdd(layerName);
+                            updateQueue[layerName] = onUpdate;
                             onUpdate(layerName);
                         }
                         else{
+                            delete updateQueue[layerName];
                             onRemove(layerName);
                         }
                     }
+
 
 
 
