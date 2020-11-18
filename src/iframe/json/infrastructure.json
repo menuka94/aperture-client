@@ -285,8 +285,8 @@
                 "options": ["Total Population", "Avg. Household Income", "Population by Age"]
             }
         },
-        "onConstraintChange": "censusViz.setFeature('census_tracts_layer'); censusViz.updateViz(RenderInfrastructure.map);",
-        "onChange": "censusViz.setFeature('census_tracts_layer'); censusViz.updateViz(RenderInfrastructure.map);"
+        "onConstraintChange": "censusViz.setFeature",
+        "onChange": "censusViz.setFeature"
     },
     "Heat_Waves": {
         "group":"Dynamic Layers",
@@ -329,7 +329,7 @@
                 "step": 1
             }
         },
-        "onConstraintChange": "censusViz.updateFutureHeat(RenderInfrastructure.map, true)",
-        "onChange": "censusViz.updateFutureHeat(RenderInfrastructure.map, true)"
+        "onConstraintChange": "Census_Visualizer.updateFutureHeat",
+        "onChange": "Census_Visualizer.updateFutureHeat"
     }
 }

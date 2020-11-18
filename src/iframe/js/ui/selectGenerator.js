@@ -96,7 +96,7 @@ let Generator = {
                     
                     slider.style.marginBottom = '15px';
                     slider.id = Util.spaceToUnderScore(element) + "_" + Util.spaceToUnderScore(constraint);
-
+                    
                     noUiSlider.create(slider, {
                         start: elementsJson[element]['constraints'][constraint]['default'] ? elementsJson[element]['constraints'][constraint]['default'] : [elementsJson[element]['constraints'][constraint]['range'][0]], //default is minimum
                         

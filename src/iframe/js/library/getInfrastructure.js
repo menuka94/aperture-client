@@ -41,7 +41,7 @@ const GEOM = {
  * Where the Rendering/Management related functions are
  * @namespace RenderInfrastructure
 */
-let RenderInfrastructure = {
+RenderInfrastructure = {
     map: null,
     markerLayer: null,
     data: null,
@@ -337,6 +337,7 @@ let RenderInfrastructure = {
      * @returns {boolean} true if feature was added, false if JSON doesnt contain tag or objects is already being rendered
      */
     addFeatureToMap: function (featureId) {
+        console.log(featureId);
         if (this.data[featureId]) {
             if (!this.queries.includes(this.data[featureId]['query'])) {
                 this.currentBounds = [];
@@ -417,7 +418,7 @@ let RenderInfrastructure = {
  * Where the querying related functions are
  * @namespace Querier 
 */
-const Querier = {
+Querier = {
     /**
      * Queries geoJSON or OSM Xml from an endpoint and returns it as geoJSON
      * @memberof Querier
@@ -627,7 +628,7 @@ const Querier = {
 * Where utility functions are
 * @namespace Util
 */
-const Util = {
+Util = {
     /**
      * Where conversion functions are
      * @namespace Convert

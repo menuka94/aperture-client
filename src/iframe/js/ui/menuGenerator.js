@@ -4,7 +4,6 @@
  * @author Daniel Reynolds
  * @dependencies react.js
  */
-
 const DEFAULT_OPTIONS = {
     colorCode: true, //should objects have a color from their corresponding render color
 }
@@ -15,8 +14,8 @@ const DEFAULT_OBJECT = {
     color: "#000000",
     popup: null,
     constraints: null,
-    onChange: "RenderManager.generalRender(this);",
-    map: "RenderManager.getMap()",
+    onChange: function(layer){RenderInfrastructure.addFeatureToMap(layer)},
+    map: function(){return RenderInfrastructure.map;},
     mongoQuery: { //format [query,collection]
         query: [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: ["@@MAP_COORDS@@"] } } } } }],
         collection: "tract_geo"
@@ -162,9 +161,10 @@ const MenuGenerator = {
                     layerContainer.appendChild(layerSelector);
 
                     const onChange = nested_json_map[obj][header][layer]["onChange"];
+                    const layerName = layer;
                     if (onChange) {
                         selector.onchange = function () {
-                            eval(onChange);
+                            onChange(layerName);
                         }
                     }
 
@@ -234,7 +234,7 @@ const MenuGenerator = {
                                     const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
                                     if (onConstraintChange) {
                                         radioSelectorContainer.onchange = function () {
-                                            eval(onConstraintChange);
+                                            onConstraintChange(layerName);
                                         };
                                     }
 
@@ -272,7 +272,14 @@ const MenuGenerator = {
         }
     },
 
-    createConstraints() {
+    executeFunctionByName: function (functionName, context, args) {
+        var args = Array.prototype.slice.call(arguments, 2);
+        var namespaces = functionName.split(".");
+        var func = namespaces.pop();
+        for (var i = 0; i < namespaces.length; i++) {
 
+            context = context[namespaces[i]];
+        }
+        return context[func].apply(context, args);
     }
 }
