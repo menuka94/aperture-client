@@ -1,3 +1,4 @@
+
 /**
  * @namespace MenuGenerator
  * @file Build's menu UI for the Aperture Client
@@ -10,12 +11,13 @@ const DEFAULT_OPTIONS = {
 const DEFAULT_OBJECT = {
     group: "Other",
     subGroup: "Other",
-    selector: "checkbox", //radio is supported, just make sure its within the same subGroup 
     color: "#000000",
     popup: null,
     constraints: null,
-    onChange: function(layer){RenderInfrastructure.addFeatureToMap(layer)},
-    map: function(){return RenderInfrastructure.map;},
+    onAdd: function (layer) { RenderInfrastructure.addFeatureToMap(layer) },
+    onRemove: function(layer){RenderInfrastructure.removeFeatureFromMap(layer)},
+    onUpdate: function(){},
+    map: function () { return RenderInfrastructure.map; },
     mongoQuery: { //format [query,collection]
         query: [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: ["@@MAP_COORDS@@"] } } } } }],
         collection: "tract_geo"
@@ -160,13 +162,23 @@ const MenuGenerator = {
                     layerSelector.appendChild(selector);
                     layerContainer.appendChild(layerSelector);
 
-                    const onChange = nested_json_map[obj][header][layer]["onChange"];
+                    const onAdd = nested_json_map[obj][header][layer]["onAdd"];
+                    const onRemove = nested_json_map[obj][header][layer]["onRemove"];
+                    const onUpdate = nested_json_map[obj][header][layer]["onUpdate"];
+
+
                     const layerName = layer;
-                    if (onChange) {
-                        selector.onchange = function () {
-                            onChange(layerName);
+                    selector.onchange = function () {
+                        if (selector.checked){
+                            onAdd(layerName);
+                            onUpdate(layerName);
+                        }
+                        else{
+                            onRemove(layerName);
                         }
                     }
+
+
 
                     //logic for constraints
                     if (nested_json_map[obj][header][layer]["constraints"]) {
@@ -206,8 +218,11 @@ const MenuGenerator = {
                                 });
                                 const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
                                 if (onConstraintChange) {
+                                    onConstraintChange(layerName, constraintName, slider.noUiSlider.get());
                                     slider.noUiSlider.on('change', function (values) {
                                         onConstraintChange(layerName, constraintName, values);
+                                        if (selector.checked)
+                                            onAdd(layerName);
                                     });
                                 }
 
@@ -236,9 +251,15 @@ const MenuGenerator = {
                                     const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
                                     const optionName = option;
                                     if (onConstraintChange) {
+                                        if (radioSelector.checked)
+                                            onConstraintChange(layerName, constraintName, optionName);
+
                                         radioSelectorContainer.onchange = function () {
-                                            if(radioSelector.checked){
+                                            if (radioSelector.checked) {
                                                 onConstraintChange(layerName, constraintName, optionName);
+                                            }
+                                            if (selector.checked) {
+                                                onUpdate(layerName);
                                             }
                                         };
                                     }
@@ -288,7 +309,7 @@ const MenuGenerator = {
         return context[func].apply(context, args);
     },
 
-    updateConstraint: function(){
+    updateConstraint: function () {
 
     }
 }

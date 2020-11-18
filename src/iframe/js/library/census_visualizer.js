@@ -192,16 +192,31 @@ const Census_Visualizer = {
     return (val - min) / (max - min);
   },
 
-  updateFutureHeatNew: function (map, constraintsUpdated){
-      if (!document.getElementById("Heat_Waves").checked){
-        return;
-      }
+  futureHeatConstraints: {
+    flag: false,
+    length: 0,
+    temperature: 0,
+    years: []
+  },
 
+  updateFutureHeatConstraint: function(constraint, value){
+    this.futureHeatConstraints[constraint] = value;
+    this.futureHeatConstraints.flag = true;
+  },
+
+  clearFutureHeat: function(){
+    this.clearHeat();
+    this.heat_layers = [];
+    this.streams.forEach(s => s.cancel());
+  },
+
+  updateFutureHeatNew: function (map){
       this.streams.forEach(s => s.cancel());
 
-      if (this.heat_layers.length > 0 && constraintsUpdated){
+      if (this.heat_layers.length > 0 && this.futureHeatConstraints.flag){
           this.clearHeat();
           this.heat_layers = [];
+          this.futureHeatConstraints.flag = false;
       }
 
       const b = map.wrapLatLngBounds(map.getBounds());
@@ -215,17 +230,17 @@ const Census_Visualizer = {
       //const firstQuery = {};
       //firstQuery[firstMatch] = {"$in": GISJOINS};
 
-      const secondMatch = "CDF." + Number(document.getElementById("Heat_Waves_length").noUiSlider.get())
+      const secondMatch = "CDF." + this.futureHeatConstraints.length;
       const secondQuery = {};
       secondQuery[secondMatch] = {"$exists": true};
 
       const thirdMatch = "temp"
       const thirdQuery = {};
-      thirdQuery[thirdMatch] = {"$gte": Number(document.getElementById("Heat_Waves_temperature").noUiSlider.get())};
+      thirdQuery[thirdMatch] = {"$gte": this.futureHeatConstraints.temperature};
 
       const fourthMatch = "year"
       const fourthQuery = {};
-      fourthQuery[fourthMatch] = {"$gte": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[0]), "$lt": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[1])};
+      fourthQuery[fourthMatch] = {"$gte": this.futureHeatConstraints.years[0], "$lt": this.futureHeatConstraints.years[1]};
       
       const q2 = [//{"$match": firstQuery},
                  {"$match": secondQuery},
@@ -243,7 +258,7 @@ const Census_Visualizer = {
 
       this.streams.push(stream);
 
-      const properties = {"Heat Wave Length": document.getElementById("Heat_Waves_length").noUiSlider.get(), "Heat Wave Lower Bound": document.getElementById("Heat_Waves_temperature").noUiSlider.get()}
+      const properties = {"Heat Wave Length": this.futureHeatConstraints.length, "Heat Wave Lower Bound": this.futureHeatConstraints.temperature}
       
       stream.on('data', function (r) {
           const data = JSON.parse(r.getData());
@@ -334,7 +349,7 @@ const Census_Visualizer = {
     if (properties !== null)
         data["properties"] = {...data["properties"], ...properties};
 
-    if (!document.getElementById("Heat_Waves").checked)
+    if (!document.getElementById("Heat_Waves_layer_selector").checked)
         return;
 
     let newLayers = RenderInfrastructure.renderGeoJson(data,false,{
@@ -346,6 +361,11 @@ const Census_Visualizer = {
     Census_Visualizer.heat_layers = Census_Visualizer.heat_layers.concat(newLayers);
   },
 
+  clearViz: function(){
+    RenderInfrastructure.removeSpecifiedLayersFromMap(Census_Visualizer.layers);
+    Census_Visualizer.layers = [];
+  },
+
   /**
     * Updates the Census visualization with the current feature
     *
@@ -355,6 +375,7 @@ const Census_Visualizer = {
     *        The leaflet map being updated
     */
   updateViz: function (map) {
+    console.log("updating");
     const draw = function (response) {
       let geo = JSON.parse(response.getResponsegeojson());
       const data = JSON.parse(response.getData());

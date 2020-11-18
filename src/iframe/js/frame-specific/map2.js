@@ -317,15 +317,21 @@ const data = {
         "constraints": {
             "data":{
                 "type": "selector",
-                "options": ["Total Population", "Avg. Household Income", "Population by Age"]
+                "options": ["Total Population", "Avg. Household Income"]
             }
         },
         "onConstraintChange": function(layer, constraintName, value){
             console.log("layer:" + layer + " \nContraint: " + constraintName + " \n Value: " + value);
             censusViz.setFeature(value);
         },
-        "onChange": function(layer){
+        "onAdd": function(){
+            //update is auto-called after add, so no need to do anything
+        },
+        "onUpdate": function(){
             censusViz.updateViz(osmMap2);
+        },
+        "onRemove": function(){
+            censusViz.clearViz();
         }
     },
     "Heat_Waves": {
@@ -370,10 +376,22 @@ const data = {
             }
         },
         "onConstraintChange": function(layer, constraintName, value){
-            Census_Visualizer.updateFutureHeat(layer);
+            if(constraintName == 'years')
+                for(let i = 0; i < value.length; i++){
+                    value[i] = Number(value[i]);
+                }
+            else
+                value = Number(value)
+            Census_Visualizer.updateFutureHeatConstraint(constraintName, value);
         },
-        "onChange": function(layer){
-            Census_Visualizer.updateFutureHeat(layer);
+        "onUpdate": function(layer){
+            Census_Visualizer.updateFutureHeatNew(osmMap2);
+        },
+        "onAdd": function(layer){
+            //update is auto-called after add, so no need to do anything
+        },
+        "onRemove": function(layer){
+            Census_Visualizer.clearHeat();
         }
     }
 }
