@@ -6,14 +6,13 @@
   overflow: hidden;
   z-index: 2000; }
   .sidebar.collapsed {
-    width: 45px;
-    height: 45px; }
+    width: 35px; }
 
 .sidebar-left {
   left: 10px; }
 
 .sidebar-right {
-  right: 0; }
+  right: 10px; }
 
 .sidebar-tabs {
   top: 0;
@@ -25,11 +24,9 @@
     margin-top: 10px;
     background-color: rgba(0,0,0,0); }
   .sidebar-right .sidebar-tabs {
-    right: 0;
+    right: 0; 
     margin-top: 10px;
-    margin-right: 10px;
-    background-color: rgba(0,0,0,0);
-    z-index: 1;}
+    background-color: rgba(0,0,0,0);}
   .sidebar-tabs, .sidebar-tabs > ul {
     position: absolute;
     width: 35px;
@@ -78,6 +75,7 @@
   background-color: rgba(255, 255, 255, 0.95);
   overflow-x: hidden;
   overflow-y: auto; 
+  height: 75%;
 }
   .sidebar-left .sidebar-content {
     left: 0px;
@@ -86,11 +84,7 @@
   .sidebar-right .sidebar-content {
     right: 0px;
     top: 54px;
-    bottom: 27px;
-    border-radius: 3px;
-    margin-right: 10px;
-    margin-left: 10px;
-    width: 85%;}
+    border-radius: 3px;}
   .sidebar.collapsed > .sidebar-content {
     overflow-y: hidden; 
     display: none;}
@@ -101,10 +95,9 @@
   right: 0;
   box-sizing: border-box;
   padding: 10px 20px; 
-  width: 100%;
+  max-width: 250px;
 }
 .sidebar-pane.active {
-  height: 100%;
   display: block; 
 }
   
@@ -150,6 +143,3 @@
   .sidebar.leaflet-touch {
     box-shadow: none;
   }
-
-
-
