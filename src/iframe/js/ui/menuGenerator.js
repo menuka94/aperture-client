@@ -26,8 +26,6 @@ const DEFAULT_OBJECT = {
 
 let updateQueue = {};
 function updateLayers(){
-    console.log("e");
-console.log(updateQueue);
     for(layerUpdate in updateQueue){
         console.log(layerUpdate);
         updateQueue[layerUpdate](layerUpdate);

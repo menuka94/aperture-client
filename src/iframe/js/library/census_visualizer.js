@@ -5,6 +5,7 @@
  * @author Kevin Bruhwiler, Daniel Reynolds
  */
 
+
 const Census_Visualizer = {
 
   /**

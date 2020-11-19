@@ -28,10 +28,22 @@ var markers = L.markerClusterGroup({
     maxClusterRadius: 55,
     animate: false
 });
-osmMap2.addLayer(markers); 
+osmMap2.addLayer(markers);
 
 //map 3 merge stuff
 const censusViz = census_visualizer();
+
+const sviCalcAdjustments = {
+    "type": "slider",
+    "range": [
+        0,
+        5
+    ],
+    "default": [
+        1
+    ],
+    "step": 0.1
+}
 
 const data = {
     "water_works": {
@@ -315,27 +327,27 @@ const data = {
         "group": "Dynamic Layers",
         "subGroup": "Tract Level",
         "constraints": {
-            "data":{
+            "data": {
                 "type": "selector",
                 "options": ["Total Population", "Avg. Household Income"]
             }
         },
-        "onConstraintChange": function(layer, constraintName, value){
+        "onConstraintChange": function (layer, constraintName, value) {
             console.log("layer:" + layer + " \nContraint: " + constraintName + " \n Value: " + value);
             censusViz.setFeature(value);
         },
-        "onAdd": function(){
+        "onAdd": function () {
             //update is auto-called after add, so no need to do anything
         },
-        "onUpdate": function(){
+        "onUpdate": function () {
             censusViz.updateViz(osmMap2);
         },
-        "onRemove": function(){
+        "onRemove": function () {
             censusViz.clearViz();
         }
     },
     "Heat_Waves": {
-        "group":"Dynamic Layers",
+        "group": "Dynamic Layers",
         "subGroup": "Climate",
         "constraints": {
             "temperature": {
@@ -375,23 +387,58 @@ const data = {
                 "step": 1
             }
         },
-        "onConstraintChange": function(layer, constraintName, value){
-            if(constraintName == 'years')
-                for(let i = 0; i < value.length; i++){
+        "onConstraintChange": function (layer, constraintName, value) {
+            if (constraintName == 'years')
+                for (let i = 0; i < value.length; i++) {
                     value[i] = Number(value[i]);
                 }
             else
                 value = Number(value)
             Census_Visualizer.updateFutureHeatConstraint(constraintName, value);
         },
-        "onUpdate": function(layer){
+        "onUpdate": function (layer) {
             Census_Visualizer.updateFutureHeatNew(osmMap2);
         },
-        "onAdd": function(layer){
+        "onAdd": function (layer) {
             //update is auto-called after add, so no need to do anything
         },
-        "onRemove": function(layer){
+        "onRemove": function (layer) {
             Census_Visualizer.clearHeat();
+        }
+    },
+    "social_vulnerability_index": {
+        "group": "Dynamic Layers",
+        "subGroup": "Social Vulnerability",
+        "constraints": {
+            below_poverty: sviCalcAdjustments,
+            unemployed: sviCalcAdjustments,
+            income: sviCalcAdjustments,
+            no_high_school_diploma: sviCalcAdjustments,
+            aged_65_or_older: sviCalcAdjustments,
+            aged_17_or_younger: sviCalcAdjustments,
+            age_5_or_older_with_disability: sviCalcAdjustments,
+            single_parent_households: sviCalcAdjustments,
+            minority: sviCalcAdjustments,
+            speaks_english_less_than_well: sviCalcAdjustments,
+            multi_unit_structures: sviCalcAdjustments,
+            mobile_homes: sviCalcAdjustments,
+            crowding: sviCalcAdjustments,
+            no_vehicle: sviCalcAdjustments,
+            group_quarters: sviCalcAdjustments
+        },
+        "onConstraintChange": function (layer, constraintName, value) {
+            //SVI.makeQuery();
+        },
+        "onUpdate": function (layer) {
+            SVI.makeQuery(osmMap2);
+        },
+        "onAdd": function (layer) {
+            SVI.allowRender = true;
+            //update is auto-called after add, so no need to do anything
+        },
+        "onRemove": function (layer) {
+            SVI.allowRender = false;
+            //Census_Visualizer.clearHeat();
         }
     }
 }
@@ -399,25 +446,25 @@ const data = {
 
 $.getJSON("json/streamflowMetadata.json", function (mdata) {
     RenderInfrastructure.preProcessData = mdata;
-        RenderInfrastructure.config(osmMap2, markers, data, {
-            queryAlertText: document.getElementById('queryInfoText'),
-            overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
-            maxElements: 10000,
-            maxLayers: 20,
-            simplifyThreshold: 0.00005
-        });
-        // //Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
-        //     '<ul style="padding-inline-start:20px;">' +
-        //     '<li><b>Reservoir/Lake/Basin/Pond</b>: Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
-        //     '<li><b>Wastewater Plant</b>: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></li>' +
-        //     '<li><b>Dam</b>: Icon from <a href="http://www.iconsmind.com">iconsmind.com</a></li>' +
-        //     '<li><b>Hospital</b>: Icons from Font Awesome by Dave Gandy - <a href="https://fortawesome.github.com/Font-Awesome">fortawesome.github.com/Font-Awesome</a> / CC BY-SA (<a href="https://creativecommons.org/licenses/by-sa/3.0">creativecommons.org/licenses/by-sa/3.0</a>)</li>' +
-        //     '<li><b>Urgent Care</b>: Icon By Bridget Gahagan, <a href="https://thenounproject.com/">noun project</a></li>' +
-        //     '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
-        //     '</ul>',
-        //     true);
-        MenuGenerator.generate(data, document.getElementById("checkboxLocation"));
-        runQuery();
+    RenderInfrastructure.config(osmMap2, markers, data, {
+        queryAlertText: document.getElementById('queryInfoText'),
+        overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
+        maxElements: 10000,
+        maxLayers: 20,
+        simplifyThreshold: 0.00005
+    });
+    // //Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
+    //     '<ul style="padding-inline-start:20px;">' +
+    //     '<li><b>Reservoir/Lake/Basin/Pond</b>: Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
+    //     '<li><b>Wastewater Plant</b>: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></li>' +
+    //     '<li><b>Dam</b>: Icon from <a href="http://www.iconsmind.com">iconsmind.com</a></li>' +
+    //     '<li><b>Hospital</b>: Icons from Font Awesome by Dave Gandy - <a href="https://fortawesome.github.com/Font-Awesome">fortawesome.github.com/Font-Awesome</a> / CC BY-SA (<a href="https://creativecommons.org/licenses/by-sa/3.0">creativecommons.org/licenses/by-sa/3.0</a>)</li>' +
+    //     '<li><b>Urgent Care</b>: Icon By Bridget Gahagan, <a href="https://thenounproject.com/">noun project</a></li>' +
+    //     '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
+    //     '</ul>',
+    //     true);
+    MenuGenerator.generate(data, document.getElementById("checkboxLocation"));
+    runQuery();
 });
 
 function updateOverPassLayer() {
