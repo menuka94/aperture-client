@@ -337,7 +337,6 @@ RenderInfrastructure = {
      * @returns {boolean} true if feature was added, false if JSON doesnt contain tag or objects is already being rendered
      */
     addFeatureToMap: function (featureId) {
-        console.log(featureId);
         if (this.data[featureId]) {
             if (!this.queries.includes(this.data[featureId]['query'])) {
                 this.currentBounds = [];

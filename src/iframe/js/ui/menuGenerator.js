@@ -15,8 +15,8 @@ const DEFAULT_OBJECT = {
     popup: null,
     constraints: null,
     onAdd: function (layer) { RenderInfrastructure.addFeatureToMap(layer) },
-    onRemove: function(layer){RenderInfrastructure.removeFeatureFromMap(layer)},
-    onUpdate: function(){},
+    onRemove: function (layer) { RenderInfrastructure.removeFeatureFromMap(layer) },
+    onUpdate: function () { },
     map: function () { return RenderInfrastructure.map; },
     mongoQuery: { //format [query,collection]
         query: [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: ["@@MAP_COORDS@@"] } } } } }],
@@ -25,9 +25,9 @@ const DEFAULT_OBJECT = {
 }
 
 let updateQueue = {};
-function updateLayers(){
-    for(layerUpdate in updateQueue){
-        console.log(layerUpdate);
+function updateLayers() {
+    for (layerUpdate in updateQueue) {
+        //console.log(layerUpdate);
         updateQueue[layerUpdate](layerUpdate);
     }
 }
@@ -62,7 +62,7 @@ const MenuGenerator = {
         let columnsAndHeadings = {}; //what will be returned
         for (obj in json_map) { //just loop over the json
             if (json_map[obj]["notAQueryableLayer"]) {
-                console.log(obj);
+                //console.log(obj);
                 continue;
             }
             const mergeWithDefalt = { //merge default and user-given object
@@ -79,7 +79,7 @@ const MenuGenerator = {
             //create obj
             columnsAndHeadings[mergeWithDefalt["group"]][mergeWithDefalt["subGroup"]][obj] = mergeWithDefalt;
         }
-        console.log(columnsAndHeadings);
+        //console.log(columnsAndHeadings);
         return columnsAndHeadings;
     },
 
@@ -177,12 +177,12 @@ const MenuGenerator = {
 
                     const layerName = layer;
                     selector.onchange = function () {
-                        if (selector.checked){
+                        if (selector.checked) {
                             onAdd(layerName);
                             updateQueue[layerName] = onUpdate;
                             onUpdate(layerName);
                         }
-                        else{
+                        else {
                             delete updateQueue[layerName];
                             onRemove(layerName);
                         }
@@ -221,10 +221,11 @@ const MenuGenerator = {
                                 });
                                 const name = Util.capitalizeString(Util.underScoreToSpace(nested_json_map[obj][header][layer]["constraints"][constraint]["label"] ? nested_json_map[obj][header][layer]["constraints"][constraint]["label"] : constraint));
                                 const step = nested_json_map[obj][header][layer]["constraints"][constraint]['step'] ? nested_json_map[obj][header][layer]["constraints"][constraint]['step'] : 1;
+                                const isDate = nested_json_map[obj][header][layer]["constraints"][constraint]['isDate'];
                                 slider.noUiSlider.on('update', function (values) {
-                                    sliderLabel.innerHTML = name + ": " + (step < 1 ? values[0] : Math.floor(values[0]));
+                                    sliderLabel.innerHTML = name + ": " + (isDate ? (new Date(Number(values[0]))).toUTCString().substr(0, 16) : (step < 1 ? values[0] : Math.floor(values[0])));
                                     for (let i = 1; i < values.length; i++) {
-                                        sliderLabel.innerHTML += " - " + (step < 1 ? values[i] : Math.floor(values[i]));
+                                        sliderLabel.innerHTML += " - " + (isDate ? (new Date(Number(values[i]))).toUTCString().substr(0, 16) : (step < 1 ? values[i] : Math.floor(values[i])));
                                     }
                                 });
                                 const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
@@ -286,7 +287,7 @@ const MenuGenerator = {
                         layerContainer.appendChild(layerConstraints);
 
                         const dropdown = document.createElement("img");
-                        dropdown.src = "../../images/dropdown.png";
+                        dropdown.src = "../../images/dropdown_white.png";
                         dropdown.className = "dropdown";
                         dropdown.style.cursor = "pointer";
                         dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";

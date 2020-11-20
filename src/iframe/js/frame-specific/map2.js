@@ -333,7 +333,7 @@ const data = {
             }
         },
         "onConstraintChange": function (layer, constraintName, value) {
-            console.log("layer:" + layer + " \nContraint: " + constraintName + " \n Value: " + value);
+            //console.log("layer:" + layer + " \nContraint: " + constraintName + " \n Value: " + value);
             censusViz.setFeature(value);
         },
         "onAdd": function () {
@@ -427,7 +427,10 @@ const data = {
             group_quarters: sviCalcAdjustments
         },
         "onConstraintChange": function (layer, constraintName, value) {
-            //SVI.makeQuery();
+            SVI.SVIweights[constraintName] = Number(value);
+            SVI.sviWeightFlag = true;
+            //console.log(SVI.SVIweights);
+            SVI.makeQuery(osmMap2);
         },
         "onUpdate": function (layer) {
             SVI.makeQuery(osmMap2);
@@ -438,7 +441,37 @@ const data = {
         },
         "onRemove": function (layer) {
             SVI.allowRender = false;
+            SVI.clear();
             //Census_Visualizer.clearHeat();
+        }
+    },
+    "COVID-19":{
+        "group": "Dynamic Layers",
+        "subGroup": "Health",
+        "constraints": {
+            date_range: {
+                "type":"slider",
+                "label": "Date Range",
+                "range": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
+                "default": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
+                "step": 1000 * 60 * 60 * 24,
+                "isDate": true
+            }
+        },
+        "onConstraintChange": function (layer, constraintName, value) {
+            COVID.dateStart = Number(value[0]);
+            COVID.dateEnd = Number(value[1]);
+            COVID.changeFlag = true;
+            COVID.makeQuery(osmMap2);
+        },
+        "onAdd": function(){
+            COVID.allowRender = true;
+        },
+        "onRemove": function(){
+            COVID.allowRender = false;
+        },
+        "onUpdate": function(){
+            COVID.makeQuery(osmMap2);
         }
     }
 }
@@ -501,11 +534,9 @@ function changeChecked(element) {
     }
 }
 
-console.log("r");
+//console.log("r");
 parent.addEventListener('updateMaps', function () {
-    console.log("hereeee");
     runQuery();
-    console.log("here");
     updateLayers();
 });
 
