@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
         integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
         crossorigin="" />
@@ -22,7 +23,10 @@
     <script src="js/third-party/leaflet.markercluster.js"></script>
 
     <script src="js/library/getInfrastructure.js"></script>
+    <script src="js/library/svi_vis.js"></script>
+    <script src="js/library/covid_vis.js"></script>
     <script src="js/ui/selectGenerator.js"></script>
+    <script src="js/ui/menuGenerator.js"></script>
 </head>
 
 <body>
@@ -49,12 +53,12 @@
         <!-- Tab panes -->
         <div class="sidebar-content">
             <div class="sidebar-pane" id="home">
-                <h6 class="sidebar-header">
-                    Menu
+                <div class="sidebar-header">
+                    <div class="sidebar-header-label">Menu</div>
                     <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
-                </h6>
+                </div>
                 <div class="selectContainer" id="checkboxLocation">
-                    <!--The react container-->
+                    
                 </div>
             </div>
         </div>

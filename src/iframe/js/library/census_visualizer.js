@@ -5,6 +5,7 @@
  * @author Kevin Bruhwiler, Daniel Reynolds
  */
 
+
 const Census_Visualizer = {
 
   /**
@@ -31,12 +32,12 @@ const Census_Visualizer = {
       2: "2010_population_by_age", 3: "2010_median_age", 4: "2010_poverty", 5: "2010_race"
     };
     this.ranges = { //this is temporary until we can get the dataset catalog queried
-      0: [1,10000],
+      0: [1, 10000],
       1: [10000, 200000],
-      2: [0,0], //this data doesnt work so no range yet
-      3: [0,0], //this data doesnt work so no range yet
-      4: [0,0], //this data doesnt work so no range yet
-      5: [1,10] //not sure how to use a range on this data
+      2: [0, 0], //this data doesnt work so no range yet
+      3: [0, 0], //this data doesnt work so no range yet
+      4: [0, 0], //this data doesnt work so no range yet
+      5: [1, 10] //not sure how to use a range on this data
     }
     this.featureName = "";
     this.feature = -1;
@@ -44,6 +45,8 @@ const Census_Visualizer = {
     this.heat_layers = [];
     this.streams = [];
   },
+
+  allowCensusRender: false,
 
   /**
     * Sets the current census feature being displayed
@@ -192,158 +195,178 @@ const Census_Visualizer = {
     return (val - min) / (max - min);
   },
 
-  updateFutureHeatNew: function (map, constraintsUpdated){
-      if (!document.getElementById("Heat_Waves").checked){
-        return;
-      }
-
-      this.streams.forEach(s => s.cancel());
-
-      if (this.heat_layers.length > 0 && constraintsUpdated){
-          this.clearHeat();
-          this.heat_layers = [];
-      }
-
-      const b = map.wrapLatLngBounds(map.getBounds());
-      const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
-                      [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
-                      [b._southWest.lng, b._southWest.lat]];
-
-      const q1 = [{"$match": {geometry: {"$geoIntersects": {"$geometry": {type: "Polygon", coordinates: [barray]}}}}}];
-
-      //const firstMatch = "GISJOIN"
-      //const firstQuery = {};
-      //firstQuery[firstMatch] = {"$in": GISJOINS};
-
-      const secondMatch = "CDF." + Number(document.getElementById("Heat_Waves_length").noUiSlider.get())
-      const secondQuery = {};
-      secondQuery[secondMatch] = {"$exists": true};
-
-      const thirdMatch = "temp"
-      const thirdQuery = {};
-      thirdQuery[thirdMatch] = {"$gte": Number(document.getElementById("Heat_Waves_temperature").noUiSlider.get())};
-
-      const fourthMatch = "year"
-      const fourthQuery = {};
-      fourthQuery[fourthMatch] = {"$gte": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[0]), "$lt": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[1])};
-      
-      const q2 = [//{"$match": firstQuery},
-                 {"$match": secondQuery},
-                 {"$match": thirdQuery},
-                 {"$match": fourthQuery}
-                ];
-
-      const q1_final = this._sustainQuerier.makeQuery("lattice-46", 27017, "county_geo_GISJOIN", JSON.stringify(q1));
-
-      const q2_final = this._sustainQuerier.makeQuery("lattice-46", 27017, "future_heat", JSON.stringify(q2));
-
-      const q_final = this._sustainQuerier.makeCompoundQuery(q1_final, null, q2_final, null, 0);
-
-      const stream = this._sustainQuerier.executeCompoundQuery(q_final);
-
-      this.streams.push(stream);
-
-      const properties = {"Heat Wave Length": document.getElementById("Heat_Waves_length").noUiSlider.get(), "Heat Wave Lower Bound": document.getElementById("Heat_Waves_temperature").noUiSlider.get()}
-      
-      stream.on('data', function (r) {
-          const data = JSON.parse(r.getData());
-          //const poly = polys[data.GISJOIN];
-          this.generalizedDraw({...data});
-      }.bind(this));
+  futureHeatConstraints: {
+    flag: false,
+    length: 0,
+    temperature: 0,
+    years: []
   },
 
-  updateFutureHeat: function (map, constraintsUpdated){
-      if (!document.getElementById("Heat_Waves").checked){
-        return;
-      }
+  updateFutureHeatConstraint: function (constraint, value) {
+    this.futureHeatConstraints[constraint] = value;
+    this.futureHeatConstraints.flag = false;
+  },
 
-      this.streams.forEach(s => s.cancel());
+  clearFutureHeat: function () {
+    this.clearHeat();
+    this.heat_layers = [];
+    this.streams.forEach(s => s.cancel());
+  },
 
-      if (this.heat_layers.length > 0 && constraintsUpdated){
-          this.clearHeat();
-          this.heat_layers = [];
-      }
+  updateFutureHeatNew: function (map) {
+    this.streams.forEach(s => s.cancel());
 
-      const b = map.wrapLatLngBounds(map.getBounds());
-      const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
-                      [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
-                      [b._southWest.lng, b._southWest.lat]];
+    if (this.heat_layers.length > 0 && this.futureHeatConstraints.flag) {
+      this.clearFutureHeat();
+      this.heat_layers = [];
+      this.futureHeatConstraints.flag = false;
+    }
 
-      const q = [{"$match": {geometry: {"$geoIntersects": {"$geometry": {type: "Polygon", coordinates: [barray]}}}}}];
+    const b = map.wrapLatLngBounds(map.getBounds());
+    const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
+    [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
+    [b._southWest.lng, b._southWest.lat]];
 
-      const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "county_geo_GISJOIN", JSON.stringify(q));
+    const q1 = [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }];
 
-      this.streams.push(stream);
+    //const firstMatch = "GISJOIN"
+    //const firstQuery = {};
+    //firstQuery[firstMatch] = {"$in": GISJOINS};
 
-      const GISJOINS = [];
-      const polys = {};
-      
-      stream.on('data', function (r) {
-          const data = JSON.parse(r.getData());
-          GISJOINS.push(data.GISJOIN);
-          polys[data.GISJOIN] = data;
-          if(GISJOINS.length > 20){
-              this._queryMatchingValues(GISJOINS, polys);
-              GISJOINS.length = 0;
-		  }
-      }.bind(this));
+    const secondMatch = "CDF." + this.futureHeatConstraints.length;
+    const secondQuery = {};
+    secondQuery[secondMatch] = { "$exists": true };
 
-      stream.on('end', function (end) {
+    const thirdMatch = "temp"
+    const thirdQuery = {};
+    thirdQuery[thirdMatch] = { "$gte": this.futureHeatConstraints.temperature };
+
+    const fourthMatch = "year"
+    const fourthQuery = {};
+    fourthQuery[fourthMatch] = { "$gte": this.futureHeatConstraints.years[0], "$lt": this.futureHeatConstraints.years[1] };
+
+    const q2 = [//{"$match": firstQuery},
+      { "$match": secondQuery },
+      { "$match": thirdQuery },
+      { "$match": fourthQuery }
+    ];
+
+    const q1_final = this._sustainQuerier.makeQuery("lattice-46", 27017, "county_geo_GISJOIN", JSON.stringify(q1));
+
+    const q2_final = this._sustainQuerier.makeQuery("lattice-46", 27017, "future_heat", JSON.stringify(q2));
+
+    const q_final = this._sustainQuerier.makeCompoundQuery(q1_final, null, q2_final, null, 0);
+
+    const stream = this._sustainQuerier.executeCompoundQuery(q_final);
+
+    this.streams.push(stream);
+
+    const properties = { "Heat Wave Length": this.futureHeatConstraints.length, "Heat Wave Lower Bound": this.futureHeatConstraints.temperature }
+
+    stream.on('data', function (r) {
+      const data = JSON.parse(r.getData());
+      //const poly = polys[data.GISJOIN];
+      this.generalizedDraw({ ...data });
+    }.bind(this));
+  },
+
+  updateFutureHeat: function (map, constraintsUpdated) {
+    if (!document.getElementById("Heat_Waves").checked) {
+      return;
+    }
+
+    this.streams.forEach(s => s.cancel());
+
+    if (this.heat_layers.length > 0 && constraintsUpdated) {
+      this.clearHeat();
+      this.heat_layers = [];
+    }
+
+    const b = map.wrapLatLngBounds(map.getBounds());
+    const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
+    [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
+    [b._southWest.lng, b._southWest.lat]];
+
+    const q = [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }];
+
+    const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "county_geo_GISJOIN", JSON.stringify(q));
+
+    this.streams.push(stream);
+
+    const GISJOINS = [];
+    const polys = {};
+
+    stream.on('data', function (r) {
+      const data = JSON.parse(r.getData());
+      GISJOINS.push(data.GISJOIN);
+      polys[data.GISJOIN] = data;
+      if (GISJOINS.length > 20) {
         this._queryMatchingValues(GISJOINS, polys);
-      }.bind(this));
+        GISJOINS.length = 0;
+      }
+    }.bind(this));
+
+    stream.on('end', function (end) {
+      this._queryMatchingValues(GISJOINS, polys);
+    }.bind(this));
   },
 
-  _queryMatchingValues: function(GISJOINS, polys) {
-      const firstMatch = "GISJOIN"
-      const firstQuery = {};
-      firstQuery[firstMatch] = {"$in": GISJOINS};
+  _queryMatchingValues: function (GISJOINS, polys) {
+    const firstMatch = "GISJOIN"
+    const firstQuery = {};
+    firstQuery[firstMatch] = { "$in": GISJOINS };
 
-      const secondMatch = "CDF." + Number(document.getElementById("Heat_Waves_length").noUiSlider.get())
-      const secondQuery = {};
-      secondQuery[secondMatch] = {"$exists": true};
+    const secondMatch = "CDF." + Number(document.getElementById("Heat_Waves_length").noUiSlider.get())
+    const secondQuery = {};
+    secondQuery[secondMatch] = { "$exists": true };
 
-      const thirdMatch = "temp"
-      const thirdQuery = {};
-      thirdQuery[thirdMatch] = {"$gte": Number(document.getElementById("Heat_Waves_temperature").noUiSlider.get())};
+    const thirdMatch = "temp"
+    const thirdQuery = {};
+    thirdQuery[thirdMatch] = { "$gte": Number(document.getElementById("Heat_Waves_temperature").noUiSlider.get()) };
 
 
-      const fourthMatch = "year"
-      const fourthQuery = {};
-      fourthQuery[fourthMatch] = {"$gte": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[0]), "$lt": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[1])};
-      
-      const q = [{"$match": firstQuery},
-                 {"$match": secondQuery},
-                 {"$match": thirdQuery},
-                 {"$match": fourthQuery}
-                ];
-      
-      const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "future_heat", JSON.stringify(q));
+    const fourthMatch = "year"
+    const fourthQuery = {};
+    fourthQuery[fourthMatch] = { "$gte": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[0]), "$lt": Number(document.getElementById("Heat_Waves_years").noUiSlider.get()[1]) };
 
-      this.streams.push(stream);
+    const q = [{ "$match": firstQuery },
+    { "$match": secondQuery },
+    { "$match": thirdQuery },
+    { "$match": fourthQuery }
+    ];
 
-      const properties = {"Heat Wave Length": document.getElementById("Heat_Waves_length").noUiSlider.get(), "Heat Wave Lower Bound": document.getElementById("Heat_Waves_temperature").noUiSlider.get()}
-      
-      stream.on('data', function (r) {
-          const data = JSON.parse(r.getData());
-          const poly = polys[data.GISJOIN];
-          this.generalizedDraw({...data, ...poly});
-      }.bind(this));
+    const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "future_heat", JSON.stringify(q));
+
+    this.streams.push(stream);
+
+    const properties = { "Heat Wave Length": document.getElementById("Heat_Waves_length").noUiSlider.get(), "Heat Wave Lower Bound": document.getElementById("Heat_Waves_temperature").noUiSlider.get() }
+
+    stream.on('data', function (r) {
+      const data = JSON.parse(r.getData());
+      const poly = polys[data.GISJOIN];
+      this.generalizedDraw({ ...data, ...poly });
+    }.bind(this));
   },
 
   generalizedDraw: function (data, properties) {
     if (properties !== null)
-        data["properties"] = {...data["properties"], ...properties};
+      data["properties"] = { ...data["properties"], ...properties };
 
-    if (!document.getElementById("Heat_Waves").checked)
-        return;
+    if (!document.getElementById("Heat_Waves_layer_selector").checked)
+      return;
 
-    let newLayers = RenderInfrastructure.renderGeoJson(data,false,{
-      "census":{
+    let newLayers = RenderInfrastructure.renderGeoJson(data, false, {
+      "census": {
         "color": "#FF0000",
         "identityField": "GISJOIN"
       }
     });
     Census_Visualizer.heat_layers = Census_Visualizer.heat_layers.concat(newLayers);
+  },
+
+  clearViz: function () {
+    RenderInfrastructure.removeSpecifiedLayersFromMap(Census_Visualizer.layers);
+    Census_Visualizer.layers = [];
   },
 
   /**
@@ -355,12 +378,18 @@ const Census_Visualizer = {
     *        The leaflet map being updated
     */
   updateViz: function (map) {
+    if (!this.allowCensusRender){
+      return 1;
+    }
     const draw = function (response) {
+      if (!Census_Visualizer.allowCensusRender)
+        return 1;
+      
       let geo = JSON.parse(response.getResponsegeojson());
       const data = JSON.parse(response.getData());
       geo.properties = data;
-      let newLayers = RenderInfrastructure.renderGeoJson(geo,false,{
-        "census":{
+      let newLayers = RenderInfrastructure.renderGeoJson(geo, false, {
+        "census": {
           "color": Census_Visualizer._getColorForPercentage(Census_Visualizer._normalize(data[Census_Visualizer.propertyMap[Census_Visualizer.feature]], Census_Visualizer.ranges[Census_Visualizer.feature][0], Census_Visualizer.ranges[Census_Visualizer.feature][1]), 0.5),
           "identityField": "GISJOIN"
         }
@@ -379,13 +408,12 @@ const Census_Visualizer = {
       // polygon.GISJOIN = data.GISJOIN;
       // Census_Visualizer.markers.push(polygon);
     }
-    
+
     if (this.featureName === "")
       return;
     const b = map.wrapLatLngBounds(map.getBounds());
     const stream = this._grpcQuerier.getCensusData(2, b._southWest, b._northEast, this.feature);
     stream.on('data', function (r) {
-      //console.log(JSON.stringify(response));
       draw(r);
     });
     stream.on('status', function (status) {
