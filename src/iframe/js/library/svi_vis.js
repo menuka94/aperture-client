@@ -85,7 +85,7 @@ const SVI = {
         stream.on('data', function (r) {
             const data = JSON.parse(r.getData());
             if (this.tractBackingStore[data.GISJOIN]) {
-                console.log("rejecting");
+                //console.log("rejecting");
                 return;
             }
             this.tractBackingStore[data.GISJOIN] = data;
@@ -108,20 +108,13 @@ const SVI = {
         this.streams.push(stream);
         //console.log(JSON.stringify(q2));
         stream.on('data', function (r) {
-            console.log("adding props");
+            //console.log("adding props");
             const data = JSON.parse(r.getData());
             this.tractBackingStore[data.GISJOIN].properties = {
                 ...this.tractBackingStore[data.GISJOIN].properties,
                 ...data
             }
-
-            // sviData[data.GISJOIN] = data;
-            // GISJOINS.push(data.GISJOIN);
-            // if(GISJOINS.length > 20){
-
-            //     GISJOINS = [];
-            //     sviData = {};
-            // }
+            this.tractBackingStore[data.GISJOIN]._id.$oid = '_' + Math.random().toString(36).substr(2, 9);
         }.bind(this));
 
         stream.on('end', function (r) {
@@ -138,8 +131,8 @@ const SVI = {
             let denom = 0;
             for (prop in SVIMAP) {
                 if (this.tractBackingStore[tract].properties[prop] == null) {
-                    console.log(this.tractBackingStore[tract].properties);
-                    console.log(this.tractBackingStore[tract].properties[prop]);
+                    //console.log(this.tractBackingStore[tract].properties);
+                    //console.log(this.tractBackingStore[tract].properties[prop]);
                     continue tract_loop;
                 }
                 num += this.tractBackingStore[tract].properties[prop] * this.SVIweights[SVIMAP[prop]]

@@ -337,13 +337,44 @@ const data = {
             censusViz.setFeature(value);
         },
         "onAdd": function () {
-            //update is auto-called after add, so no need to do anything
+            censusViz.allowCensusRender = true;
         },
         "onUpdate": function () {
             censusViz.updateViz(osmMap2);
         },
         "onRemove": function () {
+            censusViz.allowCensusRender = false;
             censusViz.clearViz();
+        }
+    },
+    "COVID-19": {
+        "group": "Dynamic Layers",
+        "subGroup": "Health",
+        "constraints": {
+            date_range: {
+                "type": "slider",
+                "label": "Date Range",
+                "range": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
+                "default": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
+                "step": 1000 * 60 * 60 * 24,
+                "isDate": true
+            }
+        },
+        "onConstraintChange": function (layer, constraintName, value) {
+            COVID.dateStart = Number(value[0]);
+            COVID.dateEnd = Number(value[1]);
+            COVID.changeFlag = true;
+            COVID.makeQuery(osmMap2);
+        },
+        "onAdd": function () {
+            COVID.allowRender = true;
+        },
+        "onRemove": function () {
+            COVID.allowRender = false;
+            COVID.clear();
+        },
+        "onUpdate": function () {
+            COVID.makeQuery(osmMap2);
         }
     },
     "Heat_Waves": {
@@ -445,35 +476,6 @@ const data = {
             //Census_Visualizer.clearHeat();
         }
     },
-    "COVID-19":{
-        "group": "Dynamic Layers",
-        "subGroup": "Health",
-        "constraints": {
-            date_range: {
-                "type":"slider",
-                "label": "Date Range",
-                "range": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
-                "default": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
-                "step": 1000 * 60 * 60 * 24,
-                "isDate": true
-            }
-        },
-        "onConstraintChange": function (layer, constraintName, value) {
-            COVID.dateStart = Number(value[0]);
-            COVID.dateEnd = Number(value[1]);
-            COVID.changeFlag = true;
-            COVID.makeQuery(osmMap2);
-        },
-        "onAdd": function(){
-            COVID.allowRender = true;
-        },
-        "onRemove": function(){
-            COVID.allowRender = false;
-        },
-        "onUpdate": function(){
-            COVID.makeQuery(osmMap2);
-        }
-    }
 }
 
 
@@ -565,3 +567,13 @@ parent.setterFunctions.push({
 setTimeout(function () {
     osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat, osmMap2.wrapLatLng(parent.view).lng - 0.0002], osmMap2.getZoom());
 }, 1); //this is a terrible fix but it works for now
+
+
+// const q = []
+// console.log(JSON.stringify(q));
+// //const stream1 = sustain_querier().getStreamForQuery("lattice-46", 27017, "covid_county", JSON.stringify(q));
+
+// stream1.on('data', function (r) {
+//     const data = JSON.parse(r.getData());
+//     console.log(data);
+// }.bind(this));
