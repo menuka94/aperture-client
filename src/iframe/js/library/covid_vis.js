@@ -142,12 +142,25 @@ const COVID = {
             this.streams.splice(this.streams.indexOf(stream), 1);
         }.bind(this));
     },
+    convertHexToRGBA: function(hexCode, opacity) {
+        let hex = hexCode.replace('#', '');
+        
+        if (hex.length === 3) {
+            hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+        }    
+        
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+    
+        return `rgba(${r},${g},${b},${opacity / 100})`;
+    },
     covidDraw: function (poly) {
         //console.log(poly);
         //console.log(poly.properties.increase_in_cases_per_1000_pop);
         //console.log(3 * ((Number(document.getElementById("covid-19_dateRange").noUiSlider.get()[1]) - Number(document.getElementById("covid-19_dateRange").noUiSlider.get()[0])) / (1000 * 60 * 60 * 24 * 14)));
         let color = Census_Visualizer._normalize(poly.properties.increase_in_cases_per_1000_pop, 0, 3 * ((this.dateEnd - this.dateStart) / (1000 * 60 * 60 * 24 * 14)));
-        color = SVI.perc2color(color), 75;
+        color = this.convertHexToRGBA(SVI.perc2color(color), 70);
         //console.log(color);
         let extra = "<br>";
         if (poly.properties.average_age)
