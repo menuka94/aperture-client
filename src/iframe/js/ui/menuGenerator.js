@@ -204,49 +204,6 @@ const MenuGenerator = {
                             const constraintName = constraint;
                             const constraintObj = layerObj["constraints"][constraintName];
 
-                            // if (constraintName === "autoGenerateConstraints") {
-                            //     const q = [{ "$match": {"collection": layerObj["autoGenerate"]} }];
-
-                            //     console.log(JSON.stringify(q));
-
-                            //     const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
-
-                            //     stream.on('data', function (r) {
-                            //         const data = JSON.parse(r.getData());
-                            //         console.log(data);
-                            //         data.fieldMetadata.forEach(feature => {
-                            //             //if(constraintObj.includes(feature.name)){
-                            //                 if(feature.max){
-                            //                     //must be a numerical slider to make
-                            //                     const min = feature.min ? feature.min : 0; //default 0
-
-                            //                     const obj = {
-                            //                         "type": "slider",
-                            //                         "range": [min, feature.max],
-                            //                         "default": [min, feature.max],
-                            //                         "step": 1
-                            //                     }
-
-                            //                     this.createSliderContainer(layerConstraints, layerContainer, feature.name, obj, layerObj, layerName, selector);
-                            //                 }
-                            //                 else if(feature.type === "STRING"){
-                            //                     const obj = {
-                            //                         "type": "multiselector",
-                            //                         "options": feature.values
-                            //                     }
-
-                            //                     this.createCheckboxContainer(layerConstraints, layerContainer, feature.name, obj, layerObj, layerName, selector, "checkbox");
-                            //                 }
-                            //             //}
-                            //         });
-                            //     }.bind(this));
-
-                            //     stream.on('end', function (r) {
-
-                            //     }.bind(this));
-                            //     continue;
-                            // }
-
 
                             if (constraintObj["type"] === "slider") {
                                 this.createSliderContainer(layerConstraints, layerContainer, constraintName, constraintObj, layerObj, layerName, selector);
@@ -257,6 +214,8 @@ const MenuGenerator = {
                             else if (constraintObj["type"] === "multiselector") {
                                 this.createCheckboxContainer(layerConstraints, layerContainer, constraintName, constraintObj, layerObj, layerName, selector, "checkbox");
                             }
+
+
                         }
                         layerContainer.appendChild(layerConstraints);
 
@@ -331,6 +290,9 @@ const MenuGenerator = {
         sliderContainer.appendChild(sliderLabel);
         sliderContainer.appendChild(slider);
 
+        if(constraintObj["hide"]){
+            sliderContainer.style.display = "none";
+        }
         constraintsContainer.appendChild(sliderContainer);
     },
 
@@ -385,12 +347,14 @@ const MenuGenerator = {
                     };
                 }
 
+
                 checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
             }
         });
 
-
-
+        if(constraintObj["hide"]){
+            checkboxContainer.style.display = "none";
+        }
         constraintsContainer.appendChild(checkboxContainer);
     }
 }

@@ -75,6 +75,20 @@ body {
     cursor: pointer;
 }
 
+
+.checkboxConstraintLabel{
+    padding: 5px;
+    border-radius: 3px;
+    background-color: #0074d9;
+    text-align: left;
+    color:white;
+}
+
+.checkboxConstraintContainer{
+    padding: 5px;
+}
+
+
 .menuHeaderContainer{
     padding: 5px;
 }
@@ -100,10 +114,17 @@ body {
     padding: 10px;
 }
 
-.radioContainer{
+.checkboxContainer{
     background-color: white;
-    padding: 5px;
     border-radius: 3px;
+    margin-bottom: 15px;
+}
+
+.sliderContainer{
+    background-color: white;
+    border-radius: 3px;
+    padding: 5px;
+    margin-bottom: 15px;
 }
 
 .dropdown{

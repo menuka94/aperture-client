@@ -151,6 +151,7 @@ const AutoMenu = {
             result.type = "slider";
         
             result.range = [constraint.min, constraint.max];
+            result.default = result.range;
 
             if(result.range[0] === result.range[1] || !constraint.max) //error check
                 return null;
