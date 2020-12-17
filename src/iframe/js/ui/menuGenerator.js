@@ -204,48 +204,48 @@ const MenuGenerator = {
                             const constraintName = constraint;
                             const constraintObj = layerObj["constraints"][constraintName];
 
-                            if (constraintName === "autoGenerateConstraints") {
-                                const q = [{ "$match": {"collection": layerObj["autoGenerate"]} }];
+                            // if (constraintName === "autoGenerateConstraints") {
+                            //     const q = [{ "$match": {"collection": layerObj["autoGenerate"]} }];
 
-                                console.log(JSON.stringify(q));
+                            //     console.log(JSON.stringify(q));
 
-                                const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
+                            //     const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
 
-                                stream.on('data', function (r) {
-                                    const data = JSON.parse(r.getData());
-                                    console.log(data);
-                                    data.fieldMetadata.forEach(feature => {
-                                        //if(constraintObj.includes(feature.name)){
-                                            if(feature.max){
-                                                //must be a numerical slider to make
-                                                const min = feature.min ? feature.min : 0; //default 0
+                            //     stream.on('data', function (r) {
+                            //         const data = JSON.parse(r.getData());
+                            //         console.log(data);
+                            //         data.fieldMetadata.forEach(feature => {
+                            //             //if(constraintObj.includes(feature.name)){
+                            //                 if(feature.max){
+                            //                     //must be a numerical slider to make
+                            //                     const min = feature.min ? feature.min : 0; //default 0
 
-                                                const obj = {
-                                                    "type": "slider",
-                                                    "range": [min, feature.max],
-                                                    "default": [min, feature.max],
-                                                    "step": 1
-                                                }
+                            //                     const obj = {
+                            //                         "type": "slider",
+                            //                         "range": [min, feature.max],
+                            //                         "default": [min, feature.max],
+                            //                         "step": 1
+                            //                     }
 
-                                                this.createSliderContainer(layerConstraints, layerContainer, feature.name, obj, layerObj, layerName, selector);
-                                            }
-                                            else if(feature.type === "STRING"){
-                                                const obj = {
-                                                    "type": "multiselector",
-                                                    "options": feature.values
-                                                }
+                            //                     this.createSliderContainer(layerConstraints, layerContainer, feature.name, obj, layerObj, layerName, selector);
+                            //                 }
+                            //                 else if(feature.type === "STRING"){
+                            //                     const obj = {
+                            //                         "type": "multiselector",
+                            //                         "options": feature.values
+                            //                     }
 
-                                                this.createCheckboxContainer(layerConstraints, layerContainer, feature.name, obj, layerObj, layerName, selector, "checkbox");
-                                            }
-                                        //}
-                                    });
-                                }.bind(this));
+                            //                     this.createCheckboxContainer(layerConstraints, layerContainer, feature.name, obj, layerObj, layerName, selector, "checkbox");
+                            //                 }
+                            //             //}
+                            //         });
+                            //     }.bind(this));
 
-                                stream.on('end', function (r) {
-                                    
-                                }.bind(this));
-                                continue;
-                            }
+                            //     stream.on('end', function (r) {
+
+                            //     }.bind(this));
+                            //     continue;
+                            // }
 
 
                             if (constraintObj["type"] === "slider") {
@@ -291,13 +291,12 @@ const MenuGenerator = {
     createSliderContainer: function (constraintsContainer, layerContainer, constraint, constraintObj, layerObj, layerName, selector) {
         const sliderContainer = document.createElement("div");
         sliderContainer.className = "sliderContainer";
-        
+
         const slider = document.createElement("div");
         const sliderLabel = document.createElement("div");
 
         slider.style.margin = '5px';
         slider.id = layerContainer.id + "_constraint_" + constraint;
-
         noUiSlider.create(slider, {
             start: constraintObj['default'] ? constraintObj['default'] : [constraintObj['range'][0]], //default is minimum
 
@@ -342,7 +341,7 @@ const MenuGenerator = {
         //add label
         const checkboxLabel = document.createElement("div");
         checkboxLabel.className = "checkboxConstraintLabel";
-        checkboxLabel.innerHTML =  Util.capitalizeString(Util.underScoreToSpace(constraint));
+        checkboxLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(constraint));
         checkboxContainer.appendChild(checkboxLabel);
 
         const checkboxConstraintContainer = document.createElement("div");
@@ -352,40 +351,42 @@ const MenuGenerator = {
 
         let isFirstCheckbox = true;
         constraintObj["options"].forEach(option => {
-            const checkboxSelectorContainer = document.createElement("div");
-            const checkboxSelector = document.createElement("input");
-            checkboxSelector.type = type;
-            checkboxSelector.id = Util.spaceToUnderScore(option);
-            checkboxSelector.checked = isFirstCheckbox;
-            checkboxSelector.name = constraint;
-            isFirstCheckbox = false;
-            const labelForRadioSelector = document.createElement("label");
-            labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
+            if (option) {
+                const checkboxSelectorContainer = document.createElement("div");
+                const checkboxSelector = document.createElement("input");
+                checkboxSelector.type = type;
+                checkboxSelector.id = Util.spaceToUnderScore(option);
+                checkboxSelector.checked = isFirstCheckbox;
+                checkboxSelector.name = constraint;
+                isFirstCheckbox = false;
+                const labelForRadioSelector = document.createElement("label");
+                labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
 
-            checkboxSelectorContainer.appendChild(labelForRadioSelector);
-            checkboxSelectorContainer.appendChild(checkboxSelector);
+                checkboxSelectorContainer.appendChild(labelForRadioSelector);
+                checkboxSelectorContainer.appendChild(checkboxSelector);
 
-            const onConstraintChange = layerObj['onConstraintChange'];
-            const onUpdate = layerObj['onUpdate'];
-            const optionName = option;
-            if (onConstraintChange) {
-                if (checkboxSelector.checked)
-                    onConstraintChange(layerName, constraint, optionName, true);
-
-                checkboxSelectorContainer.onchange = function () {
-                    if (checkboxSelector.checked) {
+                const onConstraintChange = layerObj['onConstraintChange'];
+                const onUpdate = layerObj['onUpdate'];
+                const optionName = option;
+                if (onConstraintChange) {
+                    if (checkboxSelector.checked)
                         onConstraintChange(layerName, constraint, optionName, true);
-                    }
-                    else if(type === "checkbox"){
-                        onConstraintChange(layerName, constraint, optionName, false);
-                    }
-                    if (selector.checked) {
-                        onUpdate(layerName);
-                    }
-                };
-            }
 
-            checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
+                    checkboxSelectorContainer.onchange = function () {
+                        if (checkboxSelector.checked) {
+                            onConstraintChange(layerName, constraint, optionName, true);
+                        }
+                        else if (type === "checkbox") {
+                            onConstraintChange(layerName, constraint, optionName, false);
+                        }
+                        if (selector.checked) {
+                            onUpdate(layerName);
+                        }
+                    };
+                }
+
+                checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
+            }
         });
 
 

@@ -1,21 +1,33 @@
-
 const AutoMenu = {
     _sustainQuerier: sustain_querier(),
 
     build: async function (menuMetaData, overwrite) {
-        //stream the metadata catalog in
-        const q = [];
-        const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
-        let catalog = {};
-        stream.on('data', function (r) {
-            const data = JSON.parse(r.getData());
-            catalog[data.collection] = data;
-        }.bind(this));
+        return new Promise(resolve => {
+            //stream the metadata catalog in
+            const q = [];
+            const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
+            let catalog = {};
+            stream.on('data', function (r) {
+                const data = JSON.parse(r.getData());
+                catalog[data.collection] = data;
+            }.bind(this));
 
 
-        stream.on('end', function (end) {
-            console.log(this.bindMenuToCatalog(menuMetaData, catalog));
-        }.bind(this));
+            stream.on('end', function (end) {
+                const autoMenu = this.bindMenuToCatalog(menuMetaData, catalog);
+
+                console.log({
+                    ...autoMenu,
+                    ...overwrite
+                });
+
+                resolve({
+                    ...autoMenu,
+                    ...overwrite
+                });
+
+            }.bind(this));
+        });
     },
 
     bindMenuToCatalog: function (menuMetaData, catalog) {
@@ -42,7 +54,7 @@ const AutoMenu = {
         let result = {};
         catalogLayer.fieldMetadata.forEach(constraint => {
             const fieldIndex = this.arrayIndexOf(constraint.name, metadata.fieldMetadata);
-            if(fieldIndex !== -1){
+            if (fieldIndex !== -1) {
                 constraint = { //bind defined values
                     ...constraint,
                     ...metadata.fieldMetadata[fieldIndex]
@@ -50,41 +62,62 @@ const AutoMenu = {
                 constraint.hideByDefault = false;
             }
             constraint = this.convertFromDefault(constraint);
-
-            result[constraint.name] = constraint;
+            constraint = this.buildStandardConstraint(constraint);
+            if(constraint){
+                result[constraint.label] = constraint;
+            }
         });
 
         return result;
     },
 
-    arrayIndexOf: function(fieldName, fieldMetadata){
-        if(!fieldMetadata){
+    arrayIndexOf: function (fieldName, fieldMetadata) {
+        if (!fieldMetadata) {
             return -1;
         }
 
         let count = 0;
-        for(let i = 0; i < fieldMetadata.length; i++){
-            if(fieldMetadata[i].name === fieldName){
+        for (let i = 0; i < fieldMetadata.length; i++) {
+            if (fieldMetadata[i].name === fieldName) {
                 return i;
             }
         }
         return -1;
     },
 
-    convertFromDefault: function(constraint){
-        if(constraint.type === "STRING"){
+    convertFromDefault: function (constraint) {
+        if (constraint.type === "STRING") {
             constraint.type = "multiselect";
         }
-        else if(constraint.type === "NUMBER"){
+        else if (constraint.type === "NUMBER" || constraint.type === "range") {
             constraint.type = "range";
-            if(!constraint.min || constraint.min === -999){
+            if (!constraint.min || constraint.min === -999) {
                 constraint.min = 0;
             }
         }
-        else if(constraint.type === "DATE"){
+        else if (constraint.type === "DATE" || constraint.type === "date") {
             constraint.type = "date";
+            switch(typeof(constraint.maxDate)){
+                case 'string':
+                    constraint.min = new Date(constraint.minDate).getTime();
+                    constraint.max = new Date(constraint.maxDate).getTime();
+                    break;
+                case 'number':
+                    constraint.min = constraint.minDate;
+                    constraint.max = constraint.maxDate;
+                    break;
+                case 'object':
+                    if(constraint.maxDate.$numberLong){
+                        constraint.min = Number(constraint.minDate.$numberLong);
+                        constraint.max = Number(constraint.maxDate.$numberLong);
+                    }
+                    else{
+                        console.error("Cannot deal with date field!");
+                        console.error(constraint);
+                    }
+            }
         }
-        
+
         const DEFAULTS = {
             hideByDefault: true
         }
@@ -97,13 +130,15 @@ const AutoMenu = {
         return constraint;
     },
 
-    buildStandardConstraint: function(constraint){
+    buildStandardConstraint: function (constraint) {
         let result = {};
-        if(constraint.label){
-            result.label = constraint.label;
-        }
 
-        if(constraint.type === "range"){
+        result.label = constraint.name;
+        if (constraint.label)
+            result.label = constraint.label;
+
+
+        if (constraint.type === "range" || constraint.type === "date") {
             const DEFAULTS = {
                 step: 1,
             }
@@ -114,11 +149,35 @@ const AutoMenu = {
             }
 
             result.type = "slider";
+        
             result.range = [constraint.min, constraint.max];
-            result.default = result.range;
-        }
-        else if(constraint.type = "multiselect"){
 
+            if(result.range[0] === result.range[1] || !constraint.max) //error check
+                return null;
+            
+
+            if(constraint.type === "date")
+                result.isDate = true;
         }
+        else if (constraint.type = "multiselect") {
+            result.type = "multiselector";
+            result.options = constraint.values;
+
+            if(!result.options || result.options.length < 1)
+                return null;
+        }
+        else if (constraint.type = "select") {
+            result.type = "selector";
+            result.options = constraint.values;
+
+            if(!result.options || result.options.length < 1)
+                return null;
+        }
+        
+
+        result.hide = constraint.hideByDefault;
+
+        
+        return result;
     }
 }

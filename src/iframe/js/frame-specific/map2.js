@@ -488,9 +488,10 @@ RenderInfrastructure.config(osmMap2, markers, overwrite, {
     simplifyThreshold: 0.00005
 });
 
-$.getJSON("json/menumetadata.json", function (mdata) { //this isnt on the mongo server yet so query it locally
-    AutoMenu.build(mdata, overwrite);
-    MenuGenerator.generate(overwrite, document.getElementById("checkboxLocation"));
+$.getJSON("json/menumetadata.json", async function (mdata) { //this isnt on the mongo server yet so query it locally
+    const finalData = await AutoMenu.build(mdata, overwrite);
+    console.log(finalData);
+    MenuGenerator.generate(finalData, document.getElementById("checkboxLocation"));
     runQuery();
 });
 
