@@ -45,7 +45,7 @@ const sviCalcAdjustments = {
     "step": 0.1
 }
 
-const data = {
+const overwrite = {
     "water_works": {
         "iconAddr": "../../../images/water_works.png",
         "color": "black",
@@ -479,28 +479,21 @@ const data = {
 }
 
 
-$.getJSON("json/streamflowMetadata.json", function (mdata) {
-    RenderInfrastructure.preProcessData = mdata;
-    RenderInfrastructure.config(osmMap2, markers, data, {
-        queryAlertText: document.getElementById('queryInfoText'),
-        overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
-        maxElements: 10000,
-        maxLayers: 20,
-        simplifyThreshold: 0.00005
-    });
-    // //Generator.config(data, document.getElementById("checkboxLocation"), true, changeChecked, "checkbox", true,
-    //     '<ul style="padding-inline-start:20px;">' +
-    //     '<li><b>Reservoir/Lake/Basin/Pond</b>: Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</li>' +
-    //     '<li><b>Wastewater Plant</b>: Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></li>' +
-    //     '<li><b>Dam</b>: Icon from <a href="http://www.iconsmind.com">iconsmind.com</a></li>' +
-    //     '<li><b>Hospital</b>: Icons from Font Awesome by Dave Gandy - <a href="https://fortawesome.github.com/Font-Awesome">fortawesome.github.com/Font-Awesome</a> / CC BY-SA (<a href="https://creativecommons.org/licenses/by-sa/3.0">creativecommons.org/licenses/by-sa/3.0</a>)</li>' +
-    //     '<li><b>Urgent Care</b>: Icon By Bridget Gahagan, <a href="https://thenounproject.com/">noun project</a></li>' +
-    //     '<li><b>Fire Station</b>: Icon From <a href="https://icons8.com/">icons8.com</a></li>' +
-    //     '</ul>',
-    //     true);
+
+RenderInfrastructure.config(osmMap2, markers, data, {
+    queryAlertText: document.getElementById('queryInfoText'),
+    overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
+    maxElements: 10000,
+    maxLayers: 20,
+    simplifyThreshold: 0.00005
+});
+
+$.getJSON("json/menumetadata.json", function (mdata) { //this isnt on the mongo server yet so query it locally
+    AutoMenu.build(mdata, overwrite);
     MenuGenerator.generate(data, document.getElementById("checkboxLocation"));
     runQuery();
 });
+
 
 function updateOverPassLayer() {
     RenderInfrastructure.update();
