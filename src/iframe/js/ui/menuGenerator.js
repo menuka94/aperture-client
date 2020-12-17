@@ -33,6 +33,7 @@ function updateLayers() {
 }
 
 const MenuGenerator = {
+    _sustainQuerier: sustain_querier(),
     /** Generates the menu within a container
      * @memberof Generator
      * @method generate
@@ -151,6 +152,8 @@ const MenuGenerator = {
 
                 //now add content to each header
                 for (layer in nested_json_map[obj][header]) {
+                    const layerObj = nested_json_map[obj][header][layer];
+
                     const layerContainer = document.createElement("div");
                     layerContainer.className = "layerContainer";
                     layerContainer.id = Util.spaceToUnderScore(layer) + "_layer";
@@ -163,16 +166,16 @@ const MenuGenerator = {
                     selectorLabel.id = layerContainer.id + "_label";
                     selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layer));
                     selector.type = "checkbox";
-                    if (nested_json_map[obj][header][layer]["defaultRender"]) {
+                    if (layerObj["defaultRender"]) {
                         selector.checked = true;
                     }
                     layerSelector.appendChild(selectorLabel);
                     layerSelector.appendChild(selector);
                     layerContainer.appendChild(layerSelector);
 
-                    const onAdd = nested_json_map[obj][header][layer]["onAdd"];
-                    const onRemove = nested_json_map[obj][header][layer]["onRemove"];
-                    const onUpdate = nested_json_map[obj][header][layer]["onUpdate"];
+                    const onAdd = layerObj["onAdd"];
+                    const onRemove = layerObj["onRemove"];
+                    const onUpdate = layerObj["onUpdate"];
 
 
                     const layerName = layer;
@@ -192,96 +195,67 @@ const MenuGenerator = {
 
 
                     //logic for constraints
-                    if (nested_json_map[obj][header][layer]["constraints"]) {
+                    if (layerObj["constraints"]) {
                         const layerConstraints = document.createElement("div");
                         layerConstraints.className = "layerConstraints";
 
 
-                        for (constraint in nested_json_map[obj][header][layer]["constraints"]) {
+                        for (constraint in layerObj["constraints"]) {
                             const constraintName = constraint;
+                            const constraintObj = layerObj["constraints"][constraintName];
 
-                            if (nested_json_map[obj][header][layer]["constraints"][constraint]["type"] === "slider") {
-                                const slider = document.createElement("div");
-                                const sliderLabel = document.createElement("div");
+                            if (constraintName === "autoGenerateConstraints") {
+                                const q = [{ "$match": {"collection": layerObj["autoGenerate"]} }];
 
-                                slider.style.marginBottom = '15px';
-                                slider.id = layerContainer.id + "_constraint_" + constraint;
+                                console.log(JSON.stringify(q));
 
-                                noUiSlider.create(slider, {
-                                    start: nested_json_map[obj][header][layer]["constraints"][constraint]['default'] ? nested_json_map[obj][header][layer]["constraints"][constraint]['default'] : [nested_json_map[obj][header][layer]["constraints"][constraint]['range'][0]], //default is minimum
+                                const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
 
-                                    step: nested_json_map[obj][header][layer]["constraints"][constraint]['step'] ? nested_json_map[obj][header][layer]["constraints"][constraint]['step'] : 1, //default 1,
+                                stream.on('data', function (r) {
+                                    const data = JSON.parse(r.getData());
+                                    console.log(data);
+                                    data.fieldMetadata.forEach(feature => {
+                                        //if(constraintObj.includes(feature.name)){
+                                            if(feature.max){
+                                                //must be a numerical slider to make
+                                                const min = feature.min ? feature.min : 0; //default 0
 
-                                    range: {
-                                        'min': nested_json_map[obj][header][layer]["constraints"][constraint]['range'][0],
-                                        'max': nested_json_map[obj][header][layer]["constraints"][constraint]['range'][1]
-                                    },
+                                                const obj = {
+                                                    "type": "slider",
+                                                    "range": [min, feature.max],
+                                                    "default": [min, feature.max],
+                                                    "step": 1
+                                                }
 
-                                    connect: true,
-                                });
-                                const name = Util.capitalizeString(Util.underScoreToSpace(nested_json_map[obj][header][layer]["constraints"][constraint]["label"] ? nested_json_map[obj][header][layer]["constraints"][constraint]["label"] : constraint));
-                                const step = nested_json_map[obj][header][layer]["constraints"][constraint]['step'] ? nested_json_map[obj][header][layer]["constraints"][constraint]['step'] : 1;
-                                const isDate = nested_json_map[obj][header][layer]["constraints"][constraint]['isDate'];
-                                slider.noUiSlider.on('update', function (values) {
-                                    sliderLabel.innerHTML = name + ": " + (isDate ? (new Date(Number(values[0]))).toUTCString().substr(0, 16) : (step < 1 ? values[0] : Math.floor(values[0])));
-                                    for (let i = 1; i < values.length; i++) {
-                                        sliderLabel.innerHTML += " - " + (isDate ? (new Date(Number(values[i]))).toUTCString().substr(0, 16) : (step < 1 ? values[i] : Math.floor(values[i])));
-                                    }
-                                });
-                                const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
-                                if (onConstraintChange) {
-                                    onConstraintChange(layerName, constraintName, slider.noUiSlider.get());
-                                    slider.noUiSlider.on('change', function (values) {
-                                        onConstraintChange(layerName, constraintName, values);
-                                        if (selector.checked)
-                                            onAdd(layerName);
+                                                this.createSliderContainer(layerConstraints, layerContainer, feature.name, obj, layerObj, layerName, selector);
+                                            }
+                                            else if(feature.type === "STRING"){
+                                                const obj = {
+                                                    "type": "multiselector",
+                                                    "options": feature.values
+                                                }
+
+                                                this.createCheckboxContainer(layerConstraints, layerContainer, feature.name, obj, layerObj, layerName, selector, "checkbox");
+                                            }
+                                        //}
                                     });
-                                }
+                                }.bind(this));
 
-                                layerConstraints.appendChild(sliderLabel);
-                                layerConstraints.appendChild(slider);
+                                stream.on('end', function (r) {
+                                    
+                                }.bind(this));
+                                continue;
                             }
-                            else if (nested_json_map[obj][header][layer]["constraints"][constraint]["type"] === "selector") {
-                                const radioContainer = document.createElement("div");
-                                radioContainer.className = "radioContainer";
-
-                                let isFirstRadio = true;
-                                nested_json_map[obj][header][layer]["constraints"][constraint]["options"].forEach(option => {
-                                    const radioSelectorContainer = document.createElement("div");
-                                    const radioSelector = document.createElement("input");
-                                    radioSelector.type = "radio";
-                                    radioSelector.name = constraint;
-                                    radioSelector.id = Util.spaceToUnderScore(option);
-                                    radioSelector.checked = isFirstRadio;
-                                    isFirstRadio = false;
-                                    const labelForRadioSelector = document.createElement("label");
-                                    labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
-
-                                    radioSelectorContainer.appendChild(labelForRadioSelector);
-                                    radioSelectorContainer.appendChild(radioSelector);
-
-                                    const onConstraintChange = nested_json_map[obj][header][layer]['onConstraintChange'];
-                                    const optionName = option;
-                                    if (onConstraintChange) {
-                                        if (radioSelector.checked)
-                                            onConstraintChange(layerName, constraintName, optionName);
-
-                                        radioSelectorContainer.onchange = function () {
-                                            if (radioSelector.checked) {
-                                                onConstraintChange(layerName, constraintName, optionName);
-                                            }
-                                            if (selector.checked) {
-                                                onUpdate(layerName);
-                                            }
-                                        };
-                                    }
-
-                                    radioContainer.appendChild(radioSelectorContainer);
-                                });
 
 
-
-                                layerConstraints.appendChild(radioContainer);
+                            if (constraintObj["type"] === "slider") {
+                                this.createSliderContainer(layerConstraints, layerContainer, constraintName, constraintObj, layerObj, layerName, selector);
+                            }
+                            else if (constraintObj["type"] === "selector") {
+                                this.createCheckboxContainer(layerConstraints, layerContainer, constraintName, constraintObj, layerObj, layerName, selector, "radio");
+                            }
+                            else if (constraintObj["type"] === "multiselector") {
+                                this.createCheckboxContainer(layerConstraints, layerContainer, constraintName, constraintObj, layerObj, layerName, selector, "checkbox");
                             }
                         }
                         layerContainer.appendChild(layerConstraints);
@@ -310,18 +284,112 @@ const MenuGenerator = {
         }
     },
 
-    executeFunctionByName: function (functionName, context, args) {
-        var args = Array.prototype.slice.call(arguments, 2);
-        var namespaces = functionName.split(".");
-        var func = namespaces.pop();
-        for (var i = 0; i < namespaces.length; i++) {
-
-            context = context[namespaces[i]];
-        }
-        return context[func].apply(context, args);
-    },
-
     updateConstraint: function () {
 
+    },
+
+    createSliderContainer: function (constraintsContainer, layerContainer, constraint, constraintObj, layerObj, layerName, selector) {
+        const sliderContainer = document.createElement("div");
+        sliderContainer.className = "sliderContainer";
+        
+        const slider = document.createElement("div");
+        const sliderLabel = document.createElement("div");
+
+        slider.style.margin = '5px';
+        slider.id = layerContainer.id + "_constraint_" + constraint;
+
+        noUiSlider.create(slider, {
+            start: constraintObj['default'] ? constraintObj['default'] : [constraintObj['range'][0]], //default is minimum
+
+            step: constraintObj['step'] ? constraintObj['step'] : 1, //default 1,
+
+            range: {
+                'min': constraintObj['range'][0],
+                'max': constraintObj['range'][1]
+            },
+
+            connect: true,
+        });
+        const name = Util.capitalizeString(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
+        const step = constraintObj['step'] ? constraintObj['step'] : 1;
+        const isDate = constraintObj['isDate'];
+        slider.noUiSlider.on('update', function (values) {
+            sliderLabel.innerHTML = name + ": " + (isDate ? (new Date(Number(values[0]))).toUTCString().substr(0, 16) : (step < 1 ? values[0] : Math.floor(values[0])));
+            for (let i = 1; i < values.length; i++) {
+                sliderLabel.innerHTML += " - " + (isDate ? (new Date(Number(values[i]))).toUTCString().substr(0, 16) : (step < 1 ? values[i] : Math.floor(values[i])));
+            }
+        });
+        const onConstraintChange = layerObj['onConstraintChange'];
+        if (onConstraintChange) {
+            onConstraintChange(layerName, constraint, slider.noUiSlider.get());
+            slider.noUiSlider.on('change', function (values) {
+                onConstraintChange(layerName, constraint, values);
+                if (selector.checked)
+                    onAdd(layerName);
+            });
+        }
+
+        sliderContainer.appendChild(sliderLabel);
+        sliderContainer.appendChild(slider);
+
+        constraintsContainer.appendChild(sliderContainer);
+    },
+
+    createCheckboxContainer: function (constraintsContainer, layerContainer, constraint, constraintObj, layerObj, layerName, selector, type) {
+        const checkboxContainer = document.createElement("div");
+        checkboxContainer.className = "checkboxContainer";
+
+        //add label
+        const checkboxLabel = document.createElement("div");
+        checkboxLabel.className = "checkboxConstraintLabel";
+        checkboxLabel.innerHTML =  Util.capitalizeString(Util.underScoreToSpace(constraint));
+        checkboxContainer.appendChild(checkboxLabel);
+
+        const checkboxConstraintContainer = document.createElement("div");
+        checkboxConstraintContainer.className = "checkboxConstraintContainer";
+        checkboxContainer.appendChild(checkboxConstraintContainer);
+
+
+        let isFirstCheckbox = true;
+        constraintObj["options"].forEach(option => {
+            const checkboxSelectorContainer = document.createElement("div");
+            const checkboxSelector = document.createElement("input");
+            checkboxSelector.type = type;
+            checkboxSelector.id = Util.spaceToUnderScore(option);
+            checkboxSelector.checked = isFirstCheckbox;
+            checkboxSelector.name = constraint;
+            isFirstCheckbox = false;
+            const labelForRadioSelector = document.createElement("label");
+            labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
+
+            checkboxSelectorContainer.appendChild(labelForRadioSelector);
+            checkboxSelectorContainer.appendChild(checkboxSelector);
+
+            const onConstraintChange = layerObj['onConstraintChange'];
+            const onUpdate = layerObj['onUpdate'];
+            const optionName = option;
+            if (onConstraintChange) {
+                if (checkboxSelector.checked)
+                    onConstraintChange(layerName, constraint, optionName, true);
+
+                checkboxSelectorContainer.onchange = function () {
+                    if (checkboxSelector.checked) {
+                        onConstraintChange(layerName, constraint, optionName, true);
+                    }
+                    else if(type === "checkbox"){
+                        onConstraintChange(layerName, constraint, optionName, false);
+                    }
+                    if (selector.checked) {
+                        onUpdate(layerName);
+                    }
+                };
+            }
+
+            checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
+        });
+
+
+
+        constraintsContainer.appendChild(checkboxContainer);
     }
 }
