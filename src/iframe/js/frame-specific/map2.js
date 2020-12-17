@@ -480,7 +480,7 @@ const overwrite = {
 
 
 
-RenderInfrastructure.config(osmMap2, markers, data, {
+RenderInfrastructure.config(osmMap2, markers, overwrite, {
     queryAlertText: document.getElementById('queryInfoText'),
     overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
     maxElements: 10000,
@@ -490,7 +490,7 @@ RenderInfrastructure.config(osmMap2, markers, data, {
 
 $.getJSON("json/menumetadata.json", function (mdata) { //this isnt on the mongo server yet so query it locally
     AutoMenu.build(mdata, overwrite);
-    MenuGenerator.generate(data, document.getElementById("checkboxLocation"));
+    MenuGenerator.generate(overwrite, document.getElementById("checkboxLocation"));
     runQuery();
 });
 
