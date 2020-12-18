@@ -229,6 +229,12 @@ const MenuGenerator = {
                             dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
                         }
                         layerSelector.appendChild(dropdown);
+
+                        const settings = document.createElement("img");
+                        settings.className = "dropdown";
+                        settings.src = "../../images/gear.png";
+                        settings.style.cursor = "pointer";
+                        layerSelector.appendChild(settings);
                     }
 
                     subGroupContainer.appendChild(layerContainer);
