@@ -15,9 +15,6 @@ const DEFAULT_OBJECT = {
     color: "#000000",
     popup: null,
     constraints: null,
-    onAdd: function (layer) { RenderInfrastructure.addFeatureToMap(layer) },
-    onRemove: function (layer) { RenderInfrastructure.removeFeatureFromMap(layer) },
-    onUpdate: function () { },
     map: function () { return RenderInfrastructure.map; },
     mongoQuery: { //format [query,collection]
         query: [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: ["@@MAP_COORDS@@"] } } } } }],
@@ -155,6 +152,8 @@ const MenuGenerator = {
                 for (layer in nested_json_map[obj][header]) {
                     const layerObj = nested_json_map[obj][header][layer];
 
+                    const layerQuerier = new AutoQuery(layerObj);
+
                     const layerContainer = document.createElement("div");
                     layerContainer.className = "layerContainer";
                     layerContainer.id = Util.spaceToUnderScore(layer) + "_layer";
@@ -173,6 +172,15 @@ const MenuGenerator = {
                     layerSelector.appendChild(selectorLabel);
                     layerSelector.appendChild(selector);
                     layerContainer.appendChild(layerSelector);
+
+                    if(!layerObj["onConstraintChange"]){
+                        layerObj["onConstraintChange"] = function(layer,constraintName,value,isActive){ 
+                            layerQuerier.updateConstraint(layer,constraintName,value,isActive); 
+                        };
+                        layerObj["onUpdate"] = function(){ layerQuerier.query();};
+                        layerObj["onAdd"] = function(){ layerQuerier.onAdd();};
+                        layerObj["onRemove"] = function(){ layerQuerier.onRemove();};
+                    }
 
                     const onAdd = layerObj["onAdd"];
                     const onRemove = layerObj["onRemove"];
@@ -333,8 +341,6 @@ const MenuGenerator = {
             onConstraintChange(layerName, constraint, slider.noUiSlider.get());
             slider.noUiSlider.on('change', function (values) {
                 onConstraintChange(layerName, constraint, values);
-                if (selector.checked)
-                    onAdd(layerName);
             });
         }
 
@@ -392,9 +398,6 @@ const MenuGenerator = {
                         }
                         else if (type === "checkbox") {
                             onConstraintChange(layerName, constraint, optionName, false);
-                        }
-                        if (selector.checked) {
-                            onUpdate(layerName);
                         }
                     };
                 }

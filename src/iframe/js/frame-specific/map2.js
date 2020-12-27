@@ -361,6 +361,7 @@ const overwrite = {
             }
         },
         "onConstraintChange": function (layer, constraintName, value) {
+            console.log(layer + "-" + constraintName + "-");
             COVID.dateStart = Number(value[0]);
             COVID.dateEnd = Number(value[1]);
             COVID.changeFlag = true;
@@ -489,9 +490,9 @@ RenderInfrastructure.config(osmMap2, markers, overwrite, {
 });
 
 $.getJSON("json/menumetadata.json", async function (mdata) { //this isnt on the mongo server yet so query it locally
-    const finalData = await AutoMenu.build(mdata, overwrite);
-    console.log(finalData);
-    MenuGenerator.generate(finalData, document.getElementById("checkboxLocation"));
+    //const finalData = await AutoMenu.build(mdata, overwrite);
+    //console.log(finalData);
+    MenuGenerator.generate(overwrite, document.getElementById("checkboxLocation"));
     runQuery();
 });
 
