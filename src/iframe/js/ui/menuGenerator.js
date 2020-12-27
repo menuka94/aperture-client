@@ -3,7 +3,8 @@
  * @namespace MenuGenerator
  * @file Build's menu UI for the Aperture Client
  * @author Daniel Reynolds
- * @dependencies react.js
+ * @dependencies 
+ * @notes Work in progress!
  */
 const DEFAULT_OPTIONS = {
     colorCode: true, //should objects have a color from their corresponding render color
@@ -234,6 +235,9 @@ const MenuGenerator = {
                         settings.className = "dropdown";
                         settings.src = "../../images/gear.png";
                         settings.style.cursor = "pointer";
+                        settings.onclick = function () {
+                            MenuGenerator.selectOptions(layerConstraints);
+                        }
                         layerSelector.appendChild(settings);
                     }
 
@@ -249,13 +253,54 @@ const MenuGenerator = {
         }
     },
 
-    updateConstraint: function () {
+    selectOptions: function (layerConstraints) {
+        if (document.getElementById("editConstraints")) {
+            return;
+        }
 
+        const editDiv = document.createElement("div");
+        editDiv.className = "editConstraints";
+        editDiv.id = "editConstraints";
+
+        for (let i = 0; i < layerConstraints.childNodes.length; i++) {
+            const holderDiv = document.createElement("div");
+
+            const child = layerConstraints.childNodes[i];
+            const selectLabel = document.createElement("label");
+            selectLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(child.id));
+
+            const select = document.createElement("input");
+            select.type = "checkbox";
+            select.checked = child.style.display !== "none";
+            //console.log(child.style);
+            select.onchange = function(){
+                child.style.display = select.checked ? "block" : "none";
+            }
+
+            holderDiv.appendChild(selectLabel);
+            holderDiv.appendChild(select);
+
+            editDiv.appendChild(holderDiv);
+        }
+
+        const saveAndClose = document.createElement("button");
+        saveAndClose.style.bottom = "25px";
+        saveAndClose.style.right = "25px";
+        saveAndClose.style.position = "absolute";
+        saveAndClose.innerHTML = "Close menu"
+        saveAndClose.onclick = function(){
+            document.body.removeChild(editDiv);
+        }
+
+        editDiv.appendChild(saveAndClose);
+
+        document.body.appendChild(editDiv);
     },
 
     createSliderContainer: function (constraintsContainer, layerContainer, constraint, constraintObj, layerObj, layerName, selector) {
         const sliderContainer = document.createElement("div");
         sliderContainer.className = "sliderContainer";
+        sliderContainer.id = constraint;
 
         const slider = document.createElement("div");
         const sliderLabel = document.createElement("div");
@@ -296,7 +341,7 @@ const MenuGenerator = {
         sliderContainer.appendChild(sliderLabel);
         sliderContainer.appendChild(slider);
 
-        if(constraintObj["hide"]){
+        if (constraintObj["hide"]) {
             sliderContainer.style.display = "none";
         }
         constraintsContainer.appendChild(sliderContainer);
@@ -305,6 +350,7 @@ const MenuGenerator = {
     createCheckboxContainer: function (constraintsContainer, layerContainer, constraint, constraintObj, layerObj, layerName, selector, type) {
         const checkboxContainer = document.createElement("div");
         checkboxContainer.className = "checkboxContainer";
+        checkboxContainer.id = constraint;
 
         //add label
         const checkboxLabel = document.createElement("div");
@@ -358,7 +404,7 @@ const MenuGenerator = {
             }
         });
 
-        if(constraintObj["hide"]){
+        if (constraintObj["hide"]) {
             checkboxContainer.style.display = "none";
         }
         constraintsContainer.appendChild(checkboxContainer);

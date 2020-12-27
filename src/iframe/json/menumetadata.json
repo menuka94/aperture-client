@@ -53,6 +53,7 @@
   "collection" : "svi_county_GISJOIN",
   "fieldMetadata" : [ 
     {
+    "label":"Social Vulnerability Index",
     "name" : "RPL_THEMES",
     "type" : "range",
     "step": 0.05,
@@ -64,6 +65,7 @@
 }, {
   "collection" : "svi_tract_GISJOIN",
   "fieldMetadata" : [ {
+    "label":"Social Vulnerability Index",
     "name" : "RPL_THEMES",
     "type" : "range",
     "step": 0.05,

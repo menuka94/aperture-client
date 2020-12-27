@@ -178,6 +178,18 @@ body {
     transform: translateY(-50%);
 }
 
+.editConstraints{
+    position: absolute;
+    top:12.5%;
+    left:12.5%;
+    width: 75%;
+    height: 75%;
+    border-radius: 3px;
+    background-color: white;
+    z-index: 9999;
+    padding: 25px;
+}
+
 .leaflet-fade-anim .leaflet-tile, .leaflet-zoom-anim .leaflet-zoom-animated {
     will-change: auto !important;
 }

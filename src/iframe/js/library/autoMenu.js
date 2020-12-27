@@ -16,11 +16,6 @@ const AutoMenu = {
             stream.on('end', function (end) {
                 const autoMenu = this.bindMenuToCatalog(menuMetaData, catalog);
 
-                console.log({
-                    ...autoMenu,
-                    ...overwrite
-                });
-
                 resolve({
                     ...autoMenu,
                     ...overwrite
@@ -55,11 +50,14 @@ const AutoMenu = {
         catalogLayer.fieldMetadata.forEach(constraint => {
             const fieldIndex = this.arrayIndexOf(constraint.name, metadata.fieldMetadata);
             if (fieldIndex !== -1) {
+                const hideByDefaultMask = { 
+                    hideByDefault: false
+                }
                 constraint = { //bind defined values
                     ...constraint,
+                    ...hideByDefaultMask,
                     ...metadata.fieldMetadata[fieldIndex]
                 }
-                constraint.hideByDefault = false;
             }
             constraint = this.convertFromDefault(constraint);
             constraint = this.buildStandardConstraint(constraint);
@@ -139,6 +137,8 @@ const AutoMenu = {
 
 
         if (constraint.type === "range" || constraint.type === "date") {
+            result.step = constraint.step;
+            
             const DEFAULTS = {
                 step: 1,
             }
@@ -148,10 +148,12 @@ const AutoMenu = {
                 ...result
             }
 
+
             result.type = "slider";
         
             result.range = [constraint.min, constraint.max];
             result.default = result.range;
+            
 
             if(result.range[0] === result.range[1] || !constraint.max) //error check
                 return null;
