@@ -333,7 +333,6 @@ const overwrite = {
             }
         },
         "onConstraintChange": function (layer, constraintName, value) {
-            //console.log("layer:" + layer + " \nContraint: " + constraintName + " \n Value: " + value);
             censusViz.setFeature(value);
         },
         "onAdd": function () {
@@ -490,9 +489,9 @@ RenderInfrastructure.config(osmMap2, markers, overwrite, {
 });
 
 $.getJSON("json/menumetadata.json", async function (mdata) { //this isnt on the mongo server yet so query it locally
-    //const finalData = await AutoMenu.build(mdata, overwrite);
+    const finalData = await AutoMenu.build(mdata, overwrite);
     //console.log(finalData);
-    MenuGenerator.generate(overwrite, document.getElementById("checkboxLocation"));
+    MenuGenerator.generate(finalData, document.getElementById("checkboxLocation"));
     runQuery();
 });
 

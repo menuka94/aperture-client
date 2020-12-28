@@ -27,7 +27,7 @@ class AutoQuery {
         if (!constraint)
             return;
         const constraintMetadata = this.data.constraints[constraint];
-        console.log(constraintMetadata.type);
+        //console.log(constraintMetadata.type);
         switch (constraintMetadata.type) {
             case "slider":
                 if(Array.isArray(value))
