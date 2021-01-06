@@ -23,7 +23,6 @@ elem.id = 'testMap';
 document.body.appendChild(elem);
 
 let jsonData = require("../infrastructure.json");
-let streamflowData = require("../../../../src/iframe/json/streamflowMetadata.json");
 let sampleQuery = require("./sampleRes.json");
 
 const elem2 = document.createElement('div');

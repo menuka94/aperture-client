@@ -213,18 +213,26 @@ const MenuGenerator = {
                             const constraintName = constraint;
                             const constraintObj = layerObj["constraints"][constraintName];
 
-
+                            let container;
                             if (constraintObj["type"] === "slider") {
-                                this.createSliderContainer(layerConstraints, layerContainer, constraintName, constraintObj, layerObj, layerName, selector);
+                                container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
                             }
                             else if (constraintObj["type"] === "selector") {
-                                this.createCheckboxContainer(layerConstraints, layerContainer, constraintName, constraintObj, layerObj, layerName, selector, "radio");
+                                container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "radio");
                             }
                             else if (constraintObj["type"] === "multiselector") {
-                                this.createCheckboxContainer(layerConstraints, layerContainer, constraintName, constraintObj, layerObj, layerName, selector, "checkbox");
+                                container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "checkbox");
                             }
 
-
+                            if (constraintObj["hide"]) {
+                                layerQuerier.constraintSetActive(constraintName, false);
+                                container.style.display = "none";
+                            }
+                            else{
+                                layerQuerier.constraintSetActive(constraintName, true);
+                            }
+                            
+                            layerConstraints.appendChild(container);
                         }
                         layerContainer.appendChild(layerConstraints);
 
@@ -244,7 +252,9 @@ const MenuGenerator = {
                         settings.src = "../../images/gear.png";
                         settings.style.cursor = "pointer";
                         settings.onclick = function () {
-                            MenuGenerator.selectOptions(layerConstraints);
+                            MenuGenerator.selectOptions(layerConstraints, function(constraint, active){
+                                layerQuerier.constraintSetActive(constraint,active)
+                            });
                         }
                         layerSelector.appendChild(settings);
                     }
@@ -261,7 +271,8 @@ const MenuGenerator = {
         }
     },
 
-    selectOptions: function (layerConstraints) {
+    //work in progress
+    selectOptions: function (layerConstraints, setActive) {
         if (document.getElementById("editConstraints")) {
             return;
         }
@@ -282,6 +293,7 @@ const MenuGenerator = {
             select.checked = child.style.display !== "none";
             //console.log(child.style);
             select.onchange = function(){
+                setActive(child.id, select.checked);
                 child.style.display = select.checked ? "block" : "none";
             }
 
@@ -305,7 +317,7 @@ const MenuGenerator = {
         document.body.appendChild(editDiv);
     },
 
-    createSliderContainer: function (constraintsContainer, layerContainer, constraint, constraintObj, layerObj, layerName, selector) {
+    createSliderContainer: function (constraint, constraintObj, layerObj, layerName) {
         const sliderContainer = document.createElement("div");
         sliderContainer.className = "sliderContainer";
         sliderContainer.id = constraint;
@@ -314,7 +326,7 @@ const MenuGenerator = {
         const sliderLabel = document.createElement("div");
 
         slider.style.margin = '5px';
-        slider.id = layerContainer.id + "_constraint_" + constraint;
+        slider.id = layerName + "_" + constraint;
         noUiSlider.create(slider, {
             start: constraintObj['default'] ? constraintObj['default'] : [constraintObj['range'][0]], //default is minimum
 
@@ -347,16 +359,13 @@ const MenuGenerator = {
         sliderContainer.appendChild(sliderLabel);
         sliderContainer.appendChild(slider);
 
-        if (constraintObj["hide"]) {
-            sliderContainer.style.display = "none";
-        }
-        constraintsContainer.appendChild(sliderContainer);
+        return sliderContainer;
     },
 
-    createCheckboxContainer: function (constraintsContainer, layerContainer, constraint, constraintObj, layerObj, layerName, selector, type) {
+    createCheckboxContainer: function (constraint, constraintObj, layerObj, layerName, type) {
         const checkboxContainer = document.createElement("div");
         checkboxContainer.className = "checkboxContainer";
-        checkboxContainer.id = constraint;
+        checkboxContainer.id = layerName + "_" + constraint;
 
         //add label
         const checkboxLabel = document.createElement("div");
@@ -376,7 +385,7 @@ const MenuGenerator = {
                 const checkboxSelector = document.createElement("input");
                 checkboxSelector.type = type;
                 checkboxSelector.id = Util.spaceToUnderScore(option);
-                checkboxSelector.checked = isFirstCheckbox;
+                checkboxSelector.checked = type === "radio" ? isFirstCheckbox : true;
                 checkboxSelector.name = constraint;
                 isFirstCheckbox = false;
                 const labelForRadioSelector = document.createElement("label");
@@ -401,15 +410,11 @@ const MenuGenerator = {
                         }
                     };
                 }
-
-
                 checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
             }
         });
 
-        if (constraintObj["hide"]) {
-            checkboxContainer.style.display = "none";
-        }
-        constraintsContainer.appendChild(checkboxContainer);
+        
+        return checkboxContainer;
     }
 }

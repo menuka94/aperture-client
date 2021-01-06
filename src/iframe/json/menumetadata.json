@@ -1,6 +1,7 @@
 [ {
   "collection" : "future_heat",
   "label": "Future Heatwaves",
+  "level": "county",
   "fieldMetadata" : [ 
     {
     "name" : "temp",

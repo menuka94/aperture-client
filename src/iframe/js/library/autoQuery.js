@@ -23,11 +23,11 @@ class AutoQuery {
         console.log("rm");
     }
 
+    //updates a constraints data, and adds it if not existent
     updateConstraint(layer, constraint, value, isActive) {
         if (!constraint)
             return;
         const constraintMetadata = this.data.constraints[constraint];
-        //console.log(constraintMetadata.type);
         switch (constraintMetadata.type) {
             case "slider":
                 if(Array.isArray(value))
@@ -41,13 +41,16 @@ class AutoQuery {
                 this.constraintData[constraint] = value;
                 break;
             case "multiselector":
-                console.log("m");
+                if(!this.constraintData[constraint])
+                    this.constraintData[constraint] = {};
+                this.constraintData[constraint][value] = isActive;
                 break;
         }
+    }
 
-        // this.constraintData[constraint] = value;
-        // this.constraintState[constraint] = isActive;
-        console.log(this.constraintData);
+
+    constraintSetActive(constraint, active){
+        this.constraintState[constraint] = active;
     }
 
     query() {

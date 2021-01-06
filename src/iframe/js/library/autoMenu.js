@@ -14,6 +14,8 @@ const AutoMenu = {
 
 
             stream.on('end', function (end) {
+                console.log("end");
+                console.log(catalog);
                 const autoMenu = this.bindMenuToCatalog(menuMetaData, catalog);
 
                 resolve({
@@ -165,7 +167,6 @@ const AutoMenu = {
         else if (constraint.type = "multiselect") {
             result.type = "multiselector";
             result.options = constraint.values;
-
             if(!result.options || result.options.length < 1)
                 return null;
         }
