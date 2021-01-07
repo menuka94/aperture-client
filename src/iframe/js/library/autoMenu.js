@@ -14,8 +14,8 @@ const AutoMenu = {
 
 
             stream.on('end', function (end) {
-                console.log("end");
-                console.log(catalog);
+                // console.log("end");
+                // console.log(catalog);
                 const autoMenu = this.bindMenuToCatalog(menuMetaData, catalog);
 
                 resolve({

@@ -31,7 +31,6 @@ function updateLayers() {
 }
 
 const MenuGenerator = {
-    _sustainQuerier: sustain_querier(),
     /** Generates the menu within a container
      * @memberof Generator
      * @method generate
@@ -231,7 +230,7 @@ const MenuGenerator = {
                             else{
                                 layerQuerier.constraintSetActive(constraintName, true);
                             }
-                            
+
                             layerConstraints.appendChild(container);
                         }
                         layerContainer.appendChild(layerConstraints);
@@ -303,6 +302,7 @@ const MenuGenerator = {
             editDiv.appendChild(holderDiv);
         }
 
+        //ignore this gross css stuff
         const saveAndClose = document.createElement("button");
         saveAndClose.style.bottom = "25px";
         saveAndClose.style.right = "25px";

@@ -7,8 +7,8 @@
  */
 
 class AutoQuery {
-    constructor(data) {
-        this.data = data;
+    constructor(layerData) {
+        this.data = layerData;
         this.sustainQuerier = sustain_querier() //init querier
         this.constraintData = {};
         this.constraintState = {};
