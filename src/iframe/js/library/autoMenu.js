@@ -57,7 +57,7 @@ const AutoMenu = {
 
                 //These are hardcoded for now
                 let autoMenuLayer = {};
-                autoMenuLayer["group"] = "Dynamic Layers";
+                autoMenuLayer["group"] = "Infrastructure & Natural Features";
                 autoMenuLayer["subGroup"] = "Auto Generated";
 
                 //where the constraints are added, lots of cool stuff here

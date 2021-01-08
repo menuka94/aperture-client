@@ -188,6 +188,7 @@ body {
     background-color: white;
     z-index: 9999;
     padding: 25px;
+    overflow-y: scroll;
 }
 
 .leaflet-fade-anim .leaflet-tile, .leaflet-zoom-anim .leaflet-zoom-animated {

@@ -74,7 +74,7 @@ const overwrite = {
         "query": "man_made=water_works",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "wastewater_plant": {
@@ -84,7 +84,7 @@ const overwrite = {
         "query": "man_made=wastewater_plant",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "canal": {
@@ -94,7 +94,7 @@ const overwrite = {
         "preProcess": true,
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "river": {
@@ -104,7 +104,7 @@ const overwrite = {
         "preProcess": true,
         "grpc": "OSMRequest",
         "subGroup": "Water (Natural)",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "stream": {
@@ -114,7 +114,7 @@ const overwrite = {
         "preProcess": true,
         "subGroup": "Water (Natural)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "ditch": {
@@ -124,7 +124,7 @@ const overwrite = {
         "preProcess": true,
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "lock_gate": {
@@ -134,7 +134,7 @@ const overwrite = {
         "query": "waterway=lock_gate",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "weir": {
@@ -144,7 +144,7 @@ const overwrite = {
         "query": "waterway=weir",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "tidal_channel": {
@@ -153,7 +153,7 @@ const overwrite = {
         "query": "waterway=tidal_channel",
         "subGroup": "Water (Natural)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "water": {
@@ -163,7 +163,7 @@ const overwrite = {
         "query": "natural=water",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers",
+        "group": "Infrastructure & Natural Features",
         ...osmConstants
     },
     "reservoir": {
@@ -359,7 +359,7 @@ const overwrite = {
     //     "color": "#FF00FF"
     // },
     "census_tracts": {
-        "group": "Dynamic Layers",
+        "group": "Tract, County, & State Data",
         "subGroup": "Tract Level",
         "constraints": {
             "data": {
@@ -383,7 +383,7 @@ const overwrite = {
         "noAutoQuery": true
     },
     "covid_county": {
-        "group": "Dynamic Layers",
+        "group": "Tract, County, & State Data",
         "subGroup": "Health",
         "constraints": {
             date_range: {
@@ -415,7 +415,7 @@ const overwrite = {
         "noAutoQuery": true
     },
     "Heat_Waves": {
-        "group": "Dynamic Layers",
+        "group": "Tract, County, & State Data",
         "subGroup": "Climate",
         "constraints": {
             "temperature": {
@@ -476,7 +476,7 @@ const overwrite = {
         "noAutoQuery": true
     },
     "social_vulnerability_index": {
-        "group": "Dynamic Layers",
+        "group": "Tract, County, & State Data",
         "subGroup": "Social Vulnerability",
         "constraints": {
             below_poverty: sviCalcAdjustments,
