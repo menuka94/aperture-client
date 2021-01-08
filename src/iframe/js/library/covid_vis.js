@@ -88,18 +88,6 @@ const COVID = {
                 }
             }
         ];
-        // console.log(JSON.stringify(query));
-        // const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "covid_county", JSON.stringify(query));
-        // this.streams.push(stream);
-
-        // stream.on('data', function (r) {
-        //     const data = JSON.parse(r.getData()).arr;
-
-        //     console.log(data);
-        // }.bind(this));
-        // stream.on('end', function (r) {
-        //     console.log("done");
-        // }.bind(this));
     },
     continueQuery(FIPS, polys) {
         const q = [{ "$match": { "countyFipsCode": { "$in": FIPS }, "$or": [{ "epoch_time": this.dateStart }, { "epoch_time": this.dateEnd }] } }]

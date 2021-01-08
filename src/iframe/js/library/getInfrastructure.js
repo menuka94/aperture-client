@@ -1,6 +1,10 @@
 //Author: Daniel Reynolds
 //Purpose: Get osm nodes, ways, and relations, and then translate them onto a leaflet map
 //Dependencies: Leaflet, osmtogeojson, jquery, Leaflet.markerCluster
+
+//DEPRECATED, this giant library is being split up into smaller, more modular libraries like autoQuery.js and covid_vis.js.
+//many functions are still useful though, and are used througout the project.
+
 const FLYTOOPTIONS = { //for clicking on icons
     easeLinearity: 0.4,
     duration: 0.25,

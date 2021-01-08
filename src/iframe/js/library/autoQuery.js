@@ -1,5 +1,5 @@
 /**
- * @namespace MenuGenerator
+ * @namespace AutoQuery
  * @file Query layers in a very general fashion
  * @author Daniel Reynolds
  * @dependencies autoMenu.js menuGenerator.js

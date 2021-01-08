@@ -1,6 +1,22 @@
+/**
+ * @namespace AutoMenu
+ * @file Build a menu based on the metadata catalog & details provided by users about the metadata
+ * @author Daniel Reynolds
+ * @notes Work in progress!
+ */
+
 const AutoMenu = {
+    //get the querier
     _sustainQuerier: sustain_querier(),
 
+    /**
+      * Main, asyncronous function which is called by an external code block
+      * @memberof AutoMenu
+      * @method build
+      * @param {JSON} menuMetaData user-provided metadata about the metadata, which fits a schema
+      * @param {JSON} overwrite Object which overwrites any fields that are auto generated, useful for custom queries.
+      * @returns {JSON} JSON which can be used with menuGenerator.js to build a menu
+      */
     build: async function (menuMetaData, overwrite) {
         return new Promise(resolve => {
             //stream the metadata catalog in
@@ -14,19 +30,24 @@ const AutoMenu = {
 
 
             stream.on('end', function (end) {
-                // console.log("end");
-                // console.log(catalog);
+                //build it
                 const autoMenu = this.bindMenuToCatalog(menuMetaData, catalog);
 
+                //return it
                 resolve({
                     ...autoMenu,
-                    ...overwrite
+                    ...overwrite //overwrite using the ... operarator
                 });
 
             }.bind(this));
         });
     },
 
+    /**
+      * Helper function for @method build
+      * @memberof AutoMenu
+      * @method bindMenuToCatalog
+      */
     bindMenuToCatalog: function (menuMetaData, catalog) {
         let result = {};
 
@@ -34,12 +55,18 @@ const AutoMenu = {
             if (catalog[metadata.collection]) {
                 const catalogLayer = catalog[metadata.collection];
 
+                //These are hardcoded for now
                 let autoMenuLayer = {};
                 autoMenuLayer["group"] = "Dynamic Layers";
                 autoMenuLayer["subGroup"] = "Auto Generated";
+
+                //where the constraints are added, lots of cool stuff here
                 autoMenuLayer["constraints"] = this.buildConstraintsFromCatalog(metadata, catalogLayer);
 
+                //gets label if provided, names it the collection name otherwise
                 const label = metadata.label ? metadata.label : catalogLayer.collection;
+
+                //add finished layer to result
                 result[label] = autoMenuLayer;
             }
         });
@@ -47,6 +74,12 @@ const AutoMenu = {
         return result;
     },
 
+
+    /**
+      * Helper function for @method bindMenuToCatalog
+      * @memberof AutoMenu
+      * @method buildConstraintsFromCatalog
+      */
     buildConstraintsFromCatalog: function (metadata, catalogLayer) {
         let result = {};
         catalogLayer.fieldMetadata.forEach(constraint => {
@@ -71,6 +104,12 @@ const AutoMenu = {
         return result;
     },
 
+
+    /**
+      * Helper function for @method buildConstraintsFromCatalog
+      * @memberof AutoMenu
+      * @method arrayIndexOf
+      */
     arrayIndexOf: function (fieldName, fieldMetadata) {
         if (!fieldMetadata) {
             return -1;
@@ -85,6 +124,12 @@ const AutoMenu = {
         return -1;
     },
 
+
+    /**
+      * Helper function for @method buildConstraintsFromCatalog
+      * @memberof AutoMenu
+      * @method convertFromDefault
+      */
     convertFromDefault: function (constraint) {
         if (constraint.type === "STRING") {
             constraint.type = "multiselect";
@@ -130,6 +175,12 @@ const AutoMenu = {
         return constraint;
     },
 
+
+    /**
+      * Helper function for @method buildConstraintsFromCatalog
+      * @memberof AutoMenu
+      * @method buildStandardConstraint
+      */
     buildStandardConstraint: function (constraint) {
         let result = {};
 
