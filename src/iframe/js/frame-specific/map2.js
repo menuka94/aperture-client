@@ -1,18 +1,18 @@
 const MAPNUMBER = 2;
 
-// rsustainQuerier = sustain_querier();
-// const q = [];
-// const stream = rsustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
-// console.log("start");
-// stream.on('data', function (r) {
-//     const data = JSON.parse(r.getData());
-//     console.log(data);
-// }.bind(this));
+rsustainQuerier = sustain_querier();
+const q = [];
+const stream = rsustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
+console.log("start");
+stream.on('data', function (r) {
+    const data = JSON.parse(r.getData());
+    console.log(data);
+}.bind(this));
 
 
-// stream.on('end', function (end) {
-//     console.log("end");
-// }.bind(this));
+stream.on('end', function (end) {
+    console.log("end");
+}.bind(this));
 
 let queryAlertText = document.getElementById('queryInfoText');
 //--------------
@@ -59,6 +59,13 @@ const sviCalcAdjustments = {
     "step": 0.1
 }
 
+const osmConstants = {
+    "onAdd": function (layer) { RenderInfrastructure.addFeatureToMap(layer) },
+    "onRemove": function (layer) { RenderInfrastructure.removeFeatureFromMap(layer) },
+    "onUpdate": function () { },
+    "noAutoQuery": true
+}
+
 const overwrite = {
     "water_works": {
         "iconAddr": "../../../images/water_works.png",
@@ -67,7 +74,8 @@ const overwrite = {
         "query": "man_made=water_works",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "wastewater_plant": {
         "iconAddr": "../../../images/sewage.png",
@@ -76,7 +84,8 @@ const overwrite = {
         "query": "man_made=wastewater_plant",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "canal": {
         "color": "teal",
@@ -85,7 +94,8 @@ const overwrite = {
         "preProcess": true,
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "river": {
         "color": "#00008B",
@@ -94,7 +104,8 @@ const overwrite = {
         "preProcess": true,
         "grpc": "OSMRequest",
         "subGroup": "Water (Natural)",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "stream": {
         "color": "#0000BB",
@@ -103,7 +114,8 @@ const overwrite = {
         "preProcess": true,
         "subGroup": "Water (Natural)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "ditch": {
         "color": "#0000BB",
@@ -112,7 +124,8 @@ const overwrite = {
         "preProcess": true,
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "lock_gate": {
         "iconAddr": "../../../images/lock_gate.png",
@@ -121,7 +134,8 @@ const overwrite = {
         "query": "waterway=lock_gate",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "weir": {
         "iconAddr": "../../../images/weir.png",
@@ -130,7 +144,8 @@ const overwrite = {
         "query": "waterway=weir",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "tidal_channel": {
         "color": "#0080FF",
@@ -138,7 +153,8 @@ const overwrite = {
         "query": "waterway=tidal_channel",
         "subGroup": "Water (Natural)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "water": {
         "iconAddr": "../../../images/reservoir-lake.png",
@@ -147,196 +163,201 @@ const overwrite = {
         "query": "natural=water",
         "subGroup": "Water (Man Made)",
         "grpc": "OSMRequest",
-        "group": "Basic Layers"
+        "group": "Basic Layers",
+        ...osmConstants
     },
     "reservoir": {
         "notAQueryableLayer": true,
         "iconAddr": "../../../images/reservoir-lake.png",
         "color": "#00FFFF",
-        "subGroup": "Water (Man Made)"
+        "subGroup": "Water (Man Made)",
+        "noAutoQuery": true
     },
     "basin": {
         "notAQueryableLayer": true,
         "iconAddr": "../../../images/reservoir-lake.png",
         "color": "#00FFFF",
-        "subGroup": "Water (Natural)"
+        "subGroup": "Water (Natural)",
+        "noAutoQuery": true
     },
     "pond": {
         "notAQueryableLayer": true,
         "color": "#00FFFF",
         "iconAddr": "../../../images/reservoir-lake.png",
-        "subGroup": "Water (Natural)"
+        "subGroup": "Water (Natural)",
+        "noAutoQuery": true
     },
     "lake": {
         "notAQueryableLayer": true,
         "color": "#00FFFF",
         "iconAddr": "../../../images/reservoir-lake.png",
-        "subGroup": "Water (Natural)"
+        "subGroup": "Water (Natural)",
+        "noAutoQuery": true
     },
-    "Natural_Gas_Pipeline": {
-        "color": "#8A2BE2",
-        "defaultRender": false,
-        "query": "custom=Natural_Gas_Pipeline",
-        "grpc": "DatasetRequest",
-        "grpcDataset": 4,
-        "identityField": "TYPEPIPE",
-        "subGroup": "Energy",
-        "popup": "A(n) @@TYPEPIPE@@ natural gas pipeline operated by @@Operator@@.",
-        "group": "Basic Layers"
-    },
-    "substation": {
-        "iconAddr": "../../../images/substation.png",
-        "defaultRender": false,
-        "query": "custom=substation",
-        "grpc": "DatasetRequest",
-        "grpcDataset": 2,
-        "identityField": "TYPE",
-        "identityKey": "SUBSTATION",
-        "subGroup": "Energy",
-        "popup": "@@NAME@@ substation. An @@STATUS@@ substation in @@COUNTY@@ county with a max voltage of @@MAX_VOLT@@. Sourced from @@SOURCE@@.",
-        "group": "Basic Layers"
-    },
-    "power_transmission_line": {
-        "color": "#000000",
-        "defaultRender": false,
-        "query": "custom=power_transmission_line",
-        "grpc": "DatasetRequest",
-        "grpcDataset": 3,
-        "identityField": "TYPE",
-        "identityKey": "AC",
-        "subGroup": "Energy",
-        "popup": "A(n) @@TYPE@@ power transmission line owned by @@OWNER@@, spanning from @@SUB_1@@ to @@SUB_2@@. Sourced from @@SOURCE@@.",
-        "group": "Basic Layers"
-    },
-    "flood_zones": {
-        "defaultRender": false,
-        "query": "custom=flood_zone",
-        "refrences": [
-            "flood_zone_A",
-            "flood_zone_AE",
-            "flood_zone_AH",
-            "flood_zone_AO",
-            "floodway"
-        ],
-        "subGroup": "Flood Data",
-        "grpc": "DatasetRequest",
-        "grpcDataset": 7,
-        "group": "Basic Layers"
-    },
-    "floodway": {
-        "notAQueryableLayer": true,
-        "color": "#D60BB1",
-        "identityField": "ZONE_SUBTY",
-        "identityKey": "FLOODWAY",
-        "noBorder": true,
-        "popup": "A channel of a river or other watercourse and the adjacent land areas that must be reserved in order to discharge the base flood without cumulatively increasing the water surface elevation more than a designated height."
-    },
-    "flood_zone_A": {
-        "notAQueryableLayer": true,
-        "color": "#880000",
-        "identityField": "FLD_ZONE",
-        "identityKey": "A",
-        "noBorder": true,
-        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
-    },
-    "flood_zone_AE": {
-        "notAQueryableLayer": true,
-        "color": "#880000",
-        "identityField": "FLD_ZONE",
-        "identityKey": "AE",
-        "noBorder": true,
-        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
-    },
-    "flood_zone_AH": {
-        "notAQueryableLayer": true,
-        "color": "#008080",
-        "identityField": "FLD_ZONE",
-        "identityKey": "AH",
-        "noBorder": true,
-        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of ponding with average depths between one and three feet."
-    },
-    "flood_zone_AO": {
-        "notAQueryableLayer": true,
-        "color": "#000080",
-        "identityField": "FLD_ZONE",
-        "identityKey": "AO",
-        "noBorder": true,
-        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of sheet flow with average depths between one and three feet."
-    },
-    "flood_zone_V": {
-        "notAQueryableLayer": true,
-        "color": "#000080",
-        "identityField": "FLD_ZONE",
-        "identityKey": "V",
-        "noBorder": true,
-        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
-    },
-    "flood_zone_VE": {
-        "notAQueryableLayer": true,
-        "color": "#000080",
-        "identityField": "FLD_ZONE",
-        "identityKey": "VE",
-        "noBorder": true,
-        "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
-    },
-    "dam": {
-        "iconAddr": "../../../images/dam.png",
-        "color": "#FF0000",
-        "defaultRender": false,
-        "query": "custom=dam",
-        "subGroup": "Water (Man Made)",
-        "grpc": "DatasetRequest",
-        "grpcDataset": 1,
-        "identityField": "DAM_HEIGHT",
-        "popup": "@@NAME@@ dam, located along the @@RIVER@@, standing @@DAM_HEIGHT@@ feet high, located in @@COUNTY@@ county, @@STATE@@. This dam primarily affects @@CITYAFFECT@@, @@NIDSTATE@@.",
-        "group": "Basic Layers"
-    },
-    "power_plant": {
-        "iconAddr": "../../../images/power_plant.png",
-        "defaultRender": false,
-        "query": "custom=power_plant",
-        "queryURL": "https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_PowerPlants/MapServer/12/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
-        "identityField": "ENERGY_SRC_DESC1",
-        "subGroup": "Energy",
-        "popup": "@@PLANT_NAME@@ power plant, which produces energy through @@ENERGY_SRC_DESC1@@",
-        "group": "Basic Layers"
-    },
-    "fire_station": {
-        "iconAddr": "../../../images/fire_station.png",
-        "defaultRender": false,
-        "query": "custom=fire_station",
-        "grpc": "DatasetRequest",
-        "grpcDataset": 6,
-        "identityField": "ISLANDMARK",
-        "subGroup": "Emergency & Medical",
-        "popup": "@@NAME@@, located in @@CITY@@, @@STATE@@.",
-        "group": "Basic Layers"
-    },
-    "hospital": {
-        "iconAddr": "../../../images/hospital.png",
-        "defaultRender": false,
-        "query": "custom=hosptial",
-        "grpc": "DatasetRequest",
-        "grpcDataset": 0,
-        "identityField": "BEDS",
-        "subGroup": "Emergency & Medical",
-        "popup": "@@NAME@@, a @@OWNER@@ hospital with @@BEDS@@ beds, located in @@CITY@@, @@STATE@@.",
-        "group": "Basic Layers"
-    },
-    "urgent_care": {
-        "iconAddr": "../../../images/urgent_care.png",
-        "defaultRender": false,
-        "query": "custom=urgent_care",
-        "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
-        "identityField": "EMERGEXT",
-        "subGroup": "Emergency & Medical",
-        "popup": "@@NAME@@, an urgent care facility located in @@CITY@@, @@STATE@@.",
-        "group": "Basic Layers"
-    },
-    "streamflowData": {
-        "notAQueryableLayer": true,
-        "color": "#FF00FF"
-    },
+    // "Natural_Gas_Pipeline": {
+    //     "color": "#8A2BE2",
+    //     "defaultRender": false,
+    //     "query": "custom=Natural_Gas_Pipeline",
+    //     "grpc": "DatasetRequest",
+    //     "grpcDataset": 4,
+    //     "identityField": "TYPEPIPE",
+    //     "subGroup": "Energy",
+    //     "popup": "A(n) @@TYPEPIPE@@ natural gas pipeline operated by @@Operator@@.",
+    //     "group": "Basic Layers"
+    // },
+    // "substation": {
+    //     "iconAddr": "../../../images/substation.png",
+    //     "defaultRender": false,
+    //     "query": "custom=substation",
+    //     "grpc": "DatasetRequest",
+    //     "grpcDataset": 2,
+    //     "identityField": "TYPE",
+    //     "identityKey": "SUBSTATION",
+    //     "subGroup": "Energy",
+    //     "popup": "@@NAME@@ substation. An @@STATUS@@ substation in @@COUNTY@@ county with a max voltage of @@MAX_VOLT@@. Sourced from @@SOURCE@@.",
+    //     "group": "Basic Layers"
+    // },
+    // "power_transmission_line": {
+    //     "color": "#000000",
+    //     "defaultRender": false,
+    //     "query": "custom=power_transmission_line",
+    //     "grpc": "DatasetRequest",
+    //     "grpcDataset": 3,
+    //     "identityField": "TYPE",
+    //     "identityKey": "AC",
+    //     "subGroup": "Energy",
+    //     "popup": "A(n) @@TYPE@@ power transmission line owned by @@OWNER@@, spanning from @@SUB_1@@ to @@SUB_2@@. Sourced from @@SOURCE@@.",
+    //     "group": "Basic Layers"
+    // },
+    // "flood_zones": {
+    //     "defaultRender": false,
+    //     "query": "custom=flood_zone",
+    //     "refrences": [
+    //         "flood_zone_A",
+    //         "flood_zone_AE",
+    //         "flood_zone_AH",
+    //         "flood_zone_AO",
+    //         "floodway"
+    //     ],
+    //     "subGroup": "Flood Data",
+    //     "grpc": "DatasetRequest",
+    //     "grpcDataset": 7,
+    //     "group": "Basic Layers"
+    // },
+    // "floodway": {
+    //     "notAQueryableLayer": true,
+    //     "color": "#D60BB1",
+    //     "identityField": "ZONE_SUBTY",
+    //     "identityKey": "FLOODWAY",
+    //     "noBorder": true,
+    //     "popup": "A channel of a river or other watercourse and the adjacent land areas that must be reserved in order to discharge the base flood without cumulatively increasing the water surface elevation more than a designated height."
+    // },
+    // "flood_zone_A": {
+    //     "notAQueryableLayer": true,
+    //     "color": "#880000",
+    //     "identityField": "FLD_ZONE",
+    //     "identityKey": "A",
+    //     "noBorder": true,
+    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
+    // },
+    // "flood_zone_AE": {
+    //     "notAQueryableLayer": true,
+    //     "color": "#880000",
+    //     "identityField": "FLD_ZONE",
+    //     "identityKey": "AE",
+    //     "noBorder": true,
+    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
+    // },
+    // "flood_zone_AH": {
+    //     "notAQueryableLayer": true,
+    //     "color": "#008080",
+    //     "identityField": "FLD_ZONE",
+    //     "identityKey": "AH",
+    //     "noBorder": true,
+    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of ponding with average depths between one and three feet."
+    // },
+    // "flood_zone_AO": {
+    //     "notAQueryableLayer": true,
+    //     "color": "#000080",
+    //     "identityField": "FLD_ZONE",
+    //     "identityKey": "AO",
+    //     "noBorder": true,
+    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of sheet flow with average depths between one and three feet."
+    // },
+    // "flood_zone_V": {
+    //     "notAQueryableLayer": true,
+    //     "color": "#000080",
+    //     "identityField": "FLD_ZONE",
+    //     "identityKey": "V",
+    //     "noBorder": true,
+    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
+    // },
+    // "flood_zone_VE": {
+    //     "notAQueryableLayer": true,
+    //     "color": "#000080",
+    //     "identityField": "FLD_ZONE",
+    //     "identityKey": "VE",
+    //     "noBorder": true,
+    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
+    // },
+    // "dam": {
+    //     "iconAddr": "../../../images/dam.png",
+    //     "color": "#FF0000",
+    //     "defaultRender": false,
+    //     "query": "custom=dam",
+    //     "subGroup": "Water (Man Made)",
+    //     "grpc": "DatasetRequest",
+    //     "grpcDataset": 1,
+    //     "identityField": "DAM_HEIGHT",
+    //     "popup": "@@NAME@@ dam, located along the @@RIVER@@, standing @@DAM_HEIGHT@@ feet high, located in @@COUNTY@@ county, @@STATE@@. This dam primarily affects @@CITYAFFECT@@, @@NIDSTATE@@.",
+    //     "group": "Basic Layers"
+    // },
+    // "power_plant": {
+    //     "iconAddr": "../../../images/power_plant.png",
+    //     "defaultRender": false,
+    //     "query": "custom=power_plant",
+    //     "queryURL": "https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_PowerPlants/MapServer/12/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
+    //     "identityField": "ENERGY_SRC_DESC1",
+    //     "subGroup": "Energy",
+    //     "popup": "@@PLANT_NAME@@ power plant, which produces energy through @@ENERGY_SRC_DESC1@@",
+    //     "group": "Basic Layers"
+    // },
+    // "fire_station": {
+    //     "iconAddr": "../../../images/fire_station.png",
+    //     "defaultRender": false,
+    //     "query": "custom=fire_station",
+    //     "grpc": "DatasetRequest",
+    //     "grpcDataset": 6,
+    //     "identityField": "ISLANDMARK",
+    //     "subGroup": "Emergency & Medical",
+    //     "popup": "@@NAME@@, located in @@CITY@@, @@STATE@@.",
+    //     "group": "Basic Layers"
+    // },
+    // "hospital": {
+    //     "iconAddr": "../../../images/hospital.png",
+    //     "defaultRender": false,
+    //     "query": "custom=hosptial",
+    //     "grpc": "DatasetRequest",
+    //     "grpcDataset": 0,
+    //     "identityField": "BEDS",
+    //     "subGroup": "Emergency & Medical",
+    //     "popup": "@@NAME@@, a @@OWNER@@ hospital with @@BEDS@@ beds, located in @@CITY@@, @@STATE@@.",
+    //     "group": "Basic Layers"
+    // },
+    // "urgent_care": {
+    //     "iconAddr": "../../../images/urgent_care.png",
+    //     "defaultRender": false,
+    //     "query": "custom=urgent_care",
+    //     "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
+    //     "identityField": "EMERGEXT",
+    //     "subGroup": "Emergency & Medical",
+    //     "popup": "@@NAME@@, an urgent care facility located in @@CITY@@, @@STATE@@.",
+    //     "group": "Basic Layers"
+    // },
+    // "streamflowData": {
+    //     "notAQueryableLayer": true,
+    //     "color": "#FF00FF"
+    // },
     "census_tracts": {
         "group": "Dynamic Layers",
         "subGroup": "Tract Level",
@@ -358,9 +379,10 @@ const overwrite = {
         "onRemove": function () {
             censusViz.allowCensusRender = false;
             censusViz.clearViz();
-        }
+        },
+        "noAutoQuery": true
     },
-    "COVID-19": {
+    "covid_county": {
         "group": "Dynamic Layers",
         "subGroup": "Health",
         "constraints": {
@@ -389,7 +411,8 @@ const overwrite = {
         },
         "onUpdate": function () {
             COVID.makeQuery(osmMap2);
-        }
+        },
+        "noAutoQuery": true
     },
     "Heat_Waves": {
         "group": "Dynamic Layers",
@@ -449,7 +472,8 @@ const overwrite = {
         },
         "onRemove": function (layer) {
             Census_Visualizer.clearHeat();
-        }
+        },
+        "noAutoQuery": true
     },
     "social_vulnerability_index": {
         "group": "Dynamic Layers",
@@ -488,7 +512,8 @@ const overwrite = {
             SVI.allowRender = false;
             SVI.clear();
             //Census_Visualizer.clearHeat();
-        }
+        },
+        "noAutoQuery": true
     },
 }
 

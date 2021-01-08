@@ -32,7 +32,7 @@ function updateLayers() {
 
 const MenuGenerator = {
     /** Generates the menu within a container
-     * @memberof Generator
+     * @memberof MenuGenerator
      * @method generate
      * @param {JSON} json_map JSON map
      * @param {HTMLElement} container Where to generate the menu
@@ -172,7 +172,7 @@ const MenuGenerator = {
                     layerSelector.appendChild(selector);
                     layerContainer.appendChild(layerSelector);
 
-                    if(!layerObj["onConstraintChange"]){
+                    if(!layerObj["noAutoQuery"]){
                         layerObj["onConstraintChange"] = function(layer,constraintName,value,isActive){ 
                             layerQuerier.updateConstraint(layer,constraintName,value,isActive); 
                         };
