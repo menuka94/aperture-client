@@ -1,18 +1,18 @@
 const MAPNUMBER = 2;
 
-rsustainQuerier = sustain_querier();
-const q = [];
-const stream = rsustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
-console.log("start");
-stream.on('data', function (r) {
-    const data = JSON.parse(r.getData());
-    console.log(data);
-}.bind(this));
+// rsustainQuerier = sustain_querier();
+// const q = [];
+// const stream = rsustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
+// console.log("start");
+// stream.on('data', function (r) {
+//     const data = JSON.parse(r.getData());
+//     console.log(data);
+// }.bind(this));
 
 
-stream.on('end', function (end) {
-    console.log("end");
-}.bind(this));
+// stream.on('end', function (end) {
+//     console.log("end");
+// }.bind(this));
 
 let queryAlertText = document.getElementById('queryInfoText');
 //--------------

@@ -15,11 +15,7 @@ const DEFAULT_OBJECT = {
     color: "#000000",
     popup: null,
     constraints: null,
-    map: function () { return RenderInfrastructure.map; },
-    mongoQuery: { //format [query,collection]
-        query: [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: ["@@MAP_COORDS@@"] } } } } }],
-        collection: "tract_geo"
-    }
+    map: function () { return RenderInfrastructure.map; }
 }
 
 let updateQueue = {};
@@ -173,6 +169,10 @@ const MenuGenerator = {
                     layerContainer.appendChild(layerSelector);
 
                     if(!layerObj["noAutoQuery"]){
+                        if(!layerObj["collection"]){
+                            layerObj["collection"] = layer;
+                        }
+
                         layerObj["onConstraintChange"] = function(layer,constraintName,value,isActive){ 
                             layerQuerier.updateConstraint(layer,constraintName,value,isActive); 
                         };

@@ -149,23 +149,21 @@ RenderInfrastructure = {
      * @memberof RenderInfrastructure
      * @method renderGeoJson
      * @param {JSON} geoJsonData GeoJSON 
-     * @param {bool} preProcess (optional) does this need to be preprocessed before rendering? false if not related to streamflow stuff
      * @param {JSON} indexData (optional) custom JSON data (if you don't want to use Renderinfrastructure.data as your indexing file)
      * @returns {Array<int>} array of integers which contain the id of added layers
      */
-    renderGeoJson: function (geoJsonData, preProcessed, indexData) {
+    renderGeoJson: function (geoJsonData, indexData) {
         if (RenderInfrastructure.options.simplifyThreshold !== -1) {
             Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);
         }
         Util.fixGeoJSONID(geoJsonData);
         const datasource = indexData ? indexData : RenderInfrastructure.data;
-        let preProcess = [];
         let layers = [];
         L.geoJson(geoJsonData, {
             style: function (feature) {
                 let weight = 3;
                 let fillOpacity = 0.2;
-                let name = Util.getNameFromGeoJsonFeature(feature,indexData);
+                let name = Util.getNameFromGeoJsonFeature(feature, indexData);
                 if (datasource[name] && datasource[name]["noBorder"]) {
                     weight = 0;
                     fillOpacity = 0.75;
@@ -173,13 +171,9 @@ RenderInfrastructure = {
                 return { color: datasource[name]["color"], weight: weight, fillOpacity: fillOpacity };
             },
             filter: function (feature) {
-                if (!feature.id && feature._id.$oid) feature.id = feature._id.$oid; //osm data was kinda messy so had to hard code this
-                let name = Util.getNameFromGeoJsonFeature(feature,indexData);
+                Util.normalizeFeatureID(feature);
+                let name = Util.getNameFromGeoJsonFeature(feature, indexData);
                 if (RenderInfrastructure.currentLayers.includes(feature.id) || RenderInfrastructure.map.getZoom() < RenderInfrastructure.options.minRenderZoom || RenderInfrastructure.blacklist.includes(name) || datasource[name] == null) {
-                    return false;
-                }
-                if (datasource[name]["preProcess"] && preProcessed) {
-                    preProcess.push(feature);
                     return false;
                 }
                 RenderInfrastructure.currentLayers.push(feature.id);
@@ -190,14 +184,14 @@ RenderInfrastructure = {
                 if (latlng === -1) {
                     return;
                 }
-                let iconName = Util.getNameFromGeoJsonFeature(feature,indexData);
+                layer.specifiedId = RenderInfrastructure.idCounter++;
+                let iconName = Util.getNameFromGeoJsonFeature(feature, indexData);
                 let iconDetails = Util.createDetailsFromGeoJsonFeature(feature, iconName, indexData);
-                RenderInfrastructure.addIconToMap(iconName, latlng, iconDetails);
+                RenderInfrastructure.addIconToMap(iconName, latlng, iconDetails, indexData, layer.specifiedId);
                 layer.bindPopup(iconDetails);
                 layer.on('click', function (e) {
                     RenderInfrastructure.map.flyToBounds(layer.getBounds(), FLYTOOPTIONS);
                 });
-                layer.specifiedId = RenderInfrastructure.idCounter++;
                 layers.push(layer.specifiedId);
             },
             pointToLayer: function () {
@@ -208,10 +202,7 @@ RenderInfrastructure = {
 
         }).addTo(RenderInfrastructure.map);
         Util.refreshInfoPopup();
-        //RenderInfrastructure.markerLayer.refreshClusters();
-        if (!preProcessed) {
-            Querier.preProcessQuery(preProcess);
-        }
+        //RenderInfrastructure.markerLayer.refreshClusters(); 
         return layers;
     },
     /**
@@ -222,8 +213,8 @@ RenderInfrastructure = {
      * @param {Array} latLng latlng array where the icon will be put
      * @param {string} popUpContent the content that will display for this element when clicked, accepts HTML formatting
      */
-    addIconToMap: function (iconName, latLng, popUpContent) {
-        let icon = RenderInfrastructure.getAttribute(iconName, ATTRIBUTE.icon)
+    addIconToMap: function (iconName, latLng, popUpContent, indexData, specifiedId) {
+        let icon = RenderInfrastructure.getAttribute(iconName, ATTRIBUTE.icon, indexData)
         if (!icon || icon === "noicon") {
             return false;
         }
@@ -232,8 +223,9 @@ RenderInfrastructure = {
             opacity: 1
         });
         marker.uniqueId = iconName;
+        marker.specifiedId = specifiedId;
         RenderInfrastructure.markerLayer.addLayer(marker.on('click', function (e) {
-            if(e.target.__parent._group._spiderfied){
+            if (e.target.__parent._group._spiderfied) {
                 return;
             }
             if (RenderInfrastructure.map.getZoom() < 16) {
@@ -290,6 +282,11 @@ RenderInfrastructure = {
      * @returns {boolean} true if ids were removed
      */
     removeSpecifiedLayersFromMap: function (specifiedIds) {
+        this.markerLayer.eachLayer(function (layer) {
+            if (layer.specifiedId && specifiedIds.includes(layer.specifiedId)) {
+                RenderInfrastructure.markerLayer.removeLayer(layer);
+            }
+        });
         this.map.eachLayer(function (layer) {
             if (layer.feature && specifiedIds.includes(layer.specifiedId)) {
                 RenderInfrastructure.currentLayers.splice(RenderInfrastructure.currentLayers.indexOf(layer.feature.id), 1);
@@ -314,10 +311,10 @@ RenderInfrastructure = {
             }
         });
         this.currentQueries.forEach(cq => {
-            try{
+            try {
                 cq.query.cancel();
             }
-            catch{
+            catch {
                 cq.query.abort();
             }
         });
@@ -394,17 +391,18 @@ RenderInfrastructure = {
      * @param {number} attribute options defined in the ATTRIBUTE enum
      * @returns {string} either a address to an icon or a hex color string
      */
-    getAttribute: function (tag, attribute) {
-        if (this.data) {
-            if (this.data[tag]) {
+    getAttribute: function (tag, attribute, indexData) {
+        const datasource = indexData ? indexData : RenderInfrastructure.data;
+        if (datasource) {
+            if (datasource[tag]) {
                 if (attribute == ATTRIBUTE.color) {
-                    if (this.data[tag]["color"]) {
-                        return this.data[tag]["color"];
+                    if (datasource[tag]["color"]) {
+                        return datasource[tag]["color"];
                     }
                 }
                 else {
-                    if (this.data[tag]["iconAddr"]) {
-                        return Util.makeIcon(this.data[tag]["iconAddr"]);
+                    if (datasource[tag]["iconAddr"]) {
+                        return Util.makeIcon(datasource[tag]["iconAddr"]);
                     }
                 }
             }
@@ -446,8 +444,8 @@ Querier = {
                 RenderInfrastructure.currentBounds = [Util.expandBounds(Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds()))];
             }
             let relevantBounds = Querier.createBoundsList(bounds);
-            if(relevantBounds)
-                RenderInfrastructure.currentBounds = RenderInfrastructure.currentBounds.concat(relevantBounds /*This is a weird use of this function but it works*/); 
+            if (relevantBounds)
+                RenderInfrastructure.currentBounds = RenderInfrastructure.currentBounds.concat(relevantBounds /*This is a weird use of this function but it works*/);
             callbackFn(dataAsJson);
         });
         RenderInfrastructure.currentQueries.push({ query: query, bounds: bounds });
@@ -464,10 +462,10 @@ Querier = {
             let bound = Util.Convert.leafletBoundsToNESWObject(RenderInfrastructure.map.getBounds());
             bound = Util.expandBounds(bound);
             if (Util.boundsAreOutsideOfBounds(RenderInfrastructure.currentQueries[i].bounds, bound)) {
-                try{
+                try {
                     RenderInfrastructure.currentQueries[i].query.cancel();
                 }
-                catch{
+                catch {
                     RenderInfrastructure.currentQueries[i].query.abort();
                 }
                 RenderInfrastructure.currentQueries.splice(i, 1);
@@ -614,7 +612,7 @@ Querier = {
         stream.on('end', function (end) {
             for (let i = 0; i < RenderInfrastructure.currentQueries.length; i++) {
                 if (RenderInfrastructure.currentQueries[i].query === stream) {
-                    if(!RenderInfrastructure.currentBounds.includes(RenderInfrastructure.currentQueries[i].bounds)){
+                    if (!RenderInfrastructure.currentBounds.includes(RenderInfrastructure.currentQueries[i].bounds)) {
                         RenderInfrastructure.currentBounds.push(RenderInfrastructure.currentQueries[i].bounds);
                     }
                     RenderInfrastructure.currentQueries.splice(i, 1);
@@ -964,6 +962,9 @@ Util = {
         let params = pTObj.params;
         let tagsObj = pTObj.tagsObj;
         const datasource = indexData ? indexData : RenderInfrastructure.data;
+        if (indexData) {
+            return Object.keys(indexData)[0];
+        }
         for (let j = 0; j < RenderInfrastructure.options.commonTagNames.length; j++) {
             for (let i = 0; i < params.length; i++) {
                 if (RenderInfrastructure.options.commonTagNames[j] === params[i]) {
@@ -1252,12 +1253,12 @@ Util = {
      * @returns {Object} geoJSON, object or full group
      */
     fixGeoJSONID: function (geoJSON) {
-        if(geoJSON.features){
+        if (geoJSON.features) {
             geoJSON.features.forEach(feature => {
                 this.fixFeatureID(feature);
             });
         }
-        else{
+        else {
             this.fixFeatureID(geoJSON);
         }
     },
@@ -1268,10 +1269,19 @@ Util = {
      * @param {Object} feature geojson feature
      */
     fixFeatureID: function (feature) {
-        if(this.getFeatureType(feature) === FEATURETYPE.lineString && JSON.stringify(feature.geometry.coordinates[0]) === JSON.stringify(feature.geometry.coordinates[feature.geometry.coordinates.length - 1])){
+        if (this.getFeatureType(feature) === FEATURETYPE.lineString && JSON.stringify(feature.geometry.coordinates[0]) === JSON.stringify(feature.geometry.coordinates[feature.geometry.coordinates.length - 1])) {
             feature.geometry.type = "Polygon";
             feature.geometry.coordinates = [feature.geometry.coordinates];
         }
+    },
+    /**                                                                            
+     * Normalizes id's to the format feature.id
+     * @memberof Util
+     * @method normalizeFeatureID
+     * @param {Object} feature geojson feature
+     */
+    normalizeFeatureID: function (feature) {
+        if (!feature.id && feature._id.$oid) feature.id = feature._id.$oid;
     },
     /**                                                                            
      * Makes popup text
