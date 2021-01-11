@@ -62,6 +62,10 @@ class AutoQuery {
                 break;
         }
 
+        this.reQuery();
+    }
+
+    reQuery(){
         if (this.enabled){
             this.clearMapLayers();
             this.killStreams();
@@ -74,12 +78,12 @@ class AutoQuery {
     }
 
     getConstraintType(constraintName) {
-        console.log(constraintName);
         return this.getConstraintMetadata(constraintName).type;
     }
 
     constraintSetActive(constraintName, active) {
         this.constraintState[constraintName] = active;
+        this.reQuery();
     }
 
     query() {
@@ -139,8 +143,9 @@ class AutoQuery {
         // console.log(this.constraintData);
         // console.log(this.constraintState);
         let pipeline = [];
-        let key = 0;
+        let key = -1;
         for (const constraintName in this.constraintState) {
+            key++;
             if (this.constraintState[constraintName]) {
                 const constraintData = this.constraintData[Object.keys(this.constraintData)[key]];
 
@@ -151,7 +156,6 @@ class AutoQuery {
                 const pipelineStep = { "$match": this.buildConstraint(constraintName, constraintData) };
                 pipeline.push(pipelineStep);
             }
-            key++;
         }
         console.log(JSON.stringify(pipeline));
         return pipeline;
@@ -163,8 +167,6 @@ class AutoQuery {
                 if (!constraintData[key])
                     return true;
             }
-            console.log("invalid?");
-            console.log(JSON.parse(JSON.stringify(constraintData)));
             return false;
         }
         else{
@@ -182,7 +184,7 @@ class AutoQuery {
                 };
                 break;
             case "selector":
-
+                console.log("SELECTOR");
                 break;
             case "multiselector":
                 let $in = [];

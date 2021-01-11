@@ -326,7 +326,7 @@ const MenuGenerator = {
         const sliderLabel = document.createElement("div");
 
         slider.style.margin = '5px';
-        slider.id = layerName + "_" + constraint;
+        slider.id = constraint;
         noUiSlider.create(slider, {
             start: constraintObj['default'] ? constraintObj['default'] : [constraintObj['range'][0]], //default is minimum
 
@@ -366,7 +366,7 @@ const MenuGenerator = {
         //console.log(constraint);
         const checkboxContainer = document.createElement("div");
         checkboxContainer.className = "checkboxContainer";
-        checkboxContainer.id = layerName + "_" + constraint;
+        checkboxContainer.id = constraint;
 
         //add label
         const checkboxLabel = document.createElement("div");
@@ -401,7 +401,7 @@ const MenuGenerator = {
                 if (onConstraintChange) {
                     if (checkboxSelector.checked)
                         onConstraintChange(layerName, constraint, optionName, true);
-
+                    
                     checkboxSelectorContainer.onchange = function () {
                         if (checkboxSelector.checked) {
                             onConstraintChange(layerName, constraint, optionName, true);
