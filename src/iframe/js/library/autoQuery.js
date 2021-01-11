@@ -65,8 +65,8 @@ class AutoQuery {
         this.reQuery();
     }
 
-    reQuery(){
-        if (this.enabled){
+    reQuery() {
+        if (this.enabled) {
             this.clearMapLayers();
             this.killStreams();
             this.query();
@@ -143,11 +143,9 @@ class AutoQuery {
         // console.log(this.constraintData);
         // console.log(this.constraintState);
         let pipeline = [];
-        let key = -1;
         for (const constraintName in this.constraintState) {
-            key++;
             if (this.constraintState[constraintName]) {
-                const constraintData = this.constraintData[Object.keys(this.constraintData)[key]];
+                const constraintData = this.constraintData[constraintName];
 
                 if (!this.constraintIsRelevant(constraintName, constraintData))
                     continue;
@@ -169,7 +167,7 @@ class AutoQuery {
             }
             return false;
         }
-        else{
+        else {
             return true;
         }
     }
@@ -182,18 +180,19 @@ class AutoQuery {
                     "$gte": constraintData[0],
                     "$lte": constraintData[1]
                 };
+                
                 break;
             case "selector":
                 console.log("SELECTOR");
                 break;
             case "multiselector":
                 let $in = [];
-                for(const opt in constraintData){
-                    if(constraintData[opt]){
+                for (const opt in constraintData) {
+                    if (constraintData[opt]) {
                         $in.push(opt);
                     }
                 }
-                step = {"$in": $in};
+                step = { "$in": $in };
                 break;
         }
         const queryConstraint = {};
