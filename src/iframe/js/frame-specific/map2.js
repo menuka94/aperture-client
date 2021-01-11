@@ -384,7 +384,7 @@ const overwrite = {
     },
     "covid_county": {
         "group": "Tract, County, & State Data",
-        "subGroup": "Health",
+        "subGroup": "County Level",
         "constraints": {
             date_range: {
                 "type": "slider",
@@ -414,70 +414,70 @@ const overwrite = {
         },
         "noAutoQuery": true
     },
-    "Heat_Waves": {
-        "group": "Tract, County, & State Data",
-        "subGroup": "Climate",
-        "constraints": {
-            "temperature": {
-                "type": "slider",
-                "range": [
-                    88,
-                    110
-                ],
-                "default": [
-                    88
-                ],
-                "step": 1
-            },
-            "length": {
-                "type": "slider",
-                "label": "Length (Days)",
-                "range": [
-                    1,
-                    200
-                ],
-                "default": [
-                    1
-                ],
-                "step": 1
-            },
-            "years": {
-                "type": "slider",
-                "label": "Yearly Range",
-                "range": [
-                    2006,
-                    2010
-                ],
-                "default": [
-                    2006,
-                    2010
-                ],
-                "step": 1
-            }
-        },
-        "onConstraintChange": function (layer, constraintName, value) {
-            if (constraintName == 'years')
-                for (let i = 0; i < value.length; i++) {
-                    value[i] = Number(value[i]);
-                }
-            else
-                value = Number(value)
-            Census_Visualizer.updateFutureHeatConstraint(constraintName, value);
-        },
-        "onUpdate": function (layer) {
-            Census_Visualizer.updateFutureHeatNew(osmMap2);
-        },
-        "onAdd": function (layer) {
-            //update is auto-called after add, so no need to do anything
-        },
-        "onRemove": function (layer) {
-            Census_Visualizer.clearHeat();
-        },
-        "noAutoQuery": true
-    },
+    // "Heat_Waves": {
+    //     "group": "Tract, County, & State Data",
+    //     "subGroup": "Climate",
+    //     "constraints": {
+    //         "temperature": {
+    //             "type": "slider",
+    //             "range": [
+    //                 88,
+    //                 110
+    //             ],
+    //             "default": [
+    //                 88
+    //             ],
+    //             "step": 1
+    //         },
+    //         "length": {
+    //             "type": "slider",
+    //             "label": "Length (Days)",
+    //             "range": [
+    //                 1,
+    //                 200
+    //             ],
+    //             "default": [
+    //                 1
+    //             ],
+    //             "step": 1
+    //         },
+    //         "years": {
+    //             "type": "slider",
+    //             "label": "Yearly Range",
+    //             "range": [
+    //                 2006,
+    //                 2010
+    //             ],
+    //             "default": [
+    //                 2006,
+    //                 2010
+    //             ],
+    //             "step": 1
+    //         }
+    //     },
+    //     "onConstraintChange": function (layer, constraintName, value) {
+    //         if (constraintName == 'years')
+    //             for (let i = 0; i < value.length; i++) {
+    //                 value[i] = Number(value[i]);
+    //             }
+    //         else
+    //             value = Number(value)
+    //         Census_Visualizer.updateFutureHeatConstraint(constraintName, value);
+    //     },
+    //     "onUpdate": function (layer) {
+    //         Census_Visualizer.updateFutureHeatNew(osmMap2);
+    //     },
+    //     "onAdd": function (layer) {
+    //         //update is auto-called after add, so no need to do anything
+    //     },
+    //     "onRemove": function (layer) {
+    //         Census_Visualizer.clearHeat();
+    //     },
+    //     "noAutoQuery": true
+    // },
     "social_vulnerability_index": {
         "group": "Tract, County, & State Data",
-        "subGroup": "Social Vulnerability",
+        "subGroup": "Tract Level",
         "constraints": {
             below_poverty: sviCalcAdjustments,
             unemployed: sviCalcAdjustments,

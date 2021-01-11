@@ -57,8 +57,14 @@ const AutoMenu = {
 
                 //These are hardcoded for now
                 let autoMenuLayer = {};
-                autoMenuLayer["group"] = "Infrastructure & Natural Features";
-                autoMenuLayer["subGroup"] = "Auto Generated";
+                if(metadata.level){
+                    autoMenuLayer["group"] = "Tract, County, & State Data";
+                    autoMenuLayer["subGroup"] = metadata.level === "tract" ? "Tract Level" : "County Level";
+                }
+                else{
+                    autoMenuLayer["group"] = "Infrastructure & Natural Features";
+                    autoMenuLayer["subGroup"] = "Auto Generated";
+                }
 
                 //where the constraints are added, lots of cool stuff here
                 autoMenuLayer["constraints"] = this.buildConstraintsFromCatalog(metadata, catalogLayer);
