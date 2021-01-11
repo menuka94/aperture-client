@@ -11,16 +11,17 @@ class AutoQuery {
         this.data = layerData;
         this.collection = layerData.collection;
         this.map = layerData.map();
-        this.sustainQuerier = sustain_querier() //init querier
+        this.sustainQuerier = sustain_querier(); //init querier
 
         this.constraintData = {};
         this.constraintState = {};
-        this.layerCache = {}
+        this.layerCache = {};
 
         this.streams = [];
         this.mapLayers = [];
         this.layerIDs = [];
 
+        this.constraintChangedFlag = false;
         this.enabled = false;
     }
 
@@ -41,8 +42,8 @@ class AutoQuery {
     updateConstraint(layer, constraint, value, isActive) {
         if (!constraint)
             return;
-        const constraintMetadata = this.data.constraints[constraint];
-        switch (constraintMetadata.type) {
+
+        switch (this.getConstraintType(constraint)) {
             case "slider":
                 if (Array.isArray(value))
                     for (let i = 0; i < value.length; i++) //change string to number
@@ -60,10 +61,25 @@ class AutoQuery {
                 this.constraintData[constraint][value] = isActive;
                 break;
         }
+
+        if (this.enabled){
+            this.clearMapLayers();
+            this.killStreams();
+            this.query();
+        }
     }
 
-    constraintSetActive(constraint, active) {
-        this.constraintState[constraint] = active;
+    getConstraintMetadata(constraintName) {
+        return this.data.constraints[constraintName];
+    }
+
+    getConstraintType(constraintName) {
+        console.log(constraintName);
+        return this.getConstraintMetadata(constraintName).type;
+    }
+
+    constraintSetActive(constraintName, active) {
+        this.constraintState[constraintName] = active;
     }
 
     query() {
@@ -74,11 +90,10 @@ class AutoQuery {
         [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
         [b._southWest.lng, b._southWest.lat]];
 
-        const q = [
-            { "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }
-        ];
+        let q = [];
+        q.push({ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }); //only get geometry in viewport
+        q = q.concat(this.buildConstraintPipeline());
 
-        console.log(JSON.stringify(q));
         const stream = this.sustainQuerier.getStreamForQuery("lattice-46", 27017, this.collection, JSON.stringify(q));
         this.streams.push(stream);
 
@@ -87,8 +102,7 @@ class AutoQuery {
             const data = JSON.parse(r.getData());
             Util.normalizeFeatureID(data);
 
-            if(!this.layerIDs.includes(data.id)){
-                console.log(this.layerIDs);
+            if (!this.layerIDs.includes(data.id)) {
                 this.renderGeoJSON(data);
             }
         }.bind(this));
@@ -98,27 +112,90 @@ class AutoQuery {
     }
 
     clearMapLayers() {
-        console.log(this.mapLayers);
         RenderInfrastructure.removeSpecifiedLayersFromMap(this.mapLayers);
         this.mapLayers = [];
+        this.layerIDs = [];
     }
 
-    killStreams(){
-        for(const stream of this.streams)
+    killStreams() {
+        for (const stream of this.streams)
             stream.cancel();
         this.streams = [];
     }
 
     renderGeoJSON(data) {
-        if(!this.enabled)
+        if (!this.enabled)
             return;
-        console.log("rembveder");
         let indexData = {};
         indexData[this.collection] = {
             "color": "FFFF00",
             "iconAddr": "../../../images/water_works.png"
         }
         this.mapLayers = this.mapLayers.concat(RenderInfrastructure.renderGeoJson(data, indexData));
-        this.layerIDs.push(data.id); 
+        this.layerIDs.push(data.id);
+    }
+
+    buildConstraintPipeline() {
+        // console.log(this.constraintData);
+        // console.log(this.constraintState);
+        let pipeline = [];
+        let key = 0;
+        for (const constraintName in this.constraintState) {
+            if (this.constraintState[constraintName]) {
+                const constraintData = this.constraintData[Object.keys(this.constraintData)[key]];
+
+                if (!this.constraintIsRelevant(constraintName, constraintData))
+                    continue;
+
+
+                const pipelineStep = { "$match": this.buildConstraint(constraintName, constraintData) };
+                pipeline.push(pipelineStep);
+            }
+            key++;
+        }
+        console.log(JSON.stringify(pipeline));
+        return pipeline;
+    }
+
+    constraintIsRelevant(constraintName, constraintData) {
+        if (this.getConstraintType(constraintName) === "multiselector") {
+            for (const key in constraintData) {
+                if (!constraintData[key])
+                    return true;
+            }
+            console.log("invalid?");
+            console.log(JSON.parse(JSON.stringify(constraintData)));
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+
+    buildConstraint(constraintName, constraintData) {
+        let step;
+        switch (this.getConstraintType(constraintName)) {
+            case "slider":
+                step = {
+                    "$gte": constraintData[0],
+                    "$lte": constraintData[1]
+                };
+                break;
+            case "selector":
+
+                break;
+            case "multiselector":
+                let $in = [];
+                for(const opt in constraintData){
+                    if(constraintData[opt]){
+                        $in.push(opt);
+                    }
+                }
+                step = {"$in": $in};
+                break;
+        }
+        const queryConstraint = {};
+        queryConstraint[constraintName] = step;
+        return queryConstraint;
     }
 }

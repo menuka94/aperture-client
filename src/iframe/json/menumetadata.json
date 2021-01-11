@@ -109,12 +109,10 @@
     "label": "Highest Grade Level",
     "name" : "properties.END_GRADE",
     "type" : "multiselect",
-    "values" : [ "KG", "AE", "13", "UG", "N", "08", "03", "06", "02", "09", "PK", "04", "11", "07", "12", "10", "05", "01", "M" ],
     "hideByDefault": true
   }, {
     "name" : "properties.LEVEL_",
     "type" : "multiselect",
-    "values" : [ "MIDDLE", "SECONDARY", "PREKINDERGARTEN", "ADULT EDUCATION", "HIGH", "UNGRADED", "NOT APPLICABLE", "NOT REPORTED", "OTHER", "ELEMENTARY" ],
     "label": "Level"
   } ]
 }, {
@@ -123,9 +121,8 @@
   "fieldMetadata" : [ {
     "name" : "properties.FLD_ZONE",
     "label": "Flood Zone Code",
-    "type" : "multiselect",
-    "values" : [ "OPEN WATER", "V", "AH", "AO", "NP", "VE", "A99", "A", "AE", "AREA NOT INCLUDED", "D" ]
-  } ]
+    "type" : "multiselect"
+      } ]
 }, {
   "collection" : "tract_total_population",
   "fieldMetadata" : [ {
@@ -167,9 +164,8 @@
   }, {
     "name" : "properties.HELIPAD",
     "label": "Has Helipad",
-    "type" : "select",
-    "values" : [ "Y", "N" ]
-  } ]
+    "type" : "select"
+      } ]
 }, {
   "collection" : "electrical_substations_geo",
   "label": "Electrical Substations"
@@ -179,9 +175,8 @@
   "fieldMetadata" : [ {
     "name" : "properties.ENERGY_SRC",
     "type" : "multiselect",
-    "label": "Energy Source",
-    "values" : [ "Tires", "Black Liquor", "Disillate Fuel Oil (all Diesel, and No. 1, No. 2, and No. 4 Fuel Oils)", "Landfill Gas", "Residual Fuel Oil (Include No. 5, and No. 6 Fuel Oil, and Bunker C Fuel Oil)", "Blast-Furnace Gas", "Other Biomass Solids (Animal Manure and Waste, Solid Byproducts, and Other Solid Biomass not specified)", "Other Biomass Liquids (Fish Oil, Liquid Acetonitrite Waste, Medical Waste, Tall Oil, ethanol, Waste Alcohol, and other Biomass Liquids not specified)", "Other Gas (Coke-Oven, Coal Processes, Butane, Refinery, Other Process)", "Waste/Other Coal (Culm, Gob, Coke, and Breeze)", "Oil-Other, and Waste Oil (Butane (liquid), Crude Oil, Liquid Byproducts, Propane (liquid), Oil Waste, Re-Refined Motor Oil, Sludge Oil, Tar Oil)", "Waste Heat", "Municipal Solid Waste", "Kerosene", "Wood/Wood Waste Solids (Paper Pellets, Railroad Ties, Utility Poles, Wood Chips, and Other Wood Solids)", "Solar (Photovoltaic, Thermal)", "Geothermal", "Petroleum Coke", "Subbituminous Coal", "Water, Conventional or Pumped Storage", "Nuclear (Uranium, Plutonium, Thorium)", "Wood Waste Liquids (Red Liquor, Sludge Wood, Spent Sulfite Liquor, and other Wood Related Liquids not specified)", "Other Biomass Gases (Digester Gas, Methane, and other Biomass Gases)", "Jet Fuel", "Lignite", "Agriculture Crop Byproducts/Straw/Energy Crops", "", "Other (Batteries, Chemicals. Hydrogen, Pitch, Sulfur, Miscellaneous technologies)", "Bituminous Coal", "Purchased Steam", "Wind", "Natural Gas" ]
-  } ]
+    "label": "Energy Source"
+      } ]
 }, {
   "collection" : "natural_gas_pipelines_geo",
   "label": "Natural Gas Pipelines"

@@ -84,20 +84,28 @@ const AutoMenu = {
         let result = {};
         catalogLayer.fieldMetadata.forEach(constraint => {
             const fieldIndex = this.arrayIndexOf(constraint.name, metadata.fieldMetadata);
+            const constraintName = constraint.name;
             if (fieldIndex !== -1) {
                 const hideByDefaultMask = { 
                     hideByDefault: false
                 }
+                // console.log("----------------")
+                // console.log(constraintName);
+                // console.log(JSON.parse(JSON.stringify(constraint)))
+                // console.log(">>>>>>>>>>>>>")
                 constraint = { //bind defined values
                     ...constraint,
                     ...hideByDefaultMask,
                     ...metadata.fieldMetadata[fieldIndex]
                 }
+                // console.log(JSON.parse(JSON.stringify(constraint)))
+                // console.log("----------------")
             }
             constraint = this.convertFromDefault(constraint);
             constraint = this.buildStandardConstraint(constraint);
             if(constraint){
-                result[constraint.label] = constraint;
+                //console.log(constraint);
+                result[constraintName] = constraint;
             }
         });
 
@@ -184,7 +192,6 @@ const AutoMenu = {
     buildStandardConstraint: function (constraint) {
         let result = {};
 
-        result.label = constraint.name;
         if (constraint.label)
             result.label = constraint.label;
 

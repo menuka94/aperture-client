@@ -207,7 +207,7 @@ const MenuGenerator = {
                         const layerConstraints = document.createElement("div");
                         layerConstraints.className = "layerConstraints";
 
-
+                        //console.log(layerObj["constraints"]);
                         for (constraint in layerObj["constraints"]) {
                             const constraintName = constraint;
                             const constraintObj = layerObj["constraints"][constraintName];
@@ -363,6 +363,7 @@ const MenuGenerator = {
     },
 
     createCheckboxContainer: function (constraint, constraintObj, layerObj, layerName, type) {
+        //console.log(constraint);
         const checkboxContainer = document.createElement("div");
         checkboxContainer.className = "checkboxContainer";
         checkboxContainer.id = layerName + "_" + constraint;
