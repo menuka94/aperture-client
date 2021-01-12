@@ -140,8 +140,6 @@ class AutoQuery {
     }
 
     buildConstraintPipeline() {
-        // console.log(this.constraintData);
-        // console.log(this.constraintState);
         let pipeline = [];
         for (const constraintName in this.constraintState) {
             if (this.constraintState[constraintName]) {
@@ -149,7 +147,6 @@ class AutoQuery {
 
                 if (!this.constraintIsRelevant(constraintName, constraintData))
                     continue;
-
 
                 const pipelineStep = { "$match": this.buildConstraint(constraintName, constraintData) };
                 pipeline.push(pipelineStep);
