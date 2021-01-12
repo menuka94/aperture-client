@@ -10,7 +10,6 @@ class BackgroundLoader {
 
         this.map.on('moveend', function (e) {
             const bounds = map.getBounds();
-            console.log(bounds);
             this.getData();
         }.bind(this));
     }
@@ -41,11 +40,11 @@ class BackgroundLoader {
     }
 
     convertCacheToGISJOINS(){
-        console.log(this.cache);
         let ret = [];
         for(const obj of this.cache){
             ret.push(obj.GISJOIN);
         }
+        return ret;
     }
 
     getData(){

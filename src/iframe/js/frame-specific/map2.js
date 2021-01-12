@@ -24,6 +24,7 @@ osmMap2 = L.map('map2', {
     timeDimension: false,
     //minZoom: 11
 });
+window.map = osmMap2;
 
 osmMap2.setView(osmMap2.wrapLatLng(parent.view), 11);
 var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -44,16 +45,14 @@ var markers = L.markerClusterGroup({
 });
 osmMap2.addLayer(markers);
 
-const backgroundCensus = new BackgroundLoader("tract_geo_GISJOIN", osmMap2, 300);
-
-function callback1(yeet){
-    console.log(yeet);
-}
-
-backgroundCensus.addNewResultListener(callback1);
-
 //map 3 merge stuff
 const censusViz = census_visualizer();
+
+const backgroundTract = new BackgroundLoader("tract_geo_GISJOIN", window.map, 400);
+const backgroundCounty = new BackgroundLoader("county_geo_GISJOIN", window.map, 12);
+
+window.backgroundTract = backgroundTract;
+window.backgroundCounty = backgroundCounty
 
 const sviCalcAdjustments = {
     "type": "slider",
@@ -525,11 +524,8 @@ const overwrite = {
     },
 }
 
-
-
 RenderInfrastructure.config(osmMap2, markers, overwrite, {
     queryAlertText: document.getElementById('queryInfoText'),
-    overpassInterpreter: 'http://lattice-136.cs.colostate.edu:4096/api/interpreter',
     maxElements: 10000,
     maxLayers: 20,
     simplifyThreshold: 0.00005

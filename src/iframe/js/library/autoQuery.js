@@ -6,6 +6,8 @@
  * @notes Work in progress!
  */
 
+
+
 class AutoQuery {
     constructor(layerData) {
         this.data = layerData;
@@ -23,6 +25,15 @@ class AutoQuery {
 
         this.constraintChangedFlag = false;
         this.enabled = false;
+
+        if (this.data.linkedGeometry) { //linked geometry stuff
+            this.linked = this.data.linkedGeometry;
+            this.backgroundLoader = this.linked === "tract_geo_GISJOIN" ? window.backgroundTract : window.backgroundCounty;
+            this.backgroundLoader.addNewResultListener(function (updates) {
+                if(this.enabled)
+                    this.listenForLinkedGeometryUpdates(updates);
+            }.bind(this));
+        }
     }
 
     onAdd() {
@@ -65,6 +76,10 @@ class AutoQuery {
         this.reQuery();
     }
 
+    listenForLinkedGeometryUpdates(updates) {
+        this.query(updates);
+    }
+
     reQuery() {
         if (this.enabled) {
             this.clearMapLayers();
@@ -86,18 +101,25 @@ class AutoQuery {
         this.reQuery();
     }
 
-    query() {
+    query(forcedGeometry) {
         console.log("q");
-        const b = this.map.wrapLatLngBounds(this.map.getBounds());
-
-        const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
-        [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
-        [b._southWest.lng, b._southWest.lat]];
 
         let q = [];
-        q.push({ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }); //only get geometry in viewport
+        if (!this.linked) {
+            const b = this.map.wrapLatLngBounds(this.map.getBounds());
+            const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
+            [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
+            [b._southWest.lng, b._southWest.lat]];
+            q.push({ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }); //only get geometry in viewport
+        }
+        else {
+            const GISJOINS = forcedGeometry ? forcedGeometry : this.backgroundLoader.getGISJOINS();
+            q.push({ "$match": { "GISJOIN": { "$in": GISJOINS } } });
+        }
+
         q = q.concat(this.buildConstraintPipeline());
 
+        console.log(q);
         const stream = this.sustainQuerier.getStreamForQuery("lattice-46", 27017, this.collection, JSON.stringify(q));
         this.streams.push(stream);
 
@@ -107,7 +129,7 @@ class AutoQuery {
             Util.normalizeFeatureID(data);
 
             if (!this.layerIDs.includes(data.id)) {
-                this.renderGeoJSON(data);
+                this.renderData(data);
             }
         }.bind(this));
         stream.on('end', function (r) {
@@ -127,6 +149,22 @@ class AutoQuery {
         this.streams = [];
     }
 
+    renderData(data) {
+        if (this.linked) {
+            const GeoJSON = this.backgroundLoader.getGeometryFromGISJOIN(data.GISJOIN);
+            if (!GeoJSON)
+                return;
+
+            GeoJSON.properties = {
+                ...GeoJSON.properties,
+                ...data
+            }
+            data = GeoJSON;
+        }
+
+        this.renderGeoJSON(data);
+    }
+
     renderGeoJSON(data) {
         if (!this.enabled)
             return;
@@ -135,14 +173,14 @@ class AutoQuery {
             "color": "FFFF00"
         }
 
-        if(this.getIcon())
+        if (this.getIcon())
             indexData[this.collection]["iconAddr"] = "../../../images/water_works.png";
-        
+
         this.mapLayers = this.mapLayers.concat(RenderInfrastructure.renderGeoJson(data, indexData));
         this.layerIDs.push(data.id);
     }
 
-    getIcon(){
+    getIcon() {
         return this.data.icon;
     }
 
@@ -184,7 +222,7 @@ class AutoQuery {
                     "$gte": constraintData[0],
                     "$lte": constraintData[1]
                 };
-                
+
                 break;
             case "selector":
                 console.log("SELECTOR");
