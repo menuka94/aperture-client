@@ -44,6 +44,14 @@ var markers = L.markerClusterGroup({
 });
 osmMap2.addLayer(markers);
 
+const backgroundCensus = new BackgroundLoader("tract_geo_GISJOIN", osmMap2, 300);
+
+function callback1(yeet){
+    console.log(yeet);
+}
+
+backgroundCensus.addNewResultListener(callback1);
+
 //map 3 merge stuff
 const censusViz = census_visualizer();
 
@@ -529,7 +537,7 @@ RenderInfrastructure.config(osmMap2, markers, overwrite, {
 
 $.getJSON("json/menumetadata.json", async function (mdata) { //this isnt on the mongo server yet so query it locally
     const finalData = await AutoMenu.build(mdata, overwrite);
-    //console.log(finalData);
+
     MenuGenerator.generate(finalData, document.getElementById("checkboxLocation"));
     runQuery();
 });

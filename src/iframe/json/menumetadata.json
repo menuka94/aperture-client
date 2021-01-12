@@ -53,6 +53,7 @@
   "label": "Power Transmission Lines"
 }, {
   "collection" : "svi_county_GISJOIN",
+  "level":"county",
   "fieldMetadata" : [ 
     {
     "label":"Social Vulnerability Index",
@@ -63,6 +64,7 @@
   } ]
 }, {
   "collection" : "tract_race",
+  "level":"tract",
   "label": "Tract Race Distribution"
 }, {
   "collection" : "svi_tract_GISJOIN",
@@ -96,6 +98,7 @@
   } ]
 }, {
   "collection" : "public_schools",
+  "icon": true,
   "fieldMetadata" : [ {
     "label": "Total Students",
     "name" : "properties.ENROLLMENT",
@@ -128,6 +131,7 @@
       } ]
 }, {
   "collection" : "tract_total_population",
+  "level":"tract",
   "fieldMetadata" : [ {
     "name" : "2010_total_population",
     "type" : "range",
@@ -136,6 +140,7 @@
   } ]
 }, {
   "collection" : "fire_stations_geo",
+  "icon": true,
   "label": "Fire Stations"
 }, {
   "collection" : "dams_geo",
@@ -159,6 +164,7 @@
   } ]
 },{
   "collection" : "hospitals_geo",
+  "icon": true,
   "label": "Hospitals",
   "fieldMetadata" : [ {
     "name" : "properties.BEDS",
@@ -172,9 +178,11 @@
       } ]
 }, {
   "collection" : "electrical_substations_geo",
+  "icon": true,
   "label": "Electrical Substations"
 }, {
   "collection" : "power_plants_geo",
+  "icon": true,
   "label": "Power Plants",
   "fieldMetadata" : [ {
     "name" : "properties.ENERGY_SRC",

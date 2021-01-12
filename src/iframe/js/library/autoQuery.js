@@ -132,11 +132,18 @@ class AutoQuery {
             return;
         let indexData = {};
         indexData[this.collection] = {
-            "color": "FFFF00",
-            "iconAddr": "../../../images/water_works.png"
+            "color": "FFFF00"
         }
+
+        if(this.getIcon())
+            indexData[this.collection]["iconAddr"] = "../../../images/water_works.png";
+        
         this.mapLayers = this.mapLayers.concat(RenderInfrastructure.renderGeoJson(data, indexData));
         this.layerIDs.push(data.id);
+    }
+
+    getIcon(){
+        return this.data.icon;
     }
 
     buildConstraintPipeline() {

@@ -22,6 +22,7 @@ const AutoMenu = {
             //stream the metadata catalog in
             const q = [];
             const stream = this._sustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
+            console.log("here");
             let catalog = {};
             stream.on('data', function (r) {
                 const data = JSON.parse(r.getData());
@@ -30,6 +31,7 @@ const AutoMenu = {
 
 
             stream.on('end', function (end) {
+                console.log("end");
                 //build it
                 const autoMenu = this.bindMenuToCatalog(menuMetaData, catalog);
 
@@ -67,6 +69,9 @@ const AutoMenu = {
                     autoMenuLayer["group"] = "Infrastructure & Natural Features";
                     autoMenuLayer["subGroup"] = "Auto Generated";
                 }
+
+                if(metadata.icon)
+                    autoMenuLayer["icon"] = metadata.icon;
 
                 //where the constraints are added, lots of cool stuff here
                 autoMenuLayer["constraints"] = this.buildConstraintsFromCatalog(metadata, catalogLayer);
