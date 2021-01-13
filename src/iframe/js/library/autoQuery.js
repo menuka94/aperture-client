@@ -1,14 +1,18 @@
 /**
- * @namespace AutoQuery
+ * @class AutoQuery
  * @file Query layers in a very general fashion
  * @author Daniel Reynolds
- * @dependencies autoMenu.js menuGenerator.js
+ * @dependencies autoMenu.js menuGenerator.js geometryLoader.js
  * @notes Work in progress!
  */
 
-
-
 class AutoQuery {
+    /**
+      * Constructs the instance of the autoquerier to a specific layer
+      * @memberof AutoQuery
+      * @method constructor
+      * @param {JSON} layerData JSON which was spit out by autoMenu.js
+      */
     constructor(layerData) {
         this.data = layerData;
         this.collection = layerData.collection;
@@ -40,20 +44,38 @@ class AutoQuery {
         this.colorCode = this.buildColorCode(layerData);
     }
 
+    /**
+      * Signals that this layer has been enabled
+      * @memberof AutoQuery
+      * @method onAdd
+      */
     onAdd() {
-        console.log("add");
         this.enabled = true;
     }
 
+    /**
+      * Signals that this layer has been disabled, along with some cleanup work
+      * @memberof AutoQuery
+      * @method onAdd
+      */
     onRemove() {
-        console.log("rm");
         this.clearMapLayers();
         this.killStreams();
         this.layerIDs = [];
         this.enabled = false;
     }
 
-    //updates a constraints data, and adds it if not existent
+    /**
+      * Updates a constraint's data, and adds it if nonexistent.
+      * This is meant to plug into the "onConstraintChange" attribute of
+      * menuGenerator.js
+      * @memberof AutoQuery
+      * @method updateConstraint
+      * @param {string} layer name of layer, not actually used anywhere here
+      * @param {string} constraint name of constraint
+      * @param {?} value value of constraint, type is dependant of type of constraint
+      * @param {boolean} isActive is this constraint selected? this is only relevant for multiselector (checkbox) constraints.
+      */
     updateConstraint(layer, constraint, value, isActive) {
         if (!constraint)
             return;
@@ -80,10 +102,25 @@ class AutoQuery {
         this.reQuery();
     }
 
+    /**
+      * Waits for geometry updates from an external source, then automatically
+      * runs a query with the given geometry.
+      * This is only used for layers with linked geometry (census tracts, counties)
+      * @memberof AutoQuery
+      * @method listenForLinkedGeometryUpdates
+      * @param {Array<GeoJSON>} updates array of GeoJSON fields which each must
+      *  constain a "GISJOIN" property.
+      */
     listenForLinkedGeometryUpdates(updates) {
         this.query(updates);
     }
 
+    /**
+      * Restarts querying. This is used whenever a constraint changes, as any
+      * layers or existing queries are no longer relevant.
+      * @memberof AutoQuery
+      * @method reQuery
+      */
     reQuery() {
         if (this.enabled) {
             this.clearMapLayers();
@@ -92,21 +129,50 @@ class AutoQuery {
         }
     }
 
+    /**
+      * Gets metadata for constraint, useful helper function
+      * @memberof AutoQuery
+      * @method getConstraintMetadata
+      * @param {string} constraintName name of constraint
+      * @returns {object} constraint metadata
+      */
     getConstraintMetadata(constraintName) {
         return this.data.constraints[constraintName];
     }
 
+    /**
+      * Gets type of constraint, useful helper function
+      * @memberof AutoQuery
+      * @method getConstraintType
+      * @param {string} constraintName name of constraint
+      * @return {string} constraint type
+      */
     getConstraintType(constraintName) {
         return this.getConstraintMetadata(constraintName).type;
     }
 
+    /**
+      * Activates or deactivates a constraint, requeries after.
+      * @memberof AutoQuery
+      * @method getConstraintType
+      * @param {string} constraintName name of constraint
+      * @param {boolean} active should the constraint be activated or deactivated
+      */
     constraintSetActive(constraintName, active) {
         this.constraintState[constraintName] = active;
         this.reQuery();
     }
 
+    /**
+      * Runs a query for this layer, and automatically renders what should be
+      * rendered.
+      * @memberof AutoQuery
+      * @method query
+      * @param {Array<GeoJSON>} forcedGeometry OPTIONAL array of geojson features
+      * which can overide any automatic stuff. This parameter is ONLY used when
+      * new features come in with @method listenForLinkedGeometryUpdates
+      */
     query(forcedGeometry) {
-        //console.log("q");
         let q = [];
         if (!this.linked) {
             const b = this.map.wrapLatLngBounds(this.map.getBounds());
@@ -116,7 +182,7 @@ class AutoQuery {
             q.push({ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }); //only get geometry in viewport
         }
         else {
-            if(!forcedGeometry)
+            if (!forcedGeometry)
                 this.backgroundLoader.runQuery();
             const GISJOINS = forcedGeometry ? this.backgroundLoader.convertArrayToGISJOINS(forcedGeometry) : this.backgroundLoader.getCachedGISJOINS();
             q.push({ "$match": { "GISJOIN": { "$in": GISJOINS } } });
@@ -124,38 +190,55 @@ class AutoQuery {
 
         q = q.concat(this.buildConstraintPipeline());
 
-        //console.log(q);
         const stream = this.sustainQuerier.getStreamForQuery("lattice-46", 27017, this.collection, JSON.stringify(q));
-        
+
         this.streams.push(stream);
 
         stream.on('data', function (r) {
-            //console.log("gd");
             const data = JSON.parse(r.getData());
             Util.normalizeFeatureID(data);
 
             if (!this.layerIDs.includes(data.id)) {
-                //console.log("rendor");
                 this.renderData(data, forcedGeometry);
             }
         }.bind(this));
+
         stream.on('end', function (r) {
 
         }.bind(this));
     }
 
+    /**
+      * Clears all of the current layers from this class on the map.
+      * @memberof AutoQuery
+      * @method clearMapLayers
+      */
     clearMapLayers() {
         RenderInfrastructure.removeSpecifiedLayersFromMap(this.mapLayers);
         this.mapLayers = [];
         this.layerIDs = [];
     }
 
+    /**
+      * Kills any streams (queries) which are currently running.
+      * @memberof AutoQuery
+      * @method killStreams
+      */
     killStreams() {
         for (const stream of this.streams)
             stream.cancel();
         this.streams = [];
     }
 
+    /**
+      * Renders data from @method query 
+      * This is where the "linking" part of any linked geometry happens.
+      * @memberof AutoQuery
+      * @method renderData
+      * @param {object} data which either links or is rendered
+      * @param {Array<GeoJSON>} forcedGeometry OPTIONAL parameter, array of GeoJSON featues which
+      * overides any defaults in the linking process.
+      */
     renderData(data, forcedGeometry) {
         if (this.linked) {
             const GeoJSON = this.backgroundLoader.getGeometryFromGISJOIN(data.GISJOIN, forcedGeometry);
@@ -172,6 +255,12 @@ class AutoQuery {
         this.renderGeoJSON(data);
     }
 
+    /**
+      * Renders GeoJSON data
+      * @memberof AutoQuery
+      * @method renderGeoJSON
+      * @param {GeoJSON} data GeoJSON feature to be rendered
+      */
     renderGeoJSON(data) {
         if (!this.enabled)
             return;
@@ -187,10 +276,23 @@ class AutoQuery {
         this.layerIDs.push(data.id);
     }
 
+    /**
+      * Gets icon
+      * @memberof AutoQuery
+      * @method getIcon
+      * @returns Icon data
+      */
     getIcon() {
         return this.data.icon;
     }
 
+    /**
+      * Builds a mongodb aggregation pipeline for the active and
+      * relevant constraints
+      * @memberof AutoQuery
+      * @method buildConstraintPipeline
+      * @returns {Array<object>} mongodb aggregation pipeline
+      */
     buildConstraintPipeline() {
         let pipeline = [];
         for (const constraintName in this.constraintState) {
@@ -208,6 +310,16 @@ class AutoQuery {
         return pipeline;
     }
 
+    /**
+      * Decides if a constraint is relevant. For example, if there is a 
+      * constraint where you can select categorical attributes, and they are all
+      * selected, it is not relevant as it does not have any effect on the results.
+      * @memberof AutoQuery
+      * @method constraintIsRelevant
+      * @param {string} constraintName name of constraint
+      * @param {object} constraintData data about the state of the constraint
+      * @returns {boolean} 
+      */
     constraintIsRelevant(constraintName, constraintData) {
         if (this.getConstraintType(constraintName) === "multiselector") {
             for (const key in constraintData) {
@@ -221,6 +333,14 @@ class AutoQuery {
         }
     }
 
+    /**
+      * Takes the state of the constraint, and turns it into a mongo query
+      * @memberof AutoQuery
+      * @method buildConstraint
+      * @param {string} constraintName name of constraint
+      * @param {object} constraintData data about the state of the constraint
+      * @returns {object} mongo piece of the mongo query pipeline 
+      */
     buildConstraint(constraintName, constraintData) {
         let step;
         switch (this.getConstraintType(constraintName)) {
@@ -249,35 +369,49 @@ class AutoQuery {
         return queryConstraint;
     }
 
-    getColor(properties){
-        switch(this.colorStyle){
+    /**
+      * Gets a color code to use based on the "properties" attribute of a GeoJSON
+      * @memberof AutoQuery
+      * @method getColor
+      * @param {object} properties "properties" attribute of the geojson feature
+      * being rendered.
+      * @returns {string} hex color code
+      */
+    getColor(properties) {
+        switch (this.colorStyle) {
             case "solid":
                 return this.colorCode;
             case "gradient":
                 const value = properties[this.color.variable];
-                const range = this.data.constraints[this.color.variable].range;
+                const range = this.getConstraintMetadata(this.color.variable).range;
                 const normalizedValue = Math.round((value - range[0]) / (range[1] - range[0]) * 100); //normalizes value on range. results in #1 - 100
                 return this.colorCode[normalizedValue];
             case "sequential":
-                const varName = this.color.variable.substr(0,11) === "properties." ? this.color.variable.substring(11, this.color.variable.length) : this.color.variable; //removes a "properties." if it exists
+                const varName = this.color.variable.substr(0, 11) === "properties." ? this.color.variable.substring(11, this.color.variable.length) : this.color.variable; //removes a "properties." if it exists
                 const v = properties[varName];
-                const index = this.data.constraints[this.color.variable].options.indexOf(v);
+                const index = this.getConstraintMetadata(this.color.variable).options.indexOf(v);
                 return this.colorCode[index];
         }
     }
 
-    buildColorCode(layerData){
+    /**
+      * Builds a color code/spectrum for the layer
+      * @memberof AutoQuery
+      * @method buildColorCode
+      * @returns {?} color code or spectrum which is relevant to the layer
+      */
+    buildColorCode() {
         const colorGradient = new Gradient();
-        switch(this.colorStyle){
+        switch (this.colorStyle) {
             case "solid":
-                return layerData.color.colorCode;
+                return this.data.color.colorCode;
             case "gradient":
                 const colors = this.color.gradient ? this.color.gradient : ["#FF0000", "#00FF00"];
                 colorGradient.setGradient(colors[0], colors[1]);
                 colorGradient.setMidpoint(32);
                 return colorGradient.getArray();
             case "sequential":
-                const numOptions = layerData.constraints[layerData.color.variable].options.length;
+                const numOptions = this.data.constraints[this.data.color.variable].options.length;
                 colorGradient.setGradient("#FF0000", "#00FF00");
                 colorGradient.setMidpoint(numOptions);
                 return colorGradient.getArray();
