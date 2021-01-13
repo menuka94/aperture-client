@@ -266,8 +266,10 @@ class AutoQuery {
             return;
         let indexData = {};
         indexData[this.collection] = {
-            "color": this.getColor(data.properties)
+            "color": this.getColor(data.properties),
         }
+
+        indexData[this.collection].popup = this.buildPopup();
 
         if (this.getIcon())
             indexData[this.collection]["iconAddr"] = "../../../images/water_works.png";
@@ -384,7 +386,7 @@ class AutoQuery {
             case "gradient":
                 const value = properties[this.color.variable];
                 const range = this.getConstraintMetadata(this.color.variable).range;
-                const normalizedValue = Math.round((value - range[0]) / (range[1] - range[0]) * 100); //normalizes value on range. results in #1 - 100
+                const normalizedValue = Math.round((value - range[0]) / (range[1] - range[0]) * 32); //normalizes value on range. results in #1 - 32
                 return this.colorCode[normalizedValue];
             case "sequential":
                 const varName = this.color.variable.substr(0, 11) === "properties." ? this.color.variable.substring(11, this.color.variable.length) : this.color.variable; //removes a "properties." if it exists
@@ -418,4 +420,19 @@ class AutoQuery {
         }
     }
 
+    /**
+      * Generates popup text
+      * @memberof AutoQuery
+      * @method buildPopup
+      * @returns {string} popup text
+      */
+    buildPopup(){
+        let returnText = "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
+        for(const constraint in this.constraintState){
+            if(this.constraintState[constraint]){
+                returnText += "<li><b>" + (this.getConstraintMetadata(constraint).label ? this.getConstraintMetadata(constraint).label : constraint) + ":</b> @@" + constraint + "@@</li>";
+            }
+        }
+        return returnText + "</ul>";
+    }
 }

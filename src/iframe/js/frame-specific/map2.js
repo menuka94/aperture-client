@@ -1,22 +1,8 @@
 const MAPNUMBER = 2;
 
-// rsustainQuerier = sustain_querier();
-// const q = [];
-// const stream = rsustainQuerier.getStreamForQuery("lattice-46", 27017, "Metadata", JSON.stringify(q));
-// console.log("start");
-// stream.on('data', function (r) {
-//     const data = JSON.parse(r.getData());
-//     console.log(data);
-// }.bind(this));
-
-
-// stream.on('end', function (end) {
-//     console.log("end");
-// }.bind(this));
-
-let queryAlertText = document.getElementById('queryInfoText');
+const queryAlertText = document.getElementById('queryInfoText');
 //--------------
-osmMap2 = L.map('map2', {
+const map = L.map('map2', {
     renderer: L.canvas(),
     minZoom: 3,
     fullscreenControl: true,
@@ -24,13 +10,13 @@ osmMap2 = L.map('map2', {
     timeDimension: false,
     //minZoom: 11
 });
-window.map = osmMap2;
+window.map = map;
 
-osmMap2.setView(osmMap2.wrapLatLng(parent.view), 11);
+map.setView(map.wrapLatLng(parent.view), 11);
 var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     maxZoom: 18
-}).addTo(osmMap2);
+}).addTo(map);
 
 
 var sidebar = L.control.sidebar('sidebar', {
@@ -43,7 +29,7 @@ var markers = L.markerClusterGroup({
     maxClusterRadius: 55,
     animate: false
 });
-osmMap2.addLayer(markers);
+map.addLayer(markers);
 
 //map 3 merge stuff
 const censusViz = census_visualizer();
@@ -74,321 +60,6 @@ const osmConstants = {
 }
 
 const overwrite = {
-    "water_works": {
-        "iconAddr": "../../../images/water_works.png",
-        "color": "black",
-        "defaultRender": false,
-        "query": "man_made=water_works",
-        "subGroup": "Water (Man Made)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "wastewater_plant": {
-        "iconAddr": "../../../images/sewage.png",
-        "color": "#FF00FF",
-        "defaultRender": false,
-        "query": "man_made=wastewater_plant",
-        "subGroup": "Water (Man Made)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "canal": {
-        "color": "teal",
-        "defaultRender": false,
-        "query": "waterway=canal",
-        "preProcess": true,
-        "subGroup": "Water (Man Made)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "river": {
-        "color": "#00008B",
-        "defaultRender": false,
-        "query": "waterway=river",
-        "preProcess": true,
-        "grpc": "OSMRequest",
-        "subGroup": "Water (Natural)",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "stream": {
-        "color": "#0000BB",
-        "defaultRender": false,
-        "query": "waterway=stream",
-        "preProcess": true,
-        "subGroup": "Water (Natural)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "ditch": {
-        "color": "#0000BB",
-        "defaultRender": false,
-        "query": "waterway=ditch",
-        "preProcess": true,
-        "subGroup": "Water (Man Made)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "lock_gate": {
-        "iconAddr": "../../../images/lock_gate.png",
-        "color": "#FF0000",
-        "defaultRender": false,
-        "query": "waterway=lock_gate",
-        "subGroup": "Water (Man Made)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "weir": {
-        "iconAddr": "../../../images/weir.png",
-        "color": "#FF0000",
-        "defaultRender": false,
-        "query": "waterway=weir",
-        "subGroup": "Water (Man Made)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "tidal_channel": {
-        "color": "#0080FF",
-        "defaultRender": false,
-        "query": "waterway=tidal_channel",
-        "subGroup": "Water (Natural)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "water": {
-        "iconAddr": "../../../images/reservoir-lake.png",
-        "color": "#00FFFF",
-        "defaultRender": false,
-        "query": "natural=water",
-        "subGroup": "Water (Man Made)",
-        "grpc": "OSMRequest",
-        "group": "Infrastructure & Natural Features",
-        ...osmConstants
-    },
-    "reservoir": {
-        "notAQueryableLayer": true,
-        "iconAddr": "../../../images/reservoir-lake.png",
-        "color": "#00FFFF",
-        "subGroup": "Water (Man Made)",
-        "noAutoQuery": true
-    },
-    "basin": {
-        "notAQueryableLayer": true,
-        "iconAddr": "../../../images/reservoir-lake.png",
-        "color": "#00FFFF",
-        "subGroup": "Water (Natural)",
-        "noAutoQuery": true
-    },
-    "pond": {
-        "notAQueryableLayer": true,
-        "color": "#00FFFF",
-        "iconAddr": "../../../images/reservoir-lake.png",
-        "subGroup": "Water (Natural)",
-        "noAutoQuery": true
-    },
-    "lake": {
-        "notAQueryableLayer": true,
-        "color": "#00FFFF",
-        "iconAddr": "../../../images/reservoir-lake.png",
-        "subGroup": "Water (Natural)",
-        "noAutoQuery": true
-    },
-    // "Natural_Gas_Pipeline": {
-    //     "color": "#8A2BE2",
-    //     "defaultRender": false,
-    //     "query": "custom=Natural_Gas_Pipeline",
-    //     "grpc": "DatasetRequest",
-    //     "grpcDataset": 4,
-    //     "identityField": "TYPEPIPE",
-    //     "subGroup": "Energy",
-    //     "popup": "A(n) @@TYPEPIPE@@ natural gas pipeline operated by @@Operator@@.",
-    //     "group": "Basic Layers"
-    // },
-    // "substation": {
-    //     "iconAddr": "../../../images/substation.png",
-    //     "defaultRender": false,
-    //     "query": "custom=substation",
-    //     "grpc": "DatasetRequest",
-    //     "grpcDataset": 2,
-    //     "identityField": "TYPE",
-    //     "identityKey": "SUBSTATION",
-    //     "subGroup": "Energy",
-    //     "popup": "@@NAME@@ substation. An @@STATUS@@ substation in @@COUNTY@@ county with a max voltage of @@MAX_VOLT@@. Sourced from @@SOURCE@@.",
-    //     "group": "Basic Layers"
-    // },
-    // "power_transmission_line": {
-    //     "color": "#000000",
-    //     "defaultRender": false,
-    //     "query": "custom=power_transmission_line",
-    //     "grpc": "DatasetRequest",
-    //     "grpcDataset": 3,
-    //     "identityField": "TYPE",
-    //     "identityKey": "AC",
-    //     "subGroup": "Energy",
-    //     "popup": "A(n) @@TYPE@@ power transmission line owned by @@OWNER@@, spanning from @@SUB_1@@ to @@SUB_2@@. Sourced from @@SOURCE@@.",
-    //     "group": "Basic Layers"
-    // },
-    // "flood_zones": {
-    //     "defaultRender": false,
-    //     "query": "custom=flood_zone",
-    //     "refrences": [
-    //         "flood_zone_A",
-    //         "flood_zone_AE",
-    //         "flood_zone_AH",
-    //         "flood_zone_AO",
-    //         "floodway"
-    //     ],
-    //     "subGroup": "Flood Data",
-    //     "grpc": "DatasetRequest",
-    //     "grpcDataset": 7,
-    //     "group": "Basic Layers"
-    // },
-    // "floodway": {
-    //     "notAQueryableLayer": true,
-    //     "color": "#D60BB1",
-    //     "identityField": "ZONE_SUBTY",
-    //     "identityKey": "FLOODWAY",
-    //     "noBorder": true,
-    //     "popup": "A channel of a river or other watercourse and the adjacent land areas that must be reserved in order to discharge the base flood without cumulatively increasing the water surface elevation more than a designated height."
-    // },
-    // "flood_zone_A": {
-    //     "notAQueryableLayer": true,
-    //     "color": "#880000",
-    //     "identityField": "FLD_ZONE",
-    //     "identityKey": "A",
-    //     "noBorder": true,
-    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
-    // },
-    // "flood_zone_AE": {
-    //     "notAQueryableLayer": true,
-    //     "color": "#880000",
-    //     "identityField": "FLD_ZONE",
-    //     "identityKey": "AE",
-    //     "noBorder": true,
-    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year."
-    // },
-    // "flood_zone_AH": {
-    //     "notAQueryableLayer": true,
-    //     "color": "#008080",
-    //     "identityField": "FLD_ZONE",
-    //     "identityKey": "AH",
-    //     "noBorder": true,
-    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of ponding with average depths between one and three feet."
-    // },
-    // "flood_zone_AO": {
-    //     "notAQueryableLayer": true,
-    //     "color": "#000080",
-    //     "identityField": "FLD_ZONE",
-    //     "identityKey": "AO",
-    //     "noBorder": true,
-    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year. Flooding is usually in the form of sheet flow with average depths between one and three feet."
-    // },
-    // "flood_zone_V": {
-    //     "notAQueryableLayer": true,
-    //     "color": "#000080",
-    //     "identityField": "FLD_ZONE",
-    //     "identityKey": "V",
-    //     "noBorder": true,
-    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
-    // },
-    // "flood_zone_VE": {
-    //     "notAQueryableLayer": true,
-    //     "color": "#000080",
-    //     "identityField": "FLD_ZONE",
-    //     "identityKey": "VE",
-    //     "noBorder": true,
-    //     "popup": "Areas subject to a one percent or greater annual chance of flooding in any given year that also have additional hazards associated with velocity wave action"
-    // },
-    // "dam": {
-    //     "iconAddr": "../../../images/dam.png",
-    //     "color": "#FF0000",
-    //     "defaultRender": false,
-    //     "query": "custom=dam",
-    //     "subGroup": "Water (Man Made)",
-    //     "grpc": "DatasetRequest",
-    //     "grpcDataset": 1,
-    //     "identityField": "DAM_HEIGHT",
-    //     "popup": "@@NAME@@ dam, located along the @@RIVER@@, standing @@DAM_HEIGHT@@ feet high, located in @@COUNTY@@ county, @@STATE@@. This dam primarily affects @@CITYAFFECT@@, @@NIDSTATE@@.",
-    //     "group": "Basic Layers"
-    // },
-    // "power_plant": {
-    //     "iconAddr": "../../../images/power_plant.png",
-    //     "defaultRender": false,
-    //     "query": "custom=power_plant",
-    //     "queryURL": "https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_PowerPlants/MapServer/12/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
-    //     "identityField": "ENERGY_SRC_DESC1",
-    //     "subGroup": "Energy",
-    //     "popup": "@@PLANT_NAME@@ power plant, which produces energy through @@ENERGY_SRC_DESC1@@",
-    //     "group": "Basic Layers"
-    // },
-    // "fire_station": {
-    //     "iconAddr": "../../../images/fire_station.png",
-    //     "defaultRender": false,
-    //     "query": "custom=fire_station",
-    //     "grpc": "DatasetRequest",
-    //     "grpcDataset": 6,
-    //     "identityField": "ISLANDMARK",
-    //     "subGroup": "Emergency & Medical",
-    //     "popup": "@@NAME@@, located in @@CITY@@, @@STATE@@.",
-    //     "group": "Basic Layers"
-    // },
-    // "hospital": {
-    //     "iconAddr": "../../../images/hospital.png",
-    //     "defaultRender": false,
-    //     "query": "custom=hosptial",
-    //     "grpc": "DatasetRequest",
-    //     "grpcDataset": 0,
-    //     "identityField": "BEDS",
-    //     "subGroup": "Emergency & Medical",
-    //     "popup": "@@NAME@@, a @@OWNER@@ hospital with @@BEDS@@ beds, located in @@CITY@@, @@STATE@@.",
-    //     "group": "Basic Layers"
-    // },
-    // "urgent_care": {
-    //     "iconAddr": "../../../images/urgent_care.png",
-    //     "defaultRender": false,
-    //     "query": "custom=urgent_care",
-    //     "queryURL": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Urgent_Care_Facilities/FeatureServer/0/query?where=1%3D1&outFields=*&geometry={{BOUNDS}}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=geojson",
-    //     "identityField": "EMERGEXT",
-    //     "subGroup": "Emergency & Medical",
-    //     "popup": "@@NAME@@, an urgent care facility located in @@CITY@@, @@STATE@@.",
-    //     "group": "Basic Layers"
-    // },
-    // "streamflowData": {
-    //     "notAQueryableLayer": true,
-    //     "color": "#FF00FF"
-    // },
-    "census_tracts": {
-        "group": "Tract, County, & State Data",
-        "subGroup": "Tract Level",
-        "constraints": {
-            "data": {
-                "type": "selector",
-                "options": ["Total Population", "Avg. Household Income"]
-            }
-        },
-        "onConstraintChange": function (layer, constraintName, value) {
-            censusViz.setFeature(value);
-        },
-        "onAdd": function () {
-            censusViz.allowCensusRender = true;
-        },
-        "onUpdate": function () {
-            censusViz.updateViz(osmMap2);
-        },
-        "onRemove": function () {
-            censusViz.allowCensusRender = false;
-            censusViz.clearViz();
-        },
-        "noAutoQuery": true
-    },
     "covid_county": {
         "group": "Tract, County, & State Data",
         "subGroup": "County Level",
@@ -407,7 +78,7 @@ const overwrite = {
             COVID.dateStart = Number(value[0]);
             COVID.dateEnd = Number(value[1]);
             COVID.changeFlag = true;
-            COVID.makeQuery(osmMap2);
+            COVID.makeQuery(map);
         },
         "onAdd": function () {
             COVID.allowRender = true;
@@ -417,177 +88,34 @@ const overwrite = {
             COVID.clear();
         },
         "onUpdate": function () {
-            COVID.makeQuery(osmMap2);
-        },
-        "noAutoQuery": true
-    },
-    // "Heat_Waves": {
-    //     "group": "Tract, County, & State Data",
-    //     "subGroup": "Climate",
-    //     "constraints": {
-    //         "temperature": {
-    //             "type": "slider",
-    //             "range": [
-    //                 88,
-    //                 110
-    //             ],
-    //             "default": [
-    //                 88
-    //             ],
-    //             "step": 1
-    //         },
-    //         "length": {
-    //             "type": "slider",
-    //             "label": "Length (Days)",
-    //             "range": [
-    //                 1,
-    //                 200
-    //             ],
-    //             "default": [
-    //                 1
-    //             ],
-    //             "step": 1
-    //         },
-    //         "years": {
-    //             "type": "slider",
-    //             "label": "Yearly Range",
-    //             "range": [
-    //                 2006,
-    //                 2010
-    //             ],
-    //             "default": [
-    //                 2006,
-    //                 2010
-    //             ],
-    //             "step": 1
-    //         }
-    //     },
-    //     "onConstraintChange": function (layer, constraintName, value) {
-    //         if (constraintName == 'years')
-    //             for (let i = 0; i < value.length; i++) {
-    //                 value[i] = Number(value[i]);
-    //             }
-    //         else
-    //             value = Number(value)
-    //         Census_Visualizer.updateFutureHeatConstraint(constraintName, value);
-    //     },
-    //     "onUpdate": function (layer) {
-    //         Census_Visualizer.updateFutureHeatNew(osmMap2);
-    //     },
-    //     "onAdd": function (layer) {
-    //         //update is auto-called after add, so no need to do anything
-    //     },
-    //     "onRemove": function (layer) {
-    //         Census_Visualizer.clearHeat();
-    //     },
-    //     "noAutoQuery": true
-    // },
-    "social_vulnerability_index": {
-        "group": "Tract, County, & State Data",
-        "subGroup": "Tract Level",
-        "constraints": {
-            below_poverty: sviCalcAdjustments,
-            unemployed: sviCalcAdjustments,
-            income: sviCalcAdjustments,
-            no_high_school_diploma: sviCalcAdjustments,
-            aged_65_or_older: sviCalcAdjustments,
-            aged_17_or_younger: sviCalcAdjustments,
-            age_5_or_older_with_disability: sviCalcAdjustments,
-            single_parent_households: sviCalcAdjustments,
-            minority: sviCalcAdjustments,
-            speaks_english_less_than_well: sviCalcAdjustments,
-            multi_unit_structures: sviCalcAdjustments,
-            mobile_homes: sviCalcAdjustments,
-            crowding: sviCalcAdjustments,
-            no_vehicle: sviCalcAdjustments,
-            group_quarters: sviCalcAdjustments
-        },
-        "onConstraintChange": function (layer, constraintName, value) {
-            SVI.SVIweights[constraintName] = Number(value);
-            SVI.sviWeightFlag = true;
-            //console.log(SVI.SVIweights);
-            SVI.makeQuery(osmMap2);
-        },
-        "onUpdate": function (layer) {
-            SVI.makeQuery(osmMap2);
-        },
-        "onAdd": function (layer) {
-            SVI.allowRender = true;
-            //update is auto-called after add, so no need to do anything
-        },
-        "onRemove": function (layer) {
-            SVI.allowRender = false;
-            SVI.clear();
-            //Census_Visualizer.clearHeat();
+            COVID.makeQuery(map);
         },
         "noAutoQuery": true
     },
 }
 
-RenderInfrastructure.config(osmMap2, markers, overwrite, {
+RenderInfrastructure.config(map, markers, overwrite, {
     queryAlertText: document.getElementById('queryInfoText'),
     maxElements: 10000,
     maxLayers: 20,
-    simplifyThreshold: 0.00005
+    simplifyThreshold: 0.0001
 });
 
+//where the magic happens
 $.getJSON("json/menumetadata.json", async function (mdata) { //this isnt on the mongo server yet so query it locally
     const finalData = await AutoMenu.build(mdata, overwrite);
-
     MenuGenerator.generate(finalData, document.getElementById("checkboxLocation"));
-    runQuery();
 });
 
-
-function updateOverPassLayer() {
-    RenderInfrastructure.update();
-}
-
-function removeOverpassLayer(map, removeLayer) {
-    map.eachLayer(function (layer) {
-        if (layer.options.id === "OverPassLayer" && layer.options.query == removeLayer.options.query) {
-            map.removeLayer(layer);
-        }
-    });
-}
-
-
-function changeChecked(element) {
-    if (element.checked) {
-        if (element.id in census) {
-            censusViz.setFeature(element.id);
-            censusViz.updateViz(osmMap2);
-        } else if (element.id in future_climate) {
-            censusViz.updateFutureHeat(osmMap2, true);
-        } else {
-            RenderInfrastructure.addFeatureToMap(element.id);
-        }
-    }
-    else {
-        if (element.id in census)
-            censusViz.setFeature(element.id);
-        else if (element.id in future_climate)
-            censusViz.clearHeat();
-        else
-            RenderInfrastructure.removeFeatureFromMap(element.id);
-    }
-}
-
-//console.log("r");
 parent.addEventListener('updateMaps', function () {
-    runQuery();
     updateLayers();
 });
 
-function runQuery() {
-    updateOverPassLayer();
-}
-
-osmMap2.on("move", function (e) {
-    parent.setGlobalPosition(osmMap2.getCenter(), MAPNUMBER);
+map.on("move", function (e) {
+    parent.setGlobalPosition(map.getCenter(), MAPNUMBER);
 });
-osmMap2.on("zoomend", function () {
-    parent.setGlobalPositionFORCE(osmMap2.getCenter(), MAPNUMBER);
+map.on("zoomend", function () {
+    parent.setGlobalPositionFORCE(map.getCenter(), MAPNUMBER);
 });
 
 
@@ -595,22 +123,12 @@ osmMap2.on("zoomend", function () {
 
 //-----------
 var thisMapsSetter = function (view, zoom) {
-    osmMap2.setView(osmMap2.wrapLatLng(parent.view), osmMap2.getZoom());
+    map.setView(map.wrapLatLng(parent.view), map.getZoom());
 }
 parent.setterFunctions.push({
     setterFunc: thisMapsSetter,
     mapNum: MAPNUMBER
 });
 setTimeout(function () {
-    osmMap2.setView([osmMap2.wrapLatLng(parent.view).lat, osmMap2.wrapLatLng(parent.view).lng - 0.0002], osmMap2.getZoom());
+    map.setView([map.wrapLatLng(parent.view).lat, map.wrapLatLng(parent.view).lng - 0.0002], map.getZoom());
 }, 1); //this is a terrible fix but it works for now
-
-
-// const q = []
-// console.log(JSON.stringify(q));
-// //const stream1 = sustain_querier().getStreamForQuery("lattice-46", 27017, "covid_county", JSON.stringify(q));
-
-// stream1.on('data', function (r) {
-//     const data = JSON.parse(r.getData());
-//     console.log(data);
-// }.bind(this));

@@ -97,6 +97,7 @@
   "level": "tract",
   "color": {
     "style": "gradient",
+    "gradient": ["#00FF00", "#FF0000"],
     "variable": "median_age_total"
   },
   "fieldMetadata" : [ {
