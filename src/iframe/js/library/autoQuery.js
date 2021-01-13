@@ -30,7 +30,7 @@ class AutoQuery {
             this.linked = this.data.linkedGeometry;
             this.backgroundLoader = this.linked === "tract_geo_GISJOIN" ? window.backgroundTract : window.backgroundCounty;
             this.backgroundLoader.addNewResultListener(function (updates) {
-                if(this.enabled)
+                if (this.enabled)
                     this.listenForLinkedGeometryUpdates(updates);
             }.bind(this));
         }
@@ -102,7 +102,8 @@ class AutoQuery {
     }
 
     query(forcedGeometry) {
-        console.log("q");
+        //console.log("q");
+        
 
         let q = [];
         if (!this.linked) {
@@ -113,23 +114,26 @@ class AutoQuery {
             q.push({ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }); //only get geometry in viewport
         }
         else {
-            const GISJOINS = forcedGeometry ? forcedGeometry : this.backgroundLoader.getGISJOINS();
+            const GISJOINS = forcedGeometry ? this.backgroundLoader.convertArrayToGISJOINS(forcedGeometry) : this.backgroundLoader.getCachedGISJOINS();
             q.push({ "$match": { "GISJOIN": { "$in": GISJOINS } } });
         }
 
         q = q.concat(this.buildConstraintPipeline());
 
-        console.log(q);
+        //console.log(q);
         const stream = this.sustainQuerier.getStreamForQuery("lattice-46", 27017, this.collection, JSON.stringify(q));
-        this.streams.push(stream);
+        
+        //if(!forcedGeometry)
+            this.streams.push(stream);
 
         stream.on('data', function (r) {
-            console.log("gd");
+            //console.log("gd");
             const data = JSON.parse(r.getData());
             Util.normalizeFeatureID(data);
 
             if (!this.layerIDs.includes(data.id)) {
-                this.renderData(data);
+                //console.log("rendor");
+                this.renderData(data, forcedGeometry);
             }
         }.bind(this));
         stream.on('end', function (r) {
@@ -149,9 +153,9 @@ class AutoQuery {
         this.streams = [];
     }
 
-    renderData(data) {
+    renderData(data, forcedGeometry) {
         if (this.linked) {
-            const GeoJSON = this.backgroundLoader.getGeometryFromGISJOIN(data.GISJOIN);
+            const GeoJSON = this.backgroundLoader.getGeometryFromGISJOIN(data.GISJOIN, forcedGeometry);
             if (!GeoJSON)
                 return;
 
@@ -197,7 +201,7 @@ class AutoQuery {
                 pipeline.push(pipelineStep);
             }
         }
-        console.log(JSON.stringify(pipeline));
+
         return pipeline;
     }
 

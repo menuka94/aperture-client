@@ -5,50 +5,53 @@ class BackgroundLoader {
         this.collection = collection;
         this.maxSize = maxSize;
 
-        this.cache = []; 
+        this.cache = [];
+        this.tempCache = [];
         this.listeners = [];
+        this.streams = [];
 
         this.map.on('moveend', function (e) {
-            const bounds = map.getBounds();
+            //this.killAllStreams();
             this.getData();
         }.bind(this));
     }
 
 
     //public functions ------------------------
-    getGISJOINS(){
-        return this.convertCacheToGISJOINS();
+    getCachedGISJOINS() {
+        return this.convertArrayToGISJOINS(this.cache);
     }
 
-    getGeometryFromGISJOIN(GISJOIN){
-        const indx = this.indexInCache(GISJOIN);
-        if(indx === -1)
+    getGeometryFromGISJOIN(GISJOIN, arr) {
+        const indx = arr ? this.indexInArray(GISJOIN, arr) : this.indexInCache(GISJOIN);
+        if (indx === -1)
             return null;
-        return this.cache[indx];
+        return arr ? arr[indx] : this.cache[indx];
     }
 
-    addNewResultListener(func){
+    addNewResultListener(func) {
         this.listeners.push(func);
     }
 
-
-    //private functions -----------------------
-    broadcastNewResults(newResults){
-        for(const callback of this.listeners){
-            callback(newResults);
-        }
-    }
-
-    convertCacheToGISJOINS(){
+    convertArrayToGISJOINS(arr) {
         let ret = [];
-        for(const obj of this.cache){
+        for (const obj of arr) {
             ret.push(obj.GISJOIN);
         }
         return ret;
     }
 
-    getData(){
+
+    //private functions -----------------------
+    broadcastNewResults(newResults) {
+        for (const callback of this.listeners) {
+            callback(newResults);
+        }
+    }
+
+    getData() {
         const stream = this.sustainQuerier.getStreamForQuery("lattice-46", 27017, this.collection, JSON.stringify(this.getBasicSpatialQuery()));
+        this.streams.push(stream);
         let newResults = [];
         stream.on('data', function (r) {
             const data = JSON.parse(r.getData());
@@ -56,32 +59,47 @@ class BackgroundLoader {
 
             //remove an existing refrence
             const indexInCache = this.indexInCache(data.GISJOIN);
-            if(indexInCache !== -1)
-                this.cache.splice(indexInCache);
-            else
-                newResults.push(data.GISJOIN);
+            if (indexInCache !== -1){
+                this.cache.splice(indexInCache, 1);
+            }
+            else{
+                newResults.push(data);
+            }
 
             this.cache.unshift(data); //add it to the front of the arr
 
-            if(this.cache.length > this.maxSize) //if length is too long, pop from end
-                this.cache.pop(); 
+            if (this.cache.length > this.maxSize){ //if length is too long, pop from end
+                this.cache.pop();
+            }
         }.bind(this));
         stream.on('end', function (r) {
             this.broadcastNewResults(newResults);
         }.bind(this));
     }
 
-    indexInCache(GISJOIN){
+    indexInCache(GISJOIN) {
+        return this.indexInArray(GISJOIN, this.cache);
+    }
+
+    killAllStreams(){
+        for(const stream of this.streams){
+            stream.cancel();
+        }
+        this.streams = [];
+    }
+
+    indexInArray(GISJOIN, arr){
         let indx = 0;
-        for(const obj of this.cache){
-            if(obj.GISJOIN === GISJOIN)
+        for (const obj of arr) {
+            if (obj.GISJOIN === GISJOIN){
                 return indx;
+            }
             indx++;
         }
         return -1;
     }
 
-    getMapBoundsArray(){
+    getMapBoundsArray() {
         const b = this.map.wrapLatLngBounds(this.map.getBounds());
         const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
         [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
@@ -90,7 +108,7 @@ class BackgroundLoader {
         return barray;
     }
 
-    getBasicSpatialQuery(){
+    getBasicSpatialQuery() {
         return [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [this.getMapBoundsArray()] } } } } }];
     }
 }
