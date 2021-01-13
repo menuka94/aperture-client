@@ -70,6 +70,24 @@ const AutoMenu = {
 
                 if(metadata.icon)
                     autoMenuLayer["icon"] = metadata.icon;
+                
+                if(metadata.color){
+                    if(typeof metadata.color === "string"){
+                        autoMenuLayer["color"] = {
+                            style: "solid",
+                            colorCode: metadata.color
+                        };
+                    }
+                    else{
+                        autoMenuLayer["color"] = metadata.color;
+                    }
+                }
+                else{
+                    autoMenuLayer["color"] = autoMenuLayer["color"] = {
+                        style: "solid",
+                        colorCode: "#000000"
+                    };
+                }
 
                 //where the constraints are added, lots of cool stuff here
                 autoMenuLayer["constraints"] = this.buildConstraintsFromCatalog(metadata, catalogLayer);

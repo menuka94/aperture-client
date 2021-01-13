@@ -34,6 +34,10 @@ class AutoQuery {
                     this.listenForLinkedGeometryUpdates(updates);
             }.bind(this));
         }
+
+        this.color = layerData.color;
+        this.colorStyle = layerData.color.style;
+        this.colorCode = this.buildColorCode(layerData);
     }
 
     onAdd() {
@@ -123,8 +127,7 @@ class AutoQuery {
         //console.log(q);
         const stream = this.sustainQuerier.getStreamForQuery("lattice-46", 27017, this.collection, JSON.stringify(q));
         
-        //if(!forcedGeometry)
-            this.streams.push(stream);
+        this.streams.push(stream);
 
         stream.on('data', function (r) {
             //console.log("gd");
@@ -174,7 +177,7 @@ class AutoQuery {
             return;
         let indexData = {};
         indexData[this.collection] = {
-            "color": "FFFF00"
+            "color": this.getColor(data.properties)
         }
 
         if (this.getIcon())
@@ -245,4 +248,40 @@ class AutoQuery {
         queryConstraint[constraintName] = step;
         return queryConstraint;
     }
+
+    getColor(properties){
+        switch(this.colorStyle){
+            case "solid":
+                return this.colorCode;
+            case "gradient":
+                const value = properties[this.color.variable];
+                const range = this.data.constraints[this.color.variable].range;
+                const normalizedValue = Math.round((value - range[0]) / (range[1] - range[0]) * 100); //normalizes value on range. results in #1 - 100
+                return this.colorCode[normalizedValue];
+            case "sequential":
+                const varName = this.color.variable.substr(0,11) === "properties." ? this.color.variable.substring(11, this.color.variable.length) : this.color.variable; //removes a "properties." if it exists
+                const v = properties[varName];
+                const index = this.data.constraints[this.color.variable].options.indexOf(v);
+                return this.colorCode[index];
+        }
+    }
+
+    buildColorCode(layerData){
+        const colorGradient = new Gradient();
+        switch(this.colorStyle){
+            case "solid":
+                return layerData.color.colorCode;
+            case "gradient":
+                const colors = this.color.gradient ? this.color.gradient : ["#FF0000", "#00FF00"];
+                colorGradient.setGradient(colors[0], colors[1]);
+                colorGradient.setMidpoint(32);
+                return colorGradient.getArray();
+            case "sequential":
+                const numOptions = layerData.constraints[layerData.color.variable].options.length;
+                colorGradient.setGradient("#FF0000", "#00FF00");
+                colorGradient.setMidpoint(numOptions);
+                return colorGradient.getArray();
+        }
+    }
+
 }

@@ -2,6 +2,7 @@
   "collection" : "future_heat",
   "label": "Future Heatwaves",
   "level": "county",
+  "color": "#FF0000",
   "fieldMetadata" : [ 
     {
     "name" : "temp",
@@ -18,6 +19,10 @@
   "collection" : "tract_median_household_income",
   "label": "Tract Median Household Income",
   "level": "tract",
+  "color": {
+    "style": "gradient",
+    "variable": "2010_median_household_income"
+  },
   "fieldMetadata" : [ {
     "name" : "2000_median_household_income",
     "max" : 99899.0,
@@ -54,6 +59,11 @@
 }, {
   "collection" : "svi_county_GISJOIN",
   "level":"county",
+  "color": {
+    "style": "gradient",
+    "gradient": ["#00FF00", "#FF0000"],
+    "variable": "RPL_THEMES"
+  },
   "fieldMetadata" : [ 
     {
     "label":"Social Vulnerability Index",
@@ -69,6 +79,11 @@
 }, {
   "collection" : "svi_tract_GISJOIN",
   "level": "tract",
+  "color": {
+    "style": "gradient",
+    "gradient": ["#00FF00", "#FF0000"],
+    "variable": "RPL_THEMES"
+  },
   "fieldMetadata" : [ {
     "label":"Social Vulnerability Index",
     "name" : "RPL_THEMES",
@@ -80,6 +95,10 @@
   "collection" : "tract_median_age",
   "label": "Median Tract Age",
   "level": "tract",
+  "color": {
+    "style": "gradient",
+    "variable": "median_age_total"
+  },
   "fieldMetadata" : [ {
     "name" : "median_age_female",
     "type" : "range",
@@ -124,6 +143,10 @@
 }, {
   "collection" : "flood_zones_geo",
   "label": "Flood Zone",
+  "color": {
+    "style": "sequential",
+    "variable": "properties.FLD_ZONE"
+  },
   "fieldMetadata" : [ {
     "name" : "properties.FLD_ZONE",
     "label": "Flood Zone Code",
@@ -132,6 +155,10 @@
 }, {
   "collection" : "tract_total_population",
   "level":"tract",
+  "color": {
+    "style": "gradient",
+    "variable": "2010_total_population"
+  },
   "fieldMetadata" : [ {
     "name" : "2010_total_population",
     "type" : "range",
@@ -144,6 +171,7 @@
   "label": "Fire Stations"
 }, {
   "collection" : "dams_geo",
+  "color": "#FF0000",
   "fieldMetadata" : [  {
     "name" : "properties.STR_HEIGHT",
     "label": "Height",
@@ -155,6 +183,10 @@
   "collection" : "air_quality_avg",
   "level":"tract",
   "label": "Particulate Matter Air Quality Index",
+  "color": {
+    "style": "gradient",
+    "variable": "avgAqi"
+  },
   "fieldMetadata" : [ {
     "name" : "avgAqi",
     "label": "Average",
@@ -195,6 +227,10 @@
 }, {
   "collection" : "covid_county",
   "level": "county",
+  "color": {
+    "style": "gradient",
+    "variable": "totalCaseCount"
+  },
   "fieldMetadata" : [ {
     "name" : "totalDeathCount",
     "type" : "range",
