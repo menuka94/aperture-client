@@ -48,8 +48,8 @@ osmMap2.addLayer(markers);
 //map 3 merge stuff
 const censusViz = census_visualizer();
 
-const backgroundTract = new BackgroundLoader("tract_geo_GISJOIN", window.map, 300);
-const backgroundCounty = new BackgroundLoader("county_geo_GISJOIN", window.map, 50);
+const backgroundTract = new GeometryLoader("tract_geo_GISJOIN", window.map, 300);
+const backgroundCounty = new GeometryLoader("county_geo_GISJOIN", window.map, 50);
 
 window.backgroundTract = backgroundTract;
 window.backgroundCounty = backgroundCounty

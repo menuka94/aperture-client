@@ -103,8 +103,6 @@ class AutoQuery {
 
     query(forcedGeometry) {
         //console.log("q");
-        
-
         let q = [];
         if (!this.linked) {
             const b = this.map.wrapLatLngBounds(this.map.getBounds());
@@ -114,6 +112,8 @@ class AutoQuery {
             q.push({ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }); //only get geometry in viewport
         }
         else {
+            if(!forcedGeometry)
+                this.backgroundLoader.runQuery();
             const GISJOINS = forcedGeometry ? this.backgroundLoader.convertArrayToGISJOINS(forcedGeometry) : this.backgroundLoader.getCachedGISJOINS();
             q.push({ "$match": { "GISJOIN": { "$in": GISJOINS } } });
         }

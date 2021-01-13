@@ -1,4 +1,4 @@
-class BackgroundLoader {
+class GeometryLoader {
     constructor(collection, map, maxSize) {
         this.map = map;
         this.sustainQuerier = sustain_querier(); //init querier
@@ -9,11 +9,6 @@ class BackgroundLoader {
         this.tempCache = [];
         this.listeners = [];
         this.streams = [];
-
-        this.map.on('moveend', function (e) {
-            //this.killAllStreams();
-            this.getData();
-        }.bind(this));
     }
 
 
@@ -39,6 +34,11 @@ class BackgroundLoader {
             ret.push(obj.GISJOIN);
         }
         return ret;
+    }
+
+    runQuery(){
+        this.killAllStreams();
+        this.getData();
     }
 
 
