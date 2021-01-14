@@ -270,7 +270,6 @@ class AutoQuery {
         }
 
         indexData[this.collection].popup = this.buildPopup();
-
         if (this.getIcon())
             indexData[this.collection]["iconAddr"] = "../../../images/water_works.png";
 
@@ -389,7 +388,7 @@ class AutoQuery {
                 const normalizedValue = Math.round((value - range[0]) / (range[1] - range[0]) * 32); //normalizes value on range. results in #1 - 32
                 return this.colorCode[normalizedValue];
             case "sequential":
-                const varName = this.color.variable.substr(0, 11) === "properties." ? this.color.variable.substring(11, this.color.variable.length) : this.color.variable; //removes a "properties." if it exists
+                const varName = this.removePropertiesPrefix(this.color.variable);
                 const v = properties[varName];
                 const index = this.getConstraintMetadata(this.color.variable).options.indexOf(v);
                 return this.colorCode[index];
@@ -430,9 +429,22 @@ class AutoQuery {
         let returnText = "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
         for(const constraint in this.constraintState){
             if(this.constraintState[constraint]){
-                returnText += "<li><b>" + (this.getConstraintMetadata(constraint).label ? this.getConstraintMetadata(constraint).label : constraint) + ":</b> @@" + constraint + "@@</li>";
+                const constraintNoPrefix = this.removePropertiesPrefix(constraint);
+                const constraintLabel = this.getConstraintMetadata(constraint).label ? this.getConstraintMetadata(constraint).label : constraintNoPrefix;
+                returnText += "<li><b>" + constraintLabel + ":</b> @@" + constraintNoPrefix + "@@</li>";
             }
         }
         return returnText + "</ul>";
+    }
+
+    /**
+      * Removes properties. from name of variable
+      * @memberof AutoQuery
+      * @method removePropertiesPrefix
+      * @param {string} str
+      * @returns {string} string with truncated properties.
+      */
+    removePropertiesPrefix(str){
+        return str.substr(0, 11) === "properties." ? str.substring(11, str.length) : str; //removes a "properties." if it exists
     }
 }

@@ -191,6 +191,12 @@ body {
     overflow-y: scroll;
 }
 
+.saveAndCloseConstraints{
+    bottom: 25px;
+    right: 25px;
+    position: absolute;
+}
+
 .leaflet-fade-anim .leaflet-tile, .leaflet-zoom-anim .leaflet-zoom-animated {
     will-change: auto !important;
 }

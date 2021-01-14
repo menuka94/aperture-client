@@ -21,7 +21,6 @@ const DEFAULT_OBJECT = {
 let updateQueue = {};
 function updateLayers() {
     for (layerUpdate in updateQueue) {
-        //console.log(layerUpdate);
         updateQueue[layerUpdate](layerUpdate);
     }
 }
@@ -127,7 +126,7 @@ const MenuGenerator = {
             for (header in nested_json_map[obj]) {
                 const column = document.getElementById(Util.spaceToUnderScore(obj));
                 if (!column) {
-                    console.error("Error in column generation, could not find column!: " + ob);
+                    console.error("Error in column generation, could not find column!: " + obj);
                     return 1;
                 }
                 const subGroup = document.createElement("div");
@@ -145,129 +144,141 @@ const MenuGenerator = {
 
                 //now add content to each header
                 for (layer in nested_json_map[obj][header]) {
-                    const layerObj = nested_json_map[obj][header][layer];
-
-                    const layerQuerier = new AutoQuery(layerObj);
-
-                    const layerContainer = document.createElement("div");
-                    layerContainer.className = "layerContainer";
-                    layerContainer.id = Util.spaceToUnderScore(layer) + "_layer";
-
-                    const layerSelector = document.createElement("div");
-                    layerSelector.className = "layerSelector";
-                    const selector = document.createElement("input");
-                    const selectorLabel = document.createElement("label");
-                    selector.id = layerContainer.id + "_selector";
-                    selectorLabel.id = layerContainer.id + "_label";
-                    selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layer));
-                    selector.type = "checkbox";
-                    if (layerObj["defaultRender"]) {
-                        selector.checked = true;
-                    }
-                    layerSelector.appendChild(selectorLabel);
-                    layerSelector.appendChild(selector);
-                    layerContainer.appendChild(layerSelector);
-
-                    if(!layerObj["noAutoQuery"]){
-                        if(!layerObj["collection"]){
-                            layerObj["collection"] = layer;
-                        }
-
-                        layerObj["onConstraintChange"] = function(layer,constraintName,value,isActive){ 
-                            layerQuerier.updateConstraint(layer,constraintName,value,isActive); 
-                        };
-                        layerObj["onUpdate"] = function(){ layerQuerier.query();};
-                        layerObj["onAdd"] = function(){ layerQuerier.onAdd();};
-                        layerObj["onRemove"] = function(){ layerQuerier.onRemove();};
-                    }
-
-                    const onAdd = layerObj["onAdd"];
-                    const onRemove = layerObj["onRemove"];
-                    const onUpdate = layerObj["onUpdate"];
-
-
                     const layerName = layer;
-                    selector.onchange = function () {
-                        if (selector.checked) {
-                            onAdd(layerName);
-                            updateQueue[layerName] = onUpdate;
-                            onUpdate(layerName);
-                        }
-                        else {
-                            delete updateQueue[layerName];
-                            onRemove(layerName);
-                        }
-                    }
-
-
-
-
-                    //logic for constraints
-                    if (layerObj["constraints"]) {
-                        const layerConstraints = document.createElement("div");
-                        layerConstraints.className = "layerConstraints";
-
-                        //console.log(layerObj["constraints"]);
-                        for (constraint in layerObj["constraints"]) {
-                            const constraintName = constraint;
-                            const constraintObj = layerObj["constraints"][constraintName];
-
-                            let container;
-                            if (constraintObj["type"] === "slider") {
-                                container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
-                            }
-                            else if (constraintObj["type"] === "selector") {
-                                container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "radio");
-                            }
-                            else if (constraintObj["type"] === "multiselector") {
-                                container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "checkbox");
-                            }
-
-                            if (constraintObj["hide"]) {
-                                layerQuerier.constraintSetActive(constraintName, false);
-                                container.style.display = "none";
-                            }
-                            else{
-                                layerQuerier.constraintSetActive(constraintName, true);
-                            }
-
-                            layerConstraints.appendChild(container);
-                        }
-                        layerContainer.appendChild(layerConstraints);
-
-                        const dropdown = document.createElement("img");
-                        dropdown.src = "../../images/dropdown_white.png";
-                        dropdown.className = "dropdown";
-                        dropdown.style.cursor = "pointer";
-                        dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
-                        dropdown.onclick = function () {
-                            layerConstraints.style.display = layerConstraints.style.display === "none" ? "block" : "none";
-                            dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
-                        }
-                        layerSelector.appendChild(dropdown);
-
-                        const settings = document.createElement("img");
-                        settings.className = "dropdown";
-                        settings.src = "../../images/gear.png";
-                        settings.style.cursor = "pointer";
-                        settings.onclick = function () {
-                            MenuGenerator.selectOptions(layerConstraints, function(constraint, active){
-                                layerQuerier.constraintSetActive(constraint,active)
-                            });
-                        }
-                        layerSelector.appendChild(settings);
-                    }
-
-                    subGroupContainer.appendChild(layerContainer);
+                    const layerObj = nested_json_map[obj][header][layer];
+                    const layerQuerier = new AutoQuery(layerObj); //important
+                    subGroupContainer.appendChild(this.createLayerContainer(layerName, layerObj, layerQuerier)); //where most of the stuff happens
                 }
                 subGroupHeader.onclick = function () {
                     subGroupContainer.style.display = subGroupContainer.style.display === "none" ? "block" : "none";
                 }
 
-
                 column.appendChild(subGroup);
             }
         }
+    },
+
+    createLayerContainer(layerName, layerObj, layerQuerier) {
+        //create entire container
+        const layerContainer = document.createElement("div");
+        layerContainer.className = "layerContainer";
+        layerContainer.id = Util.spaceToUnderScore(layerName) + "_layer";
+
+        //create checkbox selector for this layer, and add a label
+        const layerSelector = document.createElement("div");
+        layerSelector.className = "layerSelector";
+        const selector = document.createElement("input");
+        const selectorLabel = document.createElement("label");
+        selector.id = layerContainer.id + "_selector";
+        selectorLabel.id = layerContainer.id + "_label";
+        selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layerName));
+        selector.type = "checkbox";
+        if (layerObj["defaultRender"]) { //if render by default, make it checked
+            selector.checked = true;
+        }
+        layerSelector.appendChild(selectorLabel);
+        layerSelector.appendChild(selector);
+        layerContainer.appendChild(layerSelector);
+
+
+        if (!layerObj["noAutoQuery"]) { //dynamic auto querying setup
+            if (!layerObj["collection"]) {
+                layerObj["collection"] = layerName;
+            }
+
+            layerObj["onConstraintChange"] = function (layerName, constraintName, value, isActive) {
+                layerQuerier.updateConstraint(layerName, constraintName, value, isActive);
+            };
+            layerObj["onUpdate"] = function () { layerQuerier.query(); };
+            layerObj["onAdd"] = function () { layerQuerier.onAdd(); };
+            layerObj["onRemove"] = function () { layerQuerier.onRemove(); };
+        }
+
+        //when selector changes, call stuff
+        const onAdd = layerObj["onAdd"];
+        const onRemove = layerObj["onRemove"];
+        const onUpdate = layerObj["onUpdate"];
+        selector.onchange = function () {
+            if (selector.checked) {
+                onAdd(layerName);
+                updateQueue[layerName] = onUpdate;
+                onUpdate(layerName);
+            }
+            else {
+                delete updateQueue[layerName];
+                onRemove(layerName);
+            }
+        }
+
+        //logic for constraints
+        if (layerObj["constraints"]) {
+            const layerConstraints = document.createElement("div");
+            layerConstraints.className = "layerConstraints";
+            //populate the constraints
+            for (constraint in layerObj["constraints"]) {
+                const constraintName = constraint;
+                layerConstraints.appendChild(this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier));
+            }
+
+            layerContainer.appendChild(layerConstraints);
+
+            layerSelector.appendChild(this.createDropdown(layerConstraints));
+
+            layerSelector.appendChild(this.createConstraintSelector(layerConstraints, layerQuerier));
+        }
+
+        return layerContainer;
+    },
+
+    createConstraintContainer: function (constraintName, layerName, layerObj, layerQuerier) {
+        const constraintObj = layerObj["constraints"][constraintName];
+
+        let container;
+        if (constraintObj["type"] === "slider") {
+            container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
+        }
+        else if (constraintObj["type"] === "selector") {
+            container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "radio");
+        }
+        else if (constraintObj["type"] === "multiselector") {
+            container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "checkbox");
+        }
+
+        if (constraintObj["hide"]) {
+            layerQuerier.constraintSetActive(constraintName, false);
+            container.style.display = "none";
+        }
+        else {
+            layerQuerier.constraintSetActive(constraintName, true);
+        }
+
+        return container;
+    },
+
+    createDropdown: function (layerConstraints) {
+        const dropdown = document.createElement("img");
+        dropdown.src = "../../images/dropdown_white.png";
+        dropdown.className = "dropdown";
+        dropdown.style.cursor = "pointer";
+        dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
+        dropdown.onclick = function () {
+            layerConstraints.style.display = layerConstraints.style.display === "none" ? "block" : "none";
+            dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
+        }
+        return dropdown;
+    },
+
+    createConstraintSelector: function (layerConstraints, layerQuerier) {
+        const settings = document.createElement("img");
+        settings.className = "dropdown";
+        settings.src = "../../images/gear.png";
+        settings.style.cursor = "pointer";
+        settings.onclick = function () {
+            MenuGenerator.selectOptions(layerConstraints, function (constraint, active) {
+                layerQuerier.constraintSetActive(constraint, active)
+            });
+        }
+        return settings;
     },
 
     //work in progress
@@ -291,7 +302,7 @@ const MenuGenerator = {
             select.type = "checkbox";
             select.checked = child.style.display !== "none";
             //console.log(child.style);
-            select.onchange = function(){
+            select.onchange = function () {
                 setActive(child.id, select.checked);
                 child.style.display = select.checked ? "block" : "none";
             }
@@ -302,16 +313,12 @@ const MenuGenerator = {
             editDiv.appendChild(holderDiv);
         }
 
-        //ignore this gross css stuff
         const saveAndClose = document.createElement("button");
-        saveAndClose.style.bottom = "25px";
-        saveAndClose.style.right = "25px";
-        saveAndClose.style.position = "absolute";
-        saveAndClose.innerHTML = "Close menu"
-        saveAndClose.onclick = function(){
+        saveAndClose.className = "saveAndCloseConstraints"
+        saveAndClose.innerHTML = "Close Menu"
+        saveAndClose.onclick = function () {
             document.body.removeChild(editDiv);
         }
-
         editDiv.appendChild(saveAndClose);
 
         document.body.appendChild(editDiv);
@@ -363,7 +370,6 @@ const MenuGenerator = {
     },
 
     createCheckboxContainer: function (constraint, constraintObj, layerObj, layerName, type) {
-        //console.log(constraint);
         const checkboxContainer = document.createElement("div");
         checkboxContainer.className = "checkboxContainer";
         checkboxContainer.id = constraint;
@@ -401,7 +407,7 @@ const MenuGenerator = {
                 if (onConstraintChange) {
                     if (checkboxSelector.checked)
                         onConstraintChange(layerName, constraint, optionName, true);
-                    
+
                     checkboxSelectorContainer.onchange = function () {
                         if (checkboxSelector.checked) {
                             onConstraintChange(layerName, constraint, optionName, true);
@@ -415,7 +421,7 @@ const MenuGenerator = {
             }
         });
 
-        
+
         return checkboxContainer;
     }
 }
