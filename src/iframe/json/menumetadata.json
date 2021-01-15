@@ -2,7 +2,10 @@
   "collection" : "future_heat",
   "label": "Future Heatwaves",
   "level": "county",
-  "color": "#FF0000",
+  "color": {
+    "colorCode":"#FF0000",
+    "style":"solid"
+  },
   "fieldMetadata" : [ 
     {
     "name" : "temp",
@@ -21,7 +24,8 @@
   "level": "tract",
   "color": {
     "style": "gradient",
-    "variable": "2010_median_household_income"
+    "variable": "2010_median_household_income",
+    "border": 1
   },
   "fieldMetadata" : [ {
     "name" : "2000_median_household_income",
@@ -84,7 +88,8 @@
   "color": {
     "style": "gradient",
     "gradient": ["#00FF00", "#FF0000"],
-    "variable": "RPL_THEMES"
+    "variable": "RPL_THEMES",
+    "border": 1
   },
   "fieldMetadata" : [ {
     "label":"Social Vulnerability Index",
@@ -100,7 +105,8 @@
   "color": {
     "style": "gradient",
     "gradient": ["#00FF00", "#FF0000"],
-    "variable": "median_age_total"
+    "variable": "median_age_total",
+    "border": 1
   },
   "fieldMetadata" : [ {
     "name" : "median_age_female",
@@ -148,7 +154,8 @@
   "label": "Flood Zone",
   "color": {
     "style": "sequential",
-    "variable": "properties.FLD_ZONE"
+    "variable": "properties.FLD_ZONE",
+    "border": 1
   },
   "fieldMetadata" : [ {
     "name" : "properties.FLD_ZONE",
@@ -160,7 +167,8 @@
   "level":"tract",
   "color": {
     "style": "gradient",
-    "variable": "2010_total_population"
+    "variable": "2010_total_population",
+    "border": 1
   },
   "fieldMetadata" : [ {
     "name" : "2010_total_population",
@@ -190,7 +198,8 @@
   "label": "Particulate Matter Air Quality Index",
   "color": {
     "style": "gradient",
-    "variable": "avgAqi"
+    "variable": "avgAqi",
+    "border": 1
   },
   "fieldMetadata" : [ {
     "name" : "avgAqi",

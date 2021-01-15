@@ -79,9 +79,9 @@ RenderInfrastructure = {
                 let weight = 3;
                 let fillOpacity = 0.2;
                 let name = Util.getNameFromGeoJsonFeature(feature, indexData);
-                if (datasource[name] && datasource[name]["noBorder"]) {
-                    weight = 0;
-                    fillOpacity = 0.75;
+                if (datasource[name] && datasource[name]["border"]) {
+                    weight = datasource[name]["border"];
+                    fillOpacity = 0.2;
                 }
                 return { color: datasource[name]["color"], weight: weight, fillOpacity: fillOpacity };
             },

@@ -326,7 +326,6 @@ Util = {
       * @returns {Array<Array<Number>>} geojson polygon
       */
     leafletBoundsToGeoJSONPoly: function(b) {
-        console.log(JSON.stringify(b));
         return [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
         [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
         [b._southWest.lng, b._southWest.lat]];

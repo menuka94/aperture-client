@@ -187,9 +187,23 @@ body {
     border-radius: 3px;
     background-color: white;
     z-index: 9999;
-    padding: 25px;
     overflow-y: scroll;
+    overflow-x: hidden;
 }
+
+.editConstraintsHeader{
+    position: absolute;
+    top:0;
+    padding: 10px;
+    background-color:#0074d9;
+    color:white;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
 
 .saveAndCloseConstraints{
     bottom: 25px;

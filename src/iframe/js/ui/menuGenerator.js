@@ -233,7 +233,7 @@ const MenuGenerator = {
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
-            layerSelector.appendChild(this.createConstraintSelector(layerConstraints, layerQuerier));
+            layerSelector.appendChild(this.createConstraintSelector(layerName, layerConstraints, layerQuerier));
         }
 
         return layerContainer;
@@ -277,13 +277,13 @@ const MenuGenerator = {
         return dropdown;
     },
 
-    createConstraintSelector: function (layerConstraints, layerQuerier) {
+    createConstraintSelector: function (layerName, layerConstraints, layerQuerier) {
         const settings = document.createElement("img");
         settings.className = "dropdown";
         settings.src = "../../images/gear.png";
         settings.style.cursor = "pointer";
         settings.onclick = function () {
-            MenuGenerator.selectOptions(layerConstraints, function (constraint, active) {
+            MenuGenerator.selectOptions(layerName, layerConstraints, function (constraint, active) {
                 layerQuerier.constraintSetActive(constraint, active)
             });
         }
@@ -291,7 +291,7 @@ const MenuGenerator = {
     },
 
     //work in progress
-    selectOptions: function (layerConstraints, setActive) {
+    selectOptions: function (layerName, layerConstraints, setActive) {
         if (document.getElementById("editConstraints")) {
             return;
         }
@@ -299,6 +299,12 @@ const MenuGenerator = {
         const editDiv = document.createElement("div");
         editDiv.className = "editConstraints";
         editDiv.id = "editConstraints";
+
+        const editDivHeader = document.createElement("div");
+        editDivHeader.className = "editConstraintsHeader";
+        editDivHeader.innerHTML = `Select Constraints for ${layerName}`;
+
+        editDiv.appendChild(editDivHeader);
 
         for (let i = 0; i < layerConstraints.childNodes.length; i++) {
             const holderDiv = document.createElement("div");

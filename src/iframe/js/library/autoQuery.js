@@ -270,6 +270,8 @@ class AutoQuery {
         if (this.getIcon())
             indexData[this.collection]["iconAddr"] = `../../../images/map-icons/${this.getIcon()}.png`;
 
+        indexData[this.collection]["border"] = this.color.border;
+
         this.mapLayers = this.mapLayers.concat(RenderInfrastructure.renderGeoJson(data, indexData));
         this.layerIDs.push(data.id);
     }
