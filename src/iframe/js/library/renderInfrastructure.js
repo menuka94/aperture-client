@@ -14,11 +14,6 @@ const ATTRIBUTE = { //attribute enums
     icon: 'icon',
     color: 'color'
 }
-const FEATURETYPE = { //attribute enums
-    point: 0,
-    lineString: 1,
-    polygon: 2
-}
 const DEFAULTOPTIONS = {
     maxElements: 5000,
     maxLayers: 10,

@@ -3,6 +3,12 @@
 * @namespace Util
 */
 Util = {
+    //enums
+    FEATURETYPE: {
+        point: 0,
+        lineString: 1,
+        polygon: 2
+    },
     /**
      * What is the best latLng point for a GeoJSON feature?
      * @memberof Util
@@ -13,17 +19,17 @@ Util = {
     getLatLngFromGeoJsonFeature: function (feature) {
         let type = this.getFeatureType(feature);
         latlng = [];
-        if (type === FEATURETYPE.polygon) {
+        if (type === this.FEATURETYPE.polygon) {
             let pos = L.latLngBounds(feature.geometry.coordinates[0]).getCenter();
             latlng.push(pos.lat);
             latlng.push(pos.lng);
         }
-        else if (type === FEATURETYPE.lineString) {
+        else if (type === this.FEATURETYPE.lineString) {
             let pos = L.latLngBounds(feature.geometry.coordinates).getCenter();
             latlng.push(pos.lat);
             latlng.push(pos.lng);
         }
-        else if (type === FEATURETYPE.point) {
+        else if (type === this.FEATURETYPE.point) {
             latlng = feature.geometry.coordinates;
         }
         else {
@@ -40,13 +46,13 @@ Util = {
      */
     getFeatureType: function (feature) {
         if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon")) {
-            return FEATURETYPE.polygon;
+            return this.FEATURETYPE.polygon;
         }
         else if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString")) {
-            return FEATURETYPE.lineString;
+            return this.FEATURETYPE.lineString;
         }
         else if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point")) {
-            return FEATURETYPE.point;
+            return this.FEATURETYPE.point;
         }
         else {
             return -1;
@@ -75,13 +81,13 @@ Util = {
      */
     simplifyFeatureCoords: function (feature, threshold) {
         let type = this.getFeatureType(feature);
-        if (type === -1 || type === FEATURETYPE.point) {
+        if (type === -1 || type === this.FEATURETYPE.point) {
             return;
         }
-        if (type === FEATURETYPE.polygon) {
+        if (type === this.FEATURETYPE.polygon) {
             feature.geometry.coordinates[0] = simplify(feature.geometry.coordinates[0], threshold, false);
         }
-        else if (type === FEATURETYPE.lineString) {
+        else if (type === this.FEATURETYPE.lineString) {
             feature.geometry.coordinates = simplify(feature.geometry.coordinates, threshold, false);
         }
     },
@@ -275,7 +281,7 @@ Util = {
      * @param {Object} feature geojson feature
      */
     fixFeatureID: function (feature) {
-        if (this.getFeatureType(feature) === FEATURETYPE.lineString && JSON.stringify(feature.geometry.coordinates[0]) === JSON.stringify(feature.geometry.coordinates[feature.geometry.coordinates.length - 1])) {
+        if (this.getFeatureType(feature) === this.FEATURETYPE.lineString && JSON.stringify(feature.geometry.coordinates[0]) === JSON.stringify(feature.geometry.coordinates[feature.geometry.coordinates.length - 1])) {
             feature.geometry.type = "Polygon";
             feature.geometry.coordinates = [feature.geometry.coordinates];
         }
@@ -335,7 +341,7 @@ Util = {
       * @param {string} str
       * @returns {string} string with truncated properties.
       */
-     removePropertiesPrefix(str){
+    removePropertiesPrefix(str) {
         return str.substr(0, 11) === "properties." ? str.substring(11, str.length) : str; //removes a "properties." if it exists
     }
 }
