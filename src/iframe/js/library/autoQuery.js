@@ -187,7 +187,6 @@ class AutoQuery {
             const GISJOINS = forcedGeometry ? this.backgroundLoader.convertArrayToGISJOINS(forcedGeometry) : this.backgroundLoader.getCachedGISJOINS();
             q.push({ "$match": { "GISJOIN": { "$in": GISJOINS } } });
         }
-
         q = q.concat(this.buildConstraintPipeline());
 
         const stream = this.sustainQuerier.getStreamForQuery("lattice-46", 27017, this.collection, JSON.stringify(q));

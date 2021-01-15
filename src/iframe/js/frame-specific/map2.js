@@ -31,67 +31,45 @@ var markers = L.markerClusterGroup({
 });
 map.addLayer(markers);
 
-//map 3 merge stuff
-const censusViz = census_visualizer();
-
 const backgroundTract = new GeometryLoader("tract_geo_GISJOIN", window.map, 300);
 const backgroundCounty = new GeometryLoader("county_geo_GISJOIN", window.map, 50);
 
 window.backgroundTract = backgroundTract;
 window.backgroundCounty = backgroundCounty
 
-const sviCalcAdjustments = {
-    "type": "slider",
-    "range": [
-        0,
-        5
-    ],
-    "default": [
-        1
-    ],
-    "step": 0.1
-}
-
-const osmConstants = {
-    "onAdd": function (layer) { RenderInfrastructure.addFeatureToMap(layer) },
-    "onRemove": function (layer) { RenderInfrastructure.removeFeatureFromMap(layer) },
-    "onUpdate": function () { },
-    "noAutoQuery": true
-}
-
-const overwrite = {
-    "covid_county": {
-        "group": "Tract, County, & State Data",
-        "subGroup": "County Level",
-        "constraints": {
-            date_range: {
-                "type": "slider",
-                "label": "Date Range",
-                "range": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
-                "default": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
-                "step": 1000 * 60 * 60 * 24,
-                "isDate": true
-            }
-        },
-        "onConstraintChange": function (layer, constraintName, value) {
-            console.log(layer + "-" + constraintName + "-");
-            COVID.dateStart = Number(value[0]);
-            COVID.dateEnd = Number(value[1]);
-            COVID.changeFlag = true;
-            COVID.makeQuery(map);
-        },
-        "onAdd": function () {
-            COVID.allowRender = true;
-        },
-        "onRemove": function () {
-            COVID.allowRender = false;
-            COVID.clear();
-        },
-        "onUpdate": function () {
-            COVID.makeQuery(map);
-        },
-        "noAutoQuery": true
-    },
+const overwrite = { //leaving this commented cause it explains the schema really well 
+    // "covid_county": {
+    //     "group": "Tract, County, & State Data",
+    //     "subGroup": "County Level",
+    //     "constraints": {
+    //         date_range: {
+    //             "type": "slider",
+    //             "label": "Date Range",
+    //             "range": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
+    //             "default": [1580169600000, 1580169600000 + 1000 * 60 * 60 * 24 * 266],
+    //             "step": 1000 * 60 * 60 * 24,
+    //             "isDate": true
+    //         }
+    //     },
+    //     "onConstraintChange": function (layer, constraintName, value) {
+    //         console.log(layer + "-" + constraintName + "-");
+    //         COVID.dateStart = Number(value[0]);
+    //         COVID.dateEnd = Number(value[1]);
+    //         COVID.changeFlag = true;
+    //         COVID.makeQuery(map);
+    //     },
+    //     "onAdd": function () {
+    //         COVID.allowRender = true;
+    //     },
+    //     "onRemove": function () {
+    //         COVID.allowRender = false;
+    //         COVID.clear();
+    //     },
+    //     "onUpdate": function () {
+    //         COVID.makeQuery(map);
+    //     },
+    //     "noAutoQuery": true
+    // },
 }
 
 RenderInfrastructure.config(map, markers, overwrite, {
