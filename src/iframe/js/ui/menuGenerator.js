@@ -301,7 +301,6 @@ const MenuGenerator = {
             const select = document.createElement("input");
             select.type = "checkbox";
             select.checked = child.style.display !== "none";
-            //console.log(child.style);
             select.onchange = function () {
                 setActive(child.id, select.checked);
                 child.style.display = select.checked ? "block" : "none";
@@ -377,7 +376,8 @@ const MenuGenerator = {
         //add label
         const checkboxLabel = document.createElement("div");
         checkboxLabel.className = "checkboxConstraintLabel";
-        checkboxLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(constraint));
+        const name = Util.capitalizeString(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
+        checkboxLabel.innerHTML = name;
         checkboxContainer.appendChild(checkboxLabel);
 
         const checkboxConstraintContainer = document.createElement("div");

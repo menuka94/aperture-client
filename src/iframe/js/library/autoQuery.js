@@ -271,7 +271,7 @@ class AutoQuery {
 
         indexData[this.collection].popup = this.buildPopup();
         if (this.getIcon())
-            indexData[this.collection]["iconAddr"] = "../../../images/water_works.png";
+            indexData[this.collection]["iconAddr"] = `../../../images/map-icons/${this.getIcon()}.png`;
 
         this.mapLayers = this.mapLayers.concat(RenderInfrastructure.renderGeoJson(data, indexData));
         this.layerIDs.push(data.id);
@@ -388,7 +388,7 @@ class AutoQuery {
                 const normalizedValue = Math.round((value - range[0]) / (range[1] - range[0]) * 32); //normalizes value on range. results in #1 - 32
                 return this.colorCode[normalizedValue];
             case "sequential":
-                const varName = this.removePropertiesPrefix(this.color.variable);
+                const varName = Util.removePropertiesPrefix(this.color.variable);
                 const v = properties[varName];
                 const index = this.getConstraintMetadata(this.color.variable).options.indexOf(v);
                 return this.colorCode[index];
@@ -429,22 +429,17 @@ class AutoQuery {
         let returnText = "<ul style='padding-inline-start:20px;margin-block-start:2.5px;'>";
         for(const constraint in this.constraintState){
             if(this.constraintState[constraint]){
-                const constraintNoPrefix = this.removePropertiesPrefix(constraint);
+                const constraintNoPrefix = Util.removePropertiesPrefix(constraint);
                 const constraintLabel = this.getConstraintMetadata(constraint).label ? this.getConstraintMetadata(constraint).label : constraintNoPrefix;
                 returnText += "<li><b>" + constraintLabel + ":</b> @@" + constraintNoPrefix + "@@</li>";
             }
         }
         return returnText + "</ul>";
     }
-
-    /**
-      * Removes properties. from name of variable
-      * @memberof AutoQuery
-      * @method removePropertiesPrefix
-      * @param {string} str
-      * @returns {string} string with truncated properties.
-      */
-    removePropertiesPrefix(str){
-        return str.substr(0, 11) === "properties." ? str.substring(11, str.length) : str; //removes a "properties." if it exists
-    }
 }
+
+try {
+    module.exports = {
+        AutoQuery: AutoQuery
+    }
+} catch (e) { }

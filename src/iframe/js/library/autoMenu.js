@@ -272,3 +272,9 @@ const AutoMenu = {
         return result;
     }
 }
+
+try {
+    module.exports = {
+        AutoMenu: AutoMenu
+    }
+} catch (e) { }

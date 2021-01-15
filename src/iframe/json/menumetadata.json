@@ -59,6 +59,7 @@
 }, {
   "collection" : "svi_county_GISJOIN",
   "level":"county",
+  "label": "Social Vulnerability Index (County)",
   "color": {
     "style": "gradient",
     "gradient": ["#00FF00", "#FF0000"],
@@ -79,6 +80,7 @@
 }, {
   "collection" : "svi_tract_GISJOIN",
   "level": "tract",
+  "label": "Social Vulnerability Index (Tract)",
   "color": {
     "style": "gradient",
     "gradient": ["#00FF00", "#FF0000"],
@@ -118,7 +120,7 @@
   } ]
 }, {
   "collection" : "public_schools",
-  "icon": true,
+  "icon": "school",
   "fieldMetadata" : [ {
     "label": "Total Students",
     "name" : "properties.ENROLLMENT",
@@ -168,11 +170,13 @@
   } ]
 }, {
   "collection" : "fire_stations_geo",
-  "icon": true,
+  "icon": "fire_station",
   "label": "Fire Stations"
 }, {
   "collection" : "dams_geo",
   "color": "#FF0000",
+  "label": "Dams",
+  "icon": "dam",
   "fieldMetadata" : [  {
     "name" : "properties.STR_HEIGHT",
     "label": "Height",
@@ -197,7 +201,7 @@
   } ]
 },{
   "collection" : "hospitals_geo",
-  "icon": true,
+  "icon": "hospital",
   "label": "Hospitals",
   "fieldMetadata" : [ {
     "name" : "properties.BEDS",
@@ -211,11 +215,11 @@
       } ]
 }, {
   "collection" : "electrical_substations_geo",
-  "icon": true,
+  "icon": "hospital",
   "label": "Electrical Substations"
 }, {
   "collection" : "power_plants_geo",
-  "icon": true,
+  "icon": "power_plant",
   "label": "Power Plants",
   "fieldMetadata" : [ {
     "name" : "properties.ENERGY_SRC",

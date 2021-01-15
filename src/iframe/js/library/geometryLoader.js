@@ -203,3 +203,9 @@ class GeometryLoader {
         return [{ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [this.getMapBoundsArray()] } } } } }];
     }
 }
+
+try {
+  module.exports = {
+      GeometryLoader: GeometryLoader
+  }
+} catch (e) { }
