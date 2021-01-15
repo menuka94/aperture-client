@@ -1,4 +1,3 @@
-
 /**
  * @namespace MenuGenerator
  * @file Build's menu UI for the Aperture Client
@@ -55,7 +54,6 @@ const MenuGenerator = {
         let columnsAndHeadings = {}; //what will be returned
         for (obj in json_map) { //just loop over the json
             if (json_map[obj]["notAQueryableLayer"]) {
-                //console.log(obj);
                 continue;
             }
             const mergeWithDefalt = { //merge default and user-given object
@@ -145,9 +143,10 @@ const MenuGenerator = {
                 //now add content to each header
                 for (layer in nested_json_map[obj][header]) {
                     const layerName = layer;
+                    const layerLabel = Util.capitalizeString(Util.underScoreToSpace(nested_json_map[obj][header][layer].label ? nested_json_map[obj][header][layer].label : layer));
                     const layerObj = nested_json_map[obj][header][layer];
                     const layerQuerier = new AutoQuery(layerObj); //important
-                    subGroupContainer.appendChild(this.createLayerContainer(layerName, layerObj, layerQuerier)); //where most of the stuff happens
+                    subGroupContainer.appendChild(this.createLayerContainer(layerName, layerLabel, layerObj, layerQuerier)); //where most of the stuff happens
                 }
                 subGroupHeader.onclick = function () {
                     subGroupContainer.style.display = subGroupContainer.style.display === "none" ? "block" : "none";
@@ -158,11 +157,11 @@ const MenuGenerator = {
         }
     },
 
-    createLayerContainer(layerName, layerObj, layerQuerier) {
+    createLayerContainer(layerName, layerLabel, layerObj, layerQuerier) {
         //create entire container
         const layerContainer = document.createElement("div");
         layerContainer.className = "layerContainer";
-        layerContainer.id = Util.spaceToUnderScore(layerName) + "_layer";
+        layerContainer.id = Util.spaceToUnderScore(layerLabel) + "_layer";
 
         //create checkbox selector for this layer, and add a label
         const layerSelector = document.createElement("div");
@@ -171,7 +170,7 @@ const MenuGenerator = {
         const selectorLabel = document.createElement("label");
         selector.id = layerContainer.id + "_selector";
         selectorLabel.id = layerContainer.id + "_label";
-        selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layerName));
+        selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layerLabel));
         selector.type = "checkbox";
         if (layerObj["defaultRender"]) { //if render by default, make it checked
             selector.checked = true;
@@ -233,7 +232,7 @@ const MenuGenerator = {
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
-            layerSelector.appendChild(this.createConstraintSelector(layerName, layerConstraints, layerQuerier));
+            layerSelector.appendChild(this.createConstraintSelector(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
         }
 
         return layerContainer;
@@ -277,21 +276,21 @@ const MenuGenerator = {
         return dropdown;
     },
 
-    createConstraintSelector: function (layerName, layerConstraints, layerQuerier) {
+    createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
         const settings = document.createElement("img");
         settings.className = "dropdown";
         settings.src = "../../images/gear.png";
         settings.style.cursor = "pointer";
         settings.onclick = function () {
-            MenuGenerator.selectOptions(layerName, layerConstraints, function (constraint, active) {
-                layerQuerier.constraintSetActive(constraint, active)
-            });
+            MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
+                layerQuerier.constraintSetActive(constraint, active);
+            }, constraintsObj);
         }
         return settings;
     },
 
     //work in progress
-    selectOptions: function (layerName, layerConstraints, setActive) {
+    selectOptions: function (layerLabel, layerConstraints, setActive, constraintsObj) {
         if (document.getElementById("editConstraints")) {
             return;
         }
@@ -302,16 +301,19 @@ const MenuGenerator = {
 
         const editDivHeader = document.createElement("div");
         editDivHeader.className = "editConstraintsHeader";
-        editDivHeader.innerHTML = `Select Constraints for ${layerName}`;
+        editDivHeader.innerHTML = `Select Constraints for ${layerLabel}`;
 
         editDiv.appendChild(editDivHeader);
 
         for (let i = 0; i < layerConstraints.childNodes.length; i++) {
             const holderDiv = document.createElement("div");
+            holderDiv.className = "editConstraintsConstraint";
 
             const child = layerConstraints.childNodes[i];
             const selectLabel = document.createElement("label");
-            selectLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(child.id));
+
+            const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintsObj[child.id].label ? constraintsObj[child.id].label : child.id));
+            selectLabel.innerHTML = name;
 
             const select = document.createElement("input");
             select.type = "checkbox";
@@ -360,7 +362,7 @@ const MenuGenerator = {
 
             connect: true,
         });
-        const name = Util.capitalizeString(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
+        const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
         const step = constraintObj['step'] ? constraintObj['step'] : 1;
         const isDate = constraintObj['isDate'];
         slider.noUiSlider.on('update', function (values) {
@@ -391,7 +393,7 @@ const MenuGenerator = {
         //add label
         const checkboxLabel = document.createElement("div");
         checkboxLabel.className = "checkboxConstraintLabel";
-        const name = Util.capitalizeString(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
+        const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
         checkboxLabel.innerHTML = name;
         checkboxContainer.appendChild(checkboxLabel);
 

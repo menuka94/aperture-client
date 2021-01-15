@@ -92,8 +92,9 @@ const AutoMenu = {
                 //where the constraints are added, lots of cool stuff here
                 autoMenuLayer["constraints"] = this.buildConstraintsFromCatalog(metadata, catalogLayer);
                 autoMenuLayer["collection"] = catalogLayer.collection;
+                autoMenuLayer["label"] = metadata.label;
                 //gets label if provided, names it the collection name otherwise
-                const label = metadata.label ? metadata.label : catalogLayer.collection;
+                const label = catalogLayer.collection;
 
                 //add finished layer to result
                 result[label] = autoMenuLayer;

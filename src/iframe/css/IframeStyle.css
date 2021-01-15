@@ -192,7 +192,6 @@ body {
 }
 
 .editConstraintsHeader{
-    position: absolute;
     top:0;
     padding: 10px;
     background-color:#0074d9;
@@ -201,14 +200,21 @@ body {
     font-size: 18px;
     text-align: center;
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
+}
+
+.editConstraintsConstraint{
+    padding: 1px;
+    padding-left: 20px;
+    font-weight: bold;
 }
 
 
 .saveAndCloseConstraints{
     bottom: 25px;
-    right: 25px;
-    position: absolute;
+    left: 85%;
+    position: sticky;
+
 }
 
 .leaflet-fade-anim .leaflet-tile, .leaflet-zoom-anim .leaflet-zoom-animated {
