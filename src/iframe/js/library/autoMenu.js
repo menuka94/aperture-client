@@ -227,17 +227,13 @@ const AutoMenu = {
 
         if (constraint.type === "range" || constraint.type === "date") {
             result.step = constraint.step;
-            
             const DEFAULTS = {
                 step: 1,
             }
-
             result = {
                 ...DEFAULTS,
                 ...result
             }
-
-
             result.type = "slider";
         
             result.range = [constraint.min, constraint.max];

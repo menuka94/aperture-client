@@ -176,9 +176,7 @@ class AutoQuery {
         let q = [];
         if (!this.linked) {
             const b = this.map.wrapLatLngBounds(this.map.getBounds());
-            const barray = [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
-            [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
-            [b._southWest.lng, b._southWest.lat]];
+            const barray = Util.leafletBoundsToGeoJSONPoly(b);
             q.push({ "$match": { geometry: { "$geoIntersects": { "$geometry": { type: "Polygon", coordinates: [barray] } } } } }); //only get geometry in viewport
         }
         else {
@@ -349,7 +347,6 @@ class AutoQuery {
                     "$gte": constraintData[0],
                     "$lte": constraintData[1]
                 };
-
                 break;
             case "selector":
                 console.log("SELECTOR");

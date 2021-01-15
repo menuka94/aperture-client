@@ -315,8 +315,21 @@ Util = {
       * @param {string} str
       * @returns {string} string with truncated properties.
       */
-    removePropertiesPrefix(str) {
+    removePropertiesPrefix: function(str) {
         return str.substr(0, 11) === "properties." ? str.substring(11, str.length) : str; //removes a "properties." if it exists
+    },
+    /**
+      * Turns leaflet bounds into geoJSON bounds
+      * @memberof AutoQuery
+      * @method eafletBoundsToGeoJSONPoly
+      * @param {Leaflet Bounds} b
+      * @returns {Array<Array<Number>>} geojson polygon
+      */
+    leafletBoundsToGeoJSONPoly: function(b) {
+        console.log(JSON.stringify(b));
+        return [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
+        [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
+        [b._southWest.lng, b._southWest.lat]];
     }
 }
 

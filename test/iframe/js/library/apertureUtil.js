@@ -79,7 +79,7 @@ describe('Util', function () {
     describe('normalizeFeatureID()', function () {
         it('make weird mongodb ids into string .ids', function () {
             polyGeoJSONClone.id = null;
-            polyGeoJSONClone._id = {$oid: "12345"};
+            polyGeoJSONClone._id = { $oid: "12345" };
             util.Util.normalizeFeatureID(polyGeoJSONClone);
             assert.deepEqual(polyGeoJSONClone.id, "12345");
         });
@@ -87,6 +87,33 @@ describe('Util', function () {
     describe('removePropertiesPrefix()', function () {
         it('removes properties. from name of variable', function () {
             assert.deepEqual(util.Util.removePropertiesPrefix("properties.test"), "test");
+        });
+    });
+    describe('leafletBoundsToGeoJSONPoly()', function () {
+        it('removes properties. from name of variable', function () {
+            assert.deepEqual(util.Util.leafletBoundsToGeoJSONPoly(JSON.parse('{"_southWest":{"lat":40.32874883206875,"lng":-105.53878784179689},"_northEast":{"lat":40.817446884558805,"lng":-104.63516235351562}}')), [
+                [
+                    -105.53878784179689,
+                    40.32874883206875
+                ],
+                [
+                    -105.53878784179689,
+                    40.817446884558805
+                ],
+                [
+                    -104.63516235351562,
+                    40.817446884558805
+                ],
+                [
+                    -104.63516235351562,
+                    40.32874883206875
+                ],
+                [
+                    -105.53878784179689,
+                    40.32874883206875
+                ]
+            ]
+            );
         });
     });
 });
