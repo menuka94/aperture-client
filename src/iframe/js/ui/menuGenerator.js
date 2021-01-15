@@ -215,10 +215,19 @@ const MenuGenerator = {
             const layerConstraints = document.createElement("div");
             layerConstraints.className = "layerConstraints";
             //populate the constraints
+            let anyActiveConstraints = false;
             for (constraint in layerObj["constraints"]) {
                 const constraintName = constraint;
-                layerConstraints.appendChild(this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier));
+                const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier);
+                if(constraintDiv.style.display !== "none")
+                    anyActiveConstraints = true;
+
+                layerConstraints.appendChild(constraintDiv);
             }
+
+            if(!anyActiveConstraints)
+                layerConstraints.style.display = "none";
+
 
             layerContainer.appendChild(layerConstraints);
 

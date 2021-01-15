@@ -48,7 +48,7 @@
     "name" : "2010_median_household_income",
     "label": "2010 Median Household Income",
     "min" : 2499.0,
-    "max" : 99983.0,
+    "max" : 200000,
     "type" : "range",
     "step": 100,
     "unit": "dollars"
