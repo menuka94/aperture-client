@@ -33,7 +33,8 @@ Util = {
             latlng = feature.geometry.coordinates;
         }
         else {
-            return [0, 0];
+            return {lat: 0,lng: 0};
+                
         }
         return L.latLng(latlng[1], latlng[0]);
     },
@@ -71,6 +72,9 @@ Util = {
                 this.simplifyFeatureCoords(feature, threshold);
             });
         }
+        else if(geoJSON.geometry){
+            this.simplifyFeatureCoords(geoJSON, threshold);
+        }
     },
     /**
      * Helper for simplify GeoJSON, simplifies a single feature
@@ -104,10 +108,10 @@ Util = {
         let params = pTObj.params;
         let tagsObj = pTObj.tagsObj;
         const datasource = indexData ? indexData : RenderInfrastructure.data;
-        if (indexData) {
+        if (indexData) { //this is quite a bit simpler than the other way.
             return Object.keys(indexData)[0];
         }
-        for (element in datasource) {
+        for (element in datasource) { 
             if (datasource[element]["identityField"]) {
                 for (let i = 0; i < params.length; i++) {
                     if (params[i] === datasource[element]["identityField"]) {
@@ -194,12 +198,10 @@ Util = {
      * @returns {string} 
      */
     underScoreToSpace: function (str) {
-        if (str == null) {
+        if (str == null) 
             return "noname"
-        }
-        if (typeof str !== 'string') {
+        if (typeof str !== 'string')
             str = str.toString();
-        }
         return str.replace(/_/gi, " ");
     },
     /**                                                                            
@@ -210,24 +212,9 @@ Util = {
      * @returns {string} 
      */
     spaceToUnderScore: function (str) {
-        if (typeof str !== 'string') {
+        if (typeof str !== 'string')
             str = str.toString();
-        }
         return str.replace(/ /gi, "_");
-    },
-    /**                                                                            
-     * Creates a leaflet icon from an image address.
-     * @memberof Util
-     * @method makeIcon
-     * @param {string} address
-     * @returns {object} leaflet icon
-     */
-    makeIcon: function (address) {
-        icon = new L.Icon({
-            iconUrl: address,
-            iconSize: RenderInfrastructure.options.iconSize
-        });
-        return icon;
     },
     /**                                                                            
      * Creates a full geojson object from a feature array
@@ -237,25 +224,11 @@ Util = {
      * @returns {object} full geojson
      */
     createGeoJsonObj: function (features) {
-        let geojson = {
+        const geojson = {
             "type": "FeatureCollection",
-            "features": []
+            "features": features
         }
-        features.forEach(fea => {
-            geojson["features"].push(fea);
-        });
         return geojson;
-    },
-    /**                                                                            
-     * Gives non-square-rooted 2d distance, one input latlng is reversed
-     * @memberof Util
-     * @method dist2d
-     * @param {Array} p1
-     * @param {Array} p2
-     * @returns {number} distance
-     */
-    dist2d: function (p1, p2) { //p2 latlng array is reversed
-        return Math.pow(p1[0] - p2[1], 2) + Math.pow(p1[1] - p2[0], 2);
     },
     /**                                                                            
      * Changed linestring to polygon if it is misidentified
@@ -293,7 +266,8 @@ Util = {
      * @param {Object} feature geojson feature
      */
     normalizeFeatureID: function (feature) {
-        if (!feature.id && feature._id.$oid) feature.id = feature._id.$oid;
+        if (!feature.id && feature._id.$oid) 
+            feature.id = feature._id.$oid;
     },
     /**                                                                            
      * Makes popup text

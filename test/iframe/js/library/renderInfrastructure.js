@@ -61,9 +61,24 @@ describe('RenderInfrastructure', function () {
             assert.deepEqual(renderInfrastructure.RenderInfrastructure.options.timeout, 15);
         });
     });
+    let render;
     describe('renderGeoJson()', function () {
         it('should render geojson onto map', function () {
-            assert.deepEqual(renderInfrastructure.RenderInfrastructure.renderGeoJson(sampleQuery).length, 24);
+            render = renderInfrastructure.RenderInfrastructure.renderGeoJson(sampleQuery);
+            assert.deepEqual(render.length, 2);
+        });
+    });
+    describe('removeSpecifiedLayersFromMap()', function () {
+        it('removes some layers from the map', function () {
+            render = renderInfrastructure.RenderInfrastructure.removeSpecifiedLayersFromMap(render);
+            assert.deepEqual(Object.keys(testMap._layers).length, 2);
+        });
+    });
+    describe('removeAllFeaturesFromMap()', function () {
+        it('removes all layers from the map', function () {
+            render = renderInfrastructure.RenderInfrastructure.renderGeoJson(sampleQuery);
+            render = renderInfrastructure.RenderInfrastructure.removeAllFeaturesFromMap();
+            assert.deepEqual(Object.keys(testMap._layers).length, 0);
         });
     });
     describe('getAttribute()', function () {

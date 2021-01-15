@@ -194,6 +194,20 @@ RenderInfrastructure = {
         }
         return true;
     },
+    /**                                                                            
+     * Creates a leaflet icon from an image address.
+     * @memberof Util
+     * @method makeIcon
+     * @param {string} address
+     * @returns {object} leaflet icon
+     */
+    makeIcon: function (address) {
+        icon = new L.Icon({
+            iconUrl: address,
+            iconSize: RenderInfrastructure.options.iconSize
+        });
+        return icon;
+    },
     /**
      * Cleans up elements outside of the current viewportX2
      * @memberof RenderInfrastructure
@@ -213,7 +227,7 @@ RenderInfrastructure = {
                 }
                 else {
                     if (datasource[tag]["iconAddr"]) {
-                        return Util.makeIcon(datasource[tag]["iconAddr"]);
+                        return RenderInfrastructure.makeIcon(datasource[tag]["iconAddr"]);
                     }
                 }
             }
