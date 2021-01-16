@@ -75,6 +75,20 @@ body {
     cursor: pointer;
 }
 
+
+.checkboxConstraintLabel{
+    padding: 5px;
+    border-radius: 3px;
+    background-color: #0074d9;
+    text-align: left;
+    color:white;
+}
+
+.checkboxConstraintContainer{
+    padding: 5px;
+}
+
+
 .menuHeaderContainer{
     padding: 5px;
 }
@@ -100,10 +114,17 @@ body {
     padding: 10px;
 }
 
-.radioContainer{
+.checkboxContainer{
     background-color: white;
-    padding: 5px;
     border-radius: 3px;
+    margin-bottom: 15px;
+}
+
+.sliderContainer{
+    background-color: white;
+    border-radius: 3px;
+    padding: 5px;
+    margin-bottom: 15px;
 }
 
 .dropdown{
@@ -155,6 +176,45 @@ body {
     top: 50%;
     -ms-transform: translateY(-50%);
     transform: translateY(-50%);
+}
+
+.editConstraints{
+    position: absolute;
+    top:12.5%;
+    left:12.5%;
+    width: 75%;
+    height: 75%;
+    border-radius: 3px;
+    background-color: white;
+    z-index: 9999;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.editConstraintsHeader{
+    top:0;
+    padding: 10px;
+    background-color:#0074d9;
+    color:white;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.editConstraintsConstraint{
+    padding: 1px;
+    padding-left: 20px;
+    font-weight: bold;
+}
+
+
+.saveAndCloseConstraints{
+    bottom: 25px;
+    left: 85%;
+    position: sticky;
+
 }
 
 .leaflet-fade-anim .leaflet-tile, .leaflet-zoom-anim .leaflet-zoom-animated {
