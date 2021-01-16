@@ -144,14 +144,11 @@
 .sidebar-header {
   margin: -10px -20px 0;
   height: 50px;
-  padding: 0 20px;
+  padding: 3px 20px 0px 0px;
   line-height: 23px;
   color: #fff;
   background-color: #0074d9;
   position: -webkit-sticky;
-  position: sticky;
-  top: 0px;
-  padding-top: 3px;
   z-index: 2;
 }
 
