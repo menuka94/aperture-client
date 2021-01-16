@@ -2,7 +2,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 100%;
+  width: 55em;
   overflow: hidden;
   z-index: 2000;
 }
