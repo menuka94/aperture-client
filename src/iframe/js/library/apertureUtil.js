@@ -33,8 +33,8 @@ Util = {
             latlng = feature.geometry.coordinates;
         }
         else {
-            return {lat: 0,lng: 0};
-                
+            return { lat: 0, lng: 0 };
+
         }
         return L.latLng(latlng[1], latlng[0]);
     },
@@ -46,17 +46,17 @@ Util = {
      * @returns {number} Enum from FEATURETYPE or -1 if not found
      */
     getFeatureType: function (feature) {
-        if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon")) {
-            return this.FEATURETYPE.polygon;
-        }
-        else if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "LineString")) {
-            return this.FEATURETYPE.lineString;
-        }
-        else if ((feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Point")) {
-            return this.FEATURETYPE.point;
-        }
-        else {
-            return -1;
+        if (feature.geometry && feature.geometry.type) {
+            switch (feature.geometry.type) {
+                case "Polygon":
+                    return this.FEATURETYPE.polygon;
+                case "LineString":
+                    return this.FEATURETYPE.lineString;
+                case "Point":
+                    return this.FEATURETYPE.point;
+                default:
+                    return -1;
+            }
         }
     },
     /**
@@ -72,7 +72,7 @@ Util = {
                 this.simplifyFeatureCoords(feature, threshold);
             });
         }
-        else if(geoJSON.geometry){
+        else if (geoJSON.geometry) {
             this.simplifyFeatureCoords(geoJSON, threshold);
         }
     },
@@ -111,7 +111,7 @@ Util = {
         if (indexData) { //this is quite a bit simpler than the other way.
             return Object.keys(indexData)[0];
         }
-        for (element in datasource) { 
+        for (element in datasource) {
             if (datasource[element]["identityField"]) {
                 for (let i = 0; i < params.length; i++) {
                     if (params[i] === datasource[element]["identityField"]) {
@@ -198,7 +198,7 @@ Util = {
      * @returns {string} 
      */
     underScoreToSpace: function (str) {
-        if (str == null) 
+        if (str == null)
             return "noname"
         if (typeof str !== 'string')
             str = str.toString();
@@ -266,7 +266,7 @@ Util = {
      * @param {Object} feature geojson feature
      */
     normalizeFeatureID: function (feature) {
-        if (!feature.id && feature._id.$oid) 
+        if (!feature.id && feature._id.$oid)
             feature.id = feature._id.$oid;
     },
     /**                                                                            
@@ -315,7 +315,7 @@ Util = {
       * @param {string} str
       * @returns {string} string with truncated properties.
       */
-    removePropertiesPrefix: function(str) {
+    removePropertiesPrefix: function (str) {
         return str.substr(0, 11) === "properties." ? str.substring(11, str.length) : str; //removes a "properties." if it exists
     },
     /**
@@ -325,7 +325,7 @@ Util = {
       * @param {Leaflet Bounds} b
       * @returns {Array<Array<Number>>} geojson polygon
       */
-    leafletBoundsToGeoJSONPoly: function(b) {
+    leafletBoundsToGeoJSONPoly: function (b) {
         return [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
         [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
         [b._southWest.lng, b._southWest.lat]];

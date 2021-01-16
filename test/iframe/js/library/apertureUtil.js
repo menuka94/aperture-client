@@ -20,6 +20,14 @@ describe('Util', function () {
             assert.deepEqual(util.Util.getLatLngFromGeoJsonFeature(polyGeoJSON), { lat: 40.40303938724696, lng: -105.13864988486216 });
         });
     });
+    describe('getFeatureType()', function () {
+        it('gets type from the geoJSON passed to it', function () {
+            assert.deepEqual(util.Util.getFeatureType({ geometry: { type: "none", coordinates: L.latLng(40, 90) } }), -1);
+            assert.deepEqual(util.Util.getFeatureType(pointGeoJSON), util.Util.FEATURETYPE.point);
+            assert.deepEqual(util.Util.getFeatureType(lineGeoJSON), util.Util.FEATURETYPE.lineString);
+            assert.deepEqual(util.Util.getFeatureType(polyGeoJSON), util.Util.FEATURETYPE.polygon);
+        });
+    });
     describe('simplifyGeoJSON()', function () {
         it('simplifies GeoJSON using the simplify.js library', function () {
             util.Util.simplifyGeoJSON(polyGeoJSON, 0.01);
