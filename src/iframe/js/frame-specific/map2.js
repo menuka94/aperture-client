@@ -1,7 +1,7 @@
 const MAPNUMBER = 2;
 
-const queryAlertText = document.getElementById('queryInfoText');
-queryAlertText.style.display = "none";
+//const queryAlertText = document.getElementById('queryInfoText');
+
 //--------------
 const map = L.map('map2', {
     renderer: L.canvas(),
