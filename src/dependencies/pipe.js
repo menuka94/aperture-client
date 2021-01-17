@@ -10,17 +10,22 @@ Pipe = {
 
     //public functions ---------------
     createPipe: function (id, listener) {
-        pipes.push({
-            id: id,
-            listener: listener
-        });
-        return id;
+        if (this.indexOfPipe(id) === -1) {
+            this.pipes.push({
+                id: id,
+                listener: listener
+            });
+            return id;
+        }
+        else{
+            return null;
+        }
     },
 
     removePipe: function (id) {
         const pipeIndex = this.indexOfPipe(id);
-        if(pipeIndex !== -1){
-            pipes.splice(pipeIndex,1); //remove the pipe
+        if (pipeIndex !== -1) {
+            this.pipes.splice(pipeIndex, 1); //remove the pipe
             return true;
         }
         return false;
@@ -29,7 +34,7 @@ Pipe = {
     pipe: function (id, data) {
         const pipeIndex = this.indexOfPipe(id);
         if (pipeIndex !== -1) {
-            pipes[pipeIndex].listener(data);
+            this.pipes[pipeIndex].listener(data);
             return true;
         }
         return false;
@@ -37,8 +42,8 @@ Pipe = {
 
     //private functions --------------
     indexOfPipe(id) {
-        for (let i = 0; i < pipes.length; i++) {
-            if (pipes[i].id === id)
+        for (let i = 0; i < this.pipes.length; i++) {
+            if (this.pipes[i].id === id)
                 return i;
         }
         return -1;
@@ -49,4 +54,4 @@ try {
     module.exports = {
         Pipe: Pipe
     };
-} catch(e) { }
+} catch (e) { }
