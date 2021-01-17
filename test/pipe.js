@@ -13,9 +13,9 @@ let listener2 = function(data){
 
 describe('createPipe()', function() {
     it('should create a pipe with a given ID and listener, and return the name of the pipe if it has not already been declared', function() {
-        assert.strictEqual(Pipe.createPipe("one", listener1), "one");
-        assert.strictEqual(Pipe.createPipe("two", listener2), "two");
-        assert.strictEqual(Pipe.createPipe("one", listener1), null); //duplicates should return null
+        assert.strictEqual(Pipe.createPipe("one", listener1), true);
+        assert.strictEqual(Pipe.createPipe("two", listener2), true);
+        assert.strictEqual(Pipe.createPipe("one", listener1), false); //duplicates should return null
     });
 });
 
