@@ -104,9 +104,6 @@ RenderInfrastructure = {
                 let iconDetails = Util.createDetailsFromGeoJsonFeature(feature, iconName, indexData);
                 RenderInfrastructure.addIconToMap(iconName, latlng, iconDetails, indexData, layer.specifiedId);
                 layer.bindPopup(iconDetails);
-                layer.on('click', function (e) {
-                    RenderInfrastructure.map.flyToBounds(layer.getBounds(), FLYTOOPTIONS);
-                });
                 layers.push(layer.specifiedId);
             },
             pointToLayer: function () {
@@ -141,12 +138,7 @@ RenderInfrastructure = {
             if (e.target.__parent._group._spiderfied) {
                 return;
             }
-            if (RenderInfrastructure.map.getZoom() < 16) {
-                RenderInfrastructure.map.flyTo(e.latlng, 16, FLYTOOPTIONS);
-            }
-            else {
-                RenderInfrastructure.map.flyTo(e.latlng, RenderInfrastructure.map.getZoom(), FLYTOOPTIONS);
-            }
+
         }).bindPopup(popUpContent));
         return true;
     },
