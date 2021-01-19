@@ -268,7 +268,7 @@ class AutoQuery {
 
         indexData[this.collection].popup = this.buildPopup();
         if (this.getIcon())
-            indexData[this.collection]["iconAddr"] = `../../../images/map-icons/${this.getIcon()}.png`;
+            indexData[this.collection]["iconAddr"] = `../../images/map-icons/${this.getIcon()}.png`;
 
         indexData[this.collection]["border"] = this.color.border;
 
