@@ -65,7 +65,7 @@ Pipe = {
     /**
       * Finds the index of a pipe
       * @memberof Pipe
-      * @method pipe
+      * @method indexOfPipe
       * @param {string} id name/id of pipe to send data over
       * @returns {Number} index of pipe if found (>= 0). -1 if not found.
       */
