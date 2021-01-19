@@ -1,6 +1,5 @@
 /**
  * @class  MapDataFilter
- * @file   Take in map data + bounds and filter to be passed into graphing
  * @author Pierce Smith
  */
 
@@ -17,18 +16,17 @@ class MapDataFilter {
       */
     getModel(feature) {
         if (Array.isArray(feature)) {
-            return getMultipleModel(feature);
+            return this.getMultipleModel(feature);
         } else {
-            return getSingleModel(feature);
+            return this.getSingleModel(feature);
         }
     }
 
     getSingleModel(feature) {
-        const model = {
-            feature: [],
-        };
+        const model = {};
+        model[feature] = [];
 
-        for (const entry of data) {
+        for (const entry of this.data) {
             if (entry[feature] !== undefined) {
                 model[feature].push(entry[feature]);
             }
@@ -38,13 +36,20 @@ class MapDataFilter {
     }
 
     getMultipleModel(features) {
-        const model = {};
+        let model = {};
 
         for (const feature of features) {
-            const singleModel = getSingleModel(feature);
+            const singleModel = this.getSingleModel(feature);
             model = { ...model, ...singleModel };
         }
 
         return model;
     }
 }
+
+
+try {
+    module.exports = {
+        MapDataFilter: MapDataFilter,
+    }
+} catch (e) { }
