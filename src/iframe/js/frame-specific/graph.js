@@ -1,10 +1,10 @@
+let filter = new MapDataFilter();
+let mapBounds;
 
-let aggregateData = [];
-parent.Pipe.createPipe("queryToFilterPipe", (entry) => {
-    aggregateData.push(entry);
-});
+parent.Pipe.createPipe("graph_data_pipe", data => { filter.add(data) } );
+parent.Pipe.createPipe("graph_report_bounds", bounds => { mapBounds = bounds } );
 
-function getFilter() {
-    return new DataFilter(aggregateData);
-}
+window.setInterval(() => {
+    console.log(filter.getModel("temp", mapBounds));
+}, 2000);
 

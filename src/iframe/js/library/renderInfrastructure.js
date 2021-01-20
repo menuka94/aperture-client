@@ -58,6 +58,7 @@ RenderInfrastructure = {
         this.currentBounds = [];
         this.currentLayers = [];
         this.idCounter = 0;
+        this.graphPipeID = "graph_data_pipe";
     },
     /**
      * Renders geojson
@@ -72,6 +73,12 @@ RenderInfrastructure = {
             Util.simplifyGeoJSON(geoJsonData, RenderInfrastructure.options.simplifyThreshold);
         }
         Util.fixGeoJSONID(geoJsonData);
+
+        if (RenderInfrastructure.graphPipeID) {
+            parent.Pipe.pipe(RenderInfrastructure.graphPipeID, geoJsonData);
+        }
+        console.log(geoJsonData);
+
         const datasource = indexData ? indexData : RenderInfrastructure.data;
         let layers = [];
         L.geoJson(geoJsonData, {

@@ -4,22 +4,48 @@
  */
 
 class MapDataFilter {
-    constructor(data) {
-        this.data = data;
+    constructor() {
+        this.msCacheMaxAge = 10000;
+        this.data = [];
     }
 
-    /**
-      * @memberof MapDataFilter
-      * @method   getModel
-      * @param    {(string|string[])} the name of the feature(s) you wish to model over. Accepts either a single string or an array of strings. 
-      * @returns  {Object} an object with a property for each requested feature, whose keys are the name of the feature as passed in and whose values are an array of all of the values of those features in the dataset 
-      */
-    getModel(feature) {
-        if (Array.isArray(feature)) {
-            return this.getMultipleModel(feature);
-        } else {
-            return this.getSingleModel(feature);
+    add(newData) {
+        let entryAlreadyExists = this.data.find(entry => entry.GISJOIN === newData.GISJOIN);
+        if (entryAlreadyExists) {
+            return false;
         }
+
+        newData.entryTime = Date.now();
+        this.data.push(newData);
+    }
+
+    getModel(feature, bounds) {
+        let model;
+
+        let filteredData = this.filter(this.data, bounds);
+
+        if (Array.isArray(feature)) {
+            return this.getMultipleModel(feature, filteredData);
+        } else {
+            return this.getSingleModel(feature, filteredData);
+        }
+    }
+
+    filter(data, bounds) {
+        return data.filter(entry => this.isInBounds(entry, bounds));
+    }
+
+    isInBounds(entry, bounds) {
+        /*
+        const featureType = Util.getFeatureType(entry);
+        switch (featureType) {
+            case FEATURETYPE.point:
+                entryBounds = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
+                return viewport.contains(entryBounds);
+            case FEATURETYPE.polygon:
+        }
+        */
+        return true;
     }
 
     getSingleModel(feature) {
@@ -27,8 +53,8 @@ class MapDataFilter {
         model[feature] = [];
 
         for (const entry of this.data) {
-            if (entry[feature] !== undefined) {
-                model[feature].push(entry[feature]);
+            if (entry.properties[feature] !== undefined) {
+                model[feature].push(entry.properties[feature]);
             }
         }
 

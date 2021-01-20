@@ -196,11 +196,8 @@ class AutoQuery {
 
         stream.on('data', function (r) {
             const data = JSON.parse(r.getData());
-            Util.normalizeFeatureID(data);
 
-            if (this.graphPipeID) {
-                Pipe.pipe(graphPipeID, data);
-            }
+            Util.normalizeFeatureID(data);
 
             if (!this.layerIDs.includes(data.id)) {
                 this.renderData(data, forcedGeometry);
