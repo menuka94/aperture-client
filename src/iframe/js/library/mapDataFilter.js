@@ -9,6 +9,12 @@ class MapDataFilter {
         this.data = [];
     }
 
+    /* Inserts a data element into the filter.
+     * Data elements should be complete responses from the database,
+     * with a valid `geometry` and `properties` props.
+     * This function is called via a pipe created in `graph.js` that reads
+     * complete data from renderInfrastructure.js.
+     */
     add(newData) {
         let entryAlreadyExists = this.data.find(entry => entry.GISJOIN === newData.GISJOIN);
         if (entryAlreadyExists) {
@@ -19,6 +25,19 @@ class MapDataFilter {
         this.data.push(newData);
     }
 
+    /* Given the name of a feature and the bounds of the map, return a
+     * formatted "model" of this data in the filter.  
+     * Only data entries whose geometry fits in the bounds will be added.
+     * For instance, if you want to model temperature, this is stored as a
+     * "temp" property in the data entires, so you'd pass "temp" as
+     * the feature.
+     * Multiple features can also be passed in an array and it will model
+     * each one.  
+     * The resulting "model" is an object with one property for each
+     * feature, whose key is the name of the feature requested and whose 
+     * value is a list of all of the values associated with that feature
+     * found in the data set.
+     */
     getModel(feature, bounds) {
         let model;
 
@@ -30,6 +49,8 @@ class MapDataFilter {
             return this.getSingleModel(feature, filteredData);
         }
     }
+
+    /* Everything below is helpers for getModel. */
 
     filter(data, bounds) {
         return data.filter(entry => this.isInBounds(entry, bounds));
