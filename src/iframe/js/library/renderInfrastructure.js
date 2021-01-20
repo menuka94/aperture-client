@@ -105,7 +105,7 @@ RenderInfrastructure = {
                 RenderInfrastructure.addIconToMap(iconName, latlng, iconDetails, indexData, layer.specifiedId);
                 layer.bindPopup(iconDetails);
                 layer.on('click', function (e) {
-                    RenderInfrastructure.map.flyToBounds(layer.getBounds(), FLYTOOPTIONS);
+                    RenderInfrastructure.map.flyTo(e.latlng, RenderInfrastructure.map.getZoom(), FLYTOOPTIONS);
                 });
                 layers.push(layer.specifiedId);
             },
@@ -138,15 +138,9 @@ RenderInfrastructure = {
         marker.uniqueId = iconName;
         marker.specifiedId = specifiedId;
         RenderInfrastructure.markerLayer.addLayer(marker.on('click', function (e) {
-            if (e.target.__parent._group._spiderfied) {
+            if (e.target.__parent._group._spiderfied) 
                 return;
-            }
-            if (RenderInfrastructure.map.getZoom() < 16) {
-                RenderInfrastructure.map.flyTo(e.latlng, 16, FLYTOOPTIONS);
-            }
-            else {
-                RenderInfrastructure.map.flyTo(e.latlng, RenderInfrastructure.map.getZoom(), FLYTOOPTIONS);
-            }
+            RenderInfrastructure.map.flyTo(e.latlng, RenderInfrastructure.map.getZoom(), FLYTOOPTIONS);
         }).bindPopup(popUpContent));
         return true;
     },
