@@ -103,39 +103,11 @@ class MapDataFilter {
       * @returns {Array<object>} a subset of the data including only entries the filter is interested in
       */
     filter(data, bounds) {
-        return data.filter(entry => this.isInBounds(entry, bounds));
+        let filtered = data.filter(entry => Util.isInBounds(entry, bounds));
+        this.discardOldData(this.msCacheMaxAge);
+        return filtered;
     }
 
-    /** Given a single entry of data and a leaflet bounds object, determines
-      * (approximately) if the entry's geometry intersects the bounds at all.
-      * If the bounds object is null or undefined, this just returns true.
-      * @memberof MapDataFilter
-      * @method isInBounds
-      * @param {object} entry - a single entry of data as passed into the `add` method
-      * @param {(Leaflet Bounds|null)} bounds
-      * @returns {boolean} true if the entry seems to intersect the bounds at all, false otherwise
-      */
-    isInBounds(entry, bounds) {
-        if (!bounds) {
-            return true;
-        }
-
-        const featureType = Util.getFeatureType(entry);
-        switch (featureType) {
-            case Util.FEATURETYPE.point: {
-                let point = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
-                return bounds.contains(point);
-            }
-            case Util.FEATURETYPE.multiPolygon: {
-                let polygons = entry.geometry.coordinates;
-                bounds = Util.mirrorLatLngBounds(bounds);
-                return polygons.find(polygon => Util.arePointsApproximatelyInBounds(polygon[0], bounds));
-            }
-        }
-
-        this.discardOldData(msCacheMaxAge);
-        return false;
-    }
 
     /** Removes any data from the filter that is older in miliseconds than the
       * given max age.

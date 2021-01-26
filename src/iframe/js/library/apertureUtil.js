@@ -384,6 +384,8 @@ Util = {
       */
     arePointsApproximatelyInBounds(points, bounds) {
         let sampleSpacing = Math.floor(points.length / 10);
+        // ensure sampleSpacing is not zero, or else the bad will happen
+        sampleSpacing = (sampleSpacing === 0) ? 1 : sampleSpacing;
 
         for (let i = 0; i < points.length; i += sampleSpacing) {
             if (bounds.contains(points[i])) {
@@ -392,6 +394,36 @@ Util = {
         }
         return false;
     },
+
+    /** Given a single entry of GeoJSON data and a leaflet bounds object, determines
+      * (approximately) if the entry's geometry intersects the bounds at all.
+      * If the bounds object is null or undefined, this just returns true.
+      * @memberof MapDataFilter
+      * @method isInBounds
+      * @param {object} entry - a single entry of GeoJSON data, as directly from the database
+      * @param {(Leaflet Bounds|null)} bounds
+      * @returns {boolean} true if the entry seems to intersect the bounds at all, false otherwise
+      */
+    isInBounds(entry, bounds) {
+        if (!bounds) {
+            return true;
+        }
+
+        const featureType = Util.getFeatureType(entry);
+        switch (featureType) {
+            case Util.FEATURETYPE.point: {
+                let point = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
+                return bounds.contains(point);
+            }
+            case Util.FEATURETYPE.multiPolygon: {
+                let polygons = entry.geometry.coordinates;
+                bounds = Util.mirrorLatLngBounds(bounds);
+                return polygons.find(polygon => Util.arePointsApproximatelyInBounds(polygon[0], bounds));
+            }
+        }
+
+        return false;
+    }
 }
 
 try {
