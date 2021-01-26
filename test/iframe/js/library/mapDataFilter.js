@@ -15,4 +15,7 @@ const exampleData = [
 ];
 
 describe('MapDataFilter', () => {
+    describe('add()', () => {
+
+    });
 });

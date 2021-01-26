@@ -101,13 +101,18 @@ class MapDataFilter {
 
     /** Given a single entry of data and a leaflet bounds object, determines
       * (approximately) if the entry's geometry intersects the bounds at all.
+      * If the bounds object is null or undefined, this just returns true.
       * @memberof MapDataFilter
       * @method isInBounds
       * @param {object} entry - a single entry of data as passed into the `add` method
-      * @param {Leaflet Bounds} bounds
+      * @param {(Leaflet Bounds|null)} bounds
       * @returns {boolean} true if the entry seems to intersect the bounds at all, false otherwise
       */
     isInBounds(entry, bounds) {
+        if (!bounds) {
+            return true;
+        }
+
         const featureType = Util.getFeatureType(entry);
         switch (featureType) {
             case Util.FEATURETYPE.point: {

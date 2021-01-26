@@ -370,7 +370,7 @@ Util = {
             Util.mirrorLatLng(bounds.getNorthWest()), 
             Util.mirrorLatLng(bounds.getSouthEast())
         );
-    }
+    },
 
     /** 
       * Given a list of points (in leaflet latlng form) and a leaftlet latlng
