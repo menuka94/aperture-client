@@ -338,6 +338,48 @@ Util = {
         return [[b._southWest.lng, b._southWest.lat], [b._southWest.lng, b._northEast.lat],
         [b._northEast.lng, b._northEast.lat], [b._northEast.lng, b._southWest.lat],
         [b._southWest.lng, b._southWest.lat]];
+    },
+
+    /**
+      * Swaps the latitude and longitude of a latlng object or array.
+      * @memberof Util
+      * @method mirrorLatLng
+      * @param {(LatLng|Array<Number>)} the LatLng object or array with latitude and longitude
+      * @returns {(LatLng|Array<Number>)} the argument with the lat/lng properties switched
+      */
+    mirrorLatLng(latlng) {
+        if (Array.isArray(latlng)) {
+            return [latlng[1], latlng[0]];
+        } else {
+            return {
+                lat: latlng.lng,
+                lng: latlng.lat,
+            };
+        }
+    },
+
+    arePointsApproximatelyInBounds(points, bounds) {
+        let sampleIntolerance = 1;
+        for (let i = 0; i < points.length; i += sampleIntolerance) {
+            if (bounds.contains(points[i])) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    /**
+      * Swaps the latitude and longitude on both edges of a latlng bounds object.
+      * @memberof Util
+      * @method mirrorLatLngBounds
+      * @param {(LatLng|Array<Number>)} the LatLng bounds
+      * @returns {(LatLng|Array<Number>)} the argument with the lat/lng properties switched on its northwest and southeast points
+      */
+    mirrorLatLngBounds(bounds) {
+        return L.latLngBounds( 
+            Util.mirrorLatLng(bounds.getNorthWest()), 
+            Util.mirrorLatLng(bounds.getSouthEast())
+        );
     }
 }
 

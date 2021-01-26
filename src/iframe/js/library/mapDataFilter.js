@@ -55,18 +55,25 @@ class MapDataFilter {
     /* Everything below is helpers for getModel. */
 
     filter(data, bounds) {
-        return data.filter(entry => this.isInBounds(entry, bounds));
+        for (let entry of data) {
+            L.circle(Util.mirrorLatLng(L.latLngBounds(entry.geometry.coordinates[0][0]).getCenter()), {radius: 10}).addTo(map);
+        }
+        let dt = data.filter(entry => this.isInBounds(entry, bounds));
+        return dt;
     }
 
     isInBounds(entry, bounds) {
         const featureType = Util.getFeatureType(entry);
         switch (featureType) {
-            case Util.FEATURETYPE.point:
-                let entryBounds = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
-                return bounds.contains(entryBounds);
-            case Util.FEATURETYPE.multiPolygon:
-                let entryCenter = Util.getLatLngFromGeoJsonFeature(entry);
-                return bounds.contains(entryCenter);
+            case Util.FEATURETYPE.point: {
+                let point = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
+                return bounds.contains(point);
+            }
+            case Util.FEATURETYPE.multiPolygon: {
+                let polygons = entry.geometry.coordinates;
+                bounds = Util.mirrorLatLngBounds(bounds);
+                return polygons.find(polygon => Util.arePointsApproximatelyInBounds(polygon[0], bounds));
+            }
         }
         return false;
     }
