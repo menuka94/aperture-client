@@ -48,6 +48,10 @@ class MapDataFilter {
         }
     }
 
+    clear() {
+        data = [];
+    }
+
     /* Everything below is helpers for getModel. */
 
     filter(data, bounds) {
@@ -59,20 +63,19 @@ class MapDataFilter {
         switch (featureType) {
             case Util.FEATURETYPE.point:
                 let entryBounds = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
-                return viewport.contains(entryBounds);
-                break;
+                return bounds.contains(entryBounds);
             case Util.FEATURETYPE.multiPolygon:
                 let entryCenter = Util.getLatLngFromGeoJsonFeature(entry);
-                break;
+                return bounds.contains(entryCenter);
         }
-        return true;
+        return false;
     }
 
-    getSingleModel(feature) {
+    getSingleModel(feature, data) {
         const model = {};
         model[feature] = [];
 
-        for (const entry of this.data) {
+        for (const entry of data) {
             if (entry.properties[feature] !== undefined) {
                 model[feature].push(entry.properties[feature]);
             }
@@ -81,11 +84,11 @@ class MapDataFilter {
         return model;
     }
 
-    getMultipleModel(features) {
+    getMultipleModel(features, data) {
         let model = {};
 
         for (const feature of features) {
-            const singleModel = this.getSingleModel(feature);
+            const singleModel = this.getSingleModel(feature, data);
             model = { ...model, ...singleModel };
         }
 

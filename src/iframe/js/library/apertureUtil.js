@@ -25,6 +25,11 @@ Util = {
             latlng.push(pos.lat);
             latlng.push(pos.lng);
         }
+        else if (type === this.FEATURETYPE.multiPolygon) {
+            let pos = L.latLngBounds(feature.geometry.coordinates[0][0]).getCenter();
+            latlng.push(pos.lat);
+            latlng.push(pos.lng);
+        }
         else if (type === this.FEATURETYPE.lineString) {
             let pos = L.latLngBounds(feature.geometry.coordinates).getCenter();
             latlng.push(pos.lat);
