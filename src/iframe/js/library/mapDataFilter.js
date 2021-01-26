@@ -57,15 +57,16 @@ class MapDataFilter {
     }
 
     isInBounds(entry, bounds) {
-        /*
         const featureType = Util.getFeatureType(entry);
         switch (featureType) {
             case FEATURETYPE.point:
-                entryBounds = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
+                let entryBounds = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
                 return viewport.contains(entryBounds);
-            case FEATURETYPE.polygon:
+                break;
+            case FEATURETYPE.multiPolygon:
+                console.log("got polygon");
+                break;
         }
-        */
         return true;
     }
 

@@ -7,7 +7,8 @@ Util = {
     FEATURETYPE: {
         point: 0,
         lineString: 1,
-        polygon: 2
+        polygon: 2,
+        multiPolygon: 3,
     },
     /**
      * What is the best latLng point for a GeoJSON feature?
@@ -42,12 +43,15 @@ Util = {
      * What type is a GeoJSON feature?
      * @memberof Util
      * @method getFeatureType
-     * @param {object} feature GeoJSON feature, a latlng point will be extracted. Can be a point, linestring, or polygon.
+     * @param {object} feature GeoJSON feature, a latlng point will be extracted. 
+     *                         Can be a point, linestring, polygon, or multipolygon.
      * @returns {number} Enum from FEATURETYPE or -1 if not found
      */
     getFeatureType: function (feature) {
         if (feature.geometry && feature.geometry.type) {
             switch (feature.geometry.type) {
+                case "MultiPolygon":
+                    return this.FEATURETYPE.multiPolygon;
                 case "Polygon":
                     return this.FEATURETYPE.polygon;
                 case "LineString":
