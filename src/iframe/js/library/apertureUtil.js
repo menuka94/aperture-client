@@ -358,17 +358,6 @@ Util = {
         }
     },
 
-    arePointsApproximatelyInBounds(points, bounds) {
-        let sampleSpacing = Math.floor(points.length / 10);
-
-        for (let i = 0; i < points.length; i += sampleSpacing) {
-            if (bounds.contains(points[i])) {
-                return true;
-            }
-        }
-        return false;
-    },
-
     /**
       * Swaps the latitude and longitude on both edges of a latlng bounds object.
       * @memberof Util
@@ -382,6 +371,27 @@ Util = {
             Util.mirrorLatLng(bounds.getSouthEast())
         );
     }
+
+    /** 
+      * Given a list of points (in leaflet latlng form) and a leaftlet latlng
+      * bounds, determine _approximately_ if at least one of the points is 
+      * inside the bounds.
+      * @memberof Util
+      * @method arePointsApproximatelyInBounds
+      * @param {Array<LatLng>} points 
+      * @param {Leaflet Bounds} bounds
+      * @returns {boolean} whether or not the function estimates at least one point is in the bounds
+      */
+    arePointsApproximatelyInBounds(points, bounds) {
+        let sampleSpacing = Math.floor(points.length / 10);
+
+        for (let i = 0; i < points.length; i += sampleSpacing) {
+            if (bounds.contains(points[i])) {
+                return true;
+            }
+        }
+        return false;
+    },
 }
 
 try {
