@@ -55,11 +55,7 @@ class MapDataFilter {
     /* Everything below is helpers for getModel. */
 
     filter(data, bounds) {
-        for (let entry of data) {
-            L.circle(Util.mirrorLatLng(L.latLngBounds(entry.geometry.coordinates[0][0]).getCenter()), {radius: 10}).addTo(map);
-        }
-        let dt = data.filter(entry => this.isInBounds(entry, bounds));
-        return dt;
+        return data.filter(entry => this.isInBounds(entry, bounds));
     }
 
     isInBounds(entry, bounds) {

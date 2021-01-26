@@ -359,8 +359,9 @@ Util = {
     },
 
     arePointsApproximatelyInBounds(points, bounds) {
-        let sampleIntolerance = 1;
-        for (let i = 0; i < points.length; i += sampleIntolerance) {
+        let sampleSpacing = Math.floor(points.length / 10);
+
+        for (let i = 0; i < points.length; i += sampleSpacing) {
             if (bounds.contains(points[i])) {
                 return true;
             }

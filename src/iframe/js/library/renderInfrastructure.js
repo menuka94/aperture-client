@@ -76,7 +76,6 @@ RenderInfrastructure = {
         if (RenderInfrastructure.dataFilter) {
             RenderInfrastructure.dataFilter.add(geoJsonData);
         }
-        console.log(geoJsonData);
 
         const datasource = indexData ? indexData : RenderInfrastructure.data;
         let layers = [];
