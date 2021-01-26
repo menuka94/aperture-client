@@ -32,7 +32,14 @@ class MapDataFilter {
       * @see add
       */
     addSingle(newData) {
-        let entryAlreadyExists = this.data.find(entry => entry.GISJOIN === newData.GISJOIN);
+        let entryAlreadyExists = this.data.find(entry => {
+            if (newData.GISJOIN) {
+                return entry.GISJOIN === newData.GISJOIN;
+            } else {
+                return false;
+            }
+        });
+
         if (entryAlreadyExists) {
             return;
         }
@@ -82,7 +89,7 @@ class MapDataFilter {
       * @method clear
       */
     clear() {
-        data = [];
+        this.data = [];
     }
 
     /** Given a set of raw data and a leaflet bounds object,
@@ -126,7 +133,7 @@ class MapDataFilter {
             }
         }
 
-        discardOldData(msCacheMaxAge);
+        this.discardOldData(msCacheMaxAge);
         return false;
     }
 
@@ -137,7 +144,7 @@ class MapDataFilter {
       * @param {number} maxAge - the age, in milliseconds, that which any older data should be removed
       */
     discardOldData(maxAge) {
-        this.data = this.data.filter(entry => (Date.now() - entry.entryTime) > maxAge)
+        this.data = this.data.filter(entry => (Date.now() - entry.entryTime) < maxAge)
     }
 
     /** Gets a model for a single feature.
