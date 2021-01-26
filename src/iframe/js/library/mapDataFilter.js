@@ -39,8 +39,6 @@ class MapDataFilter {
      * found in the data set.
      */
     getModel(feature, bounds) {
-        let model;
-
         let filteredData = this.filter(this.data, bounds);
 
         if (Array.isArray(feature)) {
@@ -59,12 +57,12 @@ class MapDataFilter {
     isInBounds(entry, bounds) {
         const featureType = Util.getFeatureType(entry);
         switch (featureType) {
-            case FEATURETYPE.point:
+            case Util.FEATURETYPE.point:
                 let entryBounds = [entry.geometry.coordinates[1], entry.geometry.coordinates[0]];
                 return viewport.contains(entryBounds);
                 break;
-            case FEATURETYPE.multiPolygon:
-                console.log("got polygon");
+            case Util.FEATURETYPE.multiPolygon:
+                let entryCenter = Util.getLatLngFromGeoJsonFeature(entry);
                 break;
         }
         return true;

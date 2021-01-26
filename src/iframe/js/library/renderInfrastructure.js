@@ -58,7 +58,6 @@ RenderInfrastructure = {
         this.currentBounds = [];
         this.currentLayers = [];
         this.idCounter = 0;
-        this.graphPipeID = "graph_data_pipe";
     },
     /**
      * Renders geojson
@@ -74,10 +73,9 @@ RenderInfrastructure = {
         }
         Util.fixGeoJSONID(geoJsonData);
 
-        if (RenderInfrastructure.graphPipeID) {
-            parent.Pipe.pipe(RenderInfrastructure.graphPipeID, geoJsonData);
+        if (RenderInfrastructure.dataFilter) {
+            RenderInfrastructure.dataFilter.add(geoJsonData);
         }
-        console.log(geoJsonData);
 
         const datasource = indexData ? indexData : RenderInfrastructure.data;
         let layers = [];
@@ -243,8 +241,13 @@ RenderInfrastructure = {
             return "#000000";
         }
         else {
-            return "noicon"
+            return "noicon";
         }
+    },
+
+    useFilter: function(filter) {
+        RenderInfrastructure.dataFilter = filter;
+        console.log(filter);
     }
 }
 
