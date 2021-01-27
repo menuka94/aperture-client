@@ -21,12 +21,15 @@ var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/
 
 
 var sidebar = L.control.sidebar('sidebar', {
-    position: 'right'
+    position: 'left'
 }).addTo(map);
 
 map.on('click', function () {
     sidebar.close();
 });
+
+// FIXME get zoom toggle on the right
+L.control.zoom({position:"topright"}) 
 
 var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
