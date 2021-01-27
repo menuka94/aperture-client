@@ -44,6 +44,18 @@ const backgroundCounty = new GeometryLoader("county_geo_GISJOIN", window.map, 50
 window.backgroundTract = backgroundTract;
 window.backgroundCounty = backgroundCounty
 
+function openNav() {
+  document.getElementById("sidebar-id").style.width = "870px";
+  document.getElementById("main").style.marginLeft = "870px";
+  document.getElementById("main").style.opacity = "0";
+}
+function closeNav() {
+  document.getElementById("sidebar-id").style.width = "0";
+  document.getElementById("main").style.marginLeft= "0";
+  document.getElementById("main").style.opacity = "1";
+  document.getElementById("main").style.transition = "0.5s";
+}
+
 const overwrite = { //leaving this commented cause it explains the schema really well 
     // "covid_county": {
     //     "group": "Tract, County, & State Data",

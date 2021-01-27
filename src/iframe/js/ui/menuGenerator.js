@@ -33,6 +33,7 @@ const MenuGenerator = {
      * @param {object} options options object
      */
     generate(json_map, container, options) {
+        // console.log(json_map);
         let ops = JSON.parse(JSON.stringify(DEFAULT_OPTIONS)); //deep copy
         if (options) { //if options arg exists, merge options
             ops = { ...ops, ...options }; //merge both options into one obj
