@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="css/third-party/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="css/third-party/bootstrap4-toggle.min.css">
     <link rel="stylesheet" type="text/css" href="css/third-party/bootstrap.min.css">
+    <!-- <link rel="stylesheet" type="text/css" href="css/newUI.css"> -->
     <script src="../../node_modules/osmtogeojson/osmtogeojson.js"></script>
     <script src="js/third-party/simplify.js"></script>
     <script src="js/grpc/Other_Datasets/grpc_querier.bundle.js"></script>
@@ -33,22 +34,21 @@
 </head>
 
 <body>
-    <div class="leaflet-bottom leaflet-left">
-        
-    </div>
+
+
+
+    <div class="leaflet-bottom leaflet-left"></div>
     <div id="sidebar" class="sidebar collapsed">
         <!-- Nav tabs -->
         <div class="sidebar-tabs">
             <ul role="tablist">
                 <li>
                     <a href="#home" role="tab">
-                        <img style="width:35px;height:35px;" src="../../images/hamburger-button.svg">
+                        <img style="width:30px;height:30px;" src="../../images/hamburger-button.svg">
                     </a>
                 </li>
             </ul>
-
         </div>
-
         <!-- Tab panes -->
         <div class="sidebar-content">
             <div class="sidebar-pane" id="home">
@@ -62,11 +62,12 @@
             </div>
         </div>
     </div>
+
+
+
     <div id="map" class="sidebar-map"></div>
-    <!------------------------------------------>
     <div id='map2' class='map'></div>
 
-    <!--Required for this map to be controlled-->
     <script src="js/frame-specific/map2.js"></script>
     <script src="js/control/mouseDown.js"></script>
     <script src="js/third-party/bootstrap4-toggle.min.js"></script>
