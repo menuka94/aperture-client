@@ -74,16 +74,19 @@ body {
   border: 1px solid #dddddd;
 }
 
-.slider-section {
+.content-section {
   background-color: #fbfbfb;
   color: #414141;
   transition: 0.5s;
-  padding: 20px;
   margin: 10px;
   border: 1px solid #dddddd;
   border-radius: 3px;
   max-height: 15vh;
   overflow-y: auto;
+}
+
+.slider-section {
+  padding: 20px;
 }
 
 .slider-title {
@@ -93,15 +96,7 @@ body {
 }
 
 .checkbox-section {
-  background-color: #fbfbfb;
-  color: #414141;
-  transition: 0.5s;
   padding: 10px;
-  margin: 10px;
-  border: 1px solid #dddddd;
-  border-radius: 3px;
-  max-height: 15vh;
-  overflow-y: auto;
 }
 
 .modal-content {
