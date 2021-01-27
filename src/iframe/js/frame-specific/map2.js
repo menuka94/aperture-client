@@ -9,6 +9,7 @@ const map = L.map('map2', {
     fullscreenControl: true,
     inertia: false,
     timeDimension: false,
+    zoomControl: false,
     //minZoom: 11
 });
 window.map = map;
@@ -19,6 +20,7 @@ var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/
     maxZoom: 18
 }).addTo(map);
 
+const zoomControl = L.control.zoom({position:"topright"}).addTo(map);
 
 var sidebar = L.control.sidebar('sidebar', {
     position: 'left'
@@ -27,9 +29,6 @@ var sidebar = L.control.sidebar('sidebar', {
 map.on('click', function () {
     sidebar.close();
 });
-
-// FIXME get zoom toggle on the right
-L.control.zoom({position:"topright"}) 
 
 var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
