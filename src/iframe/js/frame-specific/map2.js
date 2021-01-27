@@ -46,12 +46,10 @@ window.backgroundCounty = backgroundCounty
 
 function openNav() {
   document.getElementById("sidebar-id").style.width = "870px";
-  document.getElementById("main").style.marginLeft = "870px";
   document.getElementById("main").style.opacity = "0";
 }
 function closeNav() {
   document.getElementById("sidebar-id").style.width = "0";
-  document.getElementById("main").style.marginLeft= "0";
   document.getElementById("main").style.opacity = "1";
   document.getElementById("main").style.transition = "0.5s";
 }

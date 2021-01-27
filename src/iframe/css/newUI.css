@@ -122,25 +122,9 @@ body {
   margin-left: 50px;
 }
 
-.openbtn {
-  font-size: 15px;
-  cursor: pointer;
-  background-color: #555;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-}
-
-.openbtn:hover {
-  background-color: #444;
-}
-
-.openbtn:onclick {
-  opacity: 0;
-}
-
 #main {
-  transition: margin-left .5s;
+  position: absolute;
+  z-index: 2000;
   padding: 16px;
 }
 
