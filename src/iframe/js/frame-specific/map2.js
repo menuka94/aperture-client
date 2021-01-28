@@ -22,13 +22,9 @@ var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/
 
 const zoomControl = L.control.zoom({position:"topright"}).addTo(map);
 
-var sidebar = L.control.sidebar('sidebar', {
-    position: 'left'
-}).addTo(map);
-
-map.on('click', function () {
-    sidebar.close();
-});
+// var sidebar = L.control.sidebar('sidebar', {
+//     position: 'left'
+// }).addTo(map);
 
 var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
@@ -44,10 +40,15 @@ const backgroundCounty = new GeometryLoader("county_geo_GISJOIN", window.map, 50
 window.backgroundTract = backgroundTract;
 window.backgroundCounty = backgroundCounty
 
+map.on('click', function () {
+    closeNav();
+});
+
 function openNav() {
   document.getElementById("sidebar-id").style.width = "870px";
   document.getElementById("main").style.opacity = "0";
 }
+
 function closeNav() {
   document.getElementById("sidebar-id").style.width = "0";
   document.getElementById("main").style.opacity = "1";
@@ -99,7 +100,7 @@ RenderInfrastructure.config(map, markers, overwrite, {
 //where the magic happens
 $.getJSON("json/menumetadata.json", async function (mdata) { //this isnt on the mongo server yet so query it locally
     const finalData = await AutoMenu.build(mdata, overwrite);
-    MenuGenerator.generate(finalData, document.getElementById("checkboxLocation"));
+    MenuGenerator.generate(finalData, document.getElementById("sidebar-container"));
 });
 
 parent.addEventListener('updateMaps', function () {
