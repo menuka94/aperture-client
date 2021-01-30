@@ -98,6 +98,18 @@ body {
   padding: 10px;
 }
 
+.checkbox-section-label {
+  font-size: 17px;
+  text-align: left;
+  padding-bottom: 5px;
+}
+
+.checkbox-section-title {
+  font-size: 15px;
+  text-align: left;
+  padding-bottom: 2px;
+}
+
 .modal-content {
   background-color: #f8f8f8
 }

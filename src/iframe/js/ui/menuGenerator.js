@@ -81,18 +81,21 @@ const MenuGenerator = {
      * @param {HTMLElement} container Where to generate the menu, what we are configing
      * @param {Number} categoryCount how many categories? these will become seperate columns
      */
+     //Daniel's
     configureContainer(container, categoryCount) {
         container.innerHTML = ""; //clear it out
 
         container.style.display = "grid";
 
+        //DANIEL, can you explain this?
         columns = "";
-        const perColPct = Math.floor(100 / categoryCount) + "%";
+        const perColPct = Math.floor(100 / categoryCount) + "%";//DANIEL wat is?
         for (let i = 0; i < categoryCount; i++)
             columns += perColPct + " ";
         container.style.gridTemplateColumns = columns; //set columns up
         container.style.height = "90%"
-    },
+    }, //DANIEL, can you explain this grid, perhaps I can use it, perhaps not.
+
 
     /** Helper method for @method generate
      * @memberof Generator
@@ -100,15 +103,18 @@ const MenuGenerator = {
      * @param {HTMLElement} container Where to generate the menu, what we are configing
      * @param {JSON} nested_json_map nested JSON map from @method makeNested
      */
+    //Daniel's
+    //DANIEL talk thru this, what compenents relate to what components of UI
     addColumns(container, nested_json_map) {
         for (obj in nested_json_map) {
-            const newColumn = document.createElement("div"); //create blank element
+            const newColumn = document.createElement("div");
             newColumn.className = "menuColumn";
             newColumn.id = Util.spaceToUnderScore(obj);
             container.appendChild(newColumn);
 
             const columnTitle = document.createElement("div");
-            columnTitle.className = "categoryName";
+            columnTitle.className = "categoryName";//Menu headers 
+            //(Tract, County, & State Data THEN Infrastructure & Natural Features)
             columnTitle.innerHTML = "<div class='vertical-center titleText'>" + obj + "</div>";
             newColumn.appendChild(columnTitle);
         }
@@ -158,6 +164,7 @@ const MenuGenerator = {
         }
     },
 
+    //DANIEL can you explain this function?
     createLayerContainer(layerName, layerLabel, layerObj, layerQuerier) {
         //create entire container
         const layerContainer = document.createElement("div");
@@ -172,7 +179,7 @@ const MenuGenerator = {
         selector.id = layerContainer.id + "_selector";
         selectorLabel.id = layerContainer.id + "_label";
         selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layerLabel));
-        selector.type = "checkbox";
+        selector.type = "checkbox";//DANIEL is this the checkbox for the whole layer?
         if (layerObj["defaultRender"]) { //if render by default, make it checked
             selector.checked = true;
         }
@@ -244,7 +251,12 @@ const MenuGenerator = {
 
         let container;
         if (constraintObj["type"] === "slider") {
+            //Create container here, fill with sliders.
             container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
+            // const masterSliderContainer = document.createElement("div");
+            // masterSliderContainer.className = "content-section slider-section";
+            // masterSliderContainer.appendChild(container);
+            // container = masterSliderContainer;
         }
         else if (constraintObj["type"] === "selector") {
             container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "radio");
@@ -264,6 +276,23 @@ const MenuGenerator = {
         return container;
     },
 
+    // Matt's Dropdown
+    // createDropdown: function (layerConstraints) {
+    //     const dropdown = document.createElement("div");
+    //     dropdown.className = "dropdown-toggle sidebar-dropdown";
+    //     dropdown.style.cursor = "pointer";
+    //     dropdown.role = "button";
+    //     dropdown.data-toggle = "collapse";
+    //     dropdown.data-target = "#dropdown-items";
+    //     dropdown.aria-expanded = "false";
+    //     dropdown.aria-controls = "dropdown-items";
+    //     dropdown.onclick = function () {
+    //         layerConstraints.style.display = layerConstraints.style.display === "none" ? "block" : "none";
+    //     }
+    //     return dropdown;
+    // },
+
+    // Daniel's dropdown
     createDropdown: function (layerConstraints) {
         const dropdown = document.createElement("img");
         dropdown.src = "../../images/dropdown_white.png";
@@ -341,15 +370,16 @@ const MenuGenerator = {
         document.body.appendChild(editDiv);
     },
 
+    // Matt's Slider Section
     createSliderContainer: function (constraint, constraintObj, layerObj, layerName) {
         const sliderContainer = document.createElement("div");
-        sliderContainer.className = "sliderContainer";
+        sliderContainer.className = "content-section slider-section";
         sliderContainer.id = constraint;
 
         const slider = document.createElement("div");
         const sliderLabel = document.createElement("div");
+        sliderLabel.className = "slider-title";
 
-        slider.style.margin = '5px';
         slider.id = constraint;
         noUiSlider.create(slider, {
             start: constraintObj['default'] ? constraintObj['default'] : [constraintObj['range'][0]], //default is minimum
@@ -388,21 +418,22 @@ const MenuGenerator = {
 
     createCheckboxContainer: function (constraint, constraintObj, layerObj, layerName, type) {
         const checkboxContainer = document.createElement("div");
-        checkboxContainer.className = "checkboxContainer";
+        checkboxContainer.className = "content-section checkbox-section";
         checkboxContainer.id = constraint;
 
         //add label
-        const checkboxLabel = document.createElement("div");
-        checkboxLabel.className = "checkboxConstraintLabel";
-        const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
-        checkboxLabel.innerHTML = name;
-        checkboxContainer.appendChild(checkboxLabel);
+        // const checkboxLabel = document.createElement("div");
+        // checkboxLabel.className = "checkbox-section-label";
+        // const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
+        // checkboxLabel.innerHTML = name;
+        // checkboxContainer.appendChild(checkboxLabel);
 
         const checkboxConstraintContainer = document.createElement("div");
-        checkboxConstraintContainer.className = "checkboxConstraintContainer";
+        checkboxConstraintContainer.className = "checkbox-section-title";
         checkboxContainer.appendChild(checkboxConstraintContainer);
 
 
+        //New Checkboxes
         let isFirstCheckbox = true;
         constraintObj["options"].forEach(option => {
             if (option) {
@@ -438,6 +469,43 @@ const MenuGenerator = {
                 checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
             }
         });
+
+        //Old Checkboxes
+        // let isFirstCheckbox = true;
+        // constraintObj["options"].forEach(option => {
+        //     if (option) {
+        //         const checkboxSelectorContainer = document.createElement("div");
+        //         const checkboxSelector = document.createElement("input");
+        //         checkboxSelector.type = type;
+        //         checkboxSelector.id = Util.spaceToUnderScore(option);
+        //         checkboxSelector.checked = type === "radio" ? isFirstCheckbox : true;
+        //         checkboxSelector.name = constraint;
+        //         isFirstCheckbox = false;
+        //         const labelForRadioSelector = document.createElement("label");
+        //         labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
+
+        //         checkboxSelectorContainer.appendChild(labelForRadioSelector);
+        //         checkboxSelectorContainer.appendChild(checkboxSelector);
+
+        //         const onConstraintChange = layerObj['onConstraintChange'];
+        //         const onUpdate = layerObj['onUpdate'];
+        //         const optionName = option;
+        //         if (onConstraintChange) {
+        //             if (checkboxSelector.checked)
+        //                 onConstraintChange(layerName, constraint, optionName, true);
+
+        //             checkboxSelectorContainer.onchange = function () {
+        //                 if (checkboxSelector.checked) {
+        //                     onConstraintChange(layerName, constraint, optionName, true);
+        //                 }
+        //                 else if (type === "checkbox") {
+        //                     onConstraintChange(layerName, constraint, optionName, false);
+        //                 }
+        //             };
+        //         }
+        //         checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
+        //     }
+        // });
 
 
         return checkboxContainer;
