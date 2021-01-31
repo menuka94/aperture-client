@@ -231,27 +231,38 @@ const MenuGenerator = {
 
             masterSliderContainer = document.createElement("div");
             masterSliderContainer.className = "content-section slider-section";
+            // masterSliderContainer.id = "mSC"
 
             for (constraint in layerObj["constraints"]) {
                 const constraintName = constraint;
 
 
                 const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier, masterSliderContainer);
-
+                constraintDiv.id = "cDI";
 
                 if(constraintDiv.style.display !== "none") {
                     anyActiveConstraints = true;
                 }
 
+
+
+
+                //ISSUE: Presently slider container is added even if its empty
+                //Solution: Only append constraintDiv to layerConstraints IF it is not empty
+                if (document.getElementById('cDI') != null) {
+                    console.log("Found a non-empty div");
+                    // layerConstraints.appendChild(constraintDiv);
+                }
                 layerConstraints.appendChild(constraintDiv);
+
+
+
+
 
             }
 
             if(!anyActiveConstraints)
                 layerConstraints.style.display = "none";
-
-            //ISSUE: Presently slider container is added even if its empty OR if checkboxes are present
-            //       no sliders show up
 
             layerContainer.appendChild(layerConstraints);
 
@@ -302,31 +313,10 @@ const MenuGenerator = {
         return container;
     },
 
-    // Matt's Dropdown
-    // createDropdown: function (layerConstraints) {
-    //     const dropdown = document.createElement("div");
-    //     dropdown.className = "dropdown-toggle sidebar-dropdown";
-    //     dropdown.style.cursor = "pointer";
-    //     dropdown.role = "button";
-    //     dropdown.data-toggle = "collapse";
-    //     dropdown.data-target = "#dropdown-items";
-    //     dropdown.aria-expanded = "false";
-    //     dropdown.aria-controls = "dropdown-items";
-    //     dropdown.onclick = function () {
-    //         layerConstraints.style.display = layerConstraints.style.display === "none" ? "block" : "none";
-    //     }
-    //     return dropdown;
-    // },
-
-
-
-
-
-
-
     createDropdown: function (layerConstraints) {
         const dropdown = document.createElement("img");
-        dropdown.src = "../../images/dropdown_white.png";
+        // dropdown.src = "../../images/dropdown_white.png";
+        dropdown.src = "../../images/FIXME.png";
         dropdown.className = "dropdown";
         dropdown.style.cursor = "pointer";
         dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
@@ -340,7 +330,8 @@ const MenuGenerator = {
     createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
         const settings = document.createElement("img");
         settings.className = "dropdown";
-        settings.src = "../../images/gear.png";
+        // settings.src = "../../images/gear.png";
+        settings.src = "../../FIXME.png";
         settings.style.cursor = "pointer";
         settings.onclick = function () {
             MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {

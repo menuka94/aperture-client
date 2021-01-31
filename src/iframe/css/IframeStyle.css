@@ -42,8 +42,8 @@ body {
 
 .menuColumn .categoryName {
     border-radius: 3px;
-    background-color: #0074d9;
-    color: white;
+    background-color: #ddd;
+    color: #111;
     position: relative;
     top: 0;
     width: 100%;
@@ -51,27 +51,25 @@ body {
 }
 
 .menuColumn .categoryName .titleText{
+    padding: 10px;
     width:100%;
-    text-align: center;
-    font-weight: bold;
     font-size: 18px;
 }
 
 .menuHeader{
     margin: 10px;
     margin-bottom: 15px;
-    padding: 0;
+    padding: 10px;
     border-radius: 3px;
-    background-color: white;
+    background-color: #f1f1f1;
 }
 
 .menuHeaderLabel{
     padding: 5px;
     border-radius: 3px;
-    background-color: #0074d9;
-    text-align: center;
-    color:white;
-    font-weight: bold;
+    background-color: #f1f1f1;
+    color: #111;
+
     cursor: pointer;
 }
 
@@ -94,7 +92,7 @@ body {
 }
 
 .layerContainer{
-    background-color: #DDD;
+    background-color: #ddd;
     margin: 5px;
     margin-bottom: 10px;
     padding: 0;
@@ -103,15 +101,15 @@ body {
 }
 
 .layerSelector{
-    font-weight: bold;
-    color:white;
-    background-color: #42b33e;
-    padding: 5px;
+    color: #111;
+    background-color: #ffffff;
+    padding: 10px;
     border-radius: 3px;
 }
 
 .layerConstraints{
     padding: 10px;
+    background-color: #ffffff;
 }
 
 .checkboxContainer{
