@@ -1,3 +1,7 @@
+//Use INSPECT in the browser to see the classes etc...
+
+
+
 /**
  * @namespace MenuGenerator
  * @file Build's menu UI for the Aperture Client
@@ -71,7 +75,7 @@ const MenuGenerator = {
             //create obj
             columnsAndHeadings[mergeWithDefalt["group"]][mergeWithDefalt["subGroup"]][obj] = mergeWithDefalt;
         }
-        //console.log(columnsAndHeadings);
+        console.log(columnsAndHeadings);
         return columnsAndHeadings;
     },
 
@@ -83,18 +87,19 @@ const MenuGenerator = {
      */
      //Daniel's
     configureContainer(container, categoryCount) {
+        //categoryCount is num columns (2)
         container.innerHTML = ""; //clear it out
 
         container.style.display = "grid";
 
         //DANIEL, can you explain this?
-        columns = "";
+        let columns = "";
         const perColPct = Math.floor(100 / categoryCount) + "%";//DANIEL wat is?
         for (let i = 0; i < categoryCount; i++)
             columns += perColPct + " ";
         container.style.gridTemplateColumns = columns; //set columns up
         container.style.height = "90%"
-    }, //DANIEL, can you explain this grid, perhaps I can use it, perhaps not.
+    }, //DANIEL: Sets up any number of culmns, based on categoryCount
 
 
     /** Helper method for @method generate
@@ -253,10 +258,10 @@ const MenuGenerator = {
         if (constraintObj["type"] === "slider") {
             //Create container here, fill with sliders.
             container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
-            // const masterSliderContainer = document.createElement("div");
-            // masterSliderContainer.className = "content-section slider-section";
-            // masterSliderContainer.appendChild(container);
-            // container = masterSliderContainer;
+            const masterSliderContainer = document.createElement("div");
+            masterSliderContainer.className = "content-section slider-section";
+            masterSliderContainer.appendChild(container);
+            container = masterSliderContainer;
         }
         else if (constraintObj["type"] === "selector") {
             container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "radio");
@@ -373,7 +378,7 @@ const MenuGenerator = {
     // Matt's Slider Section
     createSliderContainer: function (constraint, constraintObj, layerObj, layerName) {
         const sliderContainer = document.createElement("div");
-        sliderContainer.className = "content-section slider-section";
+        // sliderContainer.className = "content-section slider-section";
         sliderContainer.id = constraint;
 
         const slider = document.createElement("div");

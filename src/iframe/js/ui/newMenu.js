@@ -5,7 +5,7 @@
  * @dependencies 
  * @notes Work in progress!
  */
-const MenuFormatter = {
+const newMenu = {
     /** Generates the menu within a container
      * @memberof MenuFormatter
      * @method generate
@@ -23,8 +23,9 @@ const MenuFormatter = {
         const nested_json_map = this.makeNested(json_map); //convert to nested format
         const categoryCount = Object.keys(nested_json_map).length;
         this.configureContainer(container, categoryCount);
-        this.addColumns(container, nested_json_map);
-        this.addContentToColumns(nested_json_map);
+        console.log(json_map);
+        // this.addColumns(container, nested_json_map);
+        // this.addContentToColumns(nested_json_map);
     },
 
     /** Helper method for @method generate
@@ -52,7 +53,7 @@ const MenuFormatter = {
             //create obj
             columnsAndHeadings[mergeWithDefalt["group"]][mergeWithDefalt["subGroup"]][obj] = mergeWithDefalt;
         }
-        //console.log(columnsAndHeadings);
+        console.log(columnsAndHeadings);
         return columnsAndHeadings;
     },
 
