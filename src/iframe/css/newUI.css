@@ -80,12 +80,19 @@ body {
   margin: 10px;
   border: 1px solid #dddddd;
   border-radius: 3px;
-  max-height: 15vh;
+  max-height: 18vh;
   overflow-y: auto;
 }
 
+.slider-individual {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 .slider-section {
-  padding: 20px;
+  padding: 10px;
 }
 
 .slider-title {

@@ -228,18 +228,30 @@ const MenuGenerator = {
             layerConstraints.className = "layerConstraints";
             //populate the constraints
             let anyActiveConstraints = false;
+
+            masterSliderContainer = document.createElement("div");
+            masterSliderContainer.className = "content-section slider-section";
+
             for (constraint in layerObj["constraints"]) {
                 const constraintName = constraint;
-                const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier);
-                if(constraintDiv.style.display !== "none")
+
+
+                const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier, masterSliderContainer);
+
+
+                if(constraintDiv.style.display !== "none") {
                     anyActiveConstraints = true;
+                }
 
                 layerConstraints.appendChild(constraintDiv);
+
             }
 
             if(!anyActiveConstraints)
                 layerConstraints.style.display = "none";
 
+            //ISSUE: Presently slider container is added even if its empty OR if checkboxes are present
+            //       no sliders show up
 
             layerContainer.appendChild(layerConstraints);
 
@@ -251,18 +263,27 @@ const MenuGenerator = {
         return layerContainer;
     },
 
-    createConstraintContainer: function (constraintName, layerName, layerObj, layerQuerier) {
+    createConstraintContainer: function (constraintName, layerName, layerObj, layerQuerier, masterSliderContainer) {
         const constraintObj = layerObj["constraints"][constraintName];
 
         let container;
+
         if (constraintObj["type"] === "slider") {
-            //Create container here, fill with sliders.
             container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
-            const masterSliderContainer = document.createElement("div");
-            masterSliderContainer.className = "content-section slider-section";
             masterSliderContainer.appendChild(container);
-            container = masterSliderContainer;
+
+            if (constraintObj["hide"]) {
+            layerQuerier.constraintSetActive(constraintName, false);
+            container.style.display = "none";
+            }
+            else {
+                layerQuerier.constraintSetActive(constraintName, true);
+            }
+
+            return masterSliderContainer;
         }
+
+
         else if (constraintObj["type"] === "selector") {
             container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "radio");
         }
@@ -297,7 +318,12 @@ const MenuGenerator = {
     //     return dropdown;
     // },
 
-    // Daniel's dropdown
+
+
+
+
+
+
     createDropdown: function (layerConstraints) {
         const dropdown = document.createElement("img");
         dropdown.src = "../../images/dropdown_white.png";
@@ -323,20 +349,6 @@ const MenuGenerator = {
         }
         return settings;
     },
-
-        // createModal: function (container, modalOptions) {
-    //     const modalDiv = document.createElement("div");
-    //     modalDiv.className = "modal-popout";
-    //     const modalButton = document.createElement("mod");
-    //     modalButton.type = "modal-btn";
-    //     modalButton.className = "btn btn-sm btn-outline-dark";
-    //     modalButton.role = "button";
-    //     modalButton.href = "#";
-    //     modalButton.data-target = "#modalOptions";
-    //     modalButton.data-toggle = "modal";
-    //     modalButton.innerHTML = "☰ Constraints...";
-    //     modalDiv.appendChild(modalButton);
-    // },
 
     //work in progress
     selectOptions: function (layerLabel, layerConstraints, setActive, constraintsObj) {
@@ -389,10 +401,30 @@ const MenuGenerator = {
         document.body.appendChild(editDiv);
     },
 
+
+
+
+        // createModal: function (container, modalOptions) {
+    //     const modalDiv = document.createElement("div");
+    //     modalDiv.className = "modal-popout";
+    //     const modalButton = document.createElement("mod");
+    //     modalButton.type = "modal-btn";
+    //     modalButton.className = "btn btn-sm btn-outline-dark";
+    //     modalButton.role = "button";
+    //     modalButton.href = "#";
+    //     modalButton.data-target = "#modalOptions";
+    //     modalButton.data-toggle = "modal";
+    //     modalButton.innerHTML = "☰ Constraints...";
+    //     modalDiv.appendChild(modalButton);
+    // },
+
+
+
+
     // Matt's Slider Section
     createSliderContainer: function (constraint, constraintObj, layerObj, layerName) {
         const sliderContainer = document.createElement("div");
-        // sliderContainer.className = "content-section slider-section";
+        sliderContainer.className = "slider-individual";
         sliderContainer.id = constraint;
 
         const slider = document.createElement("div");
