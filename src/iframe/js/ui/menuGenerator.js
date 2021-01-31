@@ -324,6 +324,20 @@ const MenuGenerator = {
         return settings;
     },
 
+        // createModal: function (container, modalOptions) {
+    //     const modalDiv = document.createElement("div");
+    //     modalDiv.className = "modal-popout";
+    //     const modalButton = document.createElement("mod");
+    //     modalButton.type = "modal-btn";
+    //     modalButton.className = "btn btn-sm btn-outline-dark";
+    //     modalButton.role = "button";
+    //     modalButton.href = "#";
+    //     modalButton.data-target = "#modalOptions";
+    //     modalButton.data-toggle = "modal";
+    //     modalButton.innerHTML = "☰ Constraints...";
+    //     modalDiv.appendChild(modalButton);
+    // },
+
     //work in progress
     selectOptions: function (layerLabel, layerConstraints, setActive, constraintsObj) {
         if (document.getElementById("editConstraints")) {
@@ -434,7 +448,7 @@ const MenuGenerator = {
         checkboxContainer.appendChild(checkboxLabel);
 
         const checkboxConstraintContainer = document.createElement("div");
-        checkboxConstraintContainer.className = "checkbox-section-title";
+        checkboxConstraintContainer.className = "checkbox-section-options";
         checkboxContainer.appendChild(checkboxConstraintContainer);
 
 
@@ -450,10 +464,11 @@ const MenuGenerator = {
                 checkboxSelector.name = constraint;
                 isFirstCheckbox = false;
                 const labelForRadioSelector = document.createElement("label");
+                labelForRadioSelector.className = "checkbox-section-title";
                 labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
 
-                checkboxSelectorContainer.appendChild(labelForRadioSelector);
                 checkboxSelectorContainer.appendChild(checkboxSelector);
+                checkboxSelectorContainer.appendChild(labelForRadioSelector);
 
                 const onConstraintChange = layerObj['onConstraintChange'];
                 const onUpdate = layerObj['onUpdate'];
@@ -474,45 +489,7 @@ const MenuGenerator = {
                 checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
             }
         });
-
-        //Old Checkboxes
-        // let isFirstCheckbox = true;
-        // constraintObj["options"].forEach(option => {
-        //     if (option) {
-        //         const checkboxSelectorContainer = document.createElement("div");
-        //         const checkboxSelector = document.createElement("input");
-        //         checkboxSelector.type = type;
-        //         checkboxSelector.id = Util.spaceToUnderScore(option);
-        //         checkboxSelector.checked = type === "radio" ? isFirstCheckbox : true;
-        //         checkboxSelector.name = constraint;
-        //         isFirstCheckbox = false;
-        //         const labelForRadioSelector = document.createElement("label");
-        //         labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
-
-        //         checkboxSelectorContainer.appendChild(labelForRadioSelector);
-        //         checkboxSelectorContainer.appendChild(checkboxSelector);
-
-        //         const onConstraintChange = layerObj['onConstraintChange'];
-        //         const onUpdate = layerObj['onUpdate'];
-        //         const optionName = option;
-        //         if (onConstraintChange) {
-        //             if (checkboxSelector.checked)
-        //                 onConstraintChange(layerName, constraint, optionName, true);
-
-        //             checkboxSelectorContainer.onchange = function () {
-        //                 if (checkboxSelector.checked) {
-        //                     onConstraintChange(layerName, constraint, optionName, true);
-        //                 }
-        //                 else if (type === "checkbox") {
-        //                     onConstraintChange(layerName, constraint, optionName, false);
-        //                 }
-        //             };
-        //         }
-        //         checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
-        //     }
-        // });
-
-
         return checkboxContainer;
     }
+
 }

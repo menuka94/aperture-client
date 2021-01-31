@@ -101,17 +101,21 @@ body {
 .checkbox-section-label {
   font-size: 17px;
   text-align: left;
-  padding: 10px;
-  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-top: 2px;
+  padding-left: 10px;
   border-bottom-style: solid;
   border-bottom-width: thin;
 }
 
-.checkbox-section-title {
+.checkbox-section-options {
   padding: 10px;
-  font-size: 15px;
+  font-size: 14px;
   text-align: left;
+}
 
+.checkbox-section-title {
+  padding-left: 8px;
 }
 
 .modal-content {
