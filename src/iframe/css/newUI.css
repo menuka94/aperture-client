@@ -6,7 +6,7 @@ body {
 
 .sidebar {
   background-color: #f1f1f1;
-  opacity: 0.8;
+  opacity: 0.85;
   z-index: 2001;
   height: 100%;
   width: 0;
@@ -124,10 +124,6 @@ body {
 
 .checkbox-section-title {
   padding-left: 8px;
-}
-
-.checkbox-individual {
-
 }
 
 .modal-content {

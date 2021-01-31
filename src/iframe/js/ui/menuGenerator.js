@@ -184,7 +184,8 @@ const MenuGenerator = {
         selector.id = layerContainer.id + "_selector";
         selectorLabel.id = layerContainer.id + "_label";
         selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layerLabel));
-        selector.type = "checkbox";//DANIEL is this the checkbox for the whole layer?
+        selector.type = "checkbox";
+        selector.className = "checkbox-for-layer";
         if (layerObj["defaultRender"]) { //if render by default, make it checked
             selector.checked = true;
         }
@@ -231,7 +232,6 @@ const MenuGenerator = {
 
             masterSliderContainer = document.createElement("div");
             masterSliderContainer.className = "content-section slider-section";
-            // masterSliderContainer.id = "mSC"
 
             for (constraint in layerObj["constraints"]) {
                 const constraintName = constraint;
@@ -253,6 +253,7 @@ const MenuGenerator = {
                     console.log("Found a non-empty div");
                     // layerConstraints.appendChild(constraintDiv);
                 }
+
                 layerConstraints.appendChild(constraintDiv);
 
 
@@ -264,14 +265,34 @@ const MenuGenerator = {
             if(!anyActiveConstraints)
                 layerConstraints.style.display = "none";
 
+
+            layerConstraints.appendChild(this.createModal());
+
             layerContainer.appendChild(layerConstraints);
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
             layerSelector.appendChild(this.createConstraintSelector(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
+
         }
 
         return layerContainer;
+    },
+
+    createModal: function (container, modalOptions) {
+        const modalDiv = document.createElement("div");
+        modalDiv.className = "modal-popout";
+        const modalButton = document.createElement("mod");
+        modalButton.type = "modal-btn";
+        modalButton.className = "btn btn-xs btn-outline-dark";
+        modalButton.role = "button";
+        modalButton.href = "#";
+        // modalButton.data-target = "#modalOptions";
+        // modalButton.data-toggle = "modal";
+        modalButton.innerHTML = "☰ Constraints...";
+        modalDiv.appendChild(modalButton);
+
+        return modalDiv;
     },
 
     createConstraintContainer: function (constraintName, layerName, layerObj, layerQuerier, masterSliderContainer) {
@@ -315,9 +336,8 @@ const MenuGenerator = {
 
     createDropdown: function (layerConstraints) {
         const dropdown = document.createElement("img");
-        // dropdown.src = "../../images/dropdown_white.png";
-        dropdown.src = "../../images/FIXME.png";
-        dropdown.className = "dropdown";
+        dropdown.src = "../../images/drop-down-arrow.png";
+        dropdown.className = "dropdown dropdown-arrow";
         dropdown.style.cursor = "pointer";
         dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
         dropdown.onclick = function () {
@@ -329,9 +349,8 @@ const MenuGenerator = {
 
     createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
         const settings = document.createElement("img");
-        settings.className = "dropdown";
-        // settings.src = "../../images/gear.png";
-        settings.src = "../../FIXME.png";
+        settings.className = "dropdown dropdown-gear";
+        settings.src = "../../images/icons8-gear-24.png";
         settings.style.cursor = "pointer";
         settings.onclick = function () {
             MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
@@ -391,26 +410,6 @@ const MenuGenerator = {
 
         document.body.appendChild(editDiv);
     },
-
-
-
-
-        // createModal: function (container, modalOptions) {
-    //     const modalDiv = document.createElement("div");
-    //     modalDiv.className = "modal-popout";
-    //     const modalButton = document.createElement("mod");
-    //     modalButton.type = "modal-btn";
-    //     modalButton.className = "btn btn-sm btn-outline-dark";
-    //     modalButton.role = "button";
-    //     modalButton.href = "#";
-    //     modalButton.data-target = "#modalOptions";
-    //     modalButton.data-toggle = "modal";
-    //     modalButton.innerHTML = "☰ Constraints...";
-    //     modalDiv.appendChild(modalButton);
-    // },
-
-
-
 
     // Matt's Slider Section
     createSliderContainer: function (constraint, constraintObj, layerObj, layerName) {

@@ -130,11 +130,22 @@ body {
     margin-bottom: 15px;
 }
 
+.checkbox-for-layer {
+    float: right;
+    padding-top: 15px;
+}
+
 .dropdown{
     height: 18px;
     width: 18px;
-    float: right;
-    margin-right: 7px;
+}
+
+.dropdown-arrow {
+
+}
+
+.dropdown-gear {
+
 }
 
 .collapsible, .attributionContainer, #clearFeatures {
