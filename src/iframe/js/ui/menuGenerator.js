@@ -427,11 +427,11 @@ const MenuGenerator = {
         checkboxContainer.id = constraint;
 
         //add label
-        // const checkboxLabel = document.createElement("div");
-        // checkboxLabel.className = "checkbox-section-label";
-        // const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
-        // checkboxLabel.innerHTML = name;
-        // checkboxContainer.appendChild(checkboxLabel);
+        const checkboxLabel = document.createElement("div");
+        checkboxLabel.className = "checkbox-section-label";
+        const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
+        checkboxLabel.innerHTML = name;
+        checkboxContainer.appendChild(checkboxLabel);
 
         const checkboxConstraintContainer = document.createElement("div");
         checkboxConstraintContainer.className = "checkbox-section-title";
