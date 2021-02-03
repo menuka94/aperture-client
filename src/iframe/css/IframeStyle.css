@@ -113,6 +113,8 @@ body {
 }
 
 .layerConstraints{
+    overflow-y: auto;
+    max-height: 45vh;
     padding: 10px;
     background-color: #ffffff;
 }

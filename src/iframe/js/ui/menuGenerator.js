@@ -295,6 +295,7 @@ const MenuGenerator = {
 
         if (constraintObj["type"] === "slider") {
             container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
+            container.className = "content-section slider-section";
             // masterSliderContainer.appendChild(container);
 
             // if (constraintObj["hide"]) {
