@@ -135,7 +135,7 @@ body {
 
 .checkbox-for-layer {
     float: right;
-    padding-top: 15px;
+    margin-top: 5px;
 }
 
 .dropdown{
