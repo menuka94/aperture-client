@@ -20,11 +20,13 @@ var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/
     maxZoom: 18
 }).addTo(map);
 
+
 const zoomControl = L.control.zoom({position:"topright"}).addTo(map);
 
 // var sidebar = L.control.sidebar('sidebar', {
 //     position: 'left'
 // }).addTo(map);
+
 
 var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
@@ -114,9 +116,6 @@ map.on("move", function (e) {
 map.on("zoomend", function () {
     parent.setGlobalPositionFORCE(map.getCenter(), MAPNUMBER);
 });
-
-
-
 
 //-----------
 var thisMapsSetter = function (view, zoom) {
