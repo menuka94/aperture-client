@@ -295,17 +295,17 @@ const MenuGenerator = {
 
         if (constraintObj["type"] === "slider") {
             container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
-            masterSliderContainer.appendChild(container);
+            // masterSliderContainer.appendChild(container);
 
-            if (constraintObj["hide"]) {
-            layerQuerier.constraintSetActive(constraintName, false);
-            container.style.display = "none";
-            }
-            else {
-                layerQuerier.constraintSetActive(constraintName, true);
-            }
+            // if (constraintObj["hide"]) {
+            // layerQuerier.constraintSetActive(constraintName, false);
+            // container.style.display = "none";
+            // }
+            // else {
+            //     layerQuerier.constraintSetActive(constraintName, true);
+            // }
 
-            return masterSliderContainer;
+            // return masterSliderContainer;
         }
 
 
