@@ -33,8 +33,8 @@ body {
 }
 
 .menuColumn {
-    margin: 10px;
-    background-color: #DDD;
+    margin: 2px;
+    background-color: #f1f1f1;
     color: black;
     border-radius: 3px;
     height: 100%;
@@ -42,8 +42,8 @@ body {
 
 .menuColumn .categoryName {
     border-radius: 3px;
-    background-color: #0074d9;
-    color: white;
+    background-color: #f1f1f1;
+    color: #111;
     position: relative;
     top: 0;
     width: 100%;
@@ -51,27 +51,29 @@ body {
 }
 
 .menuColumn .categoryName .titleText{
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+    padding: 22px;
     width:100%;
-    text-align: center;
-    font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .menuHeader{
     margin: 10px;
     margin-bottom: 15px;
-    padding: 0;
+    padding: 10px;
     border-radius: 3px;
-    background-color: white;
+    background-color: #f1f1f1;
 }
 
 .menuHeaderLabel{
-    padding: 5px;
+    border-bottom-style: dashed;
+    border-bottom-width: thin;
+    padding-top: 15px;
     border-radius: 3px;
-    background-color: #0074d9;
-    text-align: center;
-    color:white;
-    font-weight: bold;
+    font-size: 18px;
+    background-color: #f1f1f1;
+    color: #111;
     cursor: pointer;
 }
 
@@ -86,6 +88,7 @@ body {
 
 .checkboxConstraintContainer{
     padding: 5px;
+    padding-bottom: 2px;
 }
 
 
@@ -94,7 +97,7 @@ body {
 }
 
 .layerContainer{
-    background-color: #DDD;
+    background-color: #ddd;
     margin: 5px;
     margin-bottom: 10px;
     padding: 0;
@@ -103,15 +106,15 @@ body {
 }
 
 .layerSelector{
-    font-weight: bold;
-    color:white;
-    background-color: #42b33e;
-    padding: 5px;
+    color: #111;
+    background-color: #f1f1f1;
+    padding: 10px;
     border-radius: 3px;
 }
 
 .layerConstraints{
     padding: 10px;
+    background-color: #ffffff;
 }
 
 .checkboxContainer{
@@ -127,11 +130,22 @@ body {
     margin-bottom: 15px;
 }
 
+.checkbox-for-layer {
+    float: right;
+    padding-top: 15px;
+}
+
 .dropdown{
     height: 18px;
     width: 18px;
-    float: right;
-    margin-right: 7px;
+}
+
+.dropdown-arrow {
+
+}
+
+.dropdown-gear {
+
 }
 
 .collapsible, .attributionContainer, #clearFeatures {

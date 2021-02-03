@@ -1,3 +1,7 @@
+//Use INSPECT in the browser to see the classes etc...
+
+
+
 /**
  * @namespace MenuGenerator
  * @file Build's menu UI for the Aperture Client
@@ -33,6 +37,7 @@ const MenuGenerator = {
      * @param {object} options options object
      */
     generate(json_map, container, options) {
+        // console.log(json_map);
         let ops = JSON.parse(JSON.stringify(DEFAULT_OPTIONS)); //deep copy
         if (options) { //if options arg exists, merge options
             ops = { ...ops, ...options }; //merge both options into one obj
@@ -70,7 +75,7 @@ const MenuGenerator = {
             //create obj
             columnsAndHeadings[mergeWithDefalt["group"]][mergeWithDefalt["subGroup"]][obj] = mergeWithDefalt;
         }
-        //console.log(columnsAndHeadings);
+        console.log(columnsAndHeadings);
         return columnsAndHeadings;
     },
 
@@ -80,18 +85,22 @@ const MenuGenerator = {
      * @param {HTMLElement} container Where to generate the menu, what we are configing
      * @param {Number} categoryCount how many categories? these will become seperate columns
      */
+     //Daniel's
     configureContainer(container, categoryCount) {
+        //categoryCount is num columns (2)
         container.innerHTML = ""; //clear it out
 
         container.style.display = "grid";
 
-        columns = "";
-        const perColPct = Math.floor(100 / categoryCount) + "%";
+        //DANIEL, can you explain this?
+        let columns = "";
+        const perColPct = Math.floor(100 / categoryCount) + "%";//DANIEL wat is?
         for (let i = 0; i < categoryCount; i++)
             columns += perColPct + " ";
         container.style.gridTemplateColumns = columns; //set columns up
         container.style.height = "90%"
-    },
+    }, //DANIEL: Sets up any number of culmns, based on categoryCount
+
 
     /** Helper method for @method generate
      * @memberof Generator
@@ -99,15 +108,18 @@ const MenuGenerator = {
      * @param {HTMLElement} container Where to generate the menu, what we are configing
      * @param {JSON} nested_json_map nested JSON map from @method makeNested
      */
+    //Daniel's
+    //DANIEL talk thru this, what compenents relate to what components of UI
     addColumns(container, nested_json_map) {
         for (obj in nested_json_map) {
-            const newColumn = document.createElement("div"); //create blank element
+            const newColumn = document.createElement("div");
             newColumn.className = "menuColumn";
             newColumn.id = Util.spaceToUnderScore(obj);
             container.appendChild(newColumn);
 
             const columnTitle = document.createElement("div");
-            columnTitle.className = "categoryName";
+            columnTitle.className = "categoryName";//Menu headers 
+            //(Tract, County, & State Data THEN Infrastructure & Natural Features)
             columnTitle.innerHTML = "<div class='vertical-center titleText'>" + obj + "</div>";
             newColumn.appendChild(columnTitle);
         }
@@ -157,6 +169,7 @@ const MenuGenerator = {
         }
     },
 
+    //DANIEL can you explain this function?
     createLayerContainer(layerName, layerLabel, layerObj, layerQuerier) {
         //create entire container
         const layerContainer = document.createElement("div");
@@ -172,6 +185,7 @@ const MenuGenerator = {
         selectorLabel.id = layerContainer.id + "_label";
         selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layerLabel));
         selector.type = "checkbox";
+        selector.className = "checkbox-for-layer";
         if (layerObj["defaultRender"]) { //if render by default, make it checked
             selector.checked = true;
         }
@@ -215,36 +229,93 @@ const MenuGenerator = {
             layerConstraints.className = "layerConstraints";
             //populate the constraints
             let anyActiveConstraints = false;
+
+            masterSliderContainer = document.createElement("div");
+            masterSliderContainer.className = "content-section slider-section";
+
             for (constraint in layerObj["constraints"]) {
                 const constraintName = constraint;
-                const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier);
-                if(constraintDiv.style.display !== "none")
+
+
+                const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier, masterSliderContainer);
+                constraintDiv.id = "cDI";
+
+                if(constraintDiv.style.display !== "none") {
                     anyActiveConstraints = true;
+                }
+
+
+
+
+                //ISSUE: Presently slider container is added even if its empty
+                //Solution: Only append constraintDiv to layerConstraints IF it is not empty
+                if (document.getElementById('cDI') != null) {
+                    console.log("Found a non-empty div");
+                    // layerConstraints.appendChild(constraintDiv);
+                }
 
                 layerConstraints.appendChild(constraintDiv);
+
+
+
+
+
             }
 
             if(!anyActiveConstraints)
                 layerConstraints.style.display = "none";
 
 
+            layerConstraints.appendChild(this.createModal());
+
             layerContainer.appendChild(layerConstraints);
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
             layerSelector.appendChild(this.createConstraintSelector(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
+
         }
 
         return layerContainer;
     },
 
-    createConstraintContainer: function (constraintName, layerName, layerObj, layerQuerier) {
+    createModal: function (container, modalOptions) {
+        const modalDiv = document.createElement("div");
+        modalDiv.className = "modal-popout";
+        const modalButton = document.createElement("mod");
+        modalButton.type = "modal-btn";
+        modalButton.className = "btn btn-xs btn-outline-dark";
+        modalButton.role = "button";
+        modalButton.href = "#";
+        // modalButton.data-target = "#modalOptions";
+        // modalButton.data-toggle = "modal";
+        modalButton.innerHTML = "☰ Constraints...";
+        modalDiv.appendChild(modalButton);
+
+        return modalDiv;
+    },
+
+    createConstraintContainer: function (constraintName, layerName, layerObj, layerQuerier, masterSliderContainer) {
         const constraintObj = layerObj["constraints"][constraintName];
 
         let container;
+
         if (constraintObj["type"] === "slider") {
             container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
+            masterSliderContainer.appendChild(container);
+
+            if (constraintObj["hide"]) {
+            layerQuerier.constraintSetActive(constraintName, false);
+            container.style.display = "none";
+            }
+            else {
+                layerQuerier.constraintSetActive(constraintName, true);
+            }
+
+            return masterSliderContainer;
         }
+
+
         else if (constraintObj["type"] === "selector") {
             container = this.createCheckboxContainer(constraintName, constraintObj, layerObj, layerName, "radio");
         }
@@ -265,8 +336,8 @@ const MenuGenerator = {
 
     createDropdown: function (layerConstraints) {
         const dropdown = document.createElement("img");
-        dropdown.src = "../../images/dropdown_white.png";
-        dropdown.className = "dropdown";
+        dropdown.src = "../../images/drop-down-arrow.png";
+        dropdown.className = "dropdown dropdown-arrow";
         dropdown.style.cursor = "pointer";
         dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
         dropdown.onclick = function () {
@@ -278,8 +349,8 @@ const MenuGenerator = {
 
     createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
         const settings = document.createElement("img");
-        settings.className = "dropdown";
-        settings.src = "../../images/gear.png";
+        settings.className = "dropdown dropdown-gear";
+        settings.src = "../../images/icons8-gear-24.png";
         settings.style.cursor = "pointer";
         settings.onclick = function () {
             MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
@@ -340,15 +411,16 @@ const MenuGenerator = {
         document.body.appendChild(editDiv);
     },
 
+    // Matt's Slider Section
     createSliderContainer: function (constraint, constraintObj, layerObj, layerName) {
         const sliderContainer = document.createElement("div");
-        sliderContainer.className = "sliderContainer";
+        sliderContainer.className = "slider-individual";
         sliderContainer.id = constraint;
 
         const slider = document.createElement("div");
         const sliderLabel = document.createElement("div");
+        sliderLabel.className = "slider-title";
 
-        slider.style.margin = '5px';
         slider.id = constraint;
         noUiSlider.create(slider, {
             start: constraintObj['default'] ? constraintObj['default'] : [constraintObj['range'][0]], //default is minimum
@@ -387,21 +459,22 @@ const MenuGenerator = {
 
     createCheckboxContainer: function (constraint, constraintObj, layerObj, layerName, type) {
         const checkboxContainer = document.createElement("div");
-        checkboxContainer.className = "checkboxContainer";
+        checkboxContainer.className = "content-section checkbox-section";
         checkboxContainer.id = constraint;
 
         //add label
         const checkboxLabel = document.createElement("div");
-        checkboxLabel.className = "checkboxConstraintLabel";
+        checkboxLabel.className = "checkbox-section-label";
         const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintObj["label"] ? constraintObj["label"] : constraint));
         checkboxLabel.innerHTML = name;
         checkboxContainer.appendChild(checkboxLabel);
 
         const checkboxConstraintContainer = document.createElement("div");
-        checkboxConstraintContainer.className = "checkboxConstraintContainer";
+        checkboxConstraintContainer.className = "checkbox-section-options";
         checkboxContainer.appendChild(checkboxConstraintContainer);
 
 
+        //New Checkboxes
         let isFirstCheckbox = true;
         constraintObj["options"].forEach(option => {
             if (option) {
@@ -413,10 +486,11 @@ const MenuGenerator = {
                 checkboxSelector.name = constraint;
                 isFirstCheckbox = false;
                 const labelForRadioSelector = document.createElement("label");
+                labelForRadioSelector.className = "checkbox-section-title";
                 labelForRadioSelector.innerHTML = Util.capitalizeString(Util.underScoreToSpace(option));
 
-                checkboxSelectorContainer.appendChild(labelForRadioSelector);
                 checkboxSelectorContainer.appendChild(checkboxSelector);
+                checkboxSelectorContainer.appendChild(labelForRadioSelector);
 
                 const onConstraintChange = layerObj['onConstraintChange'];
                 const onUpdate = layerObj['onUpdate'];
@@ -437,8 +511,7 @@ const MenuGenerator = {
                 checkboxConstraintContainer.appendChild(checkboxSelectorContainer);
             }
         });
-
-
         return checkboxContainer;
     }
+
 }

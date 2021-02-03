@@ -9,10 +9,16 @@
     <script src="../../node_modules/leaflet/dist/leaflet.js"></script>
     <link rel="stylesheet" type="text/css" href="css/IframeStyle.css">
     <script src="js/third-party/leaflet-sidebar.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/third-party/leaflet-sidebar.css">
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="js/third-party/nouislider.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/third-party/nouislider.min.css">
+    <link rel="stylesheet" type="text/css" href="css/third-party/bootstrap4-toggle.min.css">
+    <link rel="stylesheet" type="text/css" href="css/third-party/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/newUI.css">
+
+    <link rel="stylesheet" type="text/css" href="css/third-party/leaflet-sidebar.css">
+
     <script src="../../node_modules/osmtogeojson/osmtogeojson.js"></script>
     <script src="js/third-party/simplify.js"></script>
     <script src="js/grpc/Other_Datasets/grpc_querier.bundle.js"></script>
@@ -28,47 +34,68 @@
     <script src="js/library/geometryLoader.js"></script>
     <script src="js/library/autoQuery.js"></script>
     <script src="js/library/autoMenu.js"></script>
+
+    <!-- <script src="js/ui/newMenu.js"></script> -->
     <script src="js/ui/menuGenerator.js"></script>
 
     <!-- <script src="js/library/exampleFilterDigester.js"></script> -->
 </head>
 
 <body>
-    <div class="leaflet-bottom leaflet-left">
-        
+
+
+
+
+    <div class="leaflet-bottom leaflet-right"></div>
+    <div id="sidebar-id" class="sidebar">
+<!--     <div class="row custom-nav">
+        <div class="col-md-auto">
+          <a id="nav-id" href="#">Data Exploration</a>
+        </div>
+        <div class="col-md-auto">
+          <a id="nav-id" href="#">Models</a>
+        </div>
+    </div> -->
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+        <div id="sidebar-container"></div>
     </div>
-    <div id="sidebar" class="sidebar collapsed">
-        <!-- Nav tabs -->
+
+
+<!--     <div id="sidebar" class="sidebar collapsed">
         <div class="sidebar-tabs">
             <ul role="tablist">
                 <li>
                     <a href="#home" role="tab">
-                        <img style="width:35px;height:35px;" src="../../images/hamburger-button.svg">
+                        <img style="width:30px;height:30px;" src="../../images/hamburger-button.svg">
                     </a>
                 </li>
             </ul>
-
         </div>
 
-        <!-- Tab panes -->
         <div class="sidebar-content">
             <div class="sidebar-pane" id="home">
                 <div class="sidebar-header">
                     <div class="sidebar-header-label">Menu</div>
-                    <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+                    <span class="sidebar-close"><i class="fa fa-caret-right"></i></span>
                 </div>
-                <div class="selectContainer" id="checkboxLocation">
-                    
-                </div>
+                <div class="selectContainer" id="checkboxLocation"></div>
             </div>
         </div>
+    </div> -->
+
+
+    <div id="main">
+      <button class="btn btn-outline-dark" onclick="openNav()">☰</button>
     </div>
+
+
     <div id="map" class="sidebar-map"></div>
-    <!------------------------------------------>
     <div id='map2' class='map'></div>
 
-    <!--Required for this map to be controlled-->
     <script src="js/frame-specific/map2.js"></script>
     <script src="js/control/mouseDown.js"></script>
-    <!------------------------------------------>
+    <script src="js/third-party/bootstrap4-toggle.min.js"></script>
+    <script src="js/third-party/bootstrap.min.js"></script>
+    <script src="js/third-party/jquery-3.2.1.slim.min.js"></script>
+    <script src="js/third-party/popper.min.js"></script>
 </body>

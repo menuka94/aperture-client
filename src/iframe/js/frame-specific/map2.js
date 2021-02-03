@@ -9,6 +9,7 @@ const map = L.map('map2', {
     fullscreenControl: true,
     inertia: false,
     timeDimension: false,
+    zoomControl: false,
     //minZoom: 11
 });
 window.map = map;
@@ -19,13 +20,13 @@ var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/
     maxZoom: 18
 }).addTo(map);
 
-var sidebar = L.control.sidebar('sidebar', {
-    position: 'right'
-}).addTo(map);
 
-map.on('click', function () {
-    sidebar.close();
-});
+const zoomControl = L.control.zoom({position:"topright"}).addTo(map);
+
+// var sidebar = L.control.sidebar('sidebar', {
+//     position: 'left'
+// }).addTo(map);
+
 
 var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
@@ -40,6 +41,21 @@ const backgroundCounty = new GeometryLoader("county_geo_GISJOIN", window.map, 50
 
 window.backgroundTract = backgroundTract;
 window.backgroundCounty = backgroundCounty
+
+map.on('click', function () {
+    closeNav();
+});
+
+function openNav() {
+  document.getElementById("sidebar-id").style.width = "870px";
+  document.getElementById("main").style.opacity = "0";
+}
+
+function closeNav() {
+  document.getElementById("sidebar-id").style.width = "0";
+  document.getElementById("main").style.opacity = "1";
+  document.getElementById("main").style.transition = "0.5s";
+}
 
 const overwrite = { //leaving this commented cause it explains the schema really well 
     // "covid_county": {
@@ -86,7 +102,8 @@ RenderInfrastructure.config(map, markers, overwrite, {
 //where the magic happens
 $.getJSON("json/menumetadata.json", async function (mdata) { //this isnt on the mongo server yet so query it locally
     const finalData = await AutoMenu.build(mdata, overwrite);
-    MenuGenerator.generate(finalData, document.getElementById("checkboxLocation"));
+    // newMenu.generate(finalData, document.getElementById("sidebar-container"));
+    MenuGenerator.generate(finalData, document.getElementById("sidebar-container"));
 });
 
 parent.addEventListener('updateMaps', function () {
