@@ -205,8 +205,9 @@ body {
     background-color: #f8f8f8;
     z-index: 9999;
     padding: 10px;
-    max-width: 30vw;
+    max-width: 40vw;
     max-height: 60vh;
+    min-width: 20vw;
 }
 
 .editConstraintsHeader{
@@ -215,9 +216,6 @@ body {
     color: #111;
     font-size: 20px;
     width: 100%;
-    margin-bottom: 8px;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
 }
 
 .editConstraintArea {
@@ -225,7 +223,9 @@ body {
     max-height: 40vh;
     border: 1px solid #dddddd;
     border-radius: 3px;
-    margin: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
     padding-top: 10px;
     background-color: #f1f1f1;
 }
@@ -248,8 +248,6 @@ body {
 }
 
 .constraintCheckbox {
-    /*padding: 10px;*/
-    /*float: left;*/
 }
 
 .leaflet-fade-anim .leaflet-tile, .leaflet-zoom-anim .leaflet-zoom-animated {
