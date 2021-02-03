@@ -267,8 +267,6 @@ const MenuGenerator = {
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
-            layerSelector.appendChild(this.createConstraintSelector(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
-
         }
 
         return layerContainer;
@@ -302,19 +300,7 @@ const MenuGenerator = {
 
         if (constraintObj["type"] === "slider") {
             container = this.createSliderContainer(constraintName, constraintObj, layerObj, layerName);
-            container.className = "content-section slider-section";
-            // masterSliderContainer.appendChild(container);
-
-            // if (constraintObj["hide"]) {
-            // layerQuerier.constraintSetActive(constraintName, false);
-            // container.style.display = "none";
-            // }
-            // else {
-            //     layerQuerier.constraintSetActive(constraintName, true);
-            // }
-
-            // return masterSliderContainer;
-        }
+            container.className = "content-section slider-section";        }
 
 
         else if (constraintObj["type"] === "selector") {
@@ -348,19 +334,6 @@ const MenuGenerator = {
         return dropdown;
     },
 
-    createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
-        const settings = document.createElement("img");
-        settings.className = "dropdown dropdown-gear";
-        settings.src = "../../images/icons8-gear-24.png";
-        settings.style.cursor = "pointer";
-        settings.onclick = function () {
-            MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
-                layerQuerier.constraintSetActive(constraint, active);
-            }, constraintsObj);
-        }
-        return settings;
-    },
-
     //work in progress
     selectOptions: function (layerLabel, layerConstraints, setActive, constraintsObj) {
         if (document.getElementById("editConstraints")) {
@@ -377,7 +350,13 @@ const MenuGenerator = {
 
         editDiv.appendChild(editDivHeader);
 
-        for (let i = 0; i < layerConstraints.childNodes.length; i++) {
+
+        const editConstraintArea = document.createElement("div");
+        editConstraintArea.className = "editConstraintArea";
+        editDiv.appendChild(editConstraintArea)
+
+
+        for (let i = 0; i < layerConstraints.childNodes.length-1; i++) {
             const holderDiv = document.createElement("div");
             holderDiv.className = "editConstraintsConstraint";
 
@@ -386,28 +365,34 @@ const MenuGenerator = {
 
             const name = Util.removePropertiesPrefix(Util.underScoreToSpace(constraintsObj[child.id].label ? constraintsObj[child.id].label : child.id));
             selectLabel.innerHTML = name;
+            selectLabel.className = "checkbox-section-title"
 
             const select = document.createElement("input");
             select.type = "checkbox";
             select.checked = child.style.display !== "none";
+            select.className = "constraintCheckbox";
             select.onchange = function () {
                 setActive(child.id, select.checked);
                 child.style.display = select.checked ? "block" : "none";
             }
 
-            holderDiv.appendChild(selectLabel);
             holderDiv.appendChild(select);
+            holderDiv.appendChild(selectLabel);
 
-            editDiv.appendChild(holderDiv);
+            editConstraintArea.appendChild(holderDiv);
         }
 
+        const saveAndCloseArea = document.createElement('div');
+        saveAndCloseArea.className = "constraintCloseButton";
+
         const saveAndClose = document.createElement("button");
-        saveAndClose.className = "saveAndCloseConstraints"
-        saveAndClose.innerHTML = "Close Menu"
+        saveAndClose.className = "btn btn-outline-dark"
+        saveAndClose.innerHTML = "Close"
         saveAndClose.onclick = function () {
             document.body.removeChild(editDiv);
         }
-        editDiv.appendChild(saveAndClose);
+        saveAndCloseArea.appendChild(saveAndClose);
+        editDiv.appendChild(saveAndCloseArea);
 
         document.body.appendChild(editDiv);
     },
