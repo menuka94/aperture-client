@@ -108,8 +108,6 @@ const MenuGenerator = {
      * @param {HTMLElement} container Where to generate the menu, what we are configing
      * @param {JSON} nested_json_map nested JSON map from @method makeNested
      */
-    //Daniel's
-    //DANIEL talk thru this, what compenents relate to what components of UI
     addColumns(container, nested_json_map) {
         for (obj in nested_json_map) {
             const newColumn = document.createElement("div");
@@ -227,6 +225,7 @@ const MenuGenerator = {
         if (layerObj["constraints"]) {
             const layerConstraints = document.createElement("div");
             layerConstraints.className = "layerConstraints";
+            layerConstraints.style.display = "none";
             //populate the constraints
             let anyActiveConstraints = false;
 
@@ -272,7 +271,7 @@ const MenuGenerator = {
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
-            layerSelector.appendChild(this.createConstraintSelector(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
+            // layerSelector.appendChild(this.createConstraintSelector(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
 
         }
 
@@ -287,9 +286,14 @@ const MenuGenerator = {
         modalButton.className = "btn btn-xs btn-outline-dark";
         modalButton.role = "button";
         modalButton.href = "#";
+        modalButton.innerHTML = "☰ Constraints...";
+        modalButton.onclick = function () {
+            MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
+                layerQuerier.constraintSetActive(constraint, active);
+            }, constraintsObj);
+        }
         // modalButton.data-target = "#modalOptions";
         // modalButton.data-toggle = "modal";
-        modalButton.innerHTML = "☰ Constraints...";
         modalDiv.appendChild(modalButton);
 
         return modalDiv;
@@ -347,18 +351,18 @@ const MenuGenerator = {
         return dropdown;
     },
 
-    createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
-        const settings = document.createElement("img");
-        settings.className = "dropdown dropdown-gear";
-        settings.src = "../../images/icons8-gear-24.png";
-        settings.style.cursor = "pointer";
-        settings.onclick = function () {
-            MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
-                layerQuerier.constraintSetActive(constraint, active);
-            }, constraintsObj);
-        }
-        return settings;
-    },
+    // createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
+    //     const settings = document.createElement("img");
+    //     settings.className = "dropdown dropdown-gear";
+    //     settings.src = "../../images/icons8-gear-24.png";
+    //     settings.style.cursor = "pointer";
+    //     settings.onclick = function () {
+    //         MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
+    //             layerQuerier.constraintSetActive(constraint, active);
+    //         }, constraintsObj);
+    //     }
+    //     return settings;
+    // },
 
     //work in progress
     selectOptions: function (layerLabel, layerConstraints, setActive, constraintsObj) {
