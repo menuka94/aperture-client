@@ -87,19 +87,17 @@ const MenuGenerator = {
      */
      //Daniel's
     configureContainer(container, categoryCount) {
-        //categoryCount is num columns (2)
         container.innerHTML = ""; //clear it out
 
         container.style.display = "grid";
 
-        //DANIEL, can you explain this?
         let columns = "";
-        const perColPct = Math.floor(100 / categoryCount) + "%";//DANIEL wat is?
+        const perColPct = Math.floor(100 / categoryCount) + "%";
         for (let i = 0; i < categoryCount; i++)
             columns += perColPct + " ";
         container.style.gridTemplateColumns = columns; //set columns up
         container.style.height = "90%"
-    }, //DANIEL: Sets up any number of culmns, based on categoryCount
+    }, 
 
 
     /** Helper method for @method generate
@@ -117,7 +115,6 @@ const MenuGenerator = {
 
             const columnTitle = document.createElement("div");
             columnTitle.className = "categoryName";//Menu headers 
-            //(Tract, County, & State Data THEN Infrastructure & Natural Features)
             columnTitle.innerHTML = "<div class='vertical-center titleText'>" + obj + "</div>";
             newColumn.appendChild(columnTitle);
         }
@@ -237,7 +234,7 @@ const MenuGenerator = {
 
 
                 const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier, masterSliderContainer);
-                constraintDiv.id = "cDI";
+
 
                 if(constraintDiv.style.display !== "none") {
                     anyActiveConstraints = true;
@@ -245,17 +242,9 @@ const MenuGenerator = {
 
 
 
-
                 //ISSUE: Presently slider container is added even if its empty
                 //Solution: Only append constraintDiv to layerConstraints IF it is not empty
-                if (document.getElementById('cDI') != null) {
-                    console.log("Found a non-empty div");
-                    // layerConstraints.appendChild(constraintDiv);
-                }
-
                 layerConstraints.appendChild(constraintDiv);
-
-
 
 
 
@@ -265,7 +254,7 @@ const MenuGenerator = {
                 layerConstraints.style.display = "none";
 
 
-            layerConstraints.appendChild(this.createModal());
+            layerConstraints.appendChild(this.createModal(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
 
             layerContainer.appendChild(layerConstraints);
 
@@ -278,7 +267,7 @@ const MenuGenerator = {
         return layerContainer;
     },
 
-    createModal: function (container, modalOptions) {
+    createModal: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
         const modalDiv = document.createElement("div");
         modalDiv.className = "modal-popout";
         const modalButton = document.createElement("mod");
