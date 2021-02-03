@@ -174,13 +174,20 @@ const MenuGenerator = {
         //create checkbox selector for this layer, and add a label
         const layerSelector = document.createElement("div");
         layerSelector.className = "layerSelector";
-        const selector = document.createElement("input");
+
         const selectorLabel = document.createElement("label");
-        selector.id = layerContainer.id + "_selector";
         selectorLabel.id = layerContainer.id + "_label";
         selectorLabel.innerHTML = Util.capitalizeString(Util.underScoreToSpace(layerLabel));
+
+        const selector = document.createElement("input");
+        selector.id = layerContainer.id + "_selector";
         selector.type = "checkbox";
         selector.className = "checkbox-for-layer";
+
+        // const selector = document.createElement("a");
+        // selector.className = "checkbox-for-layer";
+        // selector.innerHTML = "<input id='checkbox-attempt' type='checkbox' class='checkbox-inline toggle-box' data-toggle='toggle' data-size='xs' data-onstyle='outline-primary' data-offstyle='outline-dark'>";
+
         if (layerObj["defaultRender"]) { //if render by default, make it checked
             selector.checked = true;
         }
@@ -260,7 +267,7 @@ const MenuGenerator = {
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
-            // layerSelector.appendChild(this.createConstraintSelector(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
+            layerSelector.appendChild(this.createConstraintSelector(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
 
         }
 
@@ -341,18 +348,18 @@ const MenuGenerator = {
         return dropdown;
     },
 
-    // createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
-    //     const settings = document.createElement("img");
-    //     settings.className = "dropdown dropdown-gear";
-    //     settings.src = "../../images/icons8-gear-24.png";
-    //     settings.style.cursor = "pointer";
-    //     settings.onclick = function () {
-    //         MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
-    //             layerQuerier.constraintSetActive(constraint, active);
-    //         }, constraintsObj);
-    //     }
-    //     return settings;
-    // },
+    createConstraintSelector: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
+        const settings = document.createElement("img");
+        settings.className = "dropdown dropdown-gear";
+        settings.src = "../../images/icons8-gear-24.png";
+        settings.style.cursor = "pointer";
+        settings.onclick = function () {
+            MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
+                layerQuerier.constraintSetActive(constraint, active);
+            }, constraintsObj);
+        }
+        return settings;
+    },
 
     //work in progress
     selectOptions: function (layerLabel, layerConstraints, setActive, constraintsObj) {
