@@ -247,7 +247,7 @@ const MenuGenerator = {
 
             layerContainer.appendChild(layerConstraints);
 
-            layerSelector.appendChild(this.createTooltip());
+            // layerSelector.appendChild(this.createTooltip());
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
@@ -271,6 +271,7 @@ const MenuGenerator = {
             }, constraintsObj);
         }
         modalDiv.appendChild(modalButton);
+        modalDiv.appendChild(this.createTooltip());
 
         return modalDiv;
     },
@@ -307,7 +308,6 @@ const MenuGenerator = {
         const dropdown = document.createElement("img");
         dropdown.src = "../../images/drop-down-arrow.png";
         dropdown.className = "dropdown-arrow";
-        dropdown.style.cursor = "pointer";
         dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
         dropdown.onclick = function () {
             layerConstraints.style.display = layerConstraints.style.display === "none" ? "block" : "none";
@@ -317,14 +317,17 @@ const MenuGenerator = {
     },
 
     createTooltip: function() {
+        // const tooltipDiv = document.createElement("div");
+        // tooltipDiv.className = "tooltip";
         const tooltip = document.createElement("img");
         tooltip.src = "../../images/tooltip.png";
-        tooltip.className = "dropdown tool-tip";
-        tooltip.style.cursor = "pointer";
-        // const tooltipText = document.createElement("span");
+        tooltip.className = "tool-tip";
+        const tooltipText = document.createElement("span");
         // tooltipText.className = "tooltiptext";
-        // tooltiptext.innerHTML = "Example tooltip text";
-        // tooltip.appendChild(tooltiptext);
+        tooltipText.innerHTML = "Example tooltip text";
+        tooltip.appendChild(tooltipText);
+        // tooltipDiv.appendChild(tooltip);
+        // tooltipDiv.appendChild(tooltipText);
         return tooltip;
     },
 
