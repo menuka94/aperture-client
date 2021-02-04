@@ -164,7 +164,7 @@ const MenuGenerator = {
         }
     },
 
-    //DANIEL can you explain this function?
+
     createLayerContainer(layerName, layerLabel, layerObj, layerQuerier) {
         //create entire container
         const layerContainer = document.createElement("div");
@@ -184,17 +184,12 @@ const MenuGenerator = {
         selector.type = "checkbox";
         selector.className = "checkbox-for-layer";
 
-        // const selector = document.createElement("a");
-        // selector.className = "checkbox-for-layer";
-        // selector.innerHTML = "<input id='checkbox-attempt' type='checkbox' class='checkbox-inline toggle-box' data-toggle='toggle' data-size='xs' data-onstyle='outline-primary' data-offstyle='outline-dark'>";
-
         if (layerObj["defaultRender"]) { //if render by default, make it checked
             selector.checked = true;
         }
         layerSelector.appendChild(selectorLabel);
         layerSelector.appendChild(selector);
         layerContainer.appendChild(layerSelector);
-
 
         if (!layerObj["noAutoQuery"]) { //dynamic auto querying setup
             if (!layerObj["collection"]) {
@@ -233,28 +228,15 @@ const MenuGenerator = {
             //populate the constraints
             let anyActiveConstraints = false;
 
-            masterSliderContainer = document.createElement("div");
-            masterSliderContainer.className = "content-section slider-section";
-
             for (constraint in layerObj["constraints"]) {
                 const constraintName = constraint;
-
-
-                const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier, masterSliderContainer);
+                const constraintDiv = this.createConstraintContainer(constraintName, layerName, layerObj, layerQuerier);
 
 
                 if(constraintDiv.style.display !== "none") {
                     anyActiveConstraints = true;
                 }
-
-
-
-                //ISSUE: Presently slider container is added even if its empty
-                //Solution: Only append constraintDiv to layerConstraints IF it is not empty
                 layerConstraints.appendChild(constraintDiv);
-
-
-
             }
 
             if(!anyActiveConstraints)
@@ -264,6 +246,8 @@ const MenuGenerator = {
             layerConstraints.appendChild(this.createModal(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
 
             layerContainer.appendChild(layerConstraints);
+
+            layerSelector.appendChild(this.createTooltip());
 
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
@@ -286,14 +270,12 @@ const MenuGenerator = {
                 layerQuerier.constraintSetActive(constraint, active);
             }, constraintsObj);
         }
-        // modalButton.data-target = "#modalOptions";
-        // modalButton.data-toggle = "modal";
         modalDiv.appendChild(modalButton);
 
         return modalDiv;
     },
 
-    createConstraintContainer: function (constraintName, layerName, layerObj, layerQuerier, masterSliderContainer) {
+    createConstraintContainer: function (constraintName, layerName, layerObj, layerQuerier) {
         const constraintObj = layerObj["constraints"][constraintName];
 
         let container;
@@ -324,7 +306,7 @@ const MenuGenerator = {
     createDropdown: function (layerConstraints) {
         const dropdown = document.createElement("img");
         dropdown.src = "../../images/drop-down-arrow.png";
-        dropdown.className = "dropdown dropdown-arrow";
+        dropdown.className = "dropdown-arrow";
         dropdown.style.cursor = "pointer";
         dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
         dropdown.onclick = function () {
@@ -332,6 +314,18 @@ const MenuGenerator = {
             dropdown.style.transform = layerConstraints.style.display === "none" ? "rotate(0deg)" : "rotate(180deg)";
         }
         return dropdown;
+    },
+
+    createTooltip: function() {
+        const tooltip = document.createElement("img");
+        tooltip.src = "../../images/tooltip.png";
+        tooltip.className = "dropdown tool-tip";
+        tooltip.style.cursor = "pointer";
+        // const tooltipText = document.createElement("span");
+        // tooltipText.className = "tooltiptext";
+        // tooltiptext.innerHTML = "Example tooltip text";
+        // tooltip.appendChild(tooltiptext);
+        return tooltip;
     },
 
     //work in progress
