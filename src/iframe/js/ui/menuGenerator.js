@@ -319,10 +319,10 @@ const MenuGenerator = {
     },
 
     createTooltip: function() {
-        const tooltip = document.createElement("div");
+        const tooltip = document.createElement("span");
         let expTitle = 'This is a brief explanation of what this layer means. No more than two sentences please.';
         tooltip.innerHTML = "<img src='../../images/tooltip.png' class='tool-tip' data-toggle='tooltip'\
-        data-placement='top' container='body' title=\'" + expTitle + "\'>";
+        data-placement='top' title=\'" + expTitle + "\'>";
         $(function () {
           $('[data-toggle="tooltip"]').tooltip()
         })
