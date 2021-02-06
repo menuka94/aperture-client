@@ -28,6 +28,10 @@ function updateLayers() {
     }
 }
 
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
 const MenuGenerator = {
     /** Generates the menu within a container
      * @memberof MenuGenerator
@@ -315,18 +319,17 @@ const MenuGenerator = {
     },
 
     createTooltip: function() {
-        // const tooltipDiv = document.createElement("div");
-        // tooltipDiv.className = "tooltip";
-        const tooltip = document.createElement("img");
-        tooltip.src = "../../images/tooltip.png";
-        tooltip.className = "tool-tip";
-        const tooltipText = document.createElement("span");
-        // tooltipText.className = "tooltiptext";
-        tooltipText.innerHTML = "Example tooltip text";
-        tooltip.appendChild(tooltipText);
-        // tooltipDiv.appendChild(tooltip);
-        // tooltipDiv.appendChild(tooltipText);
-        return tooltip;
+        const exp = document.createElement("div");
+        exp.innerHTML = "<img src='../../images/tooltip.png' class='tool-tip' data-toggle='tooltip'\
+        data-placement='right' title='Experimental tooltip'>";
+        return exp;
+        // const tooltip = document.createElement("img");
+        // tooltip.data-toggle = "tooltip";
+        // tooltip.data-placement = "right";
+        // tooltip.title = "Example Tooltip";
+        // tooltip.src = "../../images/tooltip.png";
+        // tooltip.className = "tool-tip";
+        // return tooltip;
     },
 
     //work in progress
