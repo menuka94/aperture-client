@@ -28,9 +28,9 @@ function updateLayers() {
     }
 }
 
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
+// $(function () {
+//   $('[data-toggle="tooltip"]').tooltip()
+// })
 
 const MenuGenerator = {
     /** Generates the menu within a container
@@ -319,17 +319,17 @@ const MenuGenerator = {
     },
 
     createTooltip: function() {
-        const exp = document.createElement("div");
-        exp.innerHTML = "<img src='../../images/tooltip.png' class='tool-tip' data-toggle='tooltip'\
-        data-placement='right' title='Experimental tooltip'>";
-        return exp;
-        // const tooltip = document.createElement("img");
-        // tooltip.data-toggle = "tooltip";
-        // tooltip.data-placement = "right";
-        // tooltip.title = "Example Tooltip";
-        // tooltip.src = "../../images/tooltip.png";
-        // tooltip.className = "tool-tip";
-        // return tooltip;
+        const tooltip = document.createElement("div");
+        let expTitle = 'This title might not work';
+        tooltip.innerHTML = "<img src='../../images/tooltip.png' class='tool-tip' data-toggle='tooltip'\
+        data-placement='top' title=\'" + expTitle + "\'>";
+        // $(function () {
+        //   $('[data-toggle="tooltip"]').tooltip()
+        // })
+        $(function () {
+          $('[class="tool-tip"]').tooltip()
+        })
+        return tooltip;
     },
 
     //work in progress

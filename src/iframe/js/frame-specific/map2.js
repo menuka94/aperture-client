@@ -102,7 +102,6 @@ RenderInfrastructure.config(map, markers, overwrite, {
 //where the magic happens
 $.getJSON("json/menumetadata.json", async function (mdata) { //this isnt on the mongo server yet so query it locally
     const finalData = await AutoMenu.build(mdata, overwrite);
-    // newMenu.generate(finalData, document.getElementById("sidebar-container"));
     MenuGenerator.generate(finalData, document.getElementById("sidebar-container"));
 });
 

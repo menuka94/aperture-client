@@ -248,11 +248,14 @@ body {
     will-change: auto !important;
 }
 
-
 .tool-tip {
     cursor: pointer;
     height: 18px;
     width: 18px;
     float: right;
     margin-top: 20px;
+}
+
+.tooltip {
+    position: fixed;
 }
