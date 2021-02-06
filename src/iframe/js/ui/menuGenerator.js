@@ -247,8 +247,6 @@ const MenuGenerator = {
 
             layerContainer.appendChild(layerConstraints);
 
-            // layerSelector.appendChild(this.createTooltip());
-
             layerSelector.appendChild(this.createDropdown(layerConstraints));
 
         }
@@ -264,7 +262,7 @@ const MenuGenerator = {
         modalButton.className = "btn btn-xs btn-outline-dark";
         modalButton.role = "button";
         modalButton.href = "#";
-        modalButton.innerHTML = "☰ Constraints...";
+        modalButton.innerHTML = "☰ Advanced...";
         modalButton.onclick = function () {
             MenuGenerator.selectOptions(layerLabel, layerConstraints, function (constraint, active) {
                 layerQuerier.constraintSetActive(constraint, active);
