@@ -168,6 +168,19 @@ const MenuGenerator = {
         }
     },
 
+    // createToggle(layerContainer) {
+    //     const toggleDiv = document.createElement("div");
+    //     toggleDiv.innerHTML = "<a class='checkbox-inline toggle-box'>\
+    //           <input class='checkbox-for-layer' \
+    //           id=\'" + layerContainer.id + "\'_selector \
+    //           type='checkbox' data-toggle='toggle' data-size='xs' \
+    //           data-onstyle='outline-primary' data-offstyle='outline-dark'>\
+    //           </a>";
+    //     // $(function () {
+    //     //   $('[data-toggle="toggle"]').toggle()
+    //     // })
+    //     return toggleDiv;
+    // }
 
     createLayerContainer(layerName, layerLabel, layerObj, layerQuerier) {
         //create entire container
@@ -193,6 +206,7 @@ const MenuGenerator = {
         }
         layerSelector.appendChild(selectorLabel);
         layerSelector.appendChild(selector);
+        // layerContainer.appendChild(createToggle(layerContainer));
         layerContainer.appendChild(layerSelector);
 
         if (!layerObj["noAutoQuery"]) { //dynamic auto querying setup
