@@ -47,15 +47,15 @@ map.on('click', function () {
 });
 
 function showDataExploration() {
-
+    document.getElementById("sidebar-container").style.display = "grid";
 }
 
 function showModeling() {
-
+    document.getElementById("sidebar-container").style.display = "none";
 }
 
 function showValidation() {
-
+    document.getElementById("sidebar-container").style.display = "none";
 }
 
 function openNav() {
