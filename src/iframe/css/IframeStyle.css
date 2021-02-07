@@ -33,15 +33,13 @@ body {
 }
 
 .menuColumn {
-    margin: 2px;
     background-color: #f1f1f1;
-    color: black;
-    border-radius: 3px;
+    color: #111;
     height: 100%;
+    margin: 2px;
 }
 
 .menuColumn .categoryName {
-    border-radius: 3px;
     background-color: #f1f1f1;
     color: #111;
     position: relative;
@@ -53,24 +51,20 @@ body {
 .menuColumn .categoryName .titleText{
     border-bottom-style: solid;
     border-bottom-width: thin;
-    padding: 18px;
+    padding: 5px;
     width:100%;
-    font-size: 20px;
+    font-size: 22px;
 }
 
 .menuHeader{
-    margin: 10px;
-    margin-bottom: 15px;
     padding: 10px;
-    border-radius: 3px;
     background-color: #f1f1f1;
 }
 
 .menuHeaderLabel{
     border-bottom-style: dashed;
     border-bottom-width: thin;
-    padding-top: 15px;
-    border-radius: 3px;
+    padding-top: 10px;
     font-size: 18px;
     background-color: #f1f1f1;
     color: #111;
@@ -80,7 +74,6 @@ body {
 
 .checkboxConstraintLabel{
     padding: 5px;
-    border-radius: 3px;
     background-color: #0074d9;
     text-align: left;
     color:white;
@@ -99,18 +92,14 @@ body {
 .layerContainer{
     background-color: #ddd;
     margin: 5px;
-    margin-bottom: 10px;
     padding: 0;
-    border-radius: 3px;
     cursor: default;
 }
 
 .layerSelector{
-    margin-top: 10px;
     color: #111;
     background-color: #f1f1f1;
-    padding: 10px;
-    border-radius: 3px;
+    padding: 8px;
 }
 
 .layerConstraints{
