@@ -157,7 +157,10 @@ const MenuGenerator = {
                     const layerLabel = Util.capitalizeString(Util.underScoreToSpace(nested_json_map[obj][header][layer].label ? nested_json_map[obj][header][layer].label : layer));
                     const layerObj = nested_json_map[obj][header][layer];
                     const layerQuerier = new AutoQuery(layerObj); //important
-                    subGroupContainer.appendChild(this.createLayerContainer(layerName, layerLabel, layerObj, layerQuerier)); //where most of the stuff happens
+                    const layerInfo = nested_json_map[obj][header][layer].info == null? "" : nested_json_map[obj][header][layer].info;
+                    // console.log("layerName: " + layerName);
+                    // console.log("layerInfo: " + layerInfo);
+                    subGroupContainer.appendChild(this.createLayerContainer(layerName, layerLabel, layerObj, layerQuerier, layerInfo)); //where most of the stuff happens
                 }
                 subGroupHeader.onclick = function () {
                     subGroupContainer.style.display = subGroupContainer.style.display === "none" ? "block" : "none";
@@ -182,7 +185,7 @@ const MenuGenerator = {
     //     return toggleDiv;
     // }
 
-    createLayerContainer(layerName, layerLabel, layerObj, layerQuerier) {
+    createLayerContainer(layerName, layerLabel, layerObj, layerQuerier, layerInfo) {
         //create entire container
         const layerContainer = document.createElement("div");
         layerContainer.className = "layerContainer";
@@ -261,7 +264,7 @@ const MenuGenerator = {
                 layerConstraints.style.display = "none";
 
 
-            layerConstraints.appendChild(this.createModal(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"]));
+            layerConstraints.appendChild(this.createModal(layerLabel, layerConstraints, layerQuerier, layerObj["constraints"], layerInfo));
 
             layerContainer.appendChild(layerConstraints);
 
@@ -272,7 +275,7 @@ const MenuGenerator = {
         return layerContainer;
     },
 
-    createModal: function (layerLabel, layerConstraints, layerQuerier, constraintsObj) {
+    createModal: function (layerLabel, layerConstraints, layerQuerier, constraintsObj, layerInfo) {
         const modalDiv = document.createElement("div");
         modalDiv.className = "modal-popout";
         const modalButton = document.createElement("mod");
@@ -287,7 +290,7 @@ const MenuGenerator = {
             }, constraintsObj);
         }
         modalDiv.appendChild(modalButton);
-        modalDiv.appendChild(this.createTooltip());
+        modalDiv.appendChild(this.createTooltip(layerInfo));
 
         return modalDiv;
     },
@@ -332,14 +335,15 @@ const MenuGenerator = {
         return dropdown;
     },
 
-    createTooltip: function() {
+    createTooltip: function(layerInfo) {
         const tooltip = document.createElement("span");
-        let expTitle = 'This is a brief explanation of what this layer means. No more than two sentences please.';
+        const title = layerInfo;
         tooltip.innerHTML = "<img src='../../images/tooltip.png' class='tool-tip' data-toggle='tooltip'\
-        data-placement='top' title=\'" + expTitle + "\'>";
+        data-placement='top' title=\'" + title + "\'>";
         $(function () {
           $('[data-toggle="tooltip"]').tooltip()
         })
+        if(layerInfo === "") return document.createElement("div");
         return tooltip;
     },
 
