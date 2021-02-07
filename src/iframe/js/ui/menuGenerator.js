@@ -157,9 +157,7 @@ const MenuGenerator = {
                     const layerLabel = Util.capitalizeString(Util.underScoreToSpace(nested_json_map[obj][header][layer].label ? nested_json_map[obj][header][layer].label : layer));
                     const layerObj = nested_json_map[obj][header][layer];
                     const layerQuerier = new AutoQuery(layerObj); //important
-                    const layerInfo = nested_json_map[obj][header][layer].info == null? "" : nested_json_map[obj][header][layer].info;
-                    // console.log("layerName: " + layerName);
-                    // console.log("layerInfo: " + layerInfo);
+                    const layerInfo = nested_json_map[obj][header][layer].info == null ? "" : nested_json_map[obj][header][layer].info;
                     subGroupContainer.appendChild(this.createLayerContainer(layerName, layerLabel, layerObj, layerQuerier, layerInfo)); //where most of the stuff happens
                 }
                 subGroupHeader.onclick = function () {
@@ -209,6 +207,9 @@ const MenuGenerator = {
         }
         layerSelector.appendChild(selectorLabel);
         layerSelector.appendChild(selector);
+        if(layerInfo !== "") {
+            layerSelector.appendChild(this.createTooltip(layerInfo));
+        }
         // layerContainer.appendChild(createToggle(layerContainer));
         layerContainer.appendChild(layerSelector);
 
@@ -290,7 +291,7 @@ const MenuGenerator = {
             }, constraintsObj);
         }
         modalDiv.appendChild(modalButton);
-        modalDiv.appendChild(this.createTooltip(layerInfo));
+        // modalDiv.appendChild(this.createTooltip(layerInfo));
 
         return modalDiv;
     },
@@ -336,14 +337,13 @@ const MenuGenerator = {
     },
 
     createTooltip: function(layerInfo) {
-        const tooltip = document.createElement("span");
         const title = layerInfo;
+        const tooltip = document.createElement("span");
         tooltip.innerHTML = "<img src='../../images/tooltip.png' class='tool-tip' data-toggle='tooltip'\
-        data-placement='top' title=\'" + title + "\'>";
+        data-placement='top' container='body' title=\'" + title + "\'>";
         $(function () {
           $('[data-toggle="tooltip"]').tooltip()
         })
-        if(layerInfo === "") return document.createElement("div");
         return tooltip;
     },
 
