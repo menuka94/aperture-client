@@ -59,7 +59,7 @@ function showValidation() {
 }
 
 function openNav() {
-  document.getElementById("sidebar-id").style.width = "55vw";
+  document.getElementById("sidebar-id").style.width = "52vw";
   document.getElementById("main").style.opacity = "0";
 }
 
