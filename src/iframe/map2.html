@@ -45,7 +45,15 @@
 
     <div class="leaflet-bottom leaflet-right"></div>
     <div id="sidebar-id" class="sidebar">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+        <div class="custom-nav">
+            <div class="btn-group" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-outline-dark" onclick="">Data Exploration</button>
+              <button type="button" class="btn btn-outline-dark" onclick="">Modeling</button>
+              <button type="button" class="btn btn-outline-dark" onclick="">Validation</button>
+              <button type="button" class="btn btn-outline-dark" onclick="closeNav()">Close</button>
+            </div>
+        </div>
+        <!-- <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a> -->
         <div id="sidebar-container"></div>
     </div>
 

@@ -46,8 +46,20 @@ map.on('click', function () {
     closeNav();
 });
 
+function showDataExploration() {
+
+}
+
+function showModeling() {
+
+}
+
+function showValidation() {
+
+}
+
 function openNav() {
-  document.getElementById("sidebar-id").style.width = "870px";
+  document.getElementById("sidebar-id").style.width = "55vw";
   document.getElementById("main").style.opacity = "0";
 }
 
