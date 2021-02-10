@@ -46,6 +46,23 @@ map.on('click', function () {
     closeNav();
 });
 
+document.getElementById('nav-menu-button').addEventListener('click', openNav);
+document.getElementById('nav-close-button').addEventListener('click', closeNav);
+document.getElementById('nav-data-exploration-button').addEventListener('click', showDataExploration);
+document.getElementById('nav-modeling-button').addEventListener('click', showModeling);
+document.getElementById('nav-validation-button').addEventListener('click', showValidation);
+document.getElementById('nav-graph-button').addEventListener('click', showGraph);
+
+function openNav() {
+  document.getElementById("sidebar-id").style.width = "52vw";
+  document.getElementById("main").style.opacity = "0";
+}
+
+function closeNav() {
+  document.getElementById("sidebar-id").style.width = "0";
+  document.getElementById("main").style.opacity = "1";
+}
+
 function showDataExploration() {
     document.getElementById("sidebar-container").style.display = "grid";
 }
@@ -58,14 +75,8 @@ function showValidation() {
     document.getElementById("sidebar-container").style.display = "none";
 }
 
-function openNav() {
-  document.getElementById("sidebar-id").style.width = "52vw";
-  document.getElementById("main").style.opacity = "0";
-}
-
-function closeNav() {
-  document.getElementById("sidebar-id").style.width = "0";
-  document.getElementById("main").style.opacity = "1";
+function showGraph() {
+    //FIXME Jean-Marc & Piers, put your graph pop-up JS here
 }
 
 const overwrite = { //leaving this commented cause it explains the schema really well 
