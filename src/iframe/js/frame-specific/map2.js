@@ -46,6 +46,11 @@ document.getElementById('nav-modeling-button').addEventListener('click', showMod
 document.getElementById('nav-validation-button').addEventListener('click', showValidation);
 document.getElementById('nav-graph-button').addEventListener('click', showGraph);
 
+// $('#nav-close-button').on('click', closeNav);
+// $('#nav-data-exploration-button').on('click', showDataExploration);
+// $('#nav-modeling-button').on('click', showModeling);
+// $('#nav-validation-button').on('click', showValidation);
+
 function openNav() {
   document.getElementById("sidebar-id").style.width = "52vw";
   document.getElementById("main").style.opacity = "0";
