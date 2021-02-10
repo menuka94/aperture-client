@@ -10,7 +10,6 @@ const map = L.map('map2', {
     inertia: false,
     timeDimension: false,
     zoomControl: false,
-    //minZoom: 11
 });
 window.map = map;
 
@@ -20,13 +19,7 @@ var tiles2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/
     maxZoom: 18
 }).addTo(map);
 
-
 const zoomControl = L.control.zoom({position:"topright"}).addTo(map);
-
-// var sidebar = L.control.sidebar('sidebar', {
-//     position: 'left'
-// }).addTo(map);
-
 
 var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
