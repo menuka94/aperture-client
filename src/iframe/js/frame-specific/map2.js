@@ -66,7 +66,6 @@ function openNav() {
 function closeNav() {
   document.getElementById("sidebar-id").style.width = "0";
   document.getElementById("main").style.opacity = "1";
-  document.getElementById("main").style.transition = "0.5s";
 }
 
 const overwrite = { //leaving this commented cause it explains the schema really well 
