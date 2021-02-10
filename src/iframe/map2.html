@@ -15,7 +15,6 @@
     <link rel="stylesheet" type="text/css" href="css/third-party/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="css/third-party/bootstrap4-toggle.min.css">
     <link rel="stylesheet" type="text/css" href="css/third-party/bootstrap.min.css">
-    <!-- <link rel="stylesheet" type="text/css" href="css/newUI.css"> -->
 
     <link rel="stylesheet" type="text/css" href="css/third-party/leaflet-sidebar.css">
 
@@ -45,17 +44,17 @@
     <div id="sidebar-id" class="sidebar">
         <div class="nav-tabs">
             <div class="btn-group" role="group" aria-label="Basic example">
-              <button type="button" class="btn btn-outline-dark" onclick="showDataExploration()">Data Exploration</button>
-              <button type="button" class="btn btn-outline-dark" onclick="showModeling()">Modeling</button>
-              <button type="button" class="btn btn-outline-dark" onclick="showValidation()">Validation</button>
-              <button type="button" class="btn btn-outline-dark" onclick="closeNav()">Close</button>
+              <button type="button" id='data-exploration-button' class="btn btn-outline-dark" onclick="showDataExploration()">Data Exploration</button>
+              <button type="button" id='modeling-button' class="btn btn-outline-dark" onclick="showModeling()">Modeling</button>
+              <button type="button" id='validation-button' class="btn btn-outline-dark" onclick="showValidation()">Validation</button>
+              <button type="button" id='close-button' class="btn btn-outline-dark" onclick="closeNav()">Close</button>
             </div>
         </div>
         <div id="sidebar-container"></div>
     </div>
 
     <div id="main">
-      <button class="btn btn-outline-dark" onclick="openNav()">☰ Menu</button>
+      <button class="btn btn-outline-dark" id='menu-button' onclick="openNav()">☰ Menu</button>
     </div>
 
 
